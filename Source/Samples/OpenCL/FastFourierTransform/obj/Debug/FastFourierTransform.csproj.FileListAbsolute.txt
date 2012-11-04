@@ -1,0 +1,13 @@
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.OpenCL.Samples.FastFourierTransform.exe
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.OpenCL.Samples.FastFourierTransform.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.OpenCL.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.Samples.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\OpenCL.Net.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\OpenCL.Net.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.OpenCL.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\bin\Debug\Brahma.Samples.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\obj\Debug\FastFourierTransform.csprojResolveAssemblyReference.cache
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\obj\Debug\Brahma.OpenCL.Samples.FastFourierTransform.exe
+D:\projects\brahma_local\brahma_git\svn\trunk\Source\Samples\OpenCL\FastFourierTransform\obj\Debug\Brahma.OpenCL.Samples.FastFourierTransform.pdb

@@ -1,0 +1,4 @@
+D:\projects\brahma_local\brahma_git\svn\trunk\Libraries\OpenCL.Net\OpenCL.Net\bin\Debug\OpenCL.Net.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Libraries\OpenCL.Net\OpenCL.Net\bin\Debug\OpenCL.Net.pdb
+D:\projects\brahma_local\brahma_git\svn\trunk\Libraries\OpenCL.Net\OpenCL.Net\obj\Debug\OpenCL.Net.dll
+D:\projects\brahma_local\brahma_git\svn\trunk\Libraries\OpenCL.Net\OpenCL.Net\obj\Debug\OpenCL.Net.pdb
