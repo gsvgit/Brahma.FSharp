@@ -116,6 +116,7 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -149,6 +150,10 @@
     <ProjectReference Include="..\..\Libraries\OpenCL.Net\OpenCL.Net\OpenCL.Net.csproj">
       <Project>{70AC8A83-9850-4F73-B7BC-541EB2505BE6}</Project>
       <Name>OpenCL.Net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
+      <Project>{bbb08eb4-a2ae-430b-a29c-3b3446f69a6d}</Project>
+      <Name>Brahma.FSharp.OpenCL.Translator</Name>
     </ProjectReference>
     <ProjectReference Include="..\Brahma\Brahma.csproj">
       <Project>{0E731438-DD9E-4444-950D-EF2DE31D3E97}</Project>

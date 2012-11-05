@@ -626,6 +626,14 @@ namespace Brahma.OpenCL
             }
         }
 
+        public static void GenerateKernel<T>(Microsoft.FSharp.Quotations.FSharpExpr lambda, ComputeProvider provider, ICLKernel kernel)
+        {
+            var codeGenerator = new FSharp.OpenCL.Translator.FSQuotationToOpenCLTranslator();
+            kernel.Source.Append(codeGenerator.Translate(lambda));
+            //kernel.SetClosures(codeGenerator.Closures);
+            //kernel.SetParameters(lambda.Parameters);
+        }
+
         public static void GenerateKernel(this LambdaExpression lambda, ComputeProvider provider, ICLKernel kernel)
         {
             var codeGenerator = new CodeGenerator(provider, lambda);

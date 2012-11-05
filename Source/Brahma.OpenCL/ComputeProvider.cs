@@ -96,6 +96,25 @@ namespace Brahma.OpenCL
                 throw new CLException(error);
         }
 
+
+        private T CompileQuery<T>(Microsoft.FSharp.Quotations.FSharpExpr lambda) where T: IKernel, ICLKernel, new()
+        {
+            var kernel = new T();
+            GenerateKernel(lambda,this, kernel);
+
+            Cl.ErrorCode error;
+            using (Cl.Program program = Cl.CreateProgramWithSource(_context, 1, new[] { (kernel as ICLKernel).Source.ToString() }, null, out error))
+            {
+                error = Cl.BuildProgram(program, (uint)_devices.Length, _devices, _compileOptions, null, IntPtr.Zero);
+                if (error != Cl.ErrorCode.Success)
+                    throw new Exception(string.Join("\n", from device in _devices
+                                                          select Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log, out error).ToString()));
+                (kernel as ICLKernel).ClKernel = Cl.CreateKernel(program, CLCodeGenerator.KernelName, out error);
+            }
+
+            return kernel;
+        }
+
         private T CompileQuery<T>(LambdaExpression lambda) where T: IKernel, ICLKernel, new()
         {
             var kernel = new T();
@@ -117,6 +136,11 @@ namespace Brahma.OpenCL
         protected override IKernel<TRange> CompileQuery<TRange>(Expression<Func<Brahma.NDRange<TRange>,IEnumerable<Set[]>>> query)
         {
             return CompileQuery<Kernel<TRange>>(query);
+        }
+
+        protected override IKernel<TRange, T> CompileQuery<TRange, T>(Microsoft.FSharp.Quotations.FSharpExpr<Action<Brahma.NDRange<TRange>, T>> query)
+        {
+            return CompileQuery<Kernel<TRange, T>>(query);
         }
 
         protected override IKernel<TRange, T> CompileQuery<TRange, T>(Expression<Func<Brahma.NDRange<TRange>,T,IEnumerable<Set[]>>> query)
@@ -164,6 +188,14 @@ namespace Brahma.OpenCL
         {
             SetCompileOptions(options);
             return CompileQuery(query) as Kernel<TRange>;
+        }
+
+        public Kernel<TRange, T> Compile<TRange, T>(Microsoft.FSharp.Quotations.FSharpExpr<Action<Brahma.NDRange<TRange>, T>> query, CompileOptions options = DefaultOptions)
+            where TRange : struct, INDRangeDimension
+            where T : IMem
+        {
+            SetCompileOptions(options);
+            return CompileQuery(query) as Kernel<TRange, T>;
         }
 
         public Kernel<TRange, T> Compile<TRange, T>(Expression<Func<Brahma.NDRange<TRange>, T, IEnumerable<Set[]>>> query, CompileOptions options = DefaultOptions)

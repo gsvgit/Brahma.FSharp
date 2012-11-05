@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>bbb08eb4-a2ae-430b-a29c-3b3446f69a6d</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Brahma.FSharp.OpenCL.Translator</RootNamespace>
-    <AssemblyName>Brahma.FSharp.OpenCL.Translator</AssemblyName>
+    <ProjectGuid>9f56515e-d17b-4a19-a4f2-32e84d395831</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>QuotationTest</RootNamespace>
+    <AssemblyName>QuotationTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Brahma.FSharp.OpenCL.Translator</Name>
+    <Name>QuotationTest</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +20,9 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Brahma.FSharp.OpenCL.Translator.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\QuotationTest.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,7 +31,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Brahma.FSharp.OpenCL.Translator.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\QuotationTest.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -41,18 +45,28 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Body.fs" />
-    <Compile Include="Translator.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
-      <Name>Brahma.FSharp.OpenCL.Printer</Name>
-      <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
+    <ProjectReference Include="..\..\Libraries\OpenCL.Net\OpenCL.Net\OpenCL.Net.csproj">
+      <Name>OpenCL.Net</Name>
+      <Project>{70ac8a83-9850-4f73-b7bc-541eb2505be6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Brahma.FSharp.OpenCL\Brahma.FSharp.OpenCL.AST.fsproj">
-      <Name>Brahma.FSharp.OpenCL.AST</Name>
-      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+    <ProjectReference Include="..\Brahma.OpenCL\Brahma.OpenCL.csproj">
+      <Name>Brahma.OpenCL</Name>
+      <Project>{1f52ecb5-6cd2-4d76-a4b7-a23131c9d195}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma\Brahma.csproj">
+      <Name>Brahma</Name>
+      <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Samples.csproj">
+      <Name>Brahma.Samples</Name>
+      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

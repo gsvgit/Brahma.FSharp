@@ -3,7 +3,7 @@
 open Microsoft.FSharp.Quotations
 
 type FSQuotationToOpenCLTranslator() =
-    let translate qExpr = 
+    let example qExpr = 
         let r = <@ fun x -> x + 1 @> 
         let q = <@ fun y -> (%r) y + 1 @>
         let x = r.Substitute(fun x -> Some (q.Raw))
@@ -45,5 +45,14 @@ type FSQuotationToOpenCLTranslator() =
   
         g q
         printfn "%A" x
- 
-    member this.Translate qExpr = "" 
+
+    let translate qExpr =
+        let rec go expr vars =
+            match expr with
+            | Patterns.Lambda (v, (Patterns.Lambda (_) as body)) -> 
+                go body (v::vars)
+            | Patterns.Lambda (v, e) -> vars, Body.Translate e
+            | x -> "Incorrect OpenCL quotation: " + string x |> failwith
+        go qExpr []
+  
+    member this.Translate (qExpr:Expr<_>) = "" 
