@@ -24,7 +24,7 @@ using OpenCL.Net;
 
 namespace Brahma.OpenCL
 {
-    internal interface ICLKernel: IKernel
+    public interface ICLKernel: IKernel
     {
         StringBuilder Source
         {

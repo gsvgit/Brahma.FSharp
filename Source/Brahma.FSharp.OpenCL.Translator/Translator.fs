@@ -55,4 +55,4 @@ type FSQuotationToOpenCLTranslator() =
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         go qExpr []
   
-    member this.Translate (qExpr:Expr<_>) = "" 
+    member this.Translate (qExpr:Expr(*<_>*)) = "" 

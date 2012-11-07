@@ -9,8 +9,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Brahma.FSharp.OpenCL.Translator</RootNamespace>
     <AssemblyName>Brahma.FSharp.OpenCL.Translator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Brahma.FSharp.OpenCL.Translator</Name>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

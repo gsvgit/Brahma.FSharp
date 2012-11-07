@@ -25,7 +25,7 @@ using Brahma.Types;
 
 namespace Brahma.OpenCL
 {
-    internal static class CLCodeGenerator
+    public static class CLCodeGenerator
     {
         private static readonly MemberExpressionComparer _memberExpressionComparer = new MemberExpressionComparer();
         
@@ -624,14 +624,6 @@ namespace Brahma.OpenCL
             {
                 get { return _closures; }
             }
-        }
-
-        public static void GenerateKernel<T>(Microsoft.FSharp.Quotations.FSharpExpr lambda, ComputeProvider provider, ICLKernel kernel)
-        {
-            var codeGenerator = new FSharp.OpenCL.Translator.FSQuotationToOpenCLTranslator();
-            kernel.Source.Append(codeGenerator.Translate(lambda));
-            //kernel.SetClosures(codeGenerator.Closures);
-            //kernel.SetParameters(lambda.Parameters);
         }
 
         public static void GenerateKernel(this LambdaExpression lambda, ComputeProvider provider, ICLKernel kernel)

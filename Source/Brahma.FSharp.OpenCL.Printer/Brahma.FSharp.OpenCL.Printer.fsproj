@@ -9,8 +9,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Brahma.FSharp.OpenCL.Printer</RootNamespace>
     <AssemblyName>Brahma.FSharp.OpenCL.Printer</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Brahma.FSharp.OpenCL.Printer</Name>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
