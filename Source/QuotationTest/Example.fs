@@ -19,15 +19,21 @@ printfn "Using %A" provider
 let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
 
 let main () = 
+    let l = 10000
+    let a = [|1..l|]
+    let aBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,a)
     let command = 
         <@ 
-            fun (range:NDRange<_2D>) (buf1:Buffer<float32>) -> 
-                let r = [for r in range -> r]
-                ()
+            fun (range:_1D) (buf1:Buffer<int>) -> 
+                let x = range.GlobalID0                
+                buf1.[x] <- buf1.[x] * buf1.[x]
         @>
 
     let c = command:>Expr
-    let kwernel = provider.Compile<_2D,_>(c)
+    let kernel = provider.Compile<_1D,_>(c)
+    let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
+    let r = Array.zeroCreate(l)
+    let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
     ()
 
 do main ()

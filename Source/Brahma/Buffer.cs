@@ -20,7 +20,7 @@ using Brahma.Types;
 
 namespace Brahma
 {
-    public abstract class Buffer<T>: Mem<T>, IDisposable where T: struct, IMem
+    public abstract class Buffer<T>: Mem<T>, IDisposable //where T: struct, IMem
     {
         public abstract void Dispose();
 

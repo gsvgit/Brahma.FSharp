@@ -1,8 +1,15 @@
 ﻿module Brahma.FSharp.OpenCL.Translator.Body
 
 open Microsoft.FSharp.Quotations
+open Brahma.FSharp.OpenCL.AST
 
-let Translate expr =
+type Lang = OpenCL
+
+let rec private translateBinding (var:Var) (expr:Expr) (inExpr:Expr) = 
+    let body = Translate expr
+    new VarDecl<Lang>(var.Type,var.Name,body)
+
+and Translate expr =
         match expr with
         | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
         | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
@@ -15,7 +22,7 @@ let Translate expr =
         | Patterns.ForIntegerRangeLoop (var,expr1,expr2,expr3) -> "Application is not suported:" + string expr|> failwith
         | Patterns.IfThenElse (cond,thenExpr,elseExpr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.Lambda (var,expr)-> "Application is not suported:" + string expr|> failwith
-        | Patterns.Let (var,expr1,expr2)-> "Application is not suported:" + string expr|> failwith
+        | Patterns.Let (var,expr, inExpr)-> "Application is not suported:" + string expr|> failwith
         | Patterns.LetRecursive (bindings,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.NewArray(sType,exprs) -> "Application is not suported:" + string expr|> failwith
         | Patterns.NewDelegate(sType,vars,expr) -> "Application is not suported:" + string expr|> failwith

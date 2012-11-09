@@ -22,7 +22,7 @@ using OpenCL.Net;
 namespace Brahma.OpenCL.Commands
 {
     public sealed class ReadBuffer<T> : Brahma.Commands.Command
-        where T : struct, IMem
+        //where T : struct, IMem
     {
         private ReadBuffer(Buffer<T> buffer,
             bool blocking,

@@ -118,7 +118,8 @@ namespace Brahma.OpenCL
             lambda.GenerateKernel(this, kernel);
 
             Cl.ErrorCode error;
-            using (Cl.Program program = Cl.CreateProgramWithSource(_context, 1, new[] { (kernel as ICLKernel).Source.ToString() }, null, out error))
+            var str = (kernel as ICLKernel).Source.ToString();
+            using (Cl.Program program = Cl.CreateProgramWithSource(_context, 1, new[] { str }, null, out error))
             {
                 error = Cl.BuildProgram(program, (uint)_devices.Length, _devices, _compileOptions, null, IntPtr.Zero);
                 if (error != Cl.ErrorCode.Success)

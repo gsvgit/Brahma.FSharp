@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Body.fs" />
     <Compile Include="Translator.fs" />
+    <Compile Include="Type.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">

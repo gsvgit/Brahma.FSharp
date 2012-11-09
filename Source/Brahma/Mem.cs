@@ -33,7 +33,7 @@ namespace Brahma
         }
     }
 
-    public abstract class Mem<T>: IMem where T : struct
+    public abstract class Mem<T>: IMem //where T : struct
     {
         public virtual IntPtr Size
         {

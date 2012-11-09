@@ -29,6 +29,7 @@ namespace Brahma.OpenCL
         StringBuilder Source
         {
             get;
+            set;
         }
 
         Cl.Kernel ClKernel
@@ -51,7 +52,7 @@ namespace Brahma.OpenCL
     {
         private static readonly TRange _range; // Default value will do
 
-        private readonly StringBuilder _source = new StringBuilder();
+        private StringBuilder _source = new StringBuilder();
         private IEnumerable<MemberExpression> _closures;
         private IEnumerable<ParameterExpression> _parameters;
 
@@ -60,6 +61,7 @@ namespace Brahma.OpenCL
         StringBuilder ICLKernel.Source
         {
             get { return _source; }
+            set { _source = value; }
         }
 
         Cl.Kernel ICLKernel.ClKernel

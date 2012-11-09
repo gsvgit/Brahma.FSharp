@@ -9,9 +9,10 @@ open System
 type CLCodeGenerator with
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
-        kernel.Source.Append(codeGenerator.Translate(lambda))
-        //kernel.SetClosures(codeGenerator.Closures);
-        //kernel.SetParameters(lambda.Parameters);
+        let vars,code = codeGenerator.Translate(lambda)
+        kernel.Source <- kernel.Source.Append(code)
+        kernel.SetClosures([||])
+        kernel.SetParameters(vars)
         
 type ComputeProvider with
     member this.CompileQuery<'T,'TRange, 'T1 
@@ -22,13 +23,15 @@ type ComputeProvider with
                                         and 'TRange :> ValueType 
                                         and 'TRange : (new: unit -> 'TRange)>(lambda:Expr) =
         let kernel = System.Activator.CreateInstance<'T>()
-        let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel)            
-        let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|(kernel :> ICLKernel).Source.ToString()|], null)
+        let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel)
+        let str = (kernel :> ICLKernel).Source.ToString()    
+        let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|str|], null)
         let _devices = Array.ofSeq  this.Devices
         let error = Cl.BuildProgram(program, _devices.Length |> uint32, _devices, this.CompileOptionsStr, null, IntPtr.Zero);
         if error <> Cl.ErrorCode.Success
         then 
-            _devices |> Array.map (fun device -> Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log ) |> fst |> string)
+            let s = _devices |> Array.map (fun device -> Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log ) |> fst |> string)
+            s
             |> String.concat "\n"
             |> failwith
         let clKernel,errpr = Cl.CreateKernel(program, CLCodeGenerator.KernelName)
