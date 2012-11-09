@@ -1,3 +1,8 @@
+Brahma.FSharp  (c) Semyon Grigorev <rsdpisuy@gmail.com>
+-------------------------------------------------------
+
+Brahma.FSharp is Brahma-based library for fSharp quotation to OpenCL translation.
+
 ------------------------------------------------------
 Introduction to Brahma version (c) 2010, Ananth B.
 ------------------------------------------------------
