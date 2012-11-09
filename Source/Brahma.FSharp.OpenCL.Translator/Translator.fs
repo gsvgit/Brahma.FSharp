@@ -51,12 +51,12 @@ type FSQuotationToOpenCLTranslator() =
             match expr with
             | Patterns.Lambda (v, (Patterns.Lambda (_) as body)) -> 
                 go body (v::vars)
-            | Patterns.Lambda (v, e) -> vars, Body.Translate e
+            | Patterns.Lambda (v, e) -> vars, Body.Translate e (new TargetContext<Lang,_>())
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         go qExpr []
   
     member this.Translate qExpr = 
-        //translate
+        let x = translate qExpr 
         []
 //          , "__kernel void brahmaKernel(__global float* a,__global float* b,__global float* c,int columns) "
 //            + "\n{int tx = get_global_id(0);"

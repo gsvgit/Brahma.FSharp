@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AST.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Expressions.fs" />
     <Compile Include="Statements.fs" />
     <Compile Include="FunDecl.fs" />

@@ -2,9 +2,17 @@
 
 [<AbstractClass>]
 type Expression<'lang>()=
-    abstract Childs : List<string>
+    inherit Node<'lang>()
+
+type Const<'lang>(_type:Type<'lang>,_val:string) =
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Type = _type
+    member this.Val = _val
 
 type FunCall<'lang>(funName,args) = 
+    inherit Expression<'lang>()
+    override this.Children = []
     member this.FunName = funName
     member this.Args = args
 
@@ -29,6 +37,8 @@ type BOp<'lang> =
      | EQ
 
 type Binop<'lang>(op:BOp<'lang>,l:Expression<'lang>,r:Expression<'lang>) = 
+    inherit Expression<'lang>()
+    override this.Children = []
     member this.Left = l
     member this.Right = r
     member this.Op = op
@@ -38,5 +48,7 @@ type UOp<'lang> =
     | Not
 
 type Unop<'lang>(op:UOp<'lang>,expr:Expression<'lang>) = 
+    inherit Expression<'lang>()
+    override this.Children = []
     member this.Expr = expr
     member this.Op = op

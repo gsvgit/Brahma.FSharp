@@ -4,7 +4,7 @@
 type Statement<'lang> () =
     abstract Childs : List<string>
 
-type VarDecl<'lang> (vType,name,expr:Option<Expression<'lang>>) =
+type VarDecl<'lang> (vType:Type<'lang>,name,expr:Option<Expression<'lang>>) =
     member this.vType = vType
     member this.Name = name
     member this.Expr = expr
