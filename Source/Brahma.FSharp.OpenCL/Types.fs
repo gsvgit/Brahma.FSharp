@@ -5,6 +5,7 @@ type PTypes<'lang> =
     | Float32
     | Int64
     | Float64
+    | Void
 
 [<AbstractClass>]
 type Type<'lang>()=
@@ -15,4 +16,10 @@ type PrimitiveType<'lang>(pType:PTypes<'lang>) =
     inherit Type<'lang>()
     override this.Size = 32
     override this.Children = []
+    member this.Type = pType
 
+type RefType<'lang>(baseType:Type<'lang>) =
+    inherit Type<'lang>()
+    override this.Size = baseType.Size
+    override this.Children = []
+    member this.BaseType = baseType

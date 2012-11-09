@@ -10,15 +10,32 @@ type Const<'lang>(_type:Type<'lang>,_val:string) =
     member this.Type = _type
     member this.Val = _val
 
-type FunCall<'lang>(funName,args) = 
+type Variable<'lang>(name:string) =
     inherit Expression<'lang>()
     override this.Children = []
-    member this.FunName = funName
+    member this.Name = name
+
+type FunCall<'lang>(funName:string, args:List<Expression<'lang>>) = 
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Name = funName
     member this.Args = args
 
-type ArrIndex<'lang>(arr,idx:Expression<'lang>) = 
+type Item<'lang>(arr:Expression<'lang>,idx:Expression<'lang>) = 
+    inherit Expression<'lang>()
+    override this.Children = []
     member this.Arr = arr
     member this.Idx = idx
+
+[<RequireQualifiedAccess>]
+type PropertyType<'lang>=
+    | Var of Variable<'lang>
+    | Item of Item<'lang>
+    
+type Property<'lang>(property:PropertyType<'lang>) =
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Property = property
 
 type BOp<'lang> =
      | Plus

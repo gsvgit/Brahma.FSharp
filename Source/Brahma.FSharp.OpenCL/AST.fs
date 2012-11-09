@@ -1,8 +1,4 @@
 ﻿namespace Brahma.FSharp.OpenCL.AST
 
-[<AbstractClass>]
-type Node<'lang>()=
-    abstract Children: List<Node<'lang>>
-
-type AST<'lang>(topDefs) = 
+type AST<'lang>(topDefs:List<TopDef<'lang>>) = 
     member this.TopDefs = topDefs

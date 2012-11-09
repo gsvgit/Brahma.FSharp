@@ -1,72 +1,46 @@
 ﻿namespace Brahma.FSharp.OpenCL.Translator
 
 open Microsoft.FSharp.Quotations
+open  Brahma.FSharp.OpenCL.AST
 
 type FSQuotationToOpenCLTranslator() =
-    let example qExpr = 
-        let r = <@ fun x -> x + 1 @> 
-        let q = <@ fun y -> (%r) y + 1 @>
-        let x = r.Substitute(fun x -> Some (q.Raw))
-        let y f = <@ fun x -> (%f) x @>
-        let rec f q = 
-            match q with
-            | ExprShape.ShapeLambda(v,e) ->
-                 printfn "expr: var: %A \nexpr:" v.Name
-                 f e 
-            | ExprShape.ShapeCombination (o,eLst) -> 
-                printfn "expression: %A" o
-                match o with
-                | :? Expr as e ->
-                    match e with
-                    | Patterns.Call(x) 
-                       -> printfn "CALL"
-                    | _ -> ()
-                | x -> printfn "ELSE: %A" x 
-                List.iter f eLst
-            | ExprShape.ShapeVar (v) -> 
-                printfn "Var: name: %A type: %A" v.Name v.Type
-
-        let rec g q = 
-            match q with
-            | Patterns.Call(oe,info,el) -> 
-                    printfn "call: "
-                    match oe with
-                    | Some e -> printfn "oe: "; g e
-                    | None -> ()
-                    List.iter g el
-            | Patterns.Lambda (v,e) -> printfn "lambda: var: %A expr: " v.Name ;g e
-            | Patterns.Application(e1,e2 ) -> 
-                printfn "application"
-                printfn "expr1"
-                g e1
-                printfn "expr2"
-                g e2
-            | c -> printfn "ELSE: %A" c
-  
-        g q
-        printfn "%A" x
+   
+    let mainKernelName = "brahmaKernel"
+    let brahmaDimensionsTypes = ["_1d";"_2d";"_3d"]
+    let brahmaDimensionsTypesPrefix = "brahma.opencl."
+    let bdts = brahmaDimensionsTypes |> List.map (fun s -> brahmaDimensionsTypesPrefix + s)
+    let buildFullAst vars partialAst context =
+        let formalArgs = 
+            vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
+            |> List.map (fun v -> new FunFormalArg<_>(true, v.Name, Type.Translate(v.Type)))
+        let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
+        new AST<_>([mainKernelFun])
 
     let translate qExpr =
         let rec go expr vars =
             match expr with
             | Patterns.Lambda (v, (Patterns.Lambda (_) as body)) -> 
                 go body (v::vars)
-            | Patterns.Lambda (v, e) -> vars, Body.Translate e (new TargetContext<Lang,_>())
+            | Patterns.Lambda (v, e) -> v::vars, Body.Translate e (new TargetContext<Lang,_>())
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
-        go qExpr []
+        let vars,(partialAst,context) = go qExpr []
+        buildFullAst (List.rev vars) (partialAst :?> Statement<_>) context
+
   
     member this.Translate qExpr = 
-        let x = translate qExpr 
-        []
-//          , "__kernel void brahmaKernel(__global float* a,__global float* b,__global float* c,int columns) "
-//            + "\n{int tx = get_global_id(0);"
-//            + "\nint ty = get_global_id(1);"
-//            + "\nfloat value = ((float)0);"
-//            + "\nfor (int k = ((int)0);"
-//            + "\n k < columns;"
-//            + "\n k++) "
-//            + "\n{float elementA = a[((ty * columns) + k)];"
-//            + "\nfloat elementB = b[((k * columns) + tx)];"
-//            + "\n(value = (value + (elementA * elementB)));;;};"
-//            + "\n(c[((ty * columns) + tx)] = value);;}" 
-        ,"__kernel void brahmaKernel(__global int* a) {int tx = get_global_id(0); a[tx] = a[tx] * 2;}" 
+        let ast = translate qExpr
+        ast
+//        []
+////          , "__kernel void brahmaKernel(__global float* a,__global float* b,__global float* c,int columns) "
+////            + "\n{int tx = get_global_id(0);"
+////            + "\nint ty = get_global_id(1);"
+////            + "\nfloat value = ((float)0);"
+////            + "\nfor (int k = ((int)0);"
+////            + "\n k < columns;"
+////            + "\n k++) "
+////            + "\n{float elementA = a[((ty * columns) + k)];"
+////            + "\nfloat elementB = b[((k * columns) + tx)];"
+////            + "\n(value = (value + (elementA * elementB)));;;};"
+////            + "\n(c[((ty * columns) + tx)] = value);;}" 
+//        ,"__kernel void brahmaKernel(__global int* a) {int tx = get_global_id(0); a[tx] = a[tx] * 2;}" 
+

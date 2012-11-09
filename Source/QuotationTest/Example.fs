@@ -26,7 +26,7 @@ let main () =
         <@ 
             fun (range:_1D) (buf1:Buffer<int>) -> 
                 let x = range.GlobalID0                
-                buf1.[x] <- buf1.[x] * buf1.[x]
+                buf1.[x] <- buf1.[x] * buf1.[x]                
         @>
 
     let c = command:>Expr

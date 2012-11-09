@@ -9,10 +9,11 @@ open System
 type CLCodeGenerator with
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
-        let vars,code = codeGenerator.Translate(lambda)
+        let ast = codeGenerator.Translate(lambda)
+        let code = Printer.AST.Print ast
         kernel.Source <- kernel.Source.Append(code)
         kernel.SetClosures([||])
-        kernel.SetParameters(vars)
+        kernel.SetParameters([])
         
 type ComputeProvider with
     member this.CompileQuery<'T,'TRange, 'T1 

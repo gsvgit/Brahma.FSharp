@@ -33,6 +33,9 @@
     <DocumentationFile>bin\Release\Brahma.FSharp.OpenCL.Printer.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -42,11 +45,19 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Printer.fs" />
-    <Compile Include="Statements.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Expressions.fs" />
+    <Compile Include="Statements.fs" />
     <Compile Include="FunDecl.fs" />
     <Compile Include="TypeDecl.fs" />
+    <Compile Include="Printer.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL\Brahma.FSharp.OpenCL.AST.fsproj">
+      <Name>Brahma.FSharp.OpenCL.AST</Name>
+      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
