@@ -32,12 +32,25 @@ and private printVarDecl (vd:VarDecl<'lang>) =
 and private printStmtBlock (sb:StatementBlock<'lang>) =
     sb.Statements |> ResizeArray.map (Print false) |> List.ofSeq |> aboveListL |> braceL
 
+and private printIf (_if:IfThenElse<_>) =
+    let cond = Expressions.Print _if.Condition |> bracketL
+    let _then = Print false _if.Then
+    let _else = 
+        match _if.Else with
+        | Some x -> Print false x
+        | None -> wordL ""
+    [ yield wordL "if" ++ cond 
+    ; yield _then
+    ; if _if.Else.IsSome then yield aboveL (wordL "else") _else]
+    |> aboveListL
+
 and Print isToplevel (stmt:Statement<'lang>) =
     let res = 
         match stmt with
         | :? StatementBlock<'lang> as sb -> printStmtBlock sb
         | :? VarDecl<'lang> as vd -> printVarDecl vd
         | :? Assignment<'lang> as a -> printAssignment a
+        | :? IfThenElse<'lang> as ite -> printIf ite
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res

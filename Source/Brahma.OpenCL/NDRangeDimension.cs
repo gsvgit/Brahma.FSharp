@@ -73,11 +73,29 @@ namespace Brahma.OpenCL
         }
 
         [KernelCallable]
+        public int GlobalID0i
+        {
+            get
+            {
+                return (int)_globalIDs.x;
+            }
+        }
+
+        [KernelCallable]
         public int32 LocalID0
         {
             get
             {
                 return _localIDs.x;
+            }
+        }
+
+        [KernelCallable]
+        public int LocalID0i
+        {
+            get
+            {
+                return (int)_localIDs.x;
             }
         }
 
@@ -154,6 +172,24 @@ namespace Brahma.OpenCL
             get
             {
                 return _globalIDs.x;
+            }
+        }
+
+        [KernelCallable]
+        public int GlobalID0i
+        {
+            get
+            {
+                return (int)_globalIDs.x;
+            }
+        }
+
+        [KernelCallable]
+        public int GlobalID1i
+        {
+            get
+            {
+                return (int)_globalIDs.y;
             }
         }
 

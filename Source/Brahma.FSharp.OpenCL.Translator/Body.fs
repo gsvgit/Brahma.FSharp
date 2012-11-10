@@ -28,8 +28,18 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
         let a,c = args |> List.fold (fun (res,tc) a -> let r,tc = TranslateAsExpr a tc in r::res,tc) ([],targetContext)
         a |> List.rev , c
     match mInfo.Name.ToLowerInvariant() with
-    | "op_multiply" -> new Binop<_>(Mult,args.[0],args.[1]),tContext
-    | "op_addition" -> new Binop<_>(Plus,args.[0],args.[1]),tContext
+    | "op_multiply" -> new Binop<_>(Mult,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_addition" -> new Binop<_>(Plus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_lessthan" -> new Binop<_>(Less,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_lessthanorequal" -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_greaterthan" -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_greaterthanorequal" -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_inequality" -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "setarray" -> 
+        let item = new Item<_>(args.[0],args.[1])
+        new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
+        , tContext
+    | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
     | c -> failwithf "Unsupporte call: %s" c
 
 and private itemHelper exprs hostVar tContext =
@@ -46,8 +56,8 @@ and private itemHelper exprs hostVar tContext =
 and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) exprs targetContext =
     let hostVar = exprOpt |> Option.map(fun e -> TranslateAsExpr e targetContext)
     match propInfo.Name.ToLowerInvariant() with
-    | "globalid0" -> new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"0")]) :> Expression<_>, targetContext
-    | "globalid1" ->  new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"1")]) :> Expression<_>, targetContext
+    | "globalid0i" | "globalid0" -> new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"0")]) :> Expression<_>, targetContext
+    | "globalid1i" | "globalid1" ->  new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"1")]) :> Expression<_>, targetContext
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar targetContext
         new Item<_>(hVar,idx) :> Expression<_>, tContext
@@ -58,14 +68,7 @@ and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     let newVal,tContext = TranslateAsExpr newVal (match hostVar with Some(v,c) -> c | None -> targetContext)
     match propInfo.Name.ToLowerInvariant() with
     | "item" -> 
-        let idx,tContext,hVar = itemHelper exprs hostVar tContext(* = 
-            match exprs with
-            | hd::_ -> TranslateAsExpr hd tContext
-            | [] -> failwith "Array index missed!"
-        let hVar = 
-            match hostVar with
-            | Some(v,_) -> v
-            | None -> failwith "Host var missed!"*)
+        let idx,tContext,hVar = itemHelper exprs hostVar tContext
         let item = new Item<_>(hVar,idx)        
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),newVal) :> Statement<_>
         , tContext
@@ -77,6 +80,39 @@ and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
 
 and translateVar (var:Var) =
     new Variable<_>(var.Name)
+
+and translateValue (value:obj) (sType:System.Type) =
+    match sType.Name.ToLowerInvariant() with
+    | "int" | "int32" -> new Const<_>(new PrimitiveType<_>(PTypes.Int32), string value)
+    | t -> failwithf "Unsupported value tape: %s" t
+
+and translateCond (cond:Expr) targetContext =
+    match cond with
+    | Patterns.IfThenElse(cond,_then,_else) ->
+        let l,tContext = translateCond cond targetContext
+        let r,tContext = translateCond _then tContext
+        let e,tContext = translateCond _else tContext
+        new Binop<_>(BitOr, new Binop<_>(BitAnd,l,r),e) :> Expression<_> , tContext
+    | Patterns.Value (v,t) -> 
+        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int32), (if string v = "True" then  "1" else "0"))
+        r :> Expression<_>, targetContext 
+    | _ -> TranslateAsExpr cond targetContext
+and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
+    let cond,tContext = translateCond cond targetContext
+    let toStb (s:Node<_>) =
+        match s with
+        | :? StatementBlock<'lang> as s -> s
+        | x -> new StatementBlock<_>(new ResizeArray<_>([x :?> Statement<_>]))
+    let _then,tContext = 
+        let t,tc = Translate thenBranch tContext
+        toStb t, tc
+    let _else,tContext = 
+        match elseBranch with
+        | Patterns.Value(null,sType) -> None,tContext
+        | _ -> 
+            let r,tContext = Translate elseBranch tContext
+            Some (toStb r), tContext
+    new IfThenElse<_>(cond,_then, _else), tContext
 
 and Translate expr (targetContext:TargetContext<_,_>) =
         match expr with
@@ -91,7 +127,9 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.FieldGet (exprOpt,fldInfo) -> "Application is not suported:" + string expr|> failwith
         | Patterns.FieldSet (exprOpt,fldInfo,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.ForIntegerRangeLoop (var,expr1,expr2,expr3) -> "Application is not suported:" + string expr|> failwith
-        | Patterns.IfThenElse (cond,thenExpr,elseExpr) -> "Application is not suported:" + string expr|> failwith
+        | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
+            let r,tContext = translateIf cond thenExpr elseExpr targetContext
+            r :> Node<_>, tContext
         | Patterns.Lambda (var,expr)-> "Application is not suported:" + string expr|> failwith
         | Patterns.Let (var, expr, inExpr) -> 
             let vDecl = translateBinding var expr targetContext
@@ -121,7 +159,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.TupleGet(expr,i) -> "Application is not suported:" + string expr|> failwith
         | Patterns.TypeTest(expr,sType) -> "Application is not suported:" + string expr|> failwith
         | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "Application is not suported:" + string expr|> failwith
-        | Patterns.Value(_obj,sTpe) -> "Application is not suported:" + string expr|> failwith
+        | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
         | Patterns.Var var -> translateVar var :> Node<_>, targetContext
         | Patterns.VarSet(var,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.WhileLoop(condExpr,bodyExpr) -> "Application is not suported:" + string expr|> failwith

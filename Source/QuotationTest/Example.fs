@@ -39,9 +39,11 @@ let main () =
     let aBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,a)
     let command = 
         <@ 
-            fun (range:_1D) (buf1:Buffer<int>) -> 
-                let x = range.GlobalID0                
-                buf1.[x] <- buf1.[x] * buf1.[x]                
+            fun (range:_1D) (buf1:array<int>) -> 
+                let x = range.GlobalID0i
+                if (x > 2 && x < 5) || (x > 10 && x < 15) 
+                then
+                    buf1.[x] <- buf1.[x] * buf1.[x] * 2              
         @>
 
     let c = command:>Expr

@@ -17,7 +17,7 @@ namespace Brahma.FSharp.OpenCL.AST
 
 [<AbstractClass>]
 type Expression<'lang>()=
-    inherit Node<'lang>()
+    inherit Statement<'lang>()
 
 type Const<'lang>(_type:Type<'lang>,_val:string) =
     inherit Expression<'lang>()
@@ -67,6 +67,7 @@ type BOp<'lang> =
      | Great
      | GreatEQ
      | EQ
+     | NEQ
 
 type Binop<'lang>(op:BOp<'lang>,l:Expression<'lang>,r:Expression<'lang>) = 
     inherit Expression<'lang>()

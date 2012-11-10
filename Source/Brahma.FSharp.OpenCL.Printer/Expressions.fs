@@ -53,13 +53,14 @@ and private printBop (op:BOp<'lang>) =
     | Great -> ">" 
     | GreatEQ -> ">="
     | EQ -> "=="
+    | NEQ -> "!="
     |> wordL
 
 and private printBinop (binop:Binop<'lang>) =
     let l = Print binop.Left
     let r = Print binop.Right
     let op = printBop binop.Op
-    [l;op;r] |> spaceListL
+    [l;op;r] |> spaceListL |> bracketL
 
 and private printProperty (prop:Property<'lang>) =
     match prop.Property with

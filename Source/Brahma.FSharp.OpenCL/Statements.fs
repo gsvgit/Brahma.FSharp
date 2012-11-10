@@ -15,10 +15,6 @@
 
 namespace Brahma.FSharp.OpenCL.AST
 
-[<AbstractClass>]
-type Statement<'lang> () =
-    inherit Node<'lang>()    
-
 type VarDecl<'lang> (vType:Type<'lang>,name:string ,expr:Option<Expression<'lang>>) =
     inherit Statement<'lang>()
     override this.Children = []
@@ -36,4 +32,11 @@ type StatementBlock<'lang> (statements:ResizeArray<Statement<'lang>>)=
     inherit Statement<'lang>()
     override this.Children = []
     member this.Statements = statements    
-    
+
+
+type IfThenElse<'lang> (cond:Expression<'lang>, thenBranch:StatementBlock<'lang>, elseBranch:Option<StatementBlock<'lang>>)=
+    inherit Statement<'lang>()
+    override this.Children = []
+    member this.Condition = cond
+    member this.Then = thenBranch
+    member this.Else = elseBranch    
