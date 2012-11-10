@@ -33,10 +33,17 @@ type StatementBlock<'lang> (statements:ResizeArray<Statement<'lang>>)=
     override this.Children = []
     member this.Statements = statements    
 
-
 type IfThenElse<'lang> (cond:Expression<'lang>, thenBranch:StatementBlock<'lang>, elseBranch:Option<StatementBlock<'lang>>)=
     inherit Statement<'lang>()
     override this.Children = []
     member this.Condition = cond
     member this.Then = thenBranch
-    member this.Else = elseBranch    
+    member this.Else = elseBranch
+
+type ForIntegerLoop<'lang> (var:VarDecl<'lang>, cond:Expression<'lang>, countModifier:Expression<'lang>, body:StatementBlock<'lang>)=
+    inherit Statement<'lang>()
+    override this.Children = []
+    member this.Var = var
+    member this.Condition = cond
+    member this.CountModifier = countModifier
+    member this.Body = body

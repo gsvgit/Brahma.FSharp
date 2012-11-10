@@ -20,7 +20,7 @@ open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
 
-let printConst (c:Const<'lang>) = 
+let private printConst (c:Const<'lang>) = 
     match c.Type with
     | :? PrimitiveType<'lang> as pt ->
         match pt.Type with
@@ -31,7 +31,7 @@ let printConst (c:Const<'lang>) =
         | Void -> wordL ""
     | c -> failwithf "Printer. Unsupported const with type: %A" c
 
-let printVar (varible:Variable<'lang>) =
+let private printVar (varible:Variable<'lang>) =
     wordL varible.Name
 
 let rec private printItem (itm:Item<'lang>) =
@@ -70,6 +70,13 @@ and private printProperty (prop:Property<'lang>) =
 and private printFunCall (fc:FunCall<'lang>) =
     wordL fc.Name ++ (fc.Args |> List.map Print |> commaListL |> bracketL)
 
+and private printUnOp (uo:Unop<'lang>) =
+    match uo.Op with
+    | UOp.Minus -> wordL "-" ++ Print uo.Expr |> bracketL
+    | UOp.Not -> wordL "not" ++ Print uo.Expr |> bracketL
+    | UOp.Incr -> Print uo.Expr ++ wordL "++"
+    | UOp.Decr -> Print uo.Expr ++ wordL "--"
+
 and Print (expr:Expression<'lang>) =
     match expr with
     | :? Const<'lang> as c -> printConst c
@@ -78,4 +85,5 @@ and Print (expr:Expression<'lang>) =
     | :? Property<'lang> as prop -> printProperty prop
     | :? Binop<'lang> as binop -> printBinop binop
     | :? FunCall<'lang> as fc -> printFunCall fc
+    | :? Unop<'lang> as uo -> printUnOp uo
     | c -> failwithf "Printer. Unsupported expression: %A" c

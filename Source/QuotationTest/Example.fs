@@ -43,7 +43,10 @@ let main () =
                 let x = range.GlobalID0i
                 if (x > 2 && x < 5) || (x > 10 && x < 15) 
                 then
-                    buf1.[x] <- buf1.[x] * buf1.[x] * 2              
+                    buf1.[x] <- buf1.[x] * buf1.[x] * 2
+                else
+                    for i in 0..x do
+                        buf1.[x] <- buf1.[x] - buf1.[x]
         @>
 
     let c = command:>Expr

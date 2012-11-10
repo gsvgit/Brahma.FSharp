@@ -35,6 +35,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_greaterthan" -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthanorequal" -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_inequality" -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_subtraction" -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "setarray" -> 
         let item = new Item<_>(args.[0],args.[1])
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
@@ -97,12 +98,14 @@ and translateCond (cond:Expr) targetContext =
         let r = new Const<_>(new PrimitiveType<_>(PTypes.Int32), (if string v = "True" then  "1" else "0"))
         r :> Expression<_>, targetContext 
     | _ -> TranslateAsExpr cond targetContext
+
+and toStb (s:Node<_>) =
+    match s with
+    | :? StatementBlock<'lang> as s -> s
+    | x -> new StatementBlock<_>(new ResizeArray<_>([x :?> Statement<_>]))
+
 and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
     let cond,tContext = translateCond cond targetContext
-    let toStb (s:Node<_>) =
-        match s with
-        | :? StatementBlock<'lang> as s -> s
-        | x -> new StatementBlock<_>(new ResizeArray<_>([x :?> Statement<_>]))
     let _then,tContext = 
         let t,tc = Translate thenBranch tContext
         toStb t, tc
@@ -113,6 +116,15 @@ and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
             let r,tContext = Translate elseBranch tContext
             Some (toStb r), tContext
     new IfThenElse<_>(cond,_then, _else), tContext
+
+and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) targetContext =
+    let v = translateVar i
+    let var = translateBinding i from targetContext
+    let condExpr,tContext = TranslateAsExpr _to targetContext
+    let body,tContext = Translate _do tContext
+    let cond = new Binop<_>(LessEQ, v, condExpr)
+    let condModifier = new Unop<_>(UOp.Incr,v)   
+    new ForIntegerLoop<_>(var,cond, condModifier,toStb body),tContext
 
 and Translate expr (targetContext:TargetContext<_,_>) =
         match expr with
@@ -126,7 +138,9 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.DefaultValue sType -> "Application is not suported:" + string expr|> failwith
         | Patterns.FieldGet (exprOpt,fldInfo) -> "Application is not suported:" + string expr|> failwith
         | Patterns.FieldSet (exprOpt,fldInfo,expr) -> "Application is not suported:" + string expr|> failwith
-        | Patterns.ForIntegerRangeLoop (var,expr1,expr2,expr3) -> "Application is not suported:" + string expr|> failwith
+        | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
+            let r,tContext = translateForIntegerRangeLoop i from _to _do targetContext
+            r :> Node<_>, tContext
         | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
             let r,tContext = translateIf cond thenExpr elseExpr targetContext
             r :> Node<_>, tContext

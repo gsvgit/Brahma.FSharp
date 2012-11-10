@@ -76,9 +76,12 @@ type Binop<'lang>(op:BOp<'lang>,l:Expression<'lang>,r:Expression<'lang>) =
     member this.Right = r
     member this.Op = op
 
+[<RequireQualifiedAccess>]
 type UOp<'lang> =
     | Minus
     | Not
+    | Incr
+    | Decr
 
 type Unop<'lang>(op:UOp<'lang>,expr:Expression<'lang>) = 
     inherit Expression<'lang>()
