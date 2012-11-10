@@ -46,7 +46,9 @@ let main () =
                     buf1.[x] <- buf1.[x] * buf1.[x] * 2
                 else
                     for i in 0..x do
-                        buf1.[x] <- buf1.[x] - buf1.[x]
+                        let y = buf1.[i] * 2
+                        let z = y - 1
+                        buf1.[x] <- buf1.[x] - z
         @>
 
     let c = command:>Expr

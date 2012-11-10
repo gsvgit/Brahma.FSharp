@@ -107,24 +107,24 @@ and toStb (s:Node<_>) =
 and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
     let cond,tContext = translateCond cond targetContext
     let _then,tContext = 
-        let t,tc = Translate thenBranch tContext
+        let t,tc = Translate thenBranch (new TargetContext<_,_>())
         toStb t, tc
     let _else,tContext = 
         match elseBranch with
         | Patterns.Value(null,sType) -> None,tContext
         | _ -> 
-            let r,tContext = Translate elseBranch tContext
+            let r,tContext = Translate elseBranch (new TargetContext<_,_>())
             Some (toStb r), tContext
-    new IfThenElse<_>(cond,_then, _else), tContext
+    new IfThenElse<_>(cond,_then, _else), targetContext
 
 and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) targetContext =
     let v = translateVar i
     let var = translateBinding i from targetContext
     let condExpr,tContext = TranslateAsExpr _to targetContext
-    let body,tContext = Translate _do tContext
+    let body,tContext = Translate _do (new TargetContext<_,_>())
     let cond = new Binop<_>(LessEQ, v, condExpr)
     let condModifier = new Unop<_>(UOp.Incr,v)   
-    new ForIntegerLoop<_>(var,cond, condModifier,toStb body),tContext
+    new ForIntegerLoop<_>(var,cond, condModifier,toStb body),targetContext
 
 and Translate expr (targetContext:TargetContext<_,_>) =
         match expr with
@@ -151,7 +151,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             let res,tContext = Translate inExpr targetContext
             let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
             sb.Add (res :?> Statement<_>)
-            new StatementBlock<_>(sb) :> Node<_>, tContext
+            new StatementBlock<_>(sb) :> Node<_>, (new TargetContext<_,_>())
 
         | Patterns.LetRecursive (bindings,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.NewArray(sType,exprs) -> "Application is not suported:" + string expr|> failwith
