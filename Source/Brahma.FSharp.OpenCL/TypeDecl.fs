@@ -13,5 +13,15 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-module TypeDecl
+namespace Brahma.FSharp.OpenCL.AST
+
+type StructField<'lang>(name:string, _type:Type<'lang>)=
+    member this.Name = name
+    member this.Type = _type
+    
+type Struct<'lang>(name:string, flds:List<StructField<'lang>>) =
+    inherit TopDef<'lang>()
+    override this.Children = []
+    member this.Name = name
+    member this.Fields = flds
 
