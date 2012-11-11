@@ -28,14 +28,14 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
         let a,c = args |> List.fold (fun (res,tc) a -> let r,tc = TranslateAsExpr a tc in r::res,tc) ([],targetContext)
         a |> List.rev , c
     match mInfo.Name.ToLowerInvariant() with
-    | "op_multiply" -> new Binop<_>(Mult,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_addition" -> new Binop<_>(Plus,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_lessthan" -> new Binop<_>(Less,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_lessthanorequal" -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_greaterthan" -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_greaterthanorequal" -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_inequality" -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_subtraction" -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_multiply"            -> new Binop<_>(Mult,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_addition"            -> new Binop<_>(Plus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_lessthan"            -> new Binop<_>(Less,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_lessthanorequal"     -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_greaterthan"         -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_greaterthanorequal"  -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_inequality"          -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "setarray" -> 
         let item = new Item<_>(args.[0],args.[1])
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
@@ -57,8 +57,8 @@ and private itemHelper exprs hostVar tContext =
 and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) exprs targetContext =
     let hostVar = exprOpt |> Option.map(fun e -> TranslateAsExpr e targetContext)
     match propInfo.Name.ToLowerInvariant() with
-    | "globalid0i" | "globalid0" -> new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"0")]) :> Expression<_>, targetContext
-    | "globalid1i" | "globalid1" ->  new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int32),"1")]) :> Expression<_>, targetContext
+    | "globalid0i" | "globalid0" -> new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int),"0")]) :> Expression<_>, targetContext
+    | "globalid1i" | "globalid1" ->  new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int),"1")]) :> Expression<_>, targetContext
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar targetContext
         new Item<_>(hVar,idx) :> Expression<_>, tContext
@@ -84,7 +84,7 @@ and translateVar (var:Var) =
 
 and translateValue (value:obj) (sType:System.Type) =
     match sType.Name.ToLowerInvariant() with
-    | "int" | "int32" -> new Const<_>(new PrimitiveType<_>(PTypes.Int32), string value)
+    | "int" | "int32" -> new Const<_>(new PrimitiveType<_>(PTypes.Int), string value)
     | t -> failwithf "Unsupported value tape: %s" t
 
 and translateCond (cond:Expr) targetContext =
@@ -95,7 +95,7 @@ and translateCond (cond:Expr) targetContext =
         let e,tContext = translateCond _else tContext
         new Binop<_>(BitOr, new Binop<_>(BitAnd,l,r),e) :> Expression<_> , tContext
     | Patterns.Value (v,t) -> 
-        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int32), (if string v = "True" then  "1" else "0"))
+        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if (string v).ToLowerInvariant() = "true" then  "1" else "0"))
         r :> Expression<_>, targetContext 
     | _ -> TranslateAsExpr cond targetContext
 
