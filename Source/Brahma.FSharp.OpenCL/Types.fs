@@ -16,10 +16,16 @@
 namespace Brahma.FSharp.OpenCL.AST
 
 type PTypes<'lang> =
-    | Int32
-    | Float32
-    | Int64
-    | Float64
+    | Char
+    | UChar
+    | Short
+    | UShort
+    | Int
+    | UInt
+    | Long
+    | ULong
+    | Float
+    | Double
     | Void
 
 [<AbstractClass>]

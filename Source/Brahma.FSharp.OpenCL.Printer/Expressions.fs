@@ -24,10 +24,16 @@ let private printConst (c:Const<'lang>) =
     match c.Type with
     | :? PrimitiveType<'lang> as pt ->
         match pt.Type with
-        | Int32 
-        | Float32
-        | Int64
-        | Float64 -> wordL c.Val
+        | Int
+        | UInt
+        | Short
+        | UShort
+        | Float
+        | Long
+        | Char
+        | UChar
+        | Double
+        | ULong -> wordL c.Val
         | Void -> wordL ""
     | c -> failwithf "Printer. Unsupported const with type: %A" c
 
