@@ -62,7 +62,7 @@ and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar targetContext
         new Item<_>(hVar,idx) :> Expression<_>, tContext
-    | x -> "Unsupported property in kernel: " + x |> failwith
+    | x -> failwithf "Unsupported property in kernel: %A"  x
 
 and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) exprs newVal targetContext =    
     let hostVar = exprOpt |> Option.map(fun e -> TranslateAsExpr e targetContext)
@@ -73,7 +73,7 @@ and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) e
         let item = new Item<_>(hVar,idx)        
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),newVal) :> Statement<_>
         , tContext
-    | x -> "Unsupported property in kernel: " + x |> failwith
+    | x -> failwithf "Unsupported property in kernel: %A"  x  
 
 and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
     let (r:Node<_>),tc = Translate expr (targetContext:TargetContext<_,_>)
@@ -101,7 +101,7 @@ and translateCond (cond:Expr) targetContext =
 
 and toStb (s:Node<_>) =
     match s with
-    | :? StatementBlock<'lang> as s -> s
+    | :? StatementBlock<_> as s -> s
     | x -> new StatementBlock<_>(new ResizeArray<_>([x :?> Statement<_>]))
 
 and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
@@ -178,4 +178,3 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.VarSet(var,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.WhileLoop(condExpr,bodyExpr) -> "Application is not suported:" + string expr|> failwith
         | other -> "OTHER!!! :" + string other |> failwith
-
