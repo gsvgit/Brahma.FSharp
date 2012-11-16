@@ -33,6 +33,10 @@ type Translator() =
         Assert.AreEqual (all1.Length, all2.Length)
         Assert.IsTrue(Array.forall2 (=) all1 all2)
 
+    let checkCode kernel outFile expected =
+        (kernel :> ICLKernel).Source.ToString() |> (fun text -> printfn "%s" text;System.IO.File.WriteAllText(outFile,text))
+        filesAreEqual outFile (System.IO.Path.Combine(basePath,expected))
+
     let a = [|0..3|]
 
     [<Test>]
@@ -46,11 +50,62 @@ type Translator() =
         let c = command:>Expr
         let kernel = provider.Compile<_1D,_> c
         
-        let outFile = "Array.Item.Set.gen"
+        checkCode kernel "Array.Item.Set.gen" "Array.Item.Set.ocl"
 
-        (kernel :> ICLKernel).Source.ToString() |> (fun text -> System.IO.File.WriteAllText(outFile,text))
-        filesAreEqual "Array.Item.Set.gen" (System.IO.Path.Combine(basePath,"Array.Item.Set.ocl"))
+        
 
+    [<Test>]
+    member this.Binding() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    let x = 1
+                    buf.[0] <- x
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binding.gen" "Binding.ocl"
+
+    [<Test>]
+    member this.``Binop plus``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    buf.[0] <- 1 + 2
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binop.Plus.gen" "Binop.Plus.ocl"
+
+    [<Test>]
+    member this.``If Then``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    if 0 = 2 then buf.[0] <- 1
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "If.Then.gen" "If.Then.ocl"
+
+    [<Test>]
+    member this.``If Then Else``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "If.Then.Else.gen" "If.Then.Else.ocl"
 //[<EntryPoint>]
 //let f _ =
 //    (new Translator()).``Array item set``()

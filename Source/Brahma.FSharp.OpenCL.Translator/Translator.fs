@@ -36,10 +36,19 @@ type FSQuotationToOpenCLTranslator() =
             match expr with
             | Patterns.Lambda (v, (Patterns.Lambda (_) as body)) -> 
                 go body (v::vars)
-            | Patterns.Lambda (v, e) -> v::vars, Body.Translate e (new TargetContext<Lang,_>())
+            | Patterns.Lambda (v, e) -> 
+                let body =
+                    let b,context = Body.Translate e (new TargetContext<_,_>()) 
+                    match b  with
+                    | :? StatementBlock<Lang> as sb -> sb
+                    | :? Statement<Lang> as s -> new StatementBlock<_>(new ResizeArray<_>([s]))
+                    | _ -> failwithf "Incorrect function body: %A" b
+                    ,context 
+                v::vars, body
+
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         let vars,(partialAst,context) = go qExpr []
-        buildFullAst (List.rev vars) (partialAst :?> Statement<_>) context
+        buildFullAst (List.rev vars) (partialAst :> Statement<_>) context
 
   
     member this.Translate qExpr = 

@@ -34,6 +34,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_lessthanorequal"     -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthan"         -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthanorequal"  -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_equality"          -> new Binop<_>(EQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_inequality"          -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "setarray" -> 
