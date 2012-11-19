@@ -106,6 +106,72 @@ type Translator() =
         let kernel = provider.Compile<_1D,_> c
         
         checkCode kernel "If.Then.Else.gen" "If.Then.Else.ocl"
+
+    [<Test>]
+    member this.``For Integer Loop``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    for i in 1..3 do buf.[0] <- i
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "For.Integer.Loop.gen" "For.Integer.Loop.ocl"
+
+    [<Test>]
+    member this.``Sequential bindings``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    let x = 1
+                    let y = x + 1
+                    buf.[0] <- y
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Sequential.Bindings.gen" "Sequential.Bindings.ocl"
+
+    [<Test>]
+    member this.``Binary operations. Math.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    let x = 0
+                    let y = x + 1
+                    let z = y * 2
+                    let a = z - x
+                    let i = a / 2
+                    buf.[0] <- i
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binary.Operations.Math.gen" "Binary.Operations.Math.ocl"
+
+    [<Test>]
+    member this.``Binding in IF.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    if 2 = 0
+                    then                        
+                        let x = 1
+                        buf.[0] <- x
+                    else
+                        let i = 2
+                        buf.[0] <- i
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binding.In.IF.gen" "Binding.In.IF.ocl"
+
 //[<EntryPoint>]
 //let f _ =
 //    (new Translator()).``Array item set``()
