@@ -52,8 +52,6 @@ type Translator() =
         
         checkCode kernel "Array.Item.Set.gen" "Array.Item.Set.ocl"
 
-        
-
     [<Test>]
     member this.Binding() = 
         let command = 
