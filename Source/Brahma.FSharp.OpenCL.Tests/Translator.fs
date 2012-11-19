@@ -172,6 +172,21 @@ type Translator() =
         
         checkCode kernel "Binding.In.IF.gen" "Binding.In.IF.ocl"
 
+    [<Test>]
+    member this.``Binding in FOR.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                    for i in 0..3 do
+                        let x = i * i
+                        buf.[0] <- x
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
+
 //[<EntryPoint>]
 //let f _ =
 //    (new Translator()).``Array item set``()
