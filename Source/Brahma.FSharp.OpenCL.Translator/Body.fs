@@ -30,6 +30,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     match mInfo.Name.ToLowerInvariant() with
     | "op_multiply"            -> new Binop<_>(Mult,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_addition"            -> new Binop<_>(Plus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_division"            -> new Binop<_>(Div,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_lessthan"            -> new Binop<_>(Less,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_lessthanorequal"     -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthan"         -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
@@ -152,7 +153,10 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             let res,tContext = Translate inExpr targetContext
             let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
             sb.Add (res :?> Statement<_>)
-            new StatementBlock<_>(sb) :> Node<_>, (new TargetContext<_,_>())
+            if sb.Count > 1
+            then new StatementBlock<_>(sb) :> Node<_>
+            else res
+            , (new TargetContext<_,_>())
 
         | Patterns.LetRecursive (bindings,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.NewArray(sType,exprs) -> "Application is not suported:" + string expr|> failwith
