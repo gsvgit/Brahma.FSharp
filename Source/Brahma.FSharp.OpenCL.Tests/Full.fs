@@ -163,3 +163,37 @@ type Translator() =
         let kernel = provider.Compile<_1D,_> c
         
         checkResult kernel [|9;1;2;3|]
+
+        //New
+    [<Test>]
+    member this.``Binding in WHILE.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                 let i = 1
+                 while i <5 do
+                 let x = i + i 
+                 let i = i + 1
+                 buf.[0] <- x                      
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResult kernel [|2;4;6;8|]
+
+    [<Test>]
+    member this.``Binding in WHILE2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                 let i = 1
+                 while i <10 do
+                 let i = i * 2 + i
+                 buf.[0] <- i                      
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResult kernel [|3;7;15|]
