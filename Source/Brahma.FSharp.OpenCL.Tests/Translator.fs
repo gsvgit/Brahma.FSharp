@@ -210,8 +210,7 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) ->
                     let i = 1
                     while i<5 do
-                    while i<3 do
-                    buf.[0] <- i
+                        while i<3 do buf.[0] <- i
             @>
 
         let c = command:>Expr
