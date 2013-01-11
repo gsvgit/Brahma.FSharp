@@ -21,7 +21,10 @@ let Translate (_type:System.Type):Type<Lang> =
     let rec go (str:string) =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
-        | "float"| "float32" -> PrimitiveType<Lang>(Float) :> Type<Lang>
+        | "float"| "float32" | "single"-> PrimitiveType<Lang>(Float) :> Type<Lang>
+        | "double" -> PrimitiveType<Lang>(Double) :> Type<Lang>        
+        | "single[]" -> RefType<_>(go "single") :> Type<Lang>
+        | "double[]" -> RefType<_>(go "double") :> Type<Lang>
         | "int32[]" -> RefType<_>(go "int32") :> Type<Lang>
         | x ->
             if x.StartsWith "buffer`"

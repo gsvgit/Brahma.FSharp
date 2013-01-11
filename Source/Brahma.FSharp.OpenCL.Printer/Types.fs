@@ -30,7 +30,7 @@ let private printPrimitiveType (pType:PrimitiveType<'lang>) =
     | Float -> "float"
     | Long -> "long"
     | ULong -> "ulong"
-    | Double -> "double"
+    | Double -> "float"
     | Void -> "void"
     |> wordL
 
