@@ -51,9 +51,15 @@ let main () =
                         buf1.[x] <- buf1.[x] - z*)
                
                
-               //New
-                let x = range.GlobalID0i
-                while (buf1.[x] < 10) do buf1.[x] <- buf1.[x] + 1
+//                let x = range.GlobalID0i
+//                let mutable i = 0
+//                while (i < 10) do 
+//                    buf1.[x] <- buf1.[x] + 1
+                    //i <- i + 1
+                //fun (range:_1D) (buf:array<int>) ->
+                 while buf1.[0] < 5 do
+                     let x = buf1.[0] + 1
+                     buf1.[0] <- x * x
         @>
 
     let c = command:>Expr

@@ -34,7 +34,7 @@ type Translator() =
         Assert.IsTrue(Array.forall2 (=) all1 all2)
 
     let checkCode kernel outFile expected =
-        (kernel :> ICLKernel).Source.ToString() |> (fun text -> printfn "%s" text;System.IO.File.WriteAllText(outFile,text))
+        (kernel :> ICLKernel).Source.ToString() |> (fun text -> printfn "%s" text;  System.IO.File.WriteAllText(outFile,text))
         filesAreEqual outFile (System.IO.Path.Combine(basePath,expected))
 
     let a = [|0..3|]
@@ -184,41 +184,37 @@ type Translator() =
         let kernel = provider.Compile<_1D,_> c
         
         checkCode kernel "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
+       
+    [<Test>]
+    member this.``Simple WHILE loop.``() = 
+        let command = 
+            <@
+                fun (range:_1D) (buf:array<int>) ->
+                    while buf.[0] < 5 do
+                        buf.[0] <- buf.[0] + 1
+            @>
 
-       //New
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Simple.WHILE.gen" "Simple.WHILE.ocl"
+
     [<Test>]
     member this.``Binding in WHILE.``() = 
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) ->
-                    let i = 0
-                    while i <= 20 do
-                        let value = i + 1
-                        let i = i + 1
-                        buf.[0] <- value
+                 while buf.[0] < 5 do
+                     let x = buf.[0] + 1
+                     buf.[0] <- x * x
             @>
 
         let c = command:>Expr
         let kernel = provider.Compile<_1D,_> c
         
-        checkCode kernel "Binding.WHILE.gen" "Binding.WHILE.ocl"
+        checkCode kernel "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
 
-    [<Test>]
-    member this.``Binding in WHILE2.``() = 
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int>) ->
-                    let i = 1
-                    while i<5 do
-                        while i<3 do buf.[0] <- i
-            @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
-        
-        checkCode kernel "Binding.WHILE2.gen" "Binding.WHILE2.ocl"
-
-//[<EntryPoint>]
-//let f _ =
-//    (new Translator()).``Array item set``()
-//    0
+[<EntryPoint>]
+let f _ =
+    (new Translator()).``Binding in WHILE.``()
+    0

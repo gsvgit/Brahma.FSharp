@@ -164,36 +164,46 @@ type Translator() =
         
         checkResult kernel [|9;1;2;3|] 
 
-        //New
+    [<Test>]
+    member this.``WHILE loop simple test.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                 while buf.[0] < 5 do
+                     buf.[0] <- buf.[0] + 1
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResult kernel [|5;1;2;3|]
+
+    [<Test>]
+    member this.``WHILE in FOR.``() = 
+        let command = 
+            <@
+                fun (range:_1D) (buf:array<int>) ->
+                 for i in 0..3 do
+                     while buf.[i] < 10 do
+                         buf.[i] <- buf.[i] * buf.[i] + 1
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResult kernel [|26;26;26;10|]
+
     [<Test>]
     member this.``Binding in WHILE.``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) -> 
-                 let i = 1
-                 while i <5 do
-                 let x = i + i 
-                 let i = i + 1
-                 buf.[0] <- x                      
+                fun (range:_1D) (buf:array<int>) ->
+                 while buf.[0] < 5 do
+                     let x = buf.[0] + 1
+                     buf.[0] <- x * x
             @>
 
         let c = command:>Expr
         let kernel = provider.Compile<_1D,_> c
         
-        checkResult kernel [|2;4;6;8|]
-
-    [<Test>]
-    member this.``Binding in WHILE2.``() = 
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int>) -> 
-                 let i = 1
-                 while i <10 do
-                 let i = i * 2 + i
-                 buf.[0] <- i                      
-            @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
-        
-        checkResult kernel [|3;7;15|]
+        checkResult kernel [|25;1;2;3|]
