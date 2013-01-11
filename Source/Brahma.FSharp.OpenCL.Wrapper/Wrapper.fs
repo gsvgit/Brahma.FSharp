@@ -55,7 +55,19 @@ type ComputeProvider with
             
         kernel            
                     
-    member this.Compile<'TRange,'T1 when 'T1 :> Brahma.IMem                                      
+    member this.Compile<'TRange,'T1 when 'T1 :> Brahma.IMem
+                                    and 'TRange : struct
+                                    and 'TRange :> Brahma.OpenCL.INDRangeDimension
+                                    and 'TRange :> ValueType
+                                    and 'TRange : (new: unit -> 'TRange)>
+            (query: Expr, ?_options:CompileOptions) =
+        let options = defaultArg _options this.DefaultOptions_p
+        this.SetCompileOptions(options)        
+        this.CompileQuery<Kernel<'TRange, 'T1>,'TRange,'T1>(query)
+
+    member this.Compile<'TRange,'T1, 'T2
+                                    when 'T1 :> Brahma.IMem
+                                    and 'T2 :> Brahma.IMem                                    
                                     and 'TRange : struct 
                                     and 'TRange :> Brahma.OpenCL.INDRangeDimension
                                     and 'TRange :> ValueType 
@@ -63,5 +75,18 @@ type ComputeProvider with
             (query: Expr, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions(options)        
-        this.CompileQuery<Kernel<'TRange, 'T1>,'TRange,'T1>(query)
+        this.CompileQuery<Kernel<'TRange, 'T1, 'T2>,'TRange,'T1>(query)
+
+    member this.Compile<'TRange,'T1, 'T2 , 'T3
+                                    when 'T1 :> Brahma.IMem
+                                    and 'T2 :> Brahma.IMem
+                                    and 'T3 :> Brahma.IMem
+                                    and 'TRange : struct 
+                                    and 'TRange :> Brahma.OpenCL.INDRangeDimension
+                                    and 'TRange :> ValueType 
+                                    and 'TRange : (new: unit -> 'TRange)>
+            (query: Expr, ?_options:CompileOptions) =
+        let options = defaultArg _options this.DefaultOptions_p
+        this.SetCompileOptions(options)        
+        this.CompileQuery<Kernel<'TRange, 'T1, 'T2, 'T3>,'TRange,'T1>(query)
     
