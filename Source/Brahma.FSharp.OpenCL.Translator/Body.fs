@@ -127,6 +127,11 @@ and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) targe
     let cond = new Binop<_>(LessEQ, v, condExpr)
     let condModifier = new Unop<_>(UOp.Incr,v)   
     new ForIntegerLoop<_>(var,cond, condModifier,toStb body),targetContext
+//New
+and translateWhileLoop condExpr bodyExpr targetContext =
+    let nCond,tContext = TranslateAsExpr condExpr targetContext
+    let nBody,tContext = Translate bodyExpr tContext
+    new WhileLoop<_>(nCond, toStb nBody), tContext 
 
 and Translate expr (targetContext:TargetContext<_,_>) =
         match expr with
@@ -181,5 +186,8 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
         | Patterns.Var var -> translateVar var :> Node<_>, targetContext
         | Patterns.VarSet(var,expr) -> "Application is not suported:" + string expr|> failwith
-        | Patterns.WhileLoop(condExpr,bodyExpr) -> "Application is not suported:" + string expr|> failwith
+        //New
+        | Patterns.WhileLoop(condExpr,bodyExpr) -> 
+            let r,tContext = translateWhileLoop condExpr bodyExpr targetContext
+            r :> Node<_>, tContext
         | other -> "OTHER!!! :" + string other |> failwith

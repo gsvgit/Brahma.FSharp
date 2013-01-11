@@ -185,6 +185,39 @@ type Translator() =
         
         checkCode kernel "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
 
+       //New
+    [<Test>]
+    member this.``Binding in WHILE.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let i = 0
+                    while i <= 20 do
+                        let value = i + 1
+                        let i = i + 1
+                        buf.[0] <- value
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binding.WHILE.gen" "Binding.WHILE.ocl"
+
+    [<Test>]
+    member this.``Binding in WHILE2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let i = 1
+                    while i<5 do
+                        while i<3 do buf.[0] <- i
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkCode kernel "Binding.WHILE2.gen" "Binding.WHILE2.ocl"
+
 //[<EntryPoint>]
 //let f _ =
 //    (new Translator()).``Array item set``()

@@ -40,7 +40,7 @@ let main () =
     let command = 
         <@ 
             fun (range:_1D) (buf1:array<int>) -> 
-                let x = range.GlobalID0i
+                (*let x = range.GlobalID0i
                 if (x > 2 && x < 5) || (x > 10 && x < 15) 
                 then
                     buf1.[x] <- buf1.[x] * buf1.[x] * 2
@@ -48,7 +48,12 @@ let main () =
                     for i in 0..x do
                         let y = buf1.[i] * 2
                         let z = y - 1
-                        buf1.[x] <- buf1.[x] - z
+                        buf1.[x] <- buf1.[x] - z*)
+               
+               
+               //New
+                let x = range.GlobalID0i
+                while (buf1.[x] < 10) do buf1.[x] <- buf1.[x] + 1
         @>
 
     let c = command:>Expr
