@@ -47,7 +47,7 @@ type ForIntegerLoop<'lang> (var:VarDecl<'lang>, cond:Expression<'lang>, countMod
     member this.Condition = cond
     member this.CountModifier = countModifier
     member this.Body = body
-//New
+
 type WhileLoop<'lang> (cond:Expression<'lang>, whileBlock:StatementBlock<'lang>)=
     inherit Statement<'lang>()
     override this.Children = []

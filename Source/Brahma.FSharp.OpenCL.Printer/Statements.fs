@@ -53,8 +53,7 @@ and private printForInteger (_for:ForIntegerLoop<_>) =
     [ yield wordL "for" ++ header
     ; yield body]
     |> aboveListL
-
-    //New
+    
 and printWhileLoop (wl:WhileLoop<_>) =
     let cond = Expressions.Print wl.Condition |> bracketL
     let body = Print true wl.WhileBlock
@@ -70,9 +69,7 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? Assignment<'lang> as a -> printAssignment a
         | :? IfThenElse<'lang> as ite -> printIf ite
         | :? ForIntegerLoop<'lang> as _for -> printForInteger _for
-        //New
         | :? WhileLoop<'lang> as wl -> printWhileLoop wl
-        //
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res
