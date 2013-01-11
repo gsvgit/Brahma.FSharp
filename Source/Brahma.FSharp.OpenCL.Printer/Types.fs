@@ -30,13 +30,13 @@ let private printPrimitiveType (pType:PrimitiveType<'lang>) =
     | Float -> "float"
     | Long -> "long"
     | ULong -> "ulong"
-    | Double -> "float"
+    | Double -> "double"
     | Void -> "void"
     |> wordL
 
 let rec Print<'lang> (_type:Type<'lang>) =
     match _type with
     | :? PrimitiveType<'lang> as pt -> printPrimitiveType pt
-    | :? RefType<'lang> as rt ->  Print rt.BaseType ^^ wordL "*"//] |> spaceListL
+    | :? RefType<'lang> as rt ->  Print rt.BaseType ^^ wordL "*"
     | t -> failwithf "Printer. Unsupported type: %A" t
 
