@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012 Semyon Grigorev <rsdpisuy@gmail.com>
+﻿// Copyright (c) 2012, 2013 Semyon Grigorev <rsdpisuy@gmail.com>
 // All rights reserved.
 // 
 // The contents of this file are made available under the terms of the
