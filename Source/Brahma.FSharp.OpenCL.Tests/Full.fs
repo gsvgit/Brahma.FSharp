@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open System.IO
-open Brahma.Types
+//open Brahma.Types
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
@@ -32,6 +32,30 @@ type Translator() =
         let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
         let r = Array.zeroCreate(l)
         let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
+        Assert.AreEqual(expected,r)
+        commandQueue.Dispose();
+
+    let checkResultFloat (kernel:Kernel<_,_>) expected =
+        let l = 4
+        let a = Array.init l (fun i -> float32 i)
+        let aBuf = new Buffer<float32>(provider, Operations.ReadWrite, Memory.Device,a)
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
+        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
+        let r = Array.zeroCreate(l)
+        let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
+        Assert.AreEqual(expected,r)
+        commandQueue.Dispose();
+
+    let checkResult2 (kernel:Kernel<_,_,_>) expected =
+        let l = 4
+        let a = [|0 .. l-1|]
+        let b = Array.zeroCreate l
+        let inBuf = new Buffer<int>(provider, Operations.ReadOnly, Memory.Device,a)
+        let outBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,b)
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
+        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf, outBuf)).Finish()
+        let r = Array.zeroCreate(l)
+        let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
         Assert.AreEqual(expected,r)
         commandQueue.Dispose();
         
@@ -221,3 +245,31 @@ type Translator() =
         let kernel = provider.Compile<_1D,_> c
         
         checkResult kernel [|0;2;4;6|]
+
+    [<Test>]
+    member this.``Simple 1D with copy.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (inBuf:array<int>) (outBuf:array<int>) ->
+                    let i = range.GlobalID0i
+                    outBuf.[i] <- inBuf.[i]
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_,_> c
+        
+        checkResult2 kernel [|0;1;2;3|]
+
+    [<Test>]
+    member this.``Simple 1D float.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<float32>) ->
+                    let i = range.GlobalID0i
+                    buf.[i] <- buf.[i] * buf.[i]
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResultFloat kernel [|0.0;1.0;4.0;9.0|]
