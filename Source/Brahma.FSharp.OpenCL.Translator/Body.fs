@@ -85,9 +85,13 @@ and translateVar (var:Var) =
     new Variable<_>(var.Name)
 
 and translateValue (value:obj) (sType:System.Type) =
-    match sType.Name.ToLowerInvariant() with
-    | "int" | "int32" -> new Const<_>(new PrimitiveType<_>(PTypes.Int), string value)
-    | t -> failwithf "Unsupported value tape: %s" t
+    let _type = Type.Translate sType
+    new Const<_>(_type, string value)
+
+and translateVarSet (var:Var) (expr:Expr) targetContext =
+    let var = translateVar var
+    let expr,tContext = TranslateAsExpr expr targetContext
+    new Assignment<_>(new Property<_>(PropertyType.Var var),expr),tContext
 
 and translateCond (cond:Expr) targetContext =
     match cond with
@@ -175,7 +179,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             (res :> Node<_>), tContext
         | Patterns.PropertySet(exprOpt,propInfo,exprs,expr) -> 
             let res,tContext = transletaPropSet exprOpt propInfo exprs expr targetContext
-            res :> Node<_>,tContext            
+            res :> Node<_>,tContext
         | Patterns.Quote expr -> "Application is not suported:" + string expr|> failwith
         | Patterns.Sequential(expr1,expr2) -> "Application is not suported:" + string expr|> failwith
         | Patterns.TryFinally(tryExpr,finallyExpr) -> "Application is not suported:" + string expr|> failwith
@@ -185,7 +189,9 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "Application is not suported:" + string expr|> failwith
         | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
         | Patterns.Var var -> translateVar var :> Node<_>, targetContext
-        | Patterns.VarSet(var,expr) -> "Application is not suported:" + string expr|> failwith        
+        | Patterns.VarSet(var,expr) -> 
+            let res,tContext = translateVarSet var expr targetContext
+            res :> Node<_>,tContext
         | Patterns.WhileLoop(condExpr,bodyExpr) -> 
             let r,tContext = translateWhileLoop condExpr bodyExpr targetContext
             r :> Node<_>, tContext
