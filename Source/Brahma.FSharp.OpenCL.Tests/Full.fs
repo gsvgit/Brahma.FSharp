@@ -198,12 +198,26 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) ->
-                 while buf.[0] < 5 do
-                     let x = buf.[0] + 1
-                     buf.[0] <- x * x
+                    while buf.[0] < 5 do
+                        let x = buf.[0] + 1
+                        buf.[0] <- x * x
             @>
 
         let c = command:>Expr
         let kernel = provider.Compile<_1D,_> c
         
         checkResult kernel [|25;1;2;3|]
+
+    [<Test>]
+    member this.``Simple 1D.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let i = range.GlobalID0i
+                    buf.[i] <- i + i
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+        
+        checkResult kernel [|0;2;4;6|]
