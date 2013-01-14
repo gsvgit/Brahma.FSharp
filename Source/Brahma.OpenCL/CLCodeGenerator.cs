@@ -242,8 +242,8 @@ namespace Brahma.OpenCL
 
                         // TODO: Verify with method name, too
                         // Loop
-                        if ((newExpression.Arguments[i].Type == typeof(Func<int, IEnumerable<Set[]>>)) ||
-                            (newExpression.Arguments[i].Type == typeof(Func<IEnumerable<int>, IEnumerable<Set[]>>)))
+                        if ((newExpression.Arguments[i].Type == typeof(Func<int, IEnumerable<int>>)) ||
+                            (newExpression.Arguments[i].Type == typeof(Func<IEnumerable<int>, IEnumerable<int>>)))
                         {
                             Visit(newExpression.Arguments[i]);
                             continue;
@@ -290,7 +290,7 @@ namespace Brahma.OpenCL
                 switch (binary.NodeType)
                 {
                     case ExpressionType.LessThanOrEqual:
-                        if (binary.Type.IsConcreteGenericOf(typeof(Set<>)))
+                        if (binary.Type.IsConcreteGenericOf(typeof(int)))
                         {
                             _code.Append(" = ");
                             isResultAssignment = true;

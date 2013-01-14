@@ -69,21 +69,5 @@ namespace Brahma
         {
             return baseType.IsAssignableFrom(type);
         }
-
-        public static bool IsSet(this Type type)
-        {
-            bool done = false;
-            while (!done)
-            {
-                if (type.IsArray)
-                    type = type.GetElementType();
-                if (type.IsEnumerable())
-                    type = type.GetEnumeratorType();
-
-                done = !(type.IsArray || type.IsEnumerable());
-            }
-            
-            return type.DerivesFrom(typeof(Set));
-        }
     }
 }
