@@ -21,7 +21,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Brahma.Types;
 
 namespace Brahma.OpenCL
 {

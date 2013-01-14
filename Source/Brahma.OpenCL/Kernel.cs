@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using Brahma.OpenCL.Commands;
-using Brahma.Types;
 using OpenCL.Net;
 
 namespace Brahma.OpenCL

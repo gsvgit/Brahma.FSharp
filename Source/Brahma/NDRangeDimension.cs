@@ -15,8 +15,6 @@
 // terms of the License.
 #endregion
 
-using Brahma.Types;
-
 namespace Brahma
 {
     public interface INDRangeDimension

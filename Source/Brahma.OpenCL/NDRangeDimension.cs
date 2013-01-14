@@ -16,7 +16,6 @@
 #endregion
 
 using System;
-using Brahma.Types;
 
 namespace Brahma.OpenCL
 {

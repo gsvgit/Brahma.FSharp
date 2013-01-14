@@ -18,7 +18,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Brahma.Commands;
-using Brahma.Types;
 using OpenCL.Net;
 
 namespace Brahma.OpenCL.Commands
