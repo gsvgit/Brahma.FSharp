@@ -53,7 +53,7 @@ namespace Brahma.OpenCL.Commands
                             select ev.Value).ToArray();
 
             Cl.Event eventID;
-            Cl.ErrorCode error = Cl.EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint32)kernel.WorkDim, null,
+            Cl.ErrorCode error = Cl.EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint)kernel.WorkDim, null,
                 range.GlobalWorkSize, range.LocalWorkSize, (uint)waitList.Length, waitList.Length == 0 ? null : waitList.ToArray(), out eventID);
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);

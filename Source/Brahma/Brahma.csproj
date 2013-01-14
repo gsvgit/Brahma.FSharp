@@ -139,7 +139,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="KernelCallableAttribute.cs" />
-    <Compile Include="Math.cs" />
     <Compile Include="Mem.cs" />
     <Compile Include="MemberExpressionComparer.cs" />
     <Compile Include="NDRange.cs" />
@@ -149,18 +148,8 @@
     <Compile Include="Set.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="TypeExtensions.cs" />
-    <Compile Include="Types\float64.cs" />
-    <Compile Include="Types\int16.cs" />
-    <Compile Include="Types\int32.cs" />
-    <Compile Include="Types\float32.cs" />
     <Compile Include="Commands\WaitFor.cs" />
-    <Compile Include="Types\int64.cs" />
-    <Compile Include="Types\int8.cs" />
     <Compile Include="Types\IPrimitiveType.cs" />
-    <Compile Include="Types\uint16.cs" />
-    <Compile Include="Types\uint32.cs" />
-    <Compile Include="Types\uint64.cs" />
-    <Compile Include="Types\uint8.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

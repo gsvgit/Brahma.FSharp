@@ -55,11 +55,11 @@ namespace Brahma.OpenCL
 
             private static string TranslateType(Type type)
             {
-                if ((type == typeof(int32)) || (type == typeof(int)))
+                if ((type == typeof(int)) || (type == typeof(int)))
                     return "int";
                 if ((type == typeof(uint)))
                     return "uint";
-                if ((type == typeof(float32)) || (type == typeof(float)))
+                if ((type == typeof(float)) || (type == typeof(float)))
                     return "float";
                 
                 if ((type.IsConcreteGenericOf(typeof(Brahma.Buffer<>))) ||
@@ -380,9 +380,9 @@ namespace Brahma.OpenCL
                         // Figure out what kind of loop body this is
                         var loopBody = method.Arguments[2] as LambdaExpression;
 
-                        if (loopBody.Parameters[0].Type == typeof(IEnumerable<int32>))
+                        if (loopBody.Parameters[0].Type == typeof(IEnumerable<int>))
                             loopVar = GetLoopVar(loopBody);
-                        if (loopBody.Parameters[0].Type == typeof(int32))
+                        if (loopBody.Parameters[0].Type == typeof(int))
                             loopVar = loopBody.Parameters[0];
 
                         _code.AppendFormat("for (int {0} = ", loopVar.Name);

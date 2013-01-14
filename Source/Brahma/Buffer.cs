@@ -20,12 +20,12 @@ using Brahma.Types;
 
 namespace Brahma
 {
-    public abstract class Buffer<T>: Mem<T>, IDisposable //where T: struct, IMem
+    public abstract class Buffer<T>: Mem<T>, IDisposable
     {
         public abstract void Dispose();
 
         [KernelCallable]
-        public abstract T this[int32 index]
+        public abstract T this[int index]
         {
             get;
             set;

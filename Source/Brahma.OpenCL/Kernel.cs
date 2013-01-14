@@ -38,7 +38,7 @@ namespace Brahma.OpenCL
             set;
         }
 
-        int32 WorkDim
+        int WorkDim
         {
             get;
         }
@@ -69,7 +69,7 @@ namespace Brahma.OpenCL
             get; set;
         }
 
-        int32 ICLKernel.WorkDim
+        int ICLKernel.WorkDim
         {
             get { return ((INDRangeDimension)_range).Dimensions; }
         }

@@ -82,7 +82,7 @@ namespace Brahma.OpenCL
         }
 
 
-        int32 Brahma.INDRangeDimension.Dimensions
+        int Brahma.INDRangeDimension.Dimensions
         {
             get
             {
@@ -185,7 +185,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        int32 Brahma.INDRangeDimension.Dimensions
+        int Brahma.INDRangeDimension.Dimensions
         {
             get
             {
@@ -317,7 +317,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        int32 Brahma.INDRangeDimension.Dimensions
+        int Brahma.INDRangeDimension.Dimensions
         {
             get
             {

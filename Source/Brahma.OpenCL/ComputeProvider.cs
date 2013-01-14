@@ -276,16 +276,11 @@ namespace Brahma.OpenCL
         }
 
         [KernelCallable]
-        public Func<int, IEnumerable<Set[]>> Loop(int32 startValue, int32 count, Func<IEnumerable<int32>, IEnumerable<Set[]>> body)
+        public Func<int, IEnumerable<Set[]>> Loop(int startValue, int count, Func<IEnumerable<int>, IEnumerable<Set[]>> body)
         {
             throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
         }
 
-        [KernelCallable]
-        public Func<int, IEnumerable<Set[]>> Loop(int32 startValue, int32 count, Func<int32, IEnumerable<Set>> body)
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
 
         // TODO: Using a range variable inside the body of a function does not carry over to OpenCL (that variable is not in scope)
         [KernelCallable]
@@ -295,97 +290,6 @@ namespace Brahma.OpenCL
             throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
         }
 
-        [KernelCallable]
-        public Func<T, TResult> CompileFunction<T, TResult>(Func<T, TResult> function)
-            where T : IMem, IPrimitiveType
-            where TResult: IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, TResult> CompileFunction<T1, T2, TResult>(Func<T1, T2, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, TResult> CompileFunction<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, T4, TResult> CompileFunction<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where T4 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, T4, T5, TResult> CompileFunction<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where T4 : IMem, IPrimitiveType
-            where T5 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, T4, T5, T6, TResult> CompileFunction<T1, T2, T3, T4, T5, T6, TResult>(Func<T1, T2, T3, T4, T5, T6, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where T4 : IMem, IPrimitiveType
-            where T5 : IMem, IPrimitiveType
-            where T6 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, T4, T5, T6, T7, TResult> CompileFunction<T1, T2, T3, T4, T5, T6, T7, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where T4 : IMem, IPrimitiveType
-            where T5 : IMem, IPrimitiveType
-            where T6 : IMem, IPrimitiveType
-            where T7 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-        [KernelCallable]
-        public Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> CompileFunction<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> function)
-            where T1 : IMem, IPrimitiveType
-            where T2 : IMem, IPrimitiveType
-            where T3 : IMem, IPrimitiveType
-            where T4 : IMem, IPrimitiveType
-            where T5 : IMem, IPrimitiveType
-            where T6 : IMem, IPrimitiveType
-            where T7 : IMem, IPrimitiveType
-            where T8 : IMem, IPrimitiveType
-            where TResult : IMem, IPrimitiveType
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
 
         public override void Dispose()
         {

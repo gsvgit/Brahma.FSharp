@@ -12,7 +12,7 @@ namespace Brahma.Reference
             get;
         }
 
-        int32 WorkDim
+        int WorkDim
         {
             get;
         }

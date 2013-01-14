@@ -70,8 +70,8 @@ let Main () =
     let matrixMult = 
         <@
             fun (r:_2D) (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
-                let tx = r.GlobalID0i
-                let ty = r.GlobalID1i
+                let tx = r.GlobalID0
+                let ty = r.GlobalID1
                 let columns = 200
                 for k in 0 .. columns - 1 do
                     c.[ty * columns + tx] <- c.[ty * columns + tx] + (a.[ty * columns + k] * b.[k * columns + tx])

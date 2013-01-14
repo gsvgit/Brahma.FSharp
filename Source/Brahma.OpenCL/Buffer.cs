@@ -105,7 +105,7 @@ namespace Brahma.OpenCL
         }
 
         [KernelCallable]
-        public override T this[Types.int32 index]
+        public override T this[int index]
         {
             get
             {

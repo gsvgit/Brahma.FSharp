@@ -21,7 +21,7 @@ namespace Brahma
 {
     public interface INDRangeDimension
     {
-        int32 Dimensions
+        int Dimensions
         {
             get;
         }
