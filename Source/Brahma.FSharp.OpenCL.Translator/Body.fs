@@ -35,9 +35,20 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_lessthanorequal"     -> new Binop<_>(LessEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthan"         -> new Binop<_>(Great,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_greaterthanorequal"  -> new Binop<_>(GreatEQ,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_equality"          -> new Binop<_>(EQ,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_equality"            -> new Binop<_>(EQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_inequality"          -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
+    | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
+    | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
+    | "acos" | "asin" | "atan"
+    | "cos" | "cosh" | "exp"
+    | "floor" | "log" | "log10"
+    | "pow" | "sin" | "sinh" 
+    | "tan" | "tanh" as fName ->
+        if mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("System.Math")
+        then FunCall<_>(fName,args) :> Statement<_>,tContext
+        else failwithf "Seems, thet you use math function with name %s not from System.Math." fName
     | "setarray" -> 
         let item = new Item<_>(args.[0],args.[1])
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
