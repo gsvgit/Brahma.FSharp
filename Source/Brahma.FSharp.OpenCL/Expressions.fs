@@ -88,3 +88,9 @@ type Unop<'lang>(op:UOp<'lang>,expr:Expression<'lang>) =
     override this.Children = []
     member this.Expr = expr
     member this.Op = op
+
+type Cast<'lang>(expr:Expression<'lang>,_type:Type<'lang>)=
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Expr = expr
+    member this.Type = _type

@@ -83,6 +83,11 @@ and private printUnOp (uo:Unop<'lang>) =
     | UOp.Incr -> Print uo.Expr ++ wordL "++"
     | UOp.Decr -> Print uo.Expr ++ wordL "--"
 
+and private printCast (c:Cast<'lang>) =
+    let t = Types.Print c.Type
+    let expr = Print c.Expr
+    (t |> bracketL) ++ expr
+
 and Print (expr:Expression<'lang>) =
     match expr with
     | :? Const<'lang> as c -> printConst c
@@ -92,4 +97,5 @@ and Print (expr:Expression<'lang>) =
     | :? Binop<'lang> as binop -> printBinop binop
     | :? FunCall<'lang> as fc -> printFunCall fc
     | :? Unop<'lang> as uo -> printUnOp uo
+    | :? Cast<'lang> as c -> printCast c
     | c -> failwithf "Printer. Unsupported expression: %A" c
