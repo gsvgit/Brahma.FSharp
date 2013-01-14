@@ -37,8 +37,8 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
     let cRows, cCols = GetOutputMatrixDimensions aRows aCols bRows bCols
     for i in 0 .. cRows - 1 do
         for j in 0 .. cCols - 1 do
-            for k in 0 .. aCols - 1 do            
-                c.[i * cCols + j] <- c.[i * cCols + j] + a.[i * aCols + k] * b.[k * bCols + j]            
+            for k in 0 .. aCols - 1 do
+                c.[i * cCols + j] <- c.[i * cCols + j] + a.[i * aCols + k] * b.[k * bCols + j]
 
 let Main () =
 
@@ -79,7 +79,7 @@ let Main () =
 
     printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
     let cNormal = Array.zeroCreate (rows * columns)
-    for i in 0 .. iterations - 1 do    
+    for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
         Multiply aValues rows columns bValues rows columns cNormal
         Timer<string>.Global.Lap(".NET")
@@ -92,7 +92,7 @@ let Main () =
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
-        commandQueue <- 
+        commandQueue <-
             commandQueue.Add(kernel.Run(new _2D(rows, columns, localWorkSize, localWorkSize), aBuffer, bBuffer, cBuffer)).Finish()
             :?> CommandQueue
         Timer<string>.Global.Lap("OpenCL")
@@ -106,20 +106,19 @@ let Main () =
     for i in 0 .. rows * columns - 1 do
         if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
         then
-            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i]
-                                                         (System.Math.Abs(cParallel.[i] - cNormal.[i]))
+            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
             |> failwith
 
     printfn "done."
 
-    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A" 
-    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A" 
+    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
+    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
 
     aBuffer.Dispose()
     bBuffer.Dispose()
     cBuffer.Dispose()
 
     commandQueue.Dispose()
-    provider.Dispose()   
+    provider.Dispose()
 
-do Main()        
+do Main()
