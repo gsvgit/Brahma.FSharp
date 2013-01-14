@@ -233,7 +233,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) ->
-                    let i = range.GlobalID0i
+                    let i = range.GlobalID0
                     buf.[i] <- i + i
             @>
 
@@ -247,7 +247,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (inBuf:array<int>) (outBuf:array<int>) ->
-                    let i = range.GlobalID0i
+                    let i = range.GlobalID0
                     outBuf.[i] <- inBuf.[i]
             @>
 
@@ -261,7 +261,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<float32>) ->
-                    let i = range.GlobalID0i
+                    let i = range.GlobalID0
                     buf.[i] <- buf.[i] * buf.[i]
             @>
 
@@ -275,7 +275,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<float32>) ->
-                    let i = range.GlobalID0i
+                    let i = range.GlobalID0
                     buf.[i] <- float32(System.Math.Sin (float buf.[i]))
             @>
 
