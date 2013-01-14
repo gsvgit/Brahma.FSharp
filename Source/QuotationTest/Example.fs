@@ -13,13 +13,13 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-open Brahma.Types
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Wrapper
 
 open Microsoft.FSharp.Quotations
+open System
 
 let deviceType = Cl.DeviceType.Default
 let platformName = "*"
@@ -33,10 +33,20 @@ printfn "Using %A" provider
 
 let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
 
-let main () = 
+let fn ([<ParamArray>] x) = x 
+
+type X() =
+    member this.F([<ParamArray>] x) = x 
+
+let main () =     
     let l = 10000
     let a = [|1..l|]
     let aBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,a)
+    let bBuf = new Buffer<float>(provider, Operations.ReadWrite, Memory.Device,[||])
+    let xobj = new X()
+//    fn (aBuf, bBuf)
+  //  xobj.F(aBuf, bBuf)
+
     let command = 
         <@ 
             fun (range:_1D) (buf1:array<int>) -> 
@@ -59,6 +69,7 @@ let main () =
                 //fun (range:_1D) (buf:array<int>) ->
                  while buf1.[0] < 5 do
                      let x = buf1.[0] + 1
+                     let c = float32(System.Math.Cos(float x))
                      buf1.[0] <- x * x
         @>
 
