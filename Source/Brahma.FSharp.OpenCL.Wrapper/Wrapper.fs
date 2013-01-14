@@ -24,11 +24,11 @@ open System
 type CLCodeGenerator with
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
-        let ast = codeGenerator.Translate(lambda)
+        let ast = codeGenerator.Translate lambda
         let code = Printer.AST.Print ast
-        kernel.Source <- kernel.Source.Append(code)
-        kernel.SetClosures([||])
-        kernel.SetParameters([])
+        kernel.Source <- kernel.Source.Append code
+        kernel.SetClosures [||]
+        kernel.SetParameters []
         
 type ComputeProvider with
     member this.CompileQuery<'T,'TRange, 'T1 
@@ -43,7 +43,7 @@ type ComputeProvider with
         let str = (kernel :> ICLKernel).Source.ToString()    
         let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|str|], null)
         let _devices = Array.ofSeq  this.Devices
-        let error = Cl.BuildProgram(program, _devices.Length |> uint32, _devices, this.CompileOptionsStr, null, IntPtr.Zero);
+        let error = Cl.BuildProgram(program, _devices.Length |> uint32, _devices, this.CompileOptionsStr, null, IntPtr.Zero)
         if error <> Cl.ErrorCode.Success
         then 
             let s = _devices |> Array.map (fun device -> Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log ) |> fst |> string)
@@ -62,8 +62,8 @@ type ComputeProvider with
                                     and 'TRange : (new: unit -> 'TRange)>
             (query: Expr, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions(options)        
-        this.CompileQuery<Kernel<'TRange, 'T1>,'TRange,'T1>(query)
+        this.SetCompileOptions options
+        this.CompileQuery<Kernel<'TRange, 'T1>,'TRange,'T1> query
 
     member this.Compile<'TRange,'T1, 'T2
                                     when 'T1 :> Brahma.IMem
@@ -74,8 +74,8 @@ type ComputeProvider with
                                     and 'TRange : (new: unit -> 'TRange)>
             (query: Expr, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions(options)        
-        this.CompileQuery<Kernel<'TRange, 'T1, 'T2>,'TRange,'T1>(query)
+        this.SetCompileOptions options
+        this.CompileQuery<Kernel<'TRange, 'T1, 'T2>,'TRange,'T1> query
 
     member this.Compile<'TRange,'T1, 'T2 , 'T3
                                     when 'T1 :> Brahma.IMem
@@ -87,6 +87,6 @@ type ComputeProvider with
                                     and 'TRange : (new: unit -> 'TRange)>
             (query: Expr, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions(options)        
-        this.CompileQuery<Kernel<'TRange, 'T1, 'T2, 'T3>,'TRange,'T1>(query)
+        this.SetCompileOptions options
+        this.CompileQuery<Kernel<'TRange, 'T1, 'T2, 'T3>,'TRange,'T1> query
     
