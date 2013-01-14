@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open System.IO
-//open Brahma.Types
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
@@ -20,17 +19,16 @@ type Translator() =
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
-        with 
+        with
         | ex -> failwith ex.Message
-
 
     let checkResult1Generic inArray (kernel:Kernel<_,Buffer<'t>>) getExpected =
         let l = Array.length inArray
         let a = inArray        
-        let inBuf = new Buffer<'t>(provider, Operations.ReadWrite, Memory.Device,a)       
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
+        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device,a)       
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
         let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf)).Finish()
-        let r = Array.zeroCreate(l)
+        let r = Array.zeroCreate l
         let cq2 = commandQueue.Add(inBuf.Read(0, l, r)).Finish()
         let expected = getExpected inArray
         Assert.AreEqual(expected ,r)
@@ -50,9 +48,9 @@ type Translator() =
         let b = Array.zeroCreate l
         let inBuf = new Buffer<int>(provider, Operations.ReadOnly, Memory.Device,a)
         let outBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,b)
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
         let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf, outBuf)).Finish()
-        let r = Array.zeroCreate(l)
+        let r = Array.zeroCreate l
         let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
         Assert.AreEqual(expected,r)
         commandQueue.Dispose()            
