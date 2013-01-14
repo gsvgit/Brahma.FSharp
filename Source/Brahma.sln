@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Web
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma", "Brahma\Brahma.csproj", "{0E731438-DD9E-4444-950D-EF2DE31D3E97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma.OpenCL", "Brahma.OpenCL\Brahma.OpenCL.csproj", "{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{4754DB5D-7261-453A-87DF-F2AB068AE6AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E54DCF27-1592-467F-8E05-F0B9745111E0}"
@@ -33,6 +31,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Tests"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsMatrixMultiply", "FsMatrixMultiply\FsMatrixMultiply.fsproj", "{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma.OpenCL", "Brahma.OpenCL\Brahma.OpenCL.csproj", "{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,17 +54,6 @@ Global
 		{0E731438-DD9E-4444-950D-EF2DE31D3E97}.Release|x64.ActiveCfg = Release|x64
 		{0E731438-DD9E-4444-950D-EF2DE31D3E97}.Release|x64.Build.0 = Release|x64
 		{0E731438-DD9E-4444-950D-EF2DE31D3E97}.Release|x86.ActiveCfg = Release|Any CPU
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x64.ActiveCfg = Debug|x64
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x64.Build.0 = Debug|x64
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x86.ActiveCfg = Debug|x86
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x86.Build.0 = Debug|x86
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x64.ActiveCfg = Release|x64
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x64.Build.0 = Release|x64
-		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x86.ActiveCfg = Release|Any CPU
 		{C46DE069-F581-4AFE-BE34-387C5D46DDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C46DE069-F581-4AFE-BE34-387C5D46DDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C46DE069-F581-4AFE-BE34-387C5D46DDEF}.Debug|x64.ActiveCfg = Debug|x64
@@ -152,6 +141,18 @@ Global
 		{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}.Release|x64.ActiveCfg = Release|Any CPU
 		{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x64.ActiveCfg = Debug|x64
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x64.Build.0 = Debug|x64
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x86.ActiveCfg = Debug|x86
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Debug|x86.Build.0 = Debug|x86
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x64.ActiveCfg = Release|x64
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x64.Build.0 = Release|x64
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x86.ActiveCfg = Release|x86
+		{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
