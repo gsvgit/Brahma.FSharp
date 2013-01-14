@@ -24,27 +24,25 @@ type Translator() =
         | ex -> failwith ex.Message
 
 
-    let checkResult (kernel:Kernel<_,_>) expected =
-        let l = 4
-        let a = [|0 .. l-1|]
-        let aBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,a)
+    let checkResult1Generic inArray (kernel:Kernel<_,Buffer<'t>>) getExpected =
+        let l = Array.length inArray
+        let a = inArray        
+        let inBuf = new Buffer<'t>(provider, Operations.ReadWrite, Memory.Device,a)       
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
-        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
+        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf)).Finish()
         let r = Array.zeroCreate(l)
-        let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
-        Assert.AreEqual(expected,r)
-        commandQueue.Dispose();
+        let cq2 = commandQueue.Add(inBuf.Read(0, l, r)).Finish()
+        let expected = getExpected inArray
+        Assert.AreEqual(expected ,r)
+        commandQueue.Dispose()
+
+    let checkResult (kernel:Kernel<_,_>) expected =        
+        let a = [|0 .. 3|]
+        checkResult1Generic a kernel (fun _ -> expected)
 
     let checkResultFloat (kernel:Kernel<_,_>) expected =
-        let l = 4
-        let a = Array.init l (fun i -> float32 i)
-        let aBuf = new Buffer<float32>(provider, Operations.ReadWrite, Memory.Device,a)
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
-        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
-        let r = Array.zeroCreate(l)
-        let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
-        Assert.AreEqual(expected,r)
-        commandQueue.Dispose();
+        let a = Array.init 4 (fun i -> float32 i)        
+        checkResult1Generic a kernel (fun _ -> expected)
 
     let checkResult2 (kernel:Kernel<_,_,_>) expected =
         let l = 4
@@ -57,8 +55,8 @@ type Translator() =
         let r = Array.zeroCreate(l)
         let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
         Assert.AreEqual(expected,r)
-        commandQueue.Dispose();
-        
+        commandQueue.Dispose()            
+
 
     [<Test>]
     member this.``Array item set``() = 
@@ -273,3 +271,20 @@ type Translator() =
         let kernel = provider.Compile<_1D,_> c
         
         checkResultFloat kernel [|0.0;1.0;4.0;9.0|]
+
+    [<Test>]
+    member this.``Math sin``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<float32>) ->
+                    let i = range.GlobalID0i
+                    buf.[i] <- float32(System.Math.Sin (float buf.[i]))
+            @>
+
+        let c = command:>Expr
+        let kernel = provider.Compile<_1D,_> c
+
+        let getExpected _ = [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]
+        
+        checkResult1Generic [|0.0f;1.0f;2.0f;3.0f|] kernel getExpected
+
