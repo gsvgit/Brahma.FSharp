@@ -22,16 +22,16 @@ type Translator() =
         with
         | ex -> failwith ex.Message
 
-    let checkResult1Generic inArray (kernel:Kernel<_,Buffer<'t>>) getExpected =
+    let checkResult1Generic inArray (kernel:Kernel<_,_>) getExpected =
         let l = Array.length inArray
         let a = inArray        
-        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device,a)       
+        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, a)
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf)).Finish()
+        let cq = commandQueue.Add(kernel.Run(new _1D(l, 1), inBuf)).Finish()
         let r = Array.zeroCreate l
         let cq2 = commandQueue.Add(inBuf.Read(0, l, r)).Finish()
         let expected = getExpected inArray
-        Assert.AreEqual(expected ,r)
+        Assert.AreEqual(expected, r)
         commandQueue.Dispose()
 
     let checkResult (kernel:Kernel<_,_>) expected =        
@@ -63,7 +63,7 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 1
             @>
-        
+
         let kernel = provider.Compile command
         
         checkResult kernel [|1;1;2;3|]
