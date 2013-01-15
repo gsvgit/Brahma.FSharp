@@ -32,7 +32,7 @@ type Translator() =
         Assert.AreEqual (all1.Length, all2.Length)
         Assert.IsTrue(Array.forall2 (=) all1 all2)
 
-    let checkCode kernel outFile expected =
+    let checkCode (kernel:Kernel<_1D,_>) outFile expected =
         (kernel :> ICLKernel).Source.ToString() |> (fun text -> printfn "%s" text;  System.IO.File.WriteAllText(outFile,text))
         filesAreEqual outFile (System.IO.Path.Combine(basePath,expected))
 
@@ -45,9 +45,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 0
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkCode kernel "Array.Item.Set.gen" "Array.Item.Set.ocl"
 
@@ -60,8 +59,7 @@ type Translator() =
                     buf.[0] <- x
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Binding.gen" "Binding.ocl"
 
@@ -72,9 +70,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 1 + 2
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkCode kernel "Binop.Plus.gen" "Binop.Plus.ocl"
 
@@ -86,8 +83,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "If.Then.gen" "If.Then.ocl"
 
@@ -99,8 +95,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "If.Then.Else.gen" "If.Then.Else.ocl"
 
@@ -112,8 +107,7 @@ type Translator() =
                     for i in 1..3 do buf.[0] <- i
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "For.Integer.Loop.gen" "For.Integer.Loop.ocl"
 
@@ -127,8 +121,7 @@ type Translator() =
                     buf.[0] <- y
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Sequential.Bindings.gen" "Sequential.Bindings.ocl"
 
@@ -145,8 +138,7 @@ type Translator() =
                     buf.[0] <- i
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Binary.Operations.Math.gen" "Binary.Operations.Math.ocl"
 
@@ -164,8 +156,7 @@ type Translator() =
                         buf.[0] <- i
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Binding.In.IF.gen" "Binding.In.IF.ocl"
 
@@ -179,8 +170,7 @@ type Translator() =
                         buf.[0] <- x
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
        
@@ -193,8 +183,7 @@ type Translator() =
                         buf.[0] <- buf.[0] + 1
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Simple.WHILE.gen" "Simple.WHILE.ocl"
 
@@ -208,8 +197,7 @@ type Translator() =
                      buf.[0] <- x * x
             @>
 
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        let kernel = provider.Compile command
         
         checkCode kernel "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
 

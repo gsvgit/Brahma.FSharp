@@ -63,9 +63,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 1
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|1;1;2;3|]
 
@@ -77,9 +76,8 @@ type Translator() =
                     let x = 1
                     buf.[0] <- x
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|1;1;2;3|]
 
@@ -90,9 +88,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 1 + 2
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|3;1;2;3|]
 
@@ -103,9 +100,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     if 0 = 2 then buf.[0] <- 1
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|0;1;2;3|]
 
@@ -116,9 +112,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|2;1;2;3|]
 
@@ -129,9 +124,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     for i in 1..3 do buf.[i] <- 0
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|0;0;0;0|]
 
@@ -144,9 +138,8 @@ type Translator() =
                     let y = x + 1
                     buf.[0] <- y
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|2;1;2;3|]
 
@@ -163,9 +156,8 @@ type Translator() =
                         let i = 2
                         buf.[0] <- i
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|2;1;2;3|]
 
@@ -178,9 +170,8 @@ type Translator() =
                         let x = i * i
                         buf.[0] <- x
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|9;1;2;3|] 
 
@@ -192,9 +183,8 @@ type Translator() =
                  while buf.[0] < 5 do
                      buf.[0] <- buf.[0] + 1
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|5;1;2;3|]
 
@@ -207,9 +197,8 @@ type Translator() =
                      while buf.[i] < 10 do
                          buf.[i] <- buf.[i] * buf.[i] + 1
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|26;26;26;10|]
 
@@ -222,9 +211,8 @@ type Translator() =
                         let x = buf.[0] + 1
                         buf.[0] <- x * x
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|25;1;2;3|]
 
@@ -236,9 +224,8 @@ type Translator() =
                     let i = range.GlobalID0
                     buf.[i] <- i + i
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult kernel [|0;2;4;6|]
 
@@ -250,9 +237,8 @@ type Translator() =
                     let i = range.GlobalID0
                     outBuf.[i] <- inBuf.[i]
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_,_> c
+        
+        let kernel = provider.Compile command
         
         checkResult2 kernel [|0;1;2;3|]
 
@@ -264,9 +250,8 @@ type Translator() =
                     let i = range.GlobalID0
                     buf.[i] <- buf.[i] * buf.[i]
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
         
         checkResultFloat kernel [|0.0;1.0;4.0;9.0|]
 
@@ -278,9 +263,8 @@ type Translator() =
                     let i = range.GlobalID0
                     buf.[i] <- float32(System.Math.Sin (float buf.[i]))
             @>
-
-        let c = command:>Expr
-        let kernel = provider.Compile<_1D,_> c
+        
+        let kernel = provider.Compile command
 
         let getExpected _ = [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]
         

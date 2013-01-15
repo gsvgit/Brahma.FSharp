@@ -72,9 +72,8 @@ let main () =
                      let c = float32(System.Math.Cos(float x))
                      buf1.[0] <- x * x
         @>
-
-    let c = command:>Expr
-    let kernel = provider.Compile<_1D,_>(c)
+    
+    let kernel = provider.Compile command
     let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
     let r = Array.zeroCreate(l)
     let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()

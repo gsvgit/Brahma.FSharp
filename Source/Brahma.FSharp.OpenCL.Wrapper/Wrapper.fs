@@ -31,13 +31,7 @@ type CLCodeGenerator with
         kernel.SetParameters []
         
 type ComputeProvider with
-    member this.CompileQuery<'T,'TRange, 'T1 
-                                        when 'T :> ICLKernel
-                                        and 'T1 :> Brahma.IMem 
-                                        and 'TRange : struct 
-                                        and 'TRange :> Brahma.OpenCL.INDRangeDimension
-                                        and 'TRange :> ValueType 
-                                        and 'TRange : (new: unit -> 'TRange)>(lambda:Expr) =
+    member this.CompileQuery<'T when 'T :> ICLKernel>(lambda:Expr) =
         let kernel = System.Activator.CreateInstance<'T>()
         let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel)
         let str = (kernel :> ICLKernel).Source.ToString()    
@@ -55,38 +49,21 @@ type ComputeProvider with
             
         kernel            
                     
-    member this.Compile<'TRange,'T1 when 'T1 :> Brahma.IMem
-                                    and 'TRange : struct
-                                    and 'TRange :> Brahma.OpenCL.INDRangeDimension
-                                    and 'TRange :> ValueType
-                                    and 'TRange : (new: unit -> 'TRange)>
-            (query: Expr, ?_options:CompileOptions) =
+    member this.Compile
+            (query: Expr<'TRange -> array<_> -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, 'T1>,'TRange,'T1> query
+        this.CompileQuery<Kernel<'TRange, _>> query
 
-    member this.Compile<'TRange,'T1, 'T2
-                                    when 'T1 :> Brahma.IMem
-                                    and 'T2 :> Brahma.IMem                                    
-                                    and 'TRange : struct 
-                                    and 'TRange :> Brahma.OpenCL.INDRangeDimension
-                                    and 'TRange :> ValueType 
-                                    and 'TRange : (new: unit -> 'TRange)>
-            (query: Expr, ?_options:CompileOptions) =
+    member this.Compile
+            (query: Expr<'TRange -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, 'T1, 'T2>,'TRange,'T1> query
+        this.CompileQuery<Kernel<'TRange, _, _>> query
 
-    member this.Compile<'TRange,'T1, 'T2 , 'T3
-                                    when 'T1 :> Brahma.IMem
-                                    and 'T2 :> Brahma.IMem
-                                    and 'T3 :> Brahma.IMem
-                                    and 'TRange : struct 
-                                    and 'TRange :> Brahma.OpenCL.INDRangeDimension
-                                    and 'TRange :> ValueType 
-                                    and 'TRange : (new: unit -> 'TRange)>
-            (query: Expr, ?_options:CompileOptions) =
+    member this.Compile
+            (query: Expr<'TRange -> array<_> -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, 'T1, 'T2, 'T3>,'TRange,'T1> query
+        this.CompileQuery<Kernel<'TRange, _, _, _>> query
     

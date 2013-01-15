@@ -85,9 +85,8 @@ let Main () =
         Timer<string>.Global.Lap(".NET")
 
     printfn "done."
-
-    let c = matrixMult:>Expr
-    let kernel = provider.Compile<_2D,_,_,_>(c)
+    
+    let kernel = provider.Compile matrixMult
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
     for i in 0 .. iterations - 1 do
