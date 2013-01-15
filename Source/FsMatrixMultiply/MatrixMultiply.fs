@@ -84,11 +84,11 @@ let Main () =
         Multiply aValues rows columns bValues rows columns cNormal
         Timer<string>.Global.Lap(".NET")
 
-    printfn "done."
-    
-    let kernel = provider.Compile matrixMult
+    printfn "done."        
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
+
+    let kernel = provider.Compile matrixMult
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
         commandQueue <-
