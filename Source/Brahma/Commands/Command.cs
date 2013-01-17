@@ -46,16 +46,6 @@ namespace Brahma.Commands
 
         public abstract void Execute(object sender);
 
-        public static Command operator <=(string name, Command command)
-        {
-            command._name = name;
-            return command;
-        }
-
-        public static Command operator >=(string name, Command command)
-        {
-            throw new NotSupportedException();
-        }
     }
 
     public interface ICommand

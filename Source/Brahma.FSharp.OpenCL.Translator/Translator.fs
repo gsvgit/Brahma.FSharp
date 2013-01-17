@@ -27,7 +27,10 @@ type FSQuotationToOpenCLTranslator() =
     let buildFullAst vars partialAst context =
         let formalArgs = 
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
-            |> List.map (fun v -> new FunFormalArg<_>(true, v.Name, Type.Translate(v.Type)))
+            |> List.map 
+                (fun v -> 
+                    let t = Type.Translate(v.Type)
+                    new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         new AST<_>([mainKernelFun])
 

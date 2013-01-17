@@ -42,14 +42,14 @@ let main () =
     let l = 10000
     let a = [|1..l|]
     let aBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,a)
-    let bBuf = new Buffer<float>(provider, Operations.ReadWrite, Memory.Device,[||])
+   // let bBuf = new Buffer<float>(provider, Operations.ReadWrite, Memory.Device,[||])
     let xobj = new X()
 //    fn (aBuf, bBuf)
   //  xobj.F(aBuf, bBuf)
 
     let command = 
         <@ 
-            fun (range:_1D) (buf1:array<int>) -> 
+            fun (range:_1D) (x) (buf1:array<int>) -> 
                 (*let x = range.GlobalID0i
                 if (x > 2 && x < 5) || (x > 10 && x < 15) 
                 then
@@ -66,15 +66,13 @@ let main () =
 //                while (i < 10) do 
 //                    buf1.[x] <- buf1.[x] + 1
                     //i <- i + 1
-                //fun (range:_1D) (buf:array<int>) ->
-                 while buf1.[0] < 5 do
-                     let x = buf1.[0] + 1
-                     let c = float32(System.Math.Cos(float x))
-                     buf1.[0] <- x * x
+                //fun (range:_1D) (buf:array<int>) ->                 
+                let y = buf1.[1] + x                
+                buf1.[0] <- y
         @>
     
     let kernel = provider.Compile command
-    let cq = commandQueue.Add(kernel.Run(new _1D(l,1), aBuf)).Finish()
+    let cq = commandQueue.Add(kernel.Run(new _1D(l,1),2, aBuf)).Finish()
     let r = Array.zeroCreate(l)
     let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
     ()

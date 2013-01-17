@@ -13,7 +13,8 @@ open Microsoft.FSharp.Quotations
 
 [<TestFixture>]
 type Translator() =
-    
+    let intArray4 = [|0..3|]
+    let floatArray4 = Array.init 4 (fun i -> float32 i)
     let deviceType = Cl.DeviceType.Default
     let platformName = "*"
 
@@ -34,26 +35,48 @@ type Translator() =
         Assert.AreEqual(expected, r)
         commandQueue.Dispose()
 
-    let checkResult (kernel:Kernel<_,_>) expected =        
-        let a = [|0 .. 3|]
-        checkResult1Generic a kernel (fun _ -> expected)
-
-    let checkResultFloat (kernel:Kernel<_,_>) expected =
-        let a = Array.init 4 (fun i -> float32 i)        
-        checkResult1Generic a kernel (fun _ -> expected)
-
-    let checkResult2 (kernel:Kernel<_,_,_>) expected =
-        let l = 4
-        let a = [|0 .. l-1|]
-        let b = Array.zeroCreate l
-        let inBuf = new Buffer<int>(provider, Operations.ReadOnly, Memory.Device,a)
-        let outBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,b)
+    let checkResult2i (kernel:Kernel<_,_,_>) inArg outArray getExpected =
+        let l = Array.length outArray
+        let a = outArray        
+        let outBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, a)
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf, outBuf)).Finish()
+        let cq = commandQueue.Add(kernel.Run(new _1D(l, 1), inArg, outBuf)).Finish()
         let r = Array.zeroCreate l
         let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
-        Assert.AreEqual(expected,r)
-        commandQueue.Dispose()            
+        let expected = getExpected inArg
+        Assert.AreEqual(expected, r)
+        commandQueue.Dispose()
+
+    let checkResult2 (kernel:Kernel<_,_,_>) inArray outArray getExpected =        
+        let outBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, outArray)
+        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, inArray)
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+        let cq = commandQueue.Add(kernel.Run(new _1D(inArray.Length, 1), inBuf, outBuf)).Finish()
+        let r = Array.zeroCreate outArray.Length
+        let cq2 = commandQueue.Add(outBuf.Read(0, outArray.Length, r)).Finish()
+        let expected = getExpected inArray
+        Assert.AreEqual(expected, r)
+        commandQueue.Dispose()
+
+    let checkResult (kernel:Kernel<_,_>) arg expected =        
+        checkResult1Generic arg kernel (fun _ -> expected)
+
+//    let checkResult (kernel:Kernel<_,_>) expected =
+//        let a = Array.init 4 (fun i -> float32 i)        
+//        checkResult1Generic a kernel (fun _ -> expected)
+
+//    let checkResult2 (kernel:Kernel<_,_,_>) expected =
+//        let l = 4
+//        let a = [|0 .. l-1|]
+//        let b = Array.zeroCreate l
+//        let inBuf = new Buffer<int>(provider, Operations.ReadOnly, Memory.Device,a)
+//        let outBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,b)
+//        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+//        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf, outBuf)).Finish()
+//        let r = Array.zeroCreate l
+//        let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
+//        Assert.AreEqual(expected,r)
+//        commandQueue.Dispose()            
 
 
     [<Test>]
@@ -66,7 +89,7 @@ type Translator() =
 
         let kernel = provider.Compile command
         
-        checkResult kernel [|1;1;2;3|]
+        checkResult kernel intArray4 [|1;1;2;3|]
 
     [<Test>]
     member this.Binding() = 
@@ -79,7 +102,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|1;1;2;3|]
+        checkResult kernel intArray4 [|1;1;2;3|]
 
     [<Test>]
     member this.``Binop plus``() = 
@@ -91,7 +114,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|3;1;2;3|]
+        checkResult kernel intArray4 [|3;1;2;3|]
 
     [<Test>]
     member this.``If Then``() = 
@@ -103,7 +126,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|0;1;2;3|]
+        checkResult kernel intArray4 [|0;1;2;3|]
 
     [<Test>]
     member this.``If Then Else``() = 
@@ -115,7 +138,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|2;1;2;3|]
+        checkResult kernel intArray4 [|2;1;2;3|]
 
     [<Test>]
     member this.``For Integer Loop``() = 
@@ -127,7 +150,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|0;0;0;0|]
+        checkResult kernel intArray4 [|0;0;0;0|]
 
     [<Test>]
     member this.``Sequential bindings``() = 
@@ -141,7 +164,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|2;1;2;3|]
+        checkResult kernel intArray4 [|2;1;2;3|]
 
     [<Test>]
     member this.``Binding in IF.``() = 
@@ -159,7 +182,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|2;1;2;3|]
+        checkResult kernel intArray4 [|2;1;2;3|]
 
     [<Test>]
     member this.``Binding in FOR.``() = 
@@ -173,7 +196,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|9;1;2;3|] 
+        checkResult kernel intArray4 [|9;1;2;3|] 
 
     [<Test>]
     member this.``WHILE loop simple test.``() = 
@@ -186,7 +209,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|5;1;2;3|]
+        checkResult kernel intArray4 [|5;1;2;3|]
 
     [<Test>]
     member this.``WHILE in FOR.``() = 
@@ -200,7 +223,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|26;26;26;10|]
+        checkResult kernel intArray4 [|26;26;26;10|]
 
     [<Test>]
     member this.``Binding in WHILE.``() = 
@@ -214,7 +237,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|25;1;2;3|]
+        checkResult kernel intArray4 [|25;1;2;3|]
 
     [<Test>]
     member this.``Simple 1D.``() = 
@@ -227,7 +250,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult kernel [|0;2;4;6|]
+        checkResult kernel intArray4 [|0;2;4;6|]
 
     [<Test>]
     member this.``Simple 1D with copy.``() = 
@@ -240,7 +263,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResult2 kernel [|0;1;2;3|]
+        checkResult2 kernel [|0;1;2;3|] [|0;0;0;0|] (fun _ -> [|0;1;2;3|])
 
     [<Test>]
     member this.``Simple 1D float.``() = 
@@ -253,7 +276,7 @@ type Translator() =
         
         let kernel = provider.Compile command
         
-        checkResultFloat kernel [|0.0;1.0;4.0;9.0|]
+        checkResult kernel floatArray4 [|0.0;1.0;4.0;9.0|]
 
     [<Test>]
     member this.``Math sin``() = 
@@ -265,8 +288,19 @@ type Translator() =
             @>
         
         let kernel = provider.Compile command
-
-        let getExpected _ = [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]
-        
+        let getExpected _ = [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]        
         checkResult1Generic [|0.0f;1.0f;2.0f;3.0f|] kernel getExpected
+
+    [<Test>]
+    member this.``Int as arg``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) x (buf:array<int>) ->
+                    let i = range.GlobalID0
+                    buf.[i] <- x + x
+            @>
+        
+        let kernel = provider.Compile command
+        let getExpected _ = [|4;4;4;4|]
+        checkResult2i kernel 2 [|0;1;2;3|] getExpected        
 

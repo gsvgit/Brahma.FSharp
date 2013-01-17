@@ -21,6 +21,9 @@ open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
 
+//type t () =
+//    inherit ``[]``<int>()
+
 type CLCodeGenerator with
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
@@ -50,20 +53,26 @@ type ComputeProvider with
         kernel            
                     
     member this.Compile
-            (query: Expr<'TRange -> array<_> -> unit>, ?_options:CompileOptions) =
+            (query: Expr<'TRange -> _ -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
         this.CompileQuery<Kernel<'TRange, _>> query
 
     member this.Compile
-            (query: Expr<'TRange -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
+            (query: Expr<'TRange -> _ -> _ -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
         this.CompileQuery<Kernel<'TRange, _, _>> query
 
     member this.Compile
-            (query: Expr<'TRange -> array<_> -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
+            (query: Expr<'TRange -> _ -> _ -> _ -> unit>, ?_options:CompileOptions) =
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
         this.CompileQuery<Kernel<'TRange, _, _, _>> query
+
+    member this.Compile
+            (query: Expr<'TRange -> _ -> _ -> _ -> _ -> unit>, ?_options:CompileOptions) =
+        let options = defaultArg _options this.DefaultOptions_p
+        this.SetCompileOptions options
+        this.CompileQuery<Kernel<'TRange, _, _, _, _>> query
     

@@ -25,11 +25,16 @@ namespace Brahma.OpenCL.Commands
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
         where TRange: struct, INDRangeDimension
     {
-        protected override void SetupArgument(object sender, int index, IMem argument)
+        protected override void SetupArgument(object sender, int index, object arg)
         {
             var kernel = Kernel as ICLKernel;
-            
-            Cl.ErrorCode error = Cl.SetKernelArg(kernel.ClKernel, (uint)index, argument.Size, argument.Data);
+            var isIMem = arg is IMem;            
+            var size = isIMem ? ((IMem)arg).Size : (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);
+            var value = isIMem ? ((IMem)arg).Data : arg;
+            Cl.ErrorCode error = 
+                    Cl.SetKernelArg(kernel.ClKernel, (uint)index
+                    , size
+                    , value);
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);
         }
@@ -67,7 +72,7 @@ namespace Brahma.OpenCL.Commands
     public sealed class Run<TRange>: RunBase<TRange>, ICommand<TRange>
         where TRange: struct, INDRangeDimension
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -82,10 +87,9 @@ namespace Brahma.OpenCL.Commands
     }
 
     public sealed class Run<TRange, T1> : RunBase<TRange>, ICommand<TRange, T1>
-        where TRange : struct, INDRangeDimension
-        where T1: IMem
+        where TRange : struct, INDRangeDimension        
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -107,10 +111,9 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2> : RunBase<TRange>, ICommand<TRange, T1, T2>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
+
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -139,11 +142,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3> : RunBase<TRange>, ICommand<TRange, T1, T2, T3>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -179,12 +179,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3, T4> : RunBase<TRange>, ICommand<TRange, T1, T2, T3, T4>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
-        where T4 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -227,13 +223,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3, T4, T5> : RunBase<TRange>, ICommand<TRange, T1, T2, T3, T4, T5>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
-        where T4 : IMem
-        where T5 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -283,14 +274,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3, T4, T5, T6> : RunBase<TRange>, ICommand<TRange, T1, T2, T3, T4, T5, T6>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
-        where T4 : IMem
-        where T5 : IMem
-        where T6 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -347,15 +332,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3, T4, T5, T6, T7> : RunBase<TRange>, ICommand<TRange, T1, T2, T3, T4, T5, T6, T7>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
-        where T4 : IMem
-        where T5 : IMem
-        where T6 : IMem
-        where T7 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
@@ -419,16 +397,8 @@ namespace Brahma.OpenCL.Commands
 
     public sealed class Run<TRange, T1, T2, T3, T4, T5, T6, T7, T8> : RunBase<TRange>, ICommand<TRange, T1, T2, T3, T4, T5, T6, T7, T8>
         where TRange : struct, INDRangeDimension
-        where T1 : IMem
-        where T2 : IMem
-        where T3 : IMem
-        where T4 : IMem
-        where T5 : IMem
-        where T6 : IMem
-        where T7 : IMem
-        where T8 : IMem
     {
-        protected override IEnumerable<IMem> Arguments
+        protected override IEnumerable<object> Arguments
         {
             get
             {
