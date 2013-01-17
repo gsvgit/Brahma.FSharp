@@ -31,34 +31,7 @@ namespace Brahma.OpenCL
 
         private sealed class CodeGenerator : ExpressionVisitor
         {
-            private readonly ComputeProvider _provider;
-            private readonly LambdaExpression _lambda;
-
-            private readonly List<MemberExpression> _closures = new List<MemberExpression>();
-
-            private string _functionName = string.Empty;
-
-            private struct FunctionDescriptor
-            {
-                public string Code;
-                public Type ReturnType;
-                public Type[] ParameterTypes;
-            }
-
-            private readonly Dictionary<string, FunctionDescriptor> _functions = new Dictionary<string, FunctionDescriptor>();
-
-            private StringBuilder _code = new StringBuilder();
-
-            private readonly List<string> _declaredMembers = new List<string>();
-
-
-
-            private static IEnumerable<Type> GetAllButLast(Type[] types)
-            {
-                for (int i = 0; i < types.Length; i++)
-                    if (i < types.Length - 1)
-                        yield return types[i];
-            }
+           
         }
     }
 }
