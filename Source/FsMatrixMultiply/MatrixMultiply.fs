@@ -87,22 +87,18 @@ let Main () =
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
 
-    let kernelFunPrep, kerRun = provider.Compile matrixMult
+    let kernelPrepare, kernelRun = provider.Compile matrixMult
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
-    kernelFunPrep d columns aValues bValues cParallel
+    kernelPrepare d columns aValues bValues cParallel
     for i in 0 .. iterations - 1 do
-        Timer<string>.Global.Start()        //aBuffer bBuffer cBuffer
-        commandQueue <-            
-            commandQueue.Add(kerRun [|aBuffer;bBuffer;cBuffer|]).Finish()
-            :?> CommandQueue
+        Timer<string>.Global.Start()
+        let _ = commandQueue.Add(kernelRun [|aBuffer;bBuffer;cBuffer|]).Finish()            
         Timer<string>.Global.Lap("OpenCL")
     
     printfn "done."
 
     printfn "Verifying results..."
-    commandQueue <- 
-        commandQueue.Add(cBuffer.Read(0, rows * columns, cParallel)).Finish()
-        :?> CommandQueue
+    let _ = commandQueue.Add(cBuffer.Read(0, rows * columns, cParallel)).Finish()
     for i in 0 .. rows * columns - 1 do
         if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
         then

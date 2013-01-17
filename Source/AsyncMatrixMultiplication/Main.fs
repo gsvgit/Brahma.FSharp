@@ -70,20 +70,21 @@ let gpuMultiplicator timerTag provider iterations (a:array<_>) aRows aCols (b:ar
 
     let matrixMult = 
         <@
-            fun (r:_2D) (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
+            fun (r:_2D) columns (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
                 let tx = r.GlobalID0
-                let ty = r.GlobalID1
-                let columns = 600
+                let ty = r.GlobalID1                
                 for k in 0 .. columns - 1 do
                     c.[ty * columns + tx] <- c.[ty * columns + tx] + (a.[ty * columns + k] * b.[k * columns + tx])
         @>
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
-
-    let kernel = provider.Compile matrixMult
+    
+    let kernelPrepare, kernelRun = provider.Compile matrixMult
+    let d = new _2D(rows, columns, localWorkSize, localWorkSize)
+    kernelPrepare d columns a b c
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
-        let _ = commandQueue.Add(kernel.Run(new _2D(rows, columns, localWorkSize, localWorkSize), aBuffer, bBuffer, cBuffer)).Finish()            
+        let _ = commandQueue.Add(kernelRun [|aBuffer; bBuffer; cBuffer|]).Finish()
         Timer<string>.Global.Lap(timerTag)
 
     let _ = commandQueue.Add(cBuffer.Read(0, rows * columns, c)).Finish()        
