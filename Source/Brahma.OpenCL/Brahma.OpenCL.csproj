@@ -128,7 +128,6 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="Buffer.cs" />
-    <Compile Include="CLCodeGenerator.cs" />
     <Compile Include="CLException.cs" />
     <Compile Include="CommandQueue.cs" />
     <Compile Include="ComputeProvider.cs" />

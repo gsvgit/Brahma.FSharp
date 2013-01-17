@@ -24,7 +24,8 @@ open System
 //type t () =
 //    inherit ``[]``<int>()
 
-type CLCodeGenerator with
+type CLCodeGenerator() =
+    static member KernelName = "brahmaKernel"
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
         let ast = codeGenerator.Translate lambda
