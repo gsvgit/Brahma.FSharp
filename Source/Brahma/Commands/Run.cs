@@ -32,12 +32,12 @@ namespace Brahma.Commands
             Range = range;
         }
 
-        protected abstract IEnumerable<IMem> Arguments
+        protected abstract IEnumerable<object> Arguments
         {
             get;
         }
 
-        protected abstract void SetupArgument(object sender, int index, IMem argument);
+        protected abstract void SetupArgument(object sender, int index, object argument);
 
         public override void Execute(object sender)
         {
@@ -46,25 +46,6 @@ namespace Brahma.Commands
             foreach (var argument in Arguments)
                 SetupArgument(sender, index++, argument);
 
-            foreach (var memberExp in Kernel.Closures)
-            {
-                IMem argument;
-
-                switch (memberExp.Member.MemberType)
-                {
-                    case MemberTypes.Field:
-                        argument = memberExp.GetClosureValue() as IMem;
-                        if (argument == null)
-                            throw new ArgumentException(string.Format("{0} is not IMem. Did you use a non-Brahma type in your query? Try a cast if it is supported.", memberExp));
-
-                        break;
-
-                    default:
-                        throw new NotSupportedException("Can only access a field from inside a kernel");
-                }
-
-                SetupArgument(sender, index++, argument);
-            }
         }
 
         public TRange Range

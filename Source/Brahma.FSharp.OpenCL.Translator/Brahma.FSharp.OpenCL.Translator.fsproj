@@ -48,14 +48,14 @@
     <Compile Include="Translator.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
+      <Name>Brahma.FSharp.OpenCL.AST</Name>
+      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
       <Name>Brahma.FSharp.OpenCL.Printer</Name>
       <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Brahma.FSharp.OpenCL\Brahma.FSharp.OpenCL.AST.fsproj">
-      <Name>Brahma.FSharp.OpenCL.AST</Name>
-      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

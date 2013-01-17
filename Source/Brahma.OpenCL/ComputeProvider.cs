@@ -108,27 +108,7 @@ namespace Brahma.OpenCL
             
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);
-        }
-
-        private T CompileQuery<T>(LambdaExpression lambda) where T: IKernel, ICLKernel, new()
-        {
-            var kernel = new T();
-            lambda.GenerateKernel(this, kernel);
-
-            Cl.ErrorCode error;
-            var str = (kernel as ICLKernel).Source.ToString();
-            using (Cl.Program program = Cl.CreateProgramWithSource(_context, 1, new[] { str }, null, out error))
-            {
-                error = Cl.BuildProgram(program, (uint)_devices.Length, _devices, _compileOptions, null, IntPtr.Zero);
-                if (error != Cl.ErrorCode.Success)
-                    throw new Exception(string.Join("\n", from device in _devices
-                                                          select Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log, out error).ToString()));
-                (kernel as ICLKernel).ClKernel = Cl.CreateKernel(program, CLCodeGenerator.KernelName, out error);
-            }
-
-            return kernel;
-        }
-
+        }        
        
 
         // TODO: Using a range variable inside the body of a function does not carry over to OpenCL (that variable is not in scope)
@@ -174,33 +154,6 @@ namespace Brahma.OpenCL
                 return _devices;
             }
         }
-
-#if DEBUG
-        public string GetBufferValues<T>(Buffer<T> buffer, CommandQueue commandQueue = null)
-            where T: struct, IMem
-        {
-            bool disposeCommandQueue = commandQueue == null;
-            commandQueue = commandQueue ?? new CommandQueue(this, _devices.First());
-
-            var resultData = new T[buffer.Length];
-            commandQueue
-                .Add(buffer.Read(0, buffer.Length, resultData))
-                .Finish();
-
-            var result = new StringBuilder();
-            for (int i = 0; i < resultData.Length; i++)
-            {
-                result.Append(resultData[i].ToString());
-                if (i < resultData.Length - 1)
-                    result.Append(", ");
-            }
-
-            if (disposeCommandQueue)
-                commandQueue.Dispose();
-
-            return result.ToString();
-        }
-#endif
 
         private static string WildcardToRegex(string pattern)
         {

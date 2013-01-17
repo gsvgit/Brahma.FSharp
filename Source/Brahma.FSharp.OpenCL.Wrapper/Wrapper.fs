@@ -17,11 +17,13 @@ module Brahma.FSharp.OpenCL.Wrapper
 
 open Brahma.OpenCL
 open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Linq.QuotationEvaluation
 open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
 
-type CLCodeGenerator with
+type CLCodeGenerator() =
+    static member KernelName = "brahmaKernel"
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
         let ast = codeGenerator.Translate lambda
@@ -31,6 +33,7 @@ type CLCodeGenerator with
         kernel.SetParameters []
         
 type ComputeProvider with
+
     member this.CompileQuery<'T when 'T :> ICLKernel>(lambda:Expr) =
         let kernel = System.Activator.CreateInstance<'T>()
         let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel)
@@ -50,20 +53,44 @@ type ComputeProvider with
         kernel            
                     
     member this.Compile
-            (query: Expr<'TRange -> array<_> -> unit>, ?_options:CompileOptions) =
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _>> query
+            (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =        
+        let getStarterFuncton qExpr =
+            let garr = ref [||]
+            let rec go expr vars=
+                match expr with
+                | Patterns.Lambda (v, body) -> 
+                    Expr.Lambda(v,go body (v::vars))
+                | e -> 
+                    let arr =                            
+                        let c = Expr.NewArray(typeof<obj>,vars |> List.rev 
+                            |> List.map 
+                                 (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
+                        <@@ garr := %%c @@>
+                    arr            
+            <@ %%(go qExpr []):'TRange ->'a @>.Compile()(),garr
 
-    member this.Compile
-            (query: Expr<'TRange -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _, _>> query
+        let kernel = this.CompileQuery<Kernel<'TRange>> query
+        if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
 
-    member this.Compile
-            (query: Expr<'TRange -> array<_> -> array<_> -> array<_> -> unit>, ?_options:CompileOptions) =
+        let starter,args = getStarterFuncton query
+
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _, _, _>> query
+        
+        starter
+        , (fun (configuredBuffers:array<_>) -> 
+                let x = !args |> List.ofArray
+                let count = ref 0
+                let rng = (box x.Head) :?> 'TRange
+                let vars = 
+                    x.Tail 
+                    |> List.map 
+                        (fun (x:obj) ->                            
+                            match x with
+                            | :? System.Array as ar -> 
+                                let v = configuredBuffers.[!count]
+                                incr count
+                                v                                
+                            | _ -> x)
+                kernel.Run(rng, vars |> Array.ofList))
     

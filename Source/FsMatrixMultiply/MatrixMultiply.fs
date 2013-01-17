@@ -69,10 +69,9 @@ let Main () =
 
     let matrixMult = 
         <@
-            fun (r:_2D) (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
+            fun (r:_2D) columns (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
                 let tx = r.GlobalID0
-                let ty = r.GlobalID1
-                let columns = 200
+                let ty = r.GlobalID1                
                 for k in 0 .. columns - 1 do
                     c.[ty * columns + tx] <- c.[ty * columns + tx] + (a.[ty * columns + k] * b.[k * columns + tx])
         @>
@@ -88,11 +87,13 @@ let Main () =
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
 
-    let kernel = provider.Compile matrixMult
+    let kernelFunPrep, kerRun = provider.Compile matrixMult
+    let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
+    kernelFunPrep d columns aValues bValues cParallel
     for i in 0 .. iterations - 1 do
-        Timer<string>.Global.Start()
-        commandQueue <-
-            commandQueue.Add(kernel.Run(new _2D(rows, columns, localWorkSize, localWorkSize), aBuffer, bBuffer, cBuffer)).Finish()
+        Timer<string>.Global.Start()        //aBuffer bBuffer cBuffer
+        commandQueue <-            
+            commandQueue.Add(kerRun [|aBuffer;bBuffer;cBuffer|]).Finish()
             :?> CommandQueue
         Timer<string>.Global.Lap("OpenCL")
     

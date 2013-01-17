@@ -32,8 +32,11 @@ type Translator() =
         Assert.AreEqual (all1.Length, all2.Length)
         Assert.IsTrue(Array.forall2 (=) all1 all2)
 
-    let checkCode (kernel:Kernel<_1D,_>) outFile expected =
-        (kernel :> ICLKernel).Source.ToString() |> (fun text -> printfn "%s" text;  System.IO.File.WriteAllText(outFile,text))
+    let checkCode command outFile expected =
+        let code = ref ""
+        let _ = provider.Compile(command,_outCode = code)
+        printfn "%s" !code
+        System.IO.File.WriteAllText(outFile,!code)
         filesAreEqual outFile (System.IO.Path.Combine(basePath,expected))
 
     let a = [|0..3|]
@@ -45,10 +48,8 @@ type Translator() =
                 fun (range:_1D) (buf:array<int>) -> 
                     buf.[0] <- 0
             @>
-        
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Array.Item.Set.gen" "Array.Item.Set.ocl"
+
+        checkCode command "Array.Item.Set.gen" "Array.Item.Set.ocl"
 
     [<Test>]
     member this.Binding() = 
@@ -59,9 +60,7 @@ type Translator() =
                     buf.[0] <- x
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binding.gen" "Binding.ocl"
+        checkCode command "Binding.gen" "Binding.ocl"
 
     [<Test>]
     member this.``Binop plus``() = 
@@ -71,9 +70,7 @@ type Translator() =
                     buf.[0] <- 1 + 2
             @>
         
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binop.Plus.gen" "Binop.Plus.ocl"
+        checkCode command "Binop.Plus.gen" "Binop.Plus.ocl"
 
     [<Test>]
     member this.``If Then``() = 
@@ -83,9 +80,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "If.Then.gen" "If.Then.ocl"
+        checkCode command "If.Then.gen" "If.Then.ocl"
 
     [<Test>]
     member this.``If Then Else``() = 
@@ -95,9 +90,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "If.Then.Else.gen" "If.Then.Else.ocl"
+        checkCode command "If.Then.Else.gen" "If.Then.Else.ocl"
 
     [<Test>]
     member this.``For Integer Loop``() = 
@@ -107,9 +100,7 @@ type Translator() =
                     for i in 1..3 do buf.[0] <- i
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "For.Integer.Loop.gen" "For.Integer.Loop.ocl"
+        checkCode command "For.Integer.Loop.gen" "For.Integer.Loop.ocl"
 
     [<Test>]
     member this.``Sequential bindings``() = 
@@ -121,9 +112,7 @@ type Translator() =
                     buf.[0] <- y
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Sequential.Bindings.gen" "Sequential.Bindings.ocl"
+        checkCode command "Sequential.Bindings.gen" "Sequential.Bindings.ocl"
 
     [<Test>]
     member this.``Binary operations. Math.``() = 
@@ -138,9 +127,7 @@ type Translator() =
                     buf.[0] <- i
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binary.Operations.Math.gen" "Binary.Operations.Math.ocl"
+        checkCode command "Binary.Operations.Math.gen" "Binary.Operations.Math.ocl"
 
     [<Test>]
     member this.``Binding in IF.``() = 
@@ -156,9 +143,7 @@ type Translator() =
                         buf.[0] <- i
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binding.In.IF.gen" "Binding.In.IF.ocl"
+        checkCode command "Binding.In.IF.gen" "Binding.In.IF.ocl"
 
     [<Test>]
     member this.``Binding in FOR.``() = 
@@ -170,9 +155,7 @@ type Translator() =
                         buf.[0] <- x
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
+        checkCode command "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
        
     [<Test>]
     member this.``Simple WHILE loop.``() = 
@@ -183,9 +166,7 @@ type Translator() =
                         buf.[0] <- buf.[0] + 1
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Simple.WHILE.gen" "Simple.WHILE.ocl"
+        checkCode command "Simple.WHILE.gen" "Simple.WHILE.ocl"
 
     [<Test>]
     member this.``Binding in WHILE.``() = 
@@ -197,9 +178,7 @@ type Translator() =
                      buf.[0] <- x * x
             @>
 
-        let kernel = provider.Compile command
-        
-        checkCode kernel "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
+        checkCode command "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
 
 [<EntryPoint>]
 let f _ =
