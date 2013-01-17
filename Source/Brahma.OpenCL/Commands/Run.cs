@@ -76,13 +76,20 @@ namespace Brahma.OpenCL.Commands
         {
             get
             {
-                yield break;
+                return args;
             }
         }
         
         internal Run(IKernel kernel, TRange range)
             : base(kernel, range)
         {
+                
+        }
+
+        public object[] args
+        {
+            get;
+            internal set;
         }
     }
 

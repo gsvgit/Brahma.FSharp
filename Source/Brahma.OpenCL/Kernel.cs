@@ -153,6 +153,12 @@ namespace Brahma.OpenCL
 
     public static class KernelExtensions
     {
+        public static Run<TRange> Run<TRange>(this Kernel<TRange> kernel, TRange range, object[] args)
+            where TRange : struct, INDRangeDimension
+        {
+            return new Run<TRange>(kernel, range) { args = args };
+        }
+
         public static Run<TRange> Run<TRange>(this Kernel<TRange> kernel, TRange range)
             where TRange: struct, INDRangeDimension
         {

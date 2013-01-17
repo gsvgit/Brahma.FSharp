@@ -275,7 +275,7 @@ type Translator() =
             @>
         
         let kernel = provider.Compile command
-        
+                
         checkResult kernel floatArray4 [|0.0;1.0;4.0;9.0|]
 
     [<Test>]
