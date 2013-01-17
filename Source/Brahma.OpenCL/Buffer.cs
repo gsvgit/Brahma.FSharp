@@ -36,7 +36,7 @@ namespace Brahma.OpenCL
         Host = Cl.MemFlags.UseHostPtr
     }
     
-    public class Buffer<T>: Brahma.Buffer<T> //where T: struct, IMem
+    public class Buffer<T>: Brahma.Buffer<T>
     {
         private static readonly IntPtr _intPtrSize = (IntPtr)Marshal.SizeOf(typeof(IntPtr));
         private static readonly int _elementSize = Marshal.SizeOf(typeof(T));
@@ -164,7 +164,7 @@ namespace Brahma.OpenCL
         public static ReadBuffer<T> Read<T>(this Buffer<T> buffer,
             int offset,
             int count,
-            T[] data) //where T : struct, IMem
+            T[] data)
         {
             return new ReadBuffer<T>(buffer, true, offset, count, data);
         }
