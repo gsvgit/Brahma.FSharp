@@ -22,9 +22,6 @@ open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
 
-//type t () =
-//    inherit ``[]``<int>()
-
 type CLCodeGenerator() =
     static member KernelName = "brahmaKernel"
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
@@ -34,8 +31,6 @@ type CLCodeGenerator() =
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
         kernel.SetParameters []
-type TTT () = 
-    member this.cBox x = box x
         
 type ComputeProvider with
 
@@ -57,31 +52,9 @@ type ComputeProvider with
             
         kernel            
                     
-//    member this.Compile
-//            (query: Expr<'TRange -> _ -> unit>, ?_options:CompileOptions) =
-//        let options = defaultArg _options this.DefaultOptions_p
-//        this.SetCompileOptions options
-//        this.CompileQuery<Kernel<'TRange, _>> query
-//
-//    member this.Compile
-//            (query: Expr<'TRange -> _ -> _ -> unit>, ?_options:CompileOptions) =
-//        let options = defaultArg _options this.DefaultOptions_p
-//        this.SetCompileOptions options
-//        this.CompileQuery<Kernel<'TRange, _, _>> query
-//
-//    member this.Compile
-//            (query: Expr<'TRange -> _ -> _ -> _ -> unit>, ?_options:CompileOptions) =
-//        let options = defaultArg _options this.DefaultOptions_p
-//        this.SetCompileOptions options
-//        this.CompileQuery<Kernel<'TRange, _, _, _>> query
-            
     member this.Compile
-            (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =
-        //let provider = ref (Unchecked.defaultof<ComputeProvider>) 
-        let configure (a:array<'tr>) = new Buffer<'tr>(this, Operations.ReadWrite, Memory.Device, a)|> box            
-        let (x:array<'z> ref) = ref [||]
-        let b  = <@ box !x @>
-        let replaceBody qExpr =
+            (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =        
+        let getStarterFuncton qExpr =
             let garr = ref [||]
             let rec go expr vars=
                 match expr with
@@ -91,73 +64,33 @@ type ComputeProvider with
                     let arr =                            
                         let c = Expr.NewArray(typeof<obj>,vars |> List.rev 
                             |> List.map 
-                                 (fun v ->
-//                                    if v.Type.Name.EndsWith "[]"
-//                                    then                                        
-//                                        let e = Expr.Var(v) in  <@@ configure (%%e:array<_>) @@>
-//                                    else Expr.Coerce (Expr.Var(v),typeof<obj>) ))
-                                            Expr.Coerce (Expr.Var(v),typeof<obj>)))
-//                                            let vv = Expr.Var v
-//                                            
-//                                            let mi = typeof<TTT>.GetMethod("cBox")
-//                                            let p  = Expr.Call(mi,[vv])
-//                                            p ))
-//                                            let vv = Expr.Var v
-//                                            if v.Type.Name.EndsWith "[]"
-//                                            then
-//                                                <@@ x := (%%vv:array<'z>) ; %b  @@>
-//                                            else Expr.Coerce (Expr.Var(v),typeof<obj>)))
-                                            //<@@ %b:'bb when 'bb :> obj) @@>))
+                                 (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
                         <@@ garr := %%c @@>
-                    arr
-            let nb = go qExpr []
-            nb,garr
+                    arr            
+            <@ %%(go qExpr []):'TRange ->'a @>.Compile()(),garr
+
         let kernel = this.CompileQuery<Kernel<'TRange>> query
         if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
-//let rng,vars = 
-//    let v = vars |> List.rev
-//    v.Head,v.Tail
-//let args = Expr.NewArray(typeof<obj>, vars |> List.map (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
-//let rng = Expr.Var rng 
-//<@@ f %%rng %%args @@>
 
-        let ff,a = replaceBody query |> fun (x,a) -> <@ %%x:'TRange ->'a @>,a
-
-        let f = ff.Compile()()         
+        let starter,args = getStarterFuncton query
 
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
-        //fun tr arr -> (this.CompileQuery<Kernel<'TRange>> query).Run(tr,arr)
-        f, (fun (configuredBuffers:array<_>) -> 
-                let x = !a |> List.ofArray
+        
+        starter
+        , (fun (configuredBuffers:array<_>) -> 
+                let x = !args |> List.ofArray
                 let count = ref 0
                 let rng = (box x.Head) :?> 'TRange
                 let vars = 
                     x.Tail 
                     |> List.map 
-                        (fun (x:obj) ->                             
-                            //if x.GetType().Name.EndsWith "[]"
-                            //then 
-                            let a =  try (box x) :? System.Array |> Some with _ -> None
-                            //let ff = (# "!0[]" #)
+                        (fun (x:obj) ->                            
                             match x with
                             | :? System.Array as ar -> 
                                 let v = configuredBuffers.[!count]
                                 incr count
-                                v
-                                //let t = ar.GetType().GetElementType()
-                                //let active (c:'t) = 
-                                  // ar :?> array<'t>
-                                //let en = ar.GetEnumerator()
-                                //en.MoveNext()|>ignore
-                                //let vv = en.Current
-                                //let g = active vv
-                                //let ddd = System.Convert.ChangeType(box ar, typeof<array<'t>>)
-                                //let arr = ar :?> array<'t> //.ofSeq (ar :> System.Collections.Generic.IList<_>)
-                                //new Buffer<_>(provider, Operations.ReadWrite, Memory.Device,ar)|> box
-
-                            //| :? <'a>``[]`` as ar-> new Buffer<'a>(provider, Operations.ReadWrite, Memory.Device, ar)|> box
-                            //| :? ``[]``<'a> as ar-> new Buffer<'a>(provider, Operations.ReadWrite, Memory.Device, ar)|> box
+                                v                                
                             | _ -> x)
                 kernel.Run(rng, vars |> Array.ofList))
     

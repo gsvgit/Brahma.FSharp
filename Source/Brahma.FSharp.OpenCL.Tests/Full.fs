@@ -29,19 +29,7 @@ type Translator() =
     let defFloatBuf () = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, float32Arr)
     let getBuf arr = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, arr)
 
-    let checkResult1Generic inArray (kernel:Kernel<_,_>) getExpected =
-        let l = Array.length inArray
-        let a = inArray        
-        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, a)
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-        let cq = commandQueue.Add(kernel.Run(new _1D(l, 1), inBuf)).Finish()
-        let r = Array.zeroCreate l
-        let cq2 = commandQueue.Add(inBuf.Read(0, l, r)).Finish()
-        let expected = getExpected inArray
-        Assert.AreEqual(expected, r)
-        commandQueue.Dispose()
-
-    let checkResultG command =
+    let checkResult command =
         let kernelPrepareF, kernelRunF = provider.Compile command                
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
         let check configuredBuffers (outBuffer:Buffer<'a>) (expected:array<'a>) =
@@ -52,53 +40,6 @@ type Translator() =
             Assert.AreEqual(expected, r)
         kernelPrepareF,check
 
-//    let checkResult2i command inArg outArray getExpected =
-//        let kernelPrepareF, kernelRunF = provider.Compile command        
-//        let l = Array.length outArray
-//        let a = outArray        
-//        let outBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, a)
-//        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-//        kernelPrepareF (new _1D(l,1)) 2 a
-//        let cq = commandQueue.Add(kerRun([|aBuf|])).Finish()
-//        let cq = commandQueue.Add(kernel.Run(new _1D(l, 1), inArg, outBuf)).Finish()
-//        let r = Array.zeroCreate l
-//        let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
-//        let expected = getExpected inArg
-//        Assert.AreEqual(expected, r)
-//        commandQueue.Dispose()
-
-    let checkResult2 (kernel:Kernel<_,_,_>) inArray outArray getExpected =        
-        let outBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, outArray)
-        let inBuf = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, inArray)
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-        let cq = commandQueue.Add(kernel.Run(new _1D(inArray.Length, 1), inBuf, outBuf)).Finish()
-        let r = Array.zeroCreate outArray.Length
-        let cq2 = commandQueue.Add(outBuf.Read(0, outArray.Length, r)).Finish()
-        let expected = getExpected inArray
-        Assert.AreEqual(expected, r)
-        commandQueue.Dispose()
-
-    let checkResult (kernel:Kernel<_,_>) arg expected =        
-        checkResult1Generic arg kernel (fun _ -> expected)
-
-//    let checkResult (kernel:Kernel<_,_>) expected =
-//        let a = Array.init 4 (fun i -> float32 i)        
-//        checkResult1Generic a kernel (fun _ -> expected)
-
-//    let checkResult2 (kernel:Kernel<_,_,_>) expected =
-//        let l = 4
-//        let a = [|0 .. l-1|]
-//        let b = Array.zeroCreate l
-//        let inBuf = new Buffer<int>(provider, Operations.ReadOnly, Memory.Device,a)
-//        let outBuf = new Buffer<int>(provider, Operations.ReadWrite, Memory.Device,b)
-//        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-//        let cq = commandQueue.Add(kernel.Run(new _1D(l,1), inBuf, outBuf)).Finish()
-//        let r = Array.zeroCreate l
-//        let cq2 = commandQueue.Add(outBuf.Read(0, l, r)).Finish()
-//        Assert.AreEqual(expected,r)
-//        commandQueue.Dispose()            
-
-
     [<Test>]
     member this.``Array item set``() = 
         let command = 
@@ -107,7 +48,7 @@ type Translator() =
                     buf.[0] <- 1
             @>
 
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|1;1;2;3|]
@@ -122,7 +63,7 @@ type Translator() =
                     buf.[0] <- x
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|1;1;2;3|]
@@ -135,7 +76,7 @@ type Translator() =
                     buf.[0] <- 1 + 2
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|3;1;2;3|]
@@ -148,7 +89,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|0;1;2;3|]
@@ -161,7 +102,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|2;1;2;3|]
@@ -174,7 +115,7 @@ type Translator() =
                     for i in 1..3 do buf.[i] <- 0
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|0;0;0;0|]
@@ -189,7 +130,7 @@ type Translator() =
                     buf.[0] <- y
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|2;1;2;3|]
@@ -208,7 +149,7 @@ type Translator() =
                         buf.[0] <- i
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|2;1;2;3|]
@@ -223,7 +164,7 @@ type Translator() =
                         buf.[0] <- x
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|9;1;2;3|] 
@@ -237,7 +178,7 @@ type Translator() =
                      buf.[0] <- buf.[0] + 1
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|5;1;2;3|]
@@ -252,7 +193,7 @@ type Translator() =
                          buf.[i] <- buf.[i] * buf.[i] + 1
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|26;26;26;10|]
@@ -267,7 +208,7 @@ type Translator() =
                         buf.[0] <- x * x
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|25;1;2;3|]
@@ -281,7 +222,7 @@ type Translator() =
                     buf.[i] <- i + i
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d intInArr
         let b = defBuf()
         check [|b|] b [|0;2;4;6|]
@@ -295,7 +236,7 @@ type Translator() =
                     outBuf.[i] <- inBuf.[i]
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         let outA = [|0;0;0;0|]
         run _1d intInArr outA
         let b = defBuf()
@@ -311,7 +252,7 @@ type Translator() =
                     buf.[i] <- buf.[i] * buf.[i]
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d float32Arr
         let b = defFloatBuf()
         check [|b|] b [|0.0f;1.0f;4.0f;9.0f|]
@@ -325,7 +266,7 @@ type Translator() =
                     buf.[i] <- float32(System.Math.Sin (float buf.[i]))
             @>
         
-        let run,check = checkResultG command
+        let run,check = checkResult command
         let inA = [|0.0f;1.0f;2.0f;3.0f|]
         run _1d inA
         let b = getBuf inA
@@ -339,7 +280,7 @@ type Translator() =
                     let i = range.GlobalID0
                     buf.[i] <- x + x
             @>
-        let run,check = checkResultG command
+        let run,check = checkResult command
         run _1d 2 intInArr
         let b = defBuf()
         check [|b|] b [|4;4;4;4|]
