@@ -105,52 +105,6 @@ namespace Brahma.OpenCL
     {
     }
 
-    public sealed class Kernel<TRange, T>: KernelBase<TRange>, IKernel<TRange, T>
-        where TRange: struct, Brahma.INDRangeDimension
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2>: KernelBase<TRange>, IKernel<TRange, T1, T2>
-        where TRange: struct, Brahma.INDRangeDimension
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3, T4> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3, T4>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3, T4, T5> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3, T4, T5>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3, T4, T5, T6> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3, T4, T5, T6>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3, T4, T5, T6, T7> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3, T4, T5, T6, T7>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
-    public sealed class Kernel<TRange, T1, T2, T3, T4, T5, T6, T7, T8> : KernelBase<TRange>, IKernel<TRange, T1, T2, T3, T4, T5, T6, T7, T8>
-        where TRange : struct, Brahma.INDRangeDimension
-
-    {
-    }
-
     public static class KernelExtensions
     {
         public static Run<TRange> Run<TRange>(this Kernel<TRange> kernel, TRange range, object[] args)
@@ -165,58 +119,5 @@ namespace Brahma.OpenCL
             return new Run<TRange>(kernel, range);
         }
         
-        public static Run<TRange, T> Run<TRange, T>(this Kernel<TRange, T> kernel, TRange range, T data) 
-            where TRange: struct, INDRangeDimension            
-        {
-            return new Run<TRange, T>(kernel, range) { D1 = data };
-        }
-        
-        public static Run<TRange, T1, T2> Run<TRange, T1, T2>(this Kernel<TRange, T1, T2> kernel, TRange range, T1 d1, T2 d2) 
-            where TRange: struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2>(kernel, range) { D1 = d1, D2 = d2 };
-        }
-        
-        public static Run<TRange, T1, T2, T3> Run<TRange, T1, T2, T3>(this Kernel<TRange, T1, T2, T3> kernel, TRange range, T1 d1, T2 d2, T3 d3)
-            where TRange : struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2, T3>(kernel, range) { D1 = d1, D2 = d2, D3 = d3 };
-        }
-
-        public static Run<TRange, T1, T2, T3, T4> Run<TRange, T1, T2, T3, T4>(this Kernel<TRange, T1, T2, T3, T4> kernel, TRange range, T1 d1, T2 d2, T3 d3, T4 d4)
-            where TRange : struct, INDRangeDimension
-        {
-            return new Run<TRange, T1, T2, T3, T4>(kernel, range) { D1 = d1, D2 = d2, D3 = d3, D4 = d4 };
-        }
-        
-        public static Run<TRange, T1, T2, T3, T4, T5> Run<TRange, T1, T2, T3, T4, T5>(this Kernel<TRange, T1, T2, T3, T4, T5> kernel, TRange range, T1 d1, T2 d2, T3 d3, T4 d4, T5 d5)
-            where TRange : struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2, T3, T4, T5>(kernel, range) { D1 = d1, D2 = d2, D3 = d3, D4 = d4, D5 = d5 };
-        }
-        
-        public static Run<TRange, T1, T2, T3, T4, T5, T6> Run<TRange, T1, T2, T3, T4, T5, T6>(this Kernel<TRange, T1, T2, T3, T4, T5, T6> kernel, TRange range, T1 d1, T2 d2, T3 d3, T4 d4, T5 d5, T6 d6)
-            where TRange : struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2, T3, T4, T5, T6>(kernel, range) { D1 = d1, D2 = d2, D3 = d3, D4 = d4, D5 = d5, D6 = d6 };
-        }
-
-        public static Run<TRange, T1, T2, T3, T4, T5, T6, T7> Run<TRange, T1, T2, T3, T4, T5, T6, T7>(this Kernel<TRange, T1, T2, T3, T4, T5, T6, T7> kernel, TRange range, T1 d1, T2 d2, T3 d3, T4 d4, T5 d5, T6 d6, T7 d7)
-            where TRange : struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2, T3, T4, T5, T6, T7>(kernel, range) { D1 = d1, D2 = d2, D3 = d3, D4 = d4, D5 = d5, D6 = d6, D7 = d7 };
-        }
-
-        public static Run<TRange, T1, T2, T3, T4, T5, T6, T7, T8> Run<TRange, T1, T2, T3, T4, T5, T6, T7, T8>(this Kernel<TRange, T1, T2, T3, T4, T5, T6, T7, T8> kernel, TRange range, T1 d1, T2 d2, T3 d3, T4 d4, T5 d5, T6 d6, T7 d7, T8 d8)
-            where TRange : struct, INDRangeDimension
-
-        {
-            return new Run<TRange, T1, T2, T3, T4, T5, T6, T7, T8>(kernel, range) { D1 = d1, D2 = d2, D3 = d3, D4 = d4, D5 = d5, D6 = d6, D7 = d7, D8 = d8 };
-        }
     }
 }

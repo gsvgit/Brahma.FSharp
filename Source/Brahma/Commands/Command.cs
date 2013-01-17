@@ -57,45 +57,4 @@ namespace Brahma.Commands
         where TRange: INDRangeDimension
     {
     }
-
-    public interface ICommand<TRange, T>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3, T4>: ICommand
-        where TRange: INDRangeDimension
-
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3, T4, T5>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3, T4, T5, T6>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3, T4, T5, T6, T7>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
-
-    public interface ICommand<TRange, T1, T2, T3, T4, T5, T6, T7, T8>: ICommand
-        where TRange: INDRangeDimension
-    {
-    }
 }
