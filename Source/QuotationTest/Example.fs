@@ -71,8 +71,9 @@ let main () =
                 buf1.[0] <- y
         @>
     
-    let kernel = provider.Compile command
-    let cq = commandQueue.Add(kernel.Run(new _1D(l,1),2, aBuf)).Finish()
+    let kernelFunPrep, kerRun = provider.Compile command
+    kernelFunPrep (new _1D(l,1)) 2 a
+    let cq = commandQueue.Add(kerRun([|aBuf|])).Finish()
     let r = Array.zeroCreate(l)
     let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
     ()

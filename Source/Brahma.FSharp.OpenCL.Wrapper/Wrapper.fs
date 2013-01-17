@@ -57,26 +57,26 @@ type ComputeProvider with
             
         kernel            
                     
-    member this.Compile
-            (query: Expr<'TRange -> _ -> unit>, ?_options:CompileOptions) =
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _>> query
-
-    member this.Compile
-            (query: Expr<'TRange -> _ -> _ -> unit>, ?_options:CompileOptions) =
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _, _>> query
-
-    member this.Compile
-            (query: Expr<'TRange -> _ -> _ -> _ -> unit>, ?_options:CompileOptions) =
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        this.CompileQuery<Kernel<'TRange, _, _, _>> query
+//    member this.Compile
+//            (query: Expr<'TRange -> _ -> unit>, ?_options:CompileOptions) =
+//        let options = defaultArg _options this.DefaultOptions_p
+//        this.SetCompileOptions options
+//        this.CompileQuery<Kernel<'TRange, _>> query
+//
+//    member this.Compile
+//            (query: Expr<'TRange -> _ -> _ -> unit>, ?_options:CompileOptions) =
+//        let options = defaultArg _options this.DefaultOptions_p
+//        this.SetCompileOptions options
+//        this.CompileQuery<Kernel<'TRange, _, _>> query
+//
+//    member this.Compile
+//            (query: Expr<'TRange -> _ -> _ -> _ -> unit>, ?_options:CompileOptions) =
+//        let options = defaultArg _options this.DefaultOptions_p
+//        this.SetCompileOptions options
+//        this.CompileQuery<Kernel<'TRange, _, _, _>> query
             
-    member this.Compile3 
-            (query: Expr<'TRange ->'a> , ?_options:CompileOptions) =
+    member this.Compile
+            (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =
         //let provider = ref (Unchecked.defaultof<ComputeProvider>) 
         let configure (a:array<'tr>) = new Buffer<'tr>(this, Operations.ReadWrite, Memory.Device, a)|> box            
         let (x:array<'z> ref) = ref [||]
@@ -112,8 +112,8 @@ type ComputeProvider with
                     arr
             let nb = go qExpr []
             nb,garr
-        let cq = this.CompileQuery<Kernel<'TRange>> query
-
+        let kernel = this.CompileQuery<Kernel<'TRange>> query
+        if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
 //let rng,vars = 
 //    let v = vars |> List.rev
 //    v.Head,v.Tail
@@ -128,7 +128,7 @@ type ComputeProvider with
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
         //fun tr arr -> (this.CompileQuery<Kernel<'TRange>> query).Run(tr,arr)
-        f, (fun provider (configuredBuffers:array<_>) -> 
+        f, (fun (configuredBuffers:array<_>) -> 
                 let x = !a |> List.ofArray
                 let count = ref 0
                 let rng = (box x.Head) :?> 'TRange
@@ -159,5 +159,5 @@ type ComputeProvider with
                             //| :? <'a>``[]`` as ar-> new Buffer<'a>(provider, Operations.ReadWrite, Memory.Device, ar)|> box
                             //| :? ``[]``<'a> as ar-> new Buffer<'a>(provider, Operations.ReadWrite, Memory.Device, ar)|> box
                             | _ -> x)
-                cq.Run(rng, vars |> Array.ofList))
+                kernel.Run(rng, vars |> Array.ofList))
     
