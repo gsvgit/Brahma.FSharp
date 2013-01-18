@@ -28,6 +28,7 @@ type CLCodeGenerator() =
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
         let ast = codeGenerator.Translate lambda
         let code = Printer.AST.Print ast
+        kernel.Provider <- provider
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
         kernel.SetParameters []
@@ -52,8 +53,9 @@ type ComputeProvider with
             
         kernel            
                     
-    member this.Compile
-            (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =        
+    member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =
+        let rng = ref Unchecked.defaultof<'TRange>
+        let args = ref [||]
         let getStarterFuncton qExpr =
             let garr = ref [||]
             let rec go expr vars=
@@ -65,32 +67,24 @@ type ComputeProvider with
                         let c = Expr.NewArray(typeof<obj>,vars |> List.rev 
                             |> List.map 
                                  (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
-                        <@@ garr := %%c @@>
+                        <@@ 
+                            garr := %%c
+                            let x = !garr |> List.ofArray
+                            rng := (box x.Head) :?> 'TRange
+                            args := x.Tail |> Array.ofList
+                        @@>
                     arr            
-            <@ %%(go qExpr []):'TRange ->'a @>.Compile()(),garr
+            <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
 
         let kernel = this.CompileQuery<Kernel<'TRange>> query
         if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
 
-        let starter,args = getStarterFuncton query
+        let starter = getStarterFuncton query
 
         let options = defaultArg _options this.DefaultOptions_p
         this.SetCompileOptions options
         
-        starter
-        , (fun (configuredBuffers:array<_>) -> 
-                let x = !args |> List.ofArray
-                let count = ref 0
-                let rng = (box x.Head) :?> 'TRange
-                let vars = 
-                    x.Tail 
-                    |> List.map 
-                        (fun (x:obj) ->                            
-                            match x with
-                            | :? System.Array as ar -> 
-                                let v = configuredBuffers.[!count]
-                                incr count
-                                v                                
-                            | _ -> x)
-                kernel.Run(rng, vars |> Array.ofList))
+        kernel
+        , starter
+        , fun () -> kernel.Run(!rng, !args)
     

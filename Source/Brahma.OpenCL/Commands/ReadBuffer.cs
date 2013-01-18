@@ -22,8 +22,25 @@ using OpenCL.Net;
 namespace Brahma.OpenCL.Commands
 {
     public sealed class ReadBuffer<T> : Brahma.Commands.Command
-        //where T : struct, IMem
     {
+
+        public ReadBuffer(
+           Cl.Mem mem,
+           int elemSize,
+           bool blocking,
+           int offset,
+           int count,
+           Array data)
+        {
+            ElementSize = elemSize;
+            Mem = mem;
+            Blocking = blocking;
+            Offset = offset;
+            Count = count;
+            Data = data;
+            DataPtr = IntPtr.Zero;
+        }
+
         private ReadBuffer(Buffer<T> buffer,
             bool blocking,
             int offset,
@@ -72,6 +89,17 @@ namespace Brahma.OpenCL.Commands
             set;
         }
 
+        private Cl.Mem Mem
+        {
+            get;
+            set;
+        }
+
+        private int ElementSize
+        {
+            get;
+            set;
+        }
         private bool Blocking
         {
             get;
@@ -113,14 +141,16 @@ namespace Brahma.OpenCL.Commands
 
             Cl.Event eventID;
             Cl.ErrorCode error;
+            var mem = (Buffer == null) ? Mem : Buffer.Mem;
+            var elementSize = (Buffer == null) ? ElementSize : Buffer.ElementSize;
             if (Data == null)
-                error = Cl.EnqueueReadBuffer(commandQueue.Queue, Buffer.Mem,
+                error = Cl.EnqueueReadBuffer(commandQueue.Queue, mem,
                     Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
-                    (IntPtr)(Count * Buffer.ElementSize), DataPtr, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
+                    (IntPtr)(Count * elementSize), DataPtr, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
             else
-                error = Cl.EnqueueReadBuffer(commandQueue.Queue, Buffer.Mem,
+                error = Cl.EnqueueReadBuffer(commandQueue.Queue, mem,
                     Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
-                    (IntPtr)(Count * Buffer.ElementSize), Data, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
+                    (IntPtr)(Count * elementSize), Data, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
             
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);

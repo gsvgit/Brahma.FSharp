@@ -22,6 +22,7 @@ open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Wrapper
 open Microsoft.FSharp.Quotations
+open Brahma.FSharp.OpenCL.Extensions
 
 let random = new System.Random()
         
@@ -61,10 +62,7 @@ let gpuMultiplicator timerTag provider iterations (a:array<_>) aRows aCols (b:ar
     let rows = aRows
     let columns = bCols
     let localWorkSize = 10
-    let c = Array.zeroCreate(rows * columns)
-    let aBuffer = new Buffer<float32>(provider, Operations.ReadOnly, Memory.Device, a)
-    let bBuffer = new Buffer<float32>(provider, Operations.ReadOnly, Memory.Device, b)
-    let cBuffer = new Buffer<float32>(provider, Operations.ReadWrite, Memory.Device, c)
+    let c = Array.zeroCreate(rows * columns)    
 
     let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
@@ -79,19 +77,17 @@ let gpuMultiplicator timerTag provider iterations (a:array<_>) aRows aCols (b:ar
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
     
-    let kernelPrepare, kernelRun = provider.Compile matrixMult
+    let kernel, kernelPrepare, kernelRun = provider.Compile matrixMult
     let d = new _2D(rows, columns, localWorkSize, localWorkSize)
     kernelPrepare d columns a b c
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
-        let _ = commandQueue.Add(kernelRun [|aBuffer; bBuffer; cBuffer|]).Finish()
+        let _ = commandQueue.Add(kernelRun()).Finish()
         Timer<string>.Global.Lap(timerTag)
 
-    let _ = commandQueue.Add(cBuffer.Read(0, rows * columns, c)).Finish()        
+    let _ = commandQueue.Add(c.ToHost(kernel)).Finish()        
     printfn "done."
-    aBuffer.Dispose()
-    bBuffer.Dispose()
-    cBuffer.Dispose()
+        
     commandQueue.Dispose()
     c
 

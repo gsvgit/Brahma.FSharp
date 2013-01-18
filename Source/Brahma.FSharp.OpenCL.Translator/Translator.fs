@@ -57,17 +57,3 @@ type FSQuotationToOpenCLTranslator() =
     member this.Translate qExpr = 
         let ast = translate qExpr
         ast
-//        []
-////          , "__kernel void brahmaKernel(__global float* a,__global float* b,__global float* c,int columns) "
-////            + "\n{int tx = get_global_id(0);"
-////            + "\nint ty = get_global_id(1);"
-////            + "\nfloat value = ((float)0);"
-////            + "\nfor (int k = ((int)0);"
-////            + "\n k < columns;"
-////            + "\n k++) "
-////            + "\n{float elementA = a[((ty * columns) + k)];"
-////            + "\nfloat elementB = b[((k * columns) + tx)];"
-////            + "\n(value = (value + (elementA * elementB)));;;};"
-////            + "\n(c[((ty * columns) + tx)] = value);;}" 
-//        ,"__kernel void brahmaKernel(__global int* a) {int tx = get_global_id(0); a[tx] = a[tx] * 2;}" 
-

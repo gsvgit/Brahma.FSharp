@@ -25,17 +25,13 @@ type Translator() =
         with
         | ex -> failwith ex.Message
 
-    let defBuf () = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, intInArr)
-    let defFloatBuf () = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, float32Arr)
-    let getBuf arr = new Buffer<_>(provider, Operations.ReadWrite, Memory.Device, arr)
-
     let checkResult command =
-        let kernelPrepareF, kernelRunF = provider.Compile command                
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command                
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-        let check configuredBuffers (outBuffer:Buffer<'a>) (expected:array<'a>) =
-            let cq = commandQueue.Add(kernelRunF configuredBuffers).Finish()
+        let check (outArray:array<'a>) (expected:array<'a>) =        
+            let cq = commandQueue.Add(kernelRunF()).Finish()
             let r = Array.zeroCreate expected.Length
-            let cq2 = commandQueue.Add(outBuffer.Read(0, expected.Length, r)).Finish()
+            let cq2 = commandQueue.Add(outArray.ToHost(kernel,r)).Finish()
             commandQueue.Dispose()
             Assert.AreEqual(expected, r)
         kernelPrepareF,check
@@ -49,9 +45,8 @@ type Translator() =
             @>
 
         let run,check = checkResult command
-        run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|1;1;2;3|]
+        run _1d intInArr        
+        check intInArr [|1;1;2;3|]
                 
 
     [<Test>]
@@ -64,9 +59,8 @@ type Translator() =
             @>
         
         let run,check = checkResult command
-        run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|1;1;2;3|]
+        run _1d intInArr        
+        check intInArr [|1;1;2;3|]
 
     [<Test>]
     member this.``Binop plus``() = 
@@ -78,8 +72,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|3;1;2;3|]
+        check intInArr [|3;1;2;3|]
 
     [<Test>]
     member this.``If Then``() = 
@@ -91,8 +84,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|0;1;2;3|]
+        check intInArr [|0;1;2;3|]
 
     [<Test>]
     member this.``If Then Else``() = 
@@ -104,8 +96,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|2;1;2;3|]
+        check intInArr [|2;1;2;3|]
 
     [<Test>]
     member this.``For Integer Loop``() = 
@@ -117,8 +108,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|0;0;0;0|]
+        check intInArr [|0;0;0;0|]
 
     [<Test>]
     member this.``Sequential bindings``() = 
@@ -132,8 +122,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|2;1;2;3|]
+        check intInArr [|2;1;2;3|]
 
     [<Test>]
     member this.``Binding in IF.``() = 
@@ -151,8 +140,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|2;1;2;3|]
+        check intInArr [|2;1;2;3|]
 
     [<Test>]
     member this.``Binding in FOR.``() = 
@@ -166,8 +154,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|9;1;2;3|] 
+        check intInArr [|9;1;2;3|] 
 
     [<Test>]
     member this.``WHILE loop simple test.``() = 
@@ -180,8 +167,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|5;1;2;3|]
+        check intInArr [|5;1;2;3|]
 
     [<Test>]
     member this.``WHILE in FOR.``() = 
@@ -195,8 +181,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|26;26;26;10|]
+        check intInArr [|26;26;26;10|]
 
     [<Test>]
     member this.``Binding in WHILE.``() = 
@@ -210,8 +195,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|25;1;2;3|]
+        check intInArr [|25;1;2;3|]
 
     [<Test>]
     member this.``Simple 1D.``() = 
@@ -224,8 +208,7 @@ type Translator() =
         
         let run,check = checkResult command
         run _1d intInArr
-        let b = defBuf()
-        check [|b|] b [|0;2;4;6|]
+        check intInArr [|0;2;4;6|]
 
     [<Test>]
     member this.``Simple 1D with copy.``() = 
@@ -238,10 +221,8 @@ type Translator() =
         
         let run,check = checkResult command
         let outA = [|0;0;0;0|]
-        run _1d intInArr outA
-        let b = defBuf()
-        let oB = getBuf outA
-        check [|b;oB|] oB [|0;1;2;3|]
+        run _1d intInArr outA        
+        check outA [|0;1;2;3|]
 
     [<Test>]
     member this.``Simple 1D float.``() = 
@@ -253,9 +234,8 @@ type Translator() =
             @>
         
         let run,check = checkResult command
-        run _1d float32Arr
-        let b = defFloatBuf()
-        check [|b|] b [|0.0f;1.0f;4.0f;9.0f|]
+        run _1d float32Arr        
+        check float32Arr [|0.0f;1.0f;4.0f;9.0f|]
 
     [<Test>]
     member this.``Math sin``() = 
@@ -268,9 +248,8 @@ type Translator() =
         
         let run,check = checkResult command
         let inA = [|0.0f;1.0f;2.0f;3.0f|]
-        run _1d inA
-        let b = getBuf inA
-        check [|b|] b [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]        
+        run _1d inA        
+        check inA [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]        
 
     [<Test>]
     member this.``Int as arg``() = 
@@ -281,9 +260,8 @@ type Translator() =
                     buf.[i] <- x + x
             @>
         let run,check = checkResult command
-        run _1d 2 intInArr
-        let b = defBuf()
-        check [|b|] b [|4;4;4;4|]
+        run _1d 2 intInArr        
+        check intInArr [|4;4;4;4|]
 
     [<Test>]
     member this.``Sequential commands over single buffer``() = 
@@ -291,19 +269,16 @@ type Translator() =
             <@ 
                 fun (range:_1D) i x (buf:array<int>) ->                    
                     buf.[i] <- x + x
-            @>
-        let b = defBuf()
-        let kernelPrepareF, kernelRunF = provider.Compile command
+            @>        
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command
         kernelPrepareF _1d 0 2 intInArr
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)        
-        let _ = commandQueue.Add(kernelRunF [|b|])
+        let _ = commandQueue.Add(kernelRunF())
         kernelPrepareF _1d 2 2 intInArr
-        let _ = commandQueue.Add(kernelRunF [|b|])
+        let _ = commandQueue.Add(kernelRunF())
         let _ = commandQueue.Finish()
-        let r = Array.zeroCreate b.Length
-        let _ = commandQueue.Add(b.Read(0, b.Length, r)).Finish()
+        let r = Array.zeroCreate intInArr.Length
+        let _ = commandQueue.Add(intInArr.ToHost(kernel, r)).Finish()
         commandQueue.Dispose()
         let expected = [|4;1;4;3|] 
-        Assert.AreEqual(expected, r)        
-        
-
+        Assert.AreEqual(expected, r)

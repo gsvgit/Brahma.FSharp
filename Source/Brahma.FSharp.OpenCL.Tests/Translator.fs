@@ -183,5 +183,5 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Binding in WHILE.``()
-    (new Brahma.FSharp.OpenCL.Full.Translator()).``Math sin``()
+    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Math sin``()
     0

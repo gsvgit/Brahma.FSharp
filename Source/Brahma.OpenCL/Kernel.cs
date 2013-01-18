@@ -25,11 +25,23 @@ namespace Brahma.OpenCL
 {
     public interface ICLKernel: IKernel
     {
-        StringBuilder Source
+        ComputeProvider Provider
         {
             get;
             set;
         }
+
+        Dictionary<System.Array, Cl.Mem> AutoconfiguredBuffers
+        {
+            get;
+            //set;
+        }
+
+        StringBuilder Source
+        {
+            get;
+            set;
+        }       
 
         Cl.Kernel ClKernel
         {
@@ -48,12 +60,15 @@ namespace Brahma.OpenCL
 
     public abstract class KernelBase<TRange>: ICLKernel
         where TRange: struct, Brahma.INDRangeDimension
-    {
+    {        
+
         private static readonly TRange _range; // Default value will do
 
         private StringBuilder _source = new StringBuilder();
         private IEnumerable<MemberExpression> _closures;
         private IEnumerable<ParameterExpression> _parameters;
+        private Dictionary<System.Array, Cl.Mem> _autoconfiguredBuffers = new Dictionary<System.Array, Cl.Mem>(5);
+
 
         #region ICLKernel Members
 
@@ -61,6 +76,18 @@ namespace Brahma.OpenCL
         {
             get { return _source; }
             set { _source = value; }
+        }
+
+        ComputeProvider ICLKernel.Provider
+        {
+            get;
+            set;
+        }
+
+        Dictionary<System.Array, Cl.Mem> ICLKernel.AutoconfiguredBuffers
+        {
+            get { return _autoconfiguredBuffers; }
+            //private set { _autoconfiguredBuffers = value; }
         }
 
         Cl.Kernel ICLKernel.ClKernel

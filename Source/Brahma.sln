@@ -30,7 +30,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma.OpenCL", "Brahma.OpenCL\Brahma.OpenCL.csproj", "{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AsyncMatrixMultiplication", "AsyncMatrixMultiplication\AsyncMatrixMultiplication.fsproj", "{9C42FC2E-647B-46C1-BBA1-F8DC69536190}"
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.AST", "Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj", "{E0388E66-E36C-4ECA-ADCC-BFD115820C25}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Extensions", "Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj", "{4903D3E4-F6DD-49B8-998B-470277120271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +155,14 @@ Global
 		{E0388E66-E36C-4ECA-ADCC-BFD115820C25}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E0388E66-E36C-4ECA-ADCC-BFD115820C25}.Release|x64.ActiveCfg = Release|Any CPU
 		{E0388E66-E36C-4ECA-ADCC-BFD115820C25}.Release|x86.ActiveCfg = Release|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Release|x64.ActiveCfg = Release|Any CPU
+		{4903D3E4-F6DD-49B8-998B-470277120271}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

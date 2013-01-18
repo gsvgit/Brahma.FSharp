@@ -17,6 +17,7 @@ open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Wrapper
+open Brahma.FSharp.OpenCL.Extensions
 
 open Microsoft.FSharp.Quotations
 open System
@@ -71,11 +72,11 @@ let main () =
                 buf1.[0] <- y
         @>
     
-    let kernelFunPrep, kerRun = provider.Compile command
+    let kernel, kernelFunPrep, kerRun = provider.Compile command
     kernelFunPrep (new _1D(l,1)) 2 a
-    let cq = commandQueue.Add(kerRun([|aBuf|])).Finish()
+    let cq = commandQueue.Add(kerRun()).Finish()
     let r = Array.zeroCreate(l)
-    let cq2 = commandQueue.Add(aBuf.Read(0, l, r)).Finish()
+    let cq2 = commandQueue.Add(a.ToHost(kernel,r)).Finish()
     ()
 
 do main ()

@@ -19,22 +19,70 @@ using System.Collections.Generic;
 using System.Linq;
 using Brahma.Commands;
 using OpenCL.Net;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Brahma.OpenCL.Commands
 {
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
         where TRange: struct, INDRangeDimension
     {
+        private static readonly IntPtr _intPtrSize = (IntPtr)Marshal.SizeOf(typeof(IntPtr));
+        private object curArgVal;
+        private System.IntPtr curArgSize;
+        private ICLKernel kernel;
+
+        private void ArrayToMem<T>(T[] data)
+        {
+            curArgSize = _intPtrSize;
+            if (kernel.AutoconfiguredBuffers.ContainsKey(data))
+            {
+                curArgVal = kernel.AutoconfiguredBuffers[data];
+            }
+            else
+            {
+                Cl.ErrorCode error;
+                var operations = Operations.ReadWrite;
+                var memory = Memory.Device;
+                var _elementSize = Marshal.SizeOf(typeof(T));
+                var mem = Cl.CreateBuffer(kernel.Provider.Context, (Cl.MemFlags)operations | (memory == Memory.Host ? Cl.MemFlags.UseHostPtr : (Cl.MemFlags)memory | Cl.MemFlags.CopyHostPtr),
+                    (IntPtr)(_elementSize * data.Length), data, out error);
+                curArgVal = mem;
+                kernel.AutoconfiguredBuffers.Add(data, mem);
+                if (error != Cl.ErrorCode.Success)
+                    throw new CLException(error);
+            }                        
+        }
+
+        private void ToIMem(object arg)
+        {
+            
+            var isIMem = arg is IMem;
+            if (isIMem)
+            {
+                curArgSize = ((IMem)arg).Size;
+                curArgVal = ((IMem)arg).Data;
+            }            
+            else if (arg is int[]) ArrayToMem<int>((int[])arg);            
+            else if (arg is Int64[]) ArrayToMem<Int64>((Int64[])arg);
+            else if (arg is float[]) ArrayToMem<float>((float[])arg);
+            //else if (arg is Single[]) ArrayToMem<Single>((Single[])arg);
+            else
+            {
+                curArgSize = (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);
+                curArgVal = arg;
+            }
+
+        }
+
         protected override void SetupArgument(object sender, int index, object arg)
         {
-            var kernel = Kernel as ICLKernel;
-            var isIMem = arg is IMem;            
-            var size = isIMem ? ((IMem)arg).Size : (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);
-            var value = isIMem ? ((IMem)arg).Data : arg;
+            kernel = Kernel as ICLKernel;
+            ToIMem(arg);            
             Cl.ErrorCode error = 
                     Cl.SetKernelArg(kernel.ClKernel, (uint)index
-                    , size
-                    , value);
+                    , curArgSize
+                    , curArgVal);
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);
         }

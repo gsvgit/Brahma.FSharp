@@ -54,6 +54,11 @@
       <Project>{70ac8a83-9850-4f73-b7bc-541eb2505be6}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Extensions</Name>
+      <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Wrapper\Brahma.FSharp.OpenCL.Wrapper.fsproj">
       <Name>Brahma.FSharp.OpenCL.Wrapper</Name>
       <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
