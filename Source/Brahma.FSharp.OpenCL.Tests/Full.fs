@@ -284,5 +284,26 @@ type Translator() =
         run _1d 2 intInArr
         let b = defBuf()
         check [|b|] b [|4;4;4;4|]
+
+    [<Test>]
+    member this.``Sequential commands over single buffer``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) i x (buf:array<int>) ->                    
+                    buf.[i] <- x + x
+            @>
+        let b = defBuf()
+        let kernelPrepareF, kernelRunF = provider.Compile command
+        kernelPrepareF _1d 0 2 intInArr
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)        
+        let _ = commandQueue.Add(kernelRunF [|b|])
+        kernelPrepareF _1d 2 2 intInArr
+        let _ = commandQueue.Add(kernelRunF [|b|])
+        let _ = commandQueue.Finish()
+        let r = Array.zeroCreate b.Length
+        let _ = commandQueue.Add(b.Read(0, b.Length, r)).Finish()
+        commandQueue.Dispose()
+        let expected = [|4;1;4;3|] 
+        Assert.AreEqual(expected, r)        
         
 
