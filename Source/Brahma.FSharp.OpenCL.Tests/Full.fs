@@ -34,6 +34,7 @@ type Translator() =
             let cq2 = commandQueue.Add(outArray.ToHost(kernel,r)).Finish()
             commandQueue.Dispose()
             Assert.AreEqual(expected, r)
+            (kernel :> ICLKernel).CloseAllBuffers()
         kernelPrepareF,check
 
     [<Test>]
@@ -282,3 +283,4 @@ type Translator() =
         commandQueue.Dispose()
         let expected = [|4;1;4;3|] 
         Assert.AreEqual(expected, r)
+        (kernel :> ICLKernel).CloseAllBuffers()

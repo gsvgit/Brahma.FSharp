@@ -54,10 +54,13 @@ type ComputeProvider with
         kernel            
                     
     member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =
+        let options = defaultArg _options this.DefaultOptions_p
+        this.SetCompileOptions options
+        let kernel = this.CompileQuery<Kernel<'TRange>> query
         let rng = ref Unchecked.defaultof<'TRange>
         let args = ref [||]
+        let run = ref Unchecked.defaultof<Commands.Run<'TRange>>
         let getStarterFuncton qExpr =
-            let garr = ref [||]
             let rec go expr vars=
                 match expr with
                 | Patterns.Lambda (v, body) -> 
@@ -68,23 +71,17 @@ type ComputeProvider with
                             |> List.map 
                                  (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
                         <@@ 
-                            garr := %%c
-                            let x = !garr |> List.ofArray
+                            let x = %%c |> List.ofArray
                             rng := (box x.Head) :?> 'TRange
                             args := x.Tail |> Array.ofList
+                            run := kernel.Run(!rng, !args)
                         @@>
                     arr            
             <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
-
-        let kernel = this.CompileQuery<Kernel<'TRange>> query
+        
         if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
 
-        let starter = getStarterFuncton query
-
-        let options = defaultArg _options this.DefaultOptions_p
-        this.SetCompileOptions options
-        
         kernel
-        , starter
-        , fun () -> kernel.Run(!rng, !args)
+        , getStarterFuncton query
+        , fun () -> !run
     

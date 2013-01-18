@@ -25,6 +25,8 @@ namespace Brahma.OpenCL
 {
     public interface ICLKernel: IKernel
     {
+        void CloseAllBuffers();
+
         ComputeProvider Provider
         {
             get;
@@ -34,7 +36,6 @@ namespace Brahma.OpenCL
         Dictionary<System.Array, Cl.Mem> AutoconfiguredBuffers
         {
             get;
-            //set;
         }
 
         StringBuilder Source
@@ -71,6 +72,14 @@ namespace Brahma.OpenCL
 
 
         #region ICLKernel Members
+        
+        void ICLKernel.CloseAllBuffers()
+        {
+            foreach (var kvp in this._autoconfiguredBuffers)
+            {
+                kvp.Value.Dispose();
+            }
+        }
 
         StringBuilder ICLKernel.Source
         {
@@ -87,7 +96,6 @@ namespace Brahma.OpenCL
         Dictionary<System.Array, Cl.Mem> ICLKernel.AutoconfiguredBuffers
         {
             get { return _autoconfiguredBuffers; }
-            //private set { _autoconfiguredBuffers = value; }
         }
 
         Cl.Kernel ICLKernel.ClKernel

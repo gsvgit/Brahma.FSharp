@@ -89,6 +89,8 @@ let gpuMultiplicator timerTag provider iterations (a:array<_>) aRows aCols (b:ar
     printfn "done."
         
     commandQueue.Dispose()
+    (kernel :> ICLKernel).CloseAllBuffers()
+
     c
 
 let Main () =
@@ -160,6 +162,6 @@ let Main () =
     gpuTime |> printfn "GPU total time async: %A"
     gpuTime2 |> printfn "GPU total time seq: %A"
 
-    provider.Dispose()
+    provider.Dispose()    
 
 do Main()
