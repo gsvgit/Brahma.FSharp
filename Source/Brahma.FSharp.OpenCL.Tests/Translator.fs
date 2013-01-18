@@ -180,8 +180,32 @@ type Translator() =
 
         checkCode command "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
 
+    [<Test>]
+    member this.``Simple seq.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    buf.[0] <- 2
+                    buf.[1] <- 3
+            @>
+
+        checkCode command "Simple.Seq.gen" "Simple.Seq.cl"
+
+    [<Test>]
+    member this.``Seq with bindings.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let x = 2
+                    buf.[0] <- x
+                    let y = 2
+                    buf.[1] <- y
+            @>
+
+        checkCode command "Seq.With.Bindings.gen" "Seq.With.Bindings.cl"
+
 [<EntryPoint>]
 let f _ =
-    //(new Translator()).``Binding in WHILE.``()
-    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Math sin``()
+    (new Translator()).``Seq with bindings.``()
+    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0

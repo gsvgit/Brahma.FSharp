@@ -38,15 +38,16 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
     let cRows, cCols = GetOutputMatrixDimensions aRows aCols bRows bCols
     for i in 0 .. cRows - 1 do
         for j in 0 .. cCols - 1 do
+            let mutable buf = 0.0f
             for k in 0 .. aCols - 1 do
-                c.[i * cCols + j] <- c.[i * cCols + j] + a.[i * aCols + k] * b.[k * bCols + j]
-
+                 buf <- buf + a.[i * aCols + k] * b.[k * bCols + j]
+            c.[i * cCols + j] <- c.[i * cCols + j] + buf
 let Main () =
 
     let platformName = "*"
 
-    let rows = 600
-    let columns = 600
+    let rows = 200
+    let columns = 200
     let localWorkSize = 10
     let iterations = 100
     let deviceType = Cl.DeviceType.Default
@@ -68,19 +69,21 @@ let Main () =
         <@
             fun (r:_2D) columns (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
                 let tx = r.GlobalID0
-                let ty = r.GlobalID1                
+                let ty = r.GlobalID1
+                let mutable buf = 0.0f
                 for k in 0 .. columns - 1 do
-                    c.[ty * columns + tx] <- c.[ty * columns + tx] + (a.[ty * columns + k] * b.[k * columns + tx])
+                    buf <- buf + (a.[ty * columns + k] * b.[k * columns + tx])
+                c.[ty * columns + tx] <- c.[ty * columns + tx] + buf
         @>
 
-//    printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
-//    let cNormal = Array.zeroCreate (rows * columns)
-//    for i in 0 .. iterations - 1 do
-//        Timer<string>.Global.Start()
-//        Multiply aValues rows columns bValues rows columns cNormal
-//        Timer<string>.Global.Lap(".NET")
-//
-//    printfn "done."        
+    printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
+    let cNormal = Array.zeroCreate (rows * columns)
+    for i in 0 .. iterations - 1 do
+        Timer<string>.Global.Start()
+        Multiply aValues rows columns bValues rows columns cNormal
+        Timer<string>.Global.Lap(".NET")
+
+    printfn "done."
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
 
@@ -95,15 +98,15 @@ let Main () =
     printfn "done."
     
     let _ = commandQueue.Add(cParallel.ToHost(kernel)).Finish()
-    //let x = cParallel = cParallel2
-//    printfn "Verifying results..."    
-//    for i in 0 .. rows * columns - 1 do
-//        if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
-//        then
-//            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
-//            |> failwith
-//
-//    printfn "done."
+    
+    printfn "Verifying results..."    
+    for i in 0 .. rows * columns - 1 do
+        if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
+        then
+            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
+            |> failwith
+
+    printfn "done."
 
     Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
     Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"    

@@ -284,3 +284,15 @@ type Translator() =
         let expected = [|4;1;4;3|] 
         Assert.AreEqual(expected, r)
         (kernel :> ICLKernel).CloseAllBuffers()
+
+    [<Test>]
+    member this.``Sequential operations``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->                    
+                    buf.[0] <- 2
+                    buf.[1] <- 4
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|2;4;2;3|]

@@ -148,6 +148,31 @@ and translateWhileLoop condExpr bodyExpr targetContext =
     let nBody,tContext = Translate bodyExpr tContext
     new WhileLoop<_>(nCond, toStb nBody), tContext 
 
+and translateSeq expr1 expr2 (targetContext:TargetContext<_,_>) =
+    let decls = new ResizeArray<_>(targetContext.VarDecls)
+    targetContext.VarDecls.Clear()
+    let nExpr1,tContext = Translate expr1 targetContext
+    let nExpr2,tContext = Translate expr2 tContext
+    let stmt = 
+        match (nExpr1:Node<_>),(nExpr2:Node<_>) with
+        | (:? StatementBlock<Lang> as s1),(:? StatementBlock<Lang> as s2) ->
+            decls.AddRange(s1.Statements)
+            decls.AddRange(s2.Statements)
+            new StatementBlock<Lang>(decls)
+        | (:? StatementBlock<Lang> as s1),s2 ->
+            decls.AddRange(s1.Statements)
+            decls.Add (s2 :?> Statement<_>)
+            new StatementBlock<Lang>(decls)
+        | s1,(:? StatementBlock<Lang> as s2) ->
+            decls.Add(s1:?> Statement<_>)
+            decls.AddRange s2.Statements
+            new StatementBlock<Lang>(decls)
+        | s1,s2 ->
+            decls.Add(s1:?> Statement<_>)
+            decls.Add (s2 :?> Statement<_>)            
+            new StatementBlock<Lang>(decls)
+    stmt, tContext
+
 and Translate expr (targetContext:TargetContext<_,_>) =
         match expr with
         | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
@@ -192,7 +217,9 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             let res,tContext = transletaPropSet exprOpt propInfo exprs expr targetContext
             res :> Node<_>,tContext
         | Patterns.Quote expr -> "Application is not suported:" + string expr|> failwith
-        | Patterns.Sequential(expr1,expr2) -> "Application is not suported:" + string expr|> failwith
+        | Patterns.Sequential(expr1,expr2) -> 
+            let res,tContext = translateSeq expr1 expr2 targetContext
+            res :> Node<_>,tContext
         | Patterns.TryFinally(tryExpr,finallyExpr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.TryWith(expr1,var1,expr2,var2,expr3) -> "Application is not suported:" + string expr|> failwith 
         | Patterns.TupleGet(expr,i) -> "Application is not suported:" + string expr|> failwith
