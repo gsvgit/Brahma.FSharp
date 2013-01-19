@@ -249,7 +249,7 @@ type Translator() =
         
         let run,check = checkResult command
         let inA = [|0.0f;1.0f;2.0f;3.0f|]
-        run _1d inA        
+        run _1d inA
         check inA [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]        
 
     [<Test>]
