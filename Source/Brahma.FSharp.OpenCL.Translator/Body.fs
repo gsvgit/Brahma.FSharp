@@ -18,10 +18,15 @@ module Brahma.FSharp.OpenCL.Translator.Body
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.AST
 
-let rec private translateBinding (var:Var) (expr:Expr) targetContext = 
+let clearContext (targetContext:TargetContext<'a,'b>) =
+    let c = new TargetContext<'a,'b>()
+    c.Namer <- targetContext.Namer
+    c
+
+let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
     let body,tContext = TranslateAsExpr expr targetContext
-    let vType = Type.Translate(var.Type)
-    new VarDecl<Lang>(vType,var.Name,Some body)
+    let vType = Type.Translate(var.Type)    
+    new VarDecl<Lang>(vType,newName,Some body)
 
 and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targetContext =
     let args,tContext = 
@@ -92,8 +97,11 @@ and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
     let (r:Node<_>),tc = Translate expr (targetContext:TargetContext<_,_>)
     (r  :?> Expression<_>) ,tc
 
-and translateVar (var:Var) =
-    new Variable<_>(var.Name)
+and translateVar (var:Var) (targetContext:TargetContext<_,_>) =
+    let vName = targetContext.Namer.GetCLVarName var.Name
+    match vName with
+    | Some n -> new Variable<_>(n)
+    | None -> failwith "Seems, that you try to use variable, that declared out of quotation. Please, pass it as quoted function's parametaer."
 
 and translateValue (value:obj) (sType:System.Type) =
     let _type = Type.Translate sType
@@ -106,7 +114,7 @@ and translateValue (value:obj) (sType:System.Type) =
     new Const<_>(_type, v)
 
 and translateVarSet (var:Var) (expr:Expr) targetContext =
-    let var = translateVar var
+    let var = translateVar var targetContext
     let expr,tContext = TranslateAsExpr expr targetContext
     new Assignment<_>(new Property<_>(PropertyType.Var var),expr),tContext
 
@@ -130,23 +138,29 @@ and toStb (s:Node<_>) =
 and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
     let cond,tContext = translateCond cond targetContext
     let _then,tContext = 
-        let t,tc = Translate thenBranch (new TargetContext<_,_>())
+        let t,tc = Translate thenBranch (clearContext targetContext)
         toStb t, tc
     let _else,tContext = 
         match elseBranch with
         | Patterns.Value(null,sType) -> None,tContext
         | _ -> 
-            let r,tContext = Translate elseBranch (new TargetContext<_,_>())
+            let r,tContext = Translate elseBranch (clearContext targetContext)
             Some (toStb r), tContext
     new IfThenElse<_>(cond,_then, _else), targetContext
 
-and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) targetContext =
-    let v = translateVar i
-    let var = translateBinding i from targetContext
+and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) (targetContext:TargetContext<_,_>) =
+    let iName = 
+        match targetContext.Namer.LetIn i.Name with
+        | Some v -> v
+        | None -> failwith "Wow!!! Name for index not found!"
+
+    let v = translateVar i targetContext
+    let var = translateBinding i iName from targetContext
     let condExpr,tContext = TranslateAsExpr _to targetContext
-    let body,tContext = Translate _do (new TargetContext<_,_>())
+    let body,tContext = Translate _do (clearContext targetContext)
     let cond = new Binop<_>(LessEQ, v, condExpr)
     let condModifier = new Unop<_>(UOp.Incr,v)   
+    targetContext.Namer.LetOut()
     new ForIntegerLoop<_>(var,cond, condModifier,toStb body),targetContext
 
 and translateWhileLoop condExpr bodyExpr targetContext =
@@ -198,16 +212,21 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             let r,tContext = translateIf cond thenExpr elseExpr targetContext
             r :> Node<_>, tContext
         | Patterns.Lambda (var,expr)-> "Application is not suported:" + string expr|> failwith
-        | Patterns.Let (var, expr, inExpr) -> 
-            let vDecl = translateBinding var expr targetContext
+        | Patterns.Let (var, expr, inExpr) ->
+            let bName = 
+                match targetContext.Namer.LetIn var.Name with
+                | Some v -> v
+                | None -> failwith "Wow!!! Name for created binding not found!"
+            let vDecl = translateBinding var bName expr targetContext
             targetContext.VarDecls.Add vDecl
             let res,tContext = Translate inExpr targetContext
             let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
             sb.Add (res :?> Statement<_>)
+            targetContext.Namer.LetOut()
             if sb.Count > 1
             then new StatementBlock<_>(sb) :> Node<_>
             else res
-            , (new TargetContext<_,_>())
+            , (clearContext targetContext)
 
         | Patterns.LetRecursive (bindings,expr) -> "Application is not suported:" + string expr|> failwith
         | Patterns.NewArray(sType,exprs) -> "Application is not suported:" + string expr|> failwith
@@ -232,7 +251,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Patterns.TypeTest(expr,sType) -> "Application is not suported:" + string expr|> failwith
         | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "Application is not suported:" + string expr|> failwith
         | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
-        | Patterns.Var var -> translateVar var :> Node<_>, targetContext
+        | Patterns.Var var -> translateVar var targetContext :> Node<_>, targetContext
         | Patterns.VarSet(var,expr) -> 
             let res,tContext = translateVarSet var expr targetContext
             res :> Node<_>,tContext

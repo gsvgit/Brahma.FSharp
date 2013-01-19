@@ -215,17 +215,46 @@ type Translator() =
 
         checkCode command "Seq.With.Bindings.gen" "Seq.With.Bindings.cl"
 
+    [<Test>]
+    member this.``Bindings with equal names.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let x = 2
+                    buf.[0] <- x
+                    let x = 3
+                    buf.[1] <- x
+            @>
+
+        checkCode command "Bindings.With.Equal.Names.gen" "Bindings.With.Equal.Names.cl"
+
+    [<Test>]
+    member this.``Binding and FOR counter conflict 1.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let i = 2
+                    for i in 1..2 do     
+                        buf.[1] <- i
+            @>
+
+        checkCode command "Binding.And.FOR.Counter.Conflict.1.gen" "Binding.And.FOR.Counter.Conflict.1.cl"
+
+    [<Test>]
+    member this.``Binding and FOR counter conflict 2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    for i in 1..2 do
+                        let i = 2     
+                        buf.[1] <- i
+            @>
+
+        checkCode command "Binding.And.FOR.Counter.Conflict.2.gen" "Binding.And.FOR.Counter.Conflict.2.cl"
+
 [<EntryPoint>]
 let f _ =
-    (new Translator()).``WHILE with complex condition.``()
+    (new Translator()).``Binding and FOR counter conflict 1.``()
+    (new Translator()).``Binding and FOR counter conflict 2.``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0
-
-//let f () =
-//    let i = 2.0
-//    let mutable j = 0
-//    while j < 9 do               
-//        let i = 1.0
-//        z.[j] <- i            
-//        j <- j + 1 
-//    z.[1] <- i

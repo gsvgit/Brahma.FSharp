@@ -20,6 +20,10 @@ type Lang = OpenCL
 
 type TargetContext<'lang,'vDecl>() =
     let varDecls = new ResizeArray<'vDecl>()
+    let mutable namer = new Namer()
     member this.VarDecls
-        with get() =  varDecls
+        with get() = varDecls
+    member this.Namer
+        with get() = namer
+        and set v = namer <- v 
 
