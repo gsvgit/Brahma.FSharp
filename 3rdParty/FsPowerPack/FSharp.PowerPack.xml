@@ -1398,54 +1398,14 @@ Build a new array that contains the elements of the first array followed by the 
 <member name="">
 
 </member>
-<member name="M:Microsoft.FSharp.Control.FileExtensions.File.AsyncOpen.Static(System.String,System.IO.FileMode,Microsoft.FSharp.Core.FSharpOption{System.IO.FileAccess},Microsoft.FSharp.Core.FSharpOption{System.IO.FileShare},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{System.IO.FileOptions})">
-<summary>
- Create an async that opens a &lt;c&gt;System.IO.FileStream&lt;/c&gt; on the specified path, via a fresh I/O thread.
- Pass &lt;c&gt;options=FileOptions.Asynchronous&lt;/c&gt; to enable further asynchronous read/write operations
- on the FileStream.
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.Control.FileExtensions.File.AsyncAppendText.Static(System.String)">
-<summary>
- Create an async that returns a &lt;c&gt;System.IO.StreamWriter&lt;/c&gt; that appends UTF-8 text to an existing file, via a fresh I/O thread.
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.Control.FileExtensions.File.AsyncOpenWrite.Static(System.String)">
-<summary>
- Create an async that opens an existing file writing, via a fresh I/O thread.
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.Control.FileExtensions.File.AsyncOpenRead.Static(System.String)">
-<summary>
- Create an async that opens a &lt;c&gt;System.IO.FileStream&lt;/c&gt; on the specified path for read/write access, via a fresh I/O thread.
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.Control.FileExtensions.File.AsyncOpenText.Static(System.String)">
-<summary>
- Create an async that opens an existing file for reading, via a fresh I/O thread.
-</summary>
-</member>
 <member name="T:Microsoft.FSharp.Control.FileExtensions">
 
-</member>
-<member name="M:Microsoft.FSharp.Control.StreamReaderExtensions.StreamReader.AsyncReadToEnd(System.IO.StreamReader)">
-<summary>
- Return an asynchronous computation that will read to the end of a stream via a fresh I/O thread.
-</summary>
 </member>
 <member name="T:Microsoft.FSharp.Control.StreamReaderExtensions">
 
 </member>
-<member name="">
-
-</member>
 <member name="T:Microsoft.FSharp.Control.WebClientExtensions">
 
-</member>
-<member name="M:Microsoft.FSharp.Control.WebRequestExtensions.WebRequest.AsyncGetResponse(System.Net.WebRequest)">
-<summary>
- Return an asynchronous computation that, when run, will wait for a response to the given WebRequest.
-</summary>
 </member>
 <member name="T:Microsoft.FSharp.Control.WebRequestExtensions">
 
@@ -4341,21 +4301,6 @@ Take the pointwise maximum of two vectors
  Used when interfacing with native code math libraries such as LAPACK.
 </summary>
 </member>
-<member name="M:Microsoft.FSharp.NativeInterop.NativArrayExtensionsForMatrix.PinnedArray2`1.of_matrix.Static``1(Microsoft.FSharp.Math.Matrix{``0})">
-<summary>
- For native interop. Pin the given object
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.NativeInterop.NativArrayExtensionsForMatrix.PinnedArray`1.of_rowvec.Static``1(Microsoft.FSharp.Math.RowVector{``0})">
-<summary>
- For native interop. Pin the given object
-</summary>
-</member>
-<member name="M:Microsoft.FSharp.NativeInterop.NativArrayExtensionsForMatrix.PinnedArray`1.of_vector.Static``1(Microsoft.FSharp.Math.Vector{``0})">
-<summary>
- For native interop. Pin the given object
-</summary>
-</member>
 <member name="T:Microsoft.FSharp.NativeInterop.NativArrayExtensionsForMatrix">
 
 </member>
@@ -4859,6 +4804,12 @@ Take the pointwise maximum of two vectors
 <summary>
  Helpers used by generated parsers.
 </summary>
+</member>
+<member name="">
+
+</member>
+<member name="T:Microsoft.FSharp.Text.Parsing.Flags">
+
 </member>
 <member name="">
 

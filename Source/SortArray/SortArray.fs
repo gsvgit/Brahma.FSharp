@@ -32,13 +32,69 @@ let provider =
         | ex -> failwith ex.Message
 let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
-let length = 100000000
+let k = 1024
+
+let length = 110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
 
 let cpuArr = Array.copy baseArr
 let gpuArr = Array.copy baseArr
-let b = Array.zeroCreate (min (length/2+1) ((length + 1)/2))
+let b = Array.zeroCreate (min (length/k+1) ((length + (k-1))/k))
+
+let gpuSumk (*commandQueue:CommandQueue*) (arr:array<_>) (*b*) k = 
+    let dbg =
+        fun rng l k (a:array<_>) (b:array<_>) ->
+            for r in rng do
+                let _start = r * k
+                let mutable _end = _start + k - 1
+                if _end >= l then _end <- l - 1
+                let mutable buf = 0
+                for i in _start .. _end do
+                    buf <- buf + a.[i]
+                b.[r] <- buf
+
+    let command = 
+        <@
+            fun (rng:_1D) l k (a:array<_>) (b:array<_>) ->
+                let r = rng.GlobalID0
+                let _start = r * k
+                let mutable _end = _start + k - 1
+                if _end >= l then _end <- l - 1
+                let mutable buf = 0
+                for i in _start .. _end do
+                    buf <- buf + a.[i]
+                b.[r] <- buf
+        @>    
+    let length = arr.Length    
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let mutable bufLen = min (length/k+1) ((length + (k-1))/k)
+    let mutable curL = length
+    let mutable flip = false    
+    while curL > 1 do
+        let d =(new _1D(bufLen,1))
+        if flip
+        then 
+            //dbg [|0..bufLen-1|] curL k b arr
+            kernelPrepare d curL k b arr
+        else
+            //dbg [|0..bufLen-1|] curL k arr b
+            kernelPrepare d curL k arr b
+        flip <- not flip
+        
+        let _ = commandQueue.Add(kernelRun())
+        curL <- bufLen
+        bufLen <- (min (bufLen/k+1) ((bufLen + (k-1))/k))//bufLen/2
+    let _ = commandQueue.Finish() //Add(kernelRun()).Finish()
+    let sum = [|0|]
+    let _ = commandQueue.Add((if flip then b else arr).ToHost(kernel,sum)).Finish()
+    (kernel :> ICLKernel).CloseAllBuffers()
+    //let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()
+    //let _ = commandQueue.Add(b.ToHost(kernel)).Finish()
+    //let sum = (if flip then b else arr).[0]
+    commandQueue.Dispose()
+    sum.[0]
+
 
 let gpuSum (arr:array<_>) = 
     let command = 
@@ -46,7 +102,7 @@ let gpuSum (arr:array<_>) =
             fun (rng:_1D) l (a:array<_>) (b:array<_>) ->
                 let r = rng.GlobalID0
                 let x = r * 2
-                if l = x
+                if l - 1 <= x
                 then b.[r] <- a.[x]
                 else b.[r] <- a.[x] + a.[x + 1]
         @>    
@@ -63,13 +119,15 @@ let gpuSum (arr:array<_>) =
         flip <- not flip
         let _ = commandQueue.Add(kernelRun())
         curL <- bufLen
-        bufLen <- bufLen/2
-    let _ = commandQueue.Add(kernelRun()).Finish()
-    let _ = commandQueue.Add((if flip then b else arr).ToHost(kernel)).Finish()
-    let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()
-    let sum = (if flip then b else arr).[0]
+        bufLen <- (min (bufLen/2+1) ((bufLen + 1)/2))//bufLen/2
+    let _ = commandQueue.Finish() //Add(kernelRun()).Finish()
+    let sum = [|0|]
+    let _ = commandQueue.Add((if flip then b else arr).ToHost(kernel,sum)).Finish()
+    //let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()
+    //let _ = commandQueue.Add(b.ToHost(kernel)).Finish()
+    //let sum = (if flip then b else arr).[0]
     commandQueue.Dispose()
-    sum
+    sum.[0]
 
 let gpuiter (arr:array<_>) = 
     let command = 
@@ -105,7 +163,7 @@ let gpuSort (arr:array<_>) =
                     // Select from right:  rotate [left..right] and correct
                     else
                        let tmp = a.[right]     // Will move to [left]                       
-                       for j in [right - 1  .. left] do a.[j + 1] <- a.[j]     
+                       for j in right - 1  .. left do a.[j + 1] <- a.[j]     
                        a.[left] <- tmp
                        // EVERYTHING has moved up by one
                        left <- left + 1
@@ -129,29 +187,52 @@ let time f =
     f()
     System.DateTime.Now - start
 
-//let cpuSum = ref 0
-//(fun () -> cpuSum := Array.sum cpuArr )
-//|> time
-//|> printfn "cpu time: %A"  
-//
-//
-//let _gpuSum = ref 0
-//(fun () -> _gpuSum := gpuSum gpuArr )
-//|> time
-//|> printfn "gpu time: %A"  
-//
-//printfn "%A" cpuSum
-//printfn "%A" _gpuSum
+let timeGpuSumk () =
+    let l = 20000000
+    let baseArr = Array.init l (fun _ -> random.Next(10))
 
+    let gpuArr = Array.copy baseArr    
 
-(fun () -> Array.iteri (fun i x -> cpuArr.[i] <- x*x*x*x*x*x*x*x) cpuArr )
+    for k in Array.init 20 (fun i -> (i+1)*100) do
+        let b = Array.zeroCreate (min (l/k+1) ((l + (k-1))/k))
+        let cq = new CommandQueue(provider, provider.Devices |> Seq.head)
+        let a = Array.copy gpuArr
+        fun () ->
+            let sum = 1//gpuSumk cq a b k
+            printfn "k=%A" k
+            printfn "Sum=%A" sum
+        |> time
+        |> printfn "Time: %A"
+
+//timeGpuSumk()
+
+let cpuSum = ref 0
+(fun () -> cpuSum := Array.sum cpuArr )
 |> time
-|> printfn "cpu iter time: %A"  
+|> printfn "cpu time: %A"  
 
 
-(fun () -> gpuiter cpuArr )
+let _gpuSum = ref 0
+(fun () -> _gpuSum := 
+                gpuSumk gpuArr k )
+                // gpuSum [|2;3;4;5;1|] )
 |> time
-|> printfn "cpu iter time: %A"  
+|> printfn "gpu time: %A"
+
+printfn "%A" cpuSum
+printfn "%A" _gpuSum
+
+
+
+
+//(fun () -> Array.iteri (fun i x -> cpuArr.[i] <- x*x*x*x*x*x*x*x) cpuArr )
+//|> time
+//|> printfn "cpu iter time: %A"  
+//
+//
+//(fun () -> gpuiter cpuArr )
+//|> time
+//|> printfn "cpu iter time: %A"  
 
 
 //gpuSort [|1;2|] |> printfn "%A"
