@@ -46,10 +46,10 @@ let Main () =
 
     let platformName = "*"
 
-    let rows = 200
-    let columns = 200
+    let rows = 4000
+    let columns = 4000
     let localWorkSize = 10
-    let iterations = 100
+    let iterations = 1
     let deviceType = Cl.DeviceType.Default
 
     let provider =
@@ -76,14 +76,14 @@ let Main () =
                 c.[ty * columns + tx] <- c.[ty * columns + tx] + buf
         @>
 
-    printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
-    let cNormal = Array.zeroCreate (rows * columns)
-    for i in 0 .. iterations - 1 do
-        Timer<string>.Global.Start()
-        Multiply aValues rows columns bValues rows columns cNormal
-        Timer<string>.Global.Lap(".NET")
-
-    printfn "done."
+//    printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
+//    let cNormal = Array.zeroCreate (rows * columns)
+//    for i in 0 .. iterations - 1 do
+//        Timer<string>.Global.Start()
+//        Multiply aValues rows columns bValues rows columns cNormal
+//        Timer<string>.Global.Lap(".NET")
+//
+//    printfn "done."
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
 
@@ -99,14 +99,14 @@ let Main () =
     
     let _ = commandQueue.Add(cParallel.ToHost(kernel)).Finish()
     
-    printfn "Verifying results..."    
-    for i in 0 .. rows * columns - 1 do
-        if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
-        then
-            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
-            |> failwith
-
-    printfn "done."
+//    printfn "Verifying results..."    
+//    for i in 0 .. rows * columns - 1 do
+//        if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
+//        then
+//            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
+//            |> failwith
+//
+//    printfn "done."
 
     Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
     Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"    

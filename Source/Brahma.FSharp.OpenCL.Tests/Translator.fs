@@ -181,6 +181,17 @@ type Translator() =
         checkCode command "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
 
     [<Test>]
+    member this.``WHILE with complex condition.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                 while buf.[0] < 5 && (buf.[1] < 6 || buf.[2] > 2) do                     
+                     buf.[0] <- 1
+            @>
+
+        checkCode command "WHILE.with.complex.condition.gen" "WHILE.with.complex.condition.cl"
+
+    [<Test>]
     member this.``Simple seq.``() = 
         let command = 
             <@ 
@@ -206,6 +217,15 @@ type Translator() =
 
 [<EntryPoint>]
 let f _ =
-    (new Translator()).``Seq with bindings.``()
+    (new Translator()).``WHILE with complex condition.``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0
+
+//let f () =
+//    let i = 2.0
+//    let mutable j = 0
+//    while j < 9 do               
+//        let i = 1.0
+//        z.[j] <- i            
+//        j <- j + 1 
+//    z.[1] <- i

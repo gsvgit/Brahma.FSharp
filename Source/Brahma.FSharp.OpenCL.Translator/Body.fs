@@ -97,7 +97,13 @@ and translateVar (var:Var) =
 
 and translateValue (value:obj) (sType:System.Type) =
     let _type = Type.Translate sType
-    new Const<_>(_type, string value)
+    let v =
+        let s = string value 
+        if sType.Name.ToLowerInvariant() = "boolean"
+        then            
+            if s.ToLowerInvariant() = "false" then "0" else "1"
+        else s 
+    new Const<_>(_type, v)
 
 and translateVarSet (var:Var) (expr:Expr) targetContext =
     let var = translateVar var
@@ -144,7 +150,7 @@ and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) targe
     new ForIntegerLoop<_>(var,cond, condModifier,toStb body),targetContext
 
 and translateWhileLoop condExpr bodyExpr targetContext =
-    let nCond,tContext = TranslateAsExpr condExpr targetContext
+    let nCond,tContext = translateCond condExpr targetContext
     let nBody,tContext = Translate bodyExpr tContext
     new WhileLoop<_>(nCond, toStb nBody), tContext 
 

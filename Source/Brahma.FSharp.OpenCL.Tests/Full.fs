@@ -268,7 +268,7 @@ type Translator() =
     member this.``Sequential commands over single buffer``() = 
         let command = 
             <@ 
-                fun (range:_1D) i x (buf:array<int>) ->                    
+                fun (range:_1D) i x (buf:array<int>) ->
                     buf.[i] <- x + x
             @>        
         let kernel,kernelPrepareF, kernelRunF = provider.Compile command
@@ -289,7 +289,7 @@ type Translator() =
     member this.``Sequential operations``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) ->                    
+                fun (range:_1D) (buf:array<int>) ->
                     buf.[0] <- 2
                     buf.[1] <- 4
             @>
