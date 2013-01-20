@@ -15,8 +15,6 @@
 
 module FsMatrixMultiply
 
-open System.Text.RegularExpressions
-
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
@@ -49,7 +47,7 @@ let Main () =
 
     let rows = 200
     let columns = 200
-    let localWorkSize = 10
+    let localWorkSize = 20
     let iterations = 100
     let deviceType = Cl.DeviceType.Default
 
@@ -66,15 +64,15 @@ let Main () =
     let bValues = MakeMatrix rows columns
     let cParallel = Array.zeroCreate(rows * columns)
 
-    let matrixMult = 
+    let command = 
         <@
-            fun (r:_2D) columns (a:array<float32>) (b:array<float32>) (c:array<float32>) -> 
+            fun (r:_2D) columns (a:array<_>) (b:array<_>) (c:array<_>) -> 
                 let tx = r.GlobalID0
                 let ty = r.GlobalID1
-                let mutable buf = 0.0f
+                let mutable buf = c.[ty * columns + tx]
                 for k in 0 .. columns - 1 do
                     buf <- buf + (a.[ty * columns + k] * b.[k * columns + tx])
-                c.[ty * columns + tx] <- c.[ty * columns + tx] + buf
+                c.[ty * columns + tx] <- buf
         @>
 
     printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
@@ -88,7 +86,7 @@ let Main () =
 
     printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
 
-    let kernel, kernelPrepare, kernelRun = provider.Compile matrixMult
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
     kernelPrepare d columns aValues bValues cParallel
     for i in 0 .. iterations - 1 do
