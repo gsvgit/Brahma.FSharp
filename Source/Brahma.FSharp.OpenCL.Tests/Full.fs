@@ -296,3 +296,51 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr
         check intInArr [|2;4;2;3|]
+
+    [<Test>]
+    member this.``Quotations injections 1``() = 
+        let myF = <@ fun x -> x * x @>
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    buf.[0] <- (%myF) 2
+                    buf.[1] <- (%myF) 4
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|4;16;2;3|]
+
+    [<Test>]
+    member this.``Quotations injections 2``() = 
+        let myF = <@ fun x y -> y - x @>
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    buf.[0] <- (%myF) 2 5
+                    buf.[1] <- (%myF) 4 9
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|3;5;2;3|]
+
+    //[<Test>]
+    member this.``Forward pipe``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    buf.[0] <- 1.25f |> int
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|1;1;2;3|]
+
+    //[<Test>]
+    member this.``Backward pipe``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    buf.[0] <- int <| 1.25f + 2.34f
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|3;1;2;3|]
