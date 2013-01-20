@@ -42,6 +42,7 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
             for k in 0 .. aCols - 1 do
                  buf <- buf + a.[i * aCols + k] * b.[k * bCols + j]
             c.[i * cCols + j] <- c.[i * cCols + j] + buf
+
 let Main () =
 
     let platformName = "*"
@@ -99,12 +100,14 @@ let Main () =
     
     let _ = commandQueue.Add(cParallel.ToHost(kernel)).Finish()
     
-    printfn "Verifying results..."    
+    printfn "Verifying results..."
+    let mutable isSuccess  = true
     for i in 0 .. rows * columns - 1 do
-        if System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
+        if isSuccess && System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
         then
-            sprintf "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
-            |> failwith
+            isSuccess <- false
+            printfn "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
+            printfn "Maybe your GPU is not powerful enough. Problems with precision often occurs on mobile GPU."
 
     printfn "done."
 
