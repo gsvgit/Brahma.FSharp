@@ -20,24 +20,40 @@ open System.Collections.Generic
 type Namer() =
     let mutable counter = 0
     let scopes = new Stack<_>(10)
-    let allVars = new ResizeArray<_>()    
+    let allVars = new ResizeArray<_>()
+    let newName vName = 
+        if allVars.Contains vName
+        then 
+            let n = vName + string counter
+            counter <- counter + 1
+            n
+        else
+            allVars.Add(vName) 
+            vName
+    let forAdd = new Dictionary<_,_>()
     member this.LetIn() = scopes.Push(new Dictionary<_,_>())
+
+    member this.LetStart bindingName =
+        let newName = newName bindingName
+        forAdd.Add(bindingName,newName)
+        newName
+
     member this.LetIn bindingName = 
         scopes.Push(new Dictionary<_,_>())
         this.AddVar bindingName
-        this.GetCLVarName bindingName
+
     member this.LetOut() = scopes.Pop() |> ignore
+
     member this.AddVar vName = 
         let newName = 
-            if allVars.Contains(vName)
-            then 
-                let n = vName + string counter
-                counter <- counter + 1
+            if forAdd.ContainsKey vName
+            then
+                let n = forAdd.[vName]
+                forAdd.Remove vName |> ignore
                 n
-            else
-                allVars.Add(vName) 
-                vName
+            else newName vName
         scopes.Peek().Add(vName,newName)
+
     member this.GetCLVarName vName =
         let scope = scopes.ToArray() |> Array.tryFind (fun d -> d.ContainsKey vName) 
         scope |> Option.map( fun s -> s.[vName])

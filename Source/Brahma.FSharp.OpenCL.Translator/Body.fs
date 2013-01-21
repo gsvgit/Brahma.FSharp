@@ -97,10 +97,13 @@ and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
     let (r:Node<_>),tc = Translate expr (targetContext:TargetContext<_,_>)
     (r  :?> Expression<_>) ,tc
 
+and getVar (clVarName:string) (targetContext:TargetContext<_,_>) =
+    new Variable<_>(clVarName)
+
 and translateVar (var:Var) (targetContext:TargetContext<_,_>) =
     let vName = targetContext.Namer.GetCLVarName var.Name
     match vName with
-    | Some n -> new Variable<_>(n)
+    | Some n -> getVar n targetContext
     | None -> failwith "Seems, that you try to use variable, that declared out of quotation. Please, pass it as quoted function's parametaer."
 
 and translateValue (value:obj) (sType:System.Type) =
@@ -149,14 +152,11 @@ and translateIf (cond:Expr) (thenBranch:Expr) (elseBranch:Expr) targetContext =
     new IfThenElse<_>(cond,_then, _else), targetContext
 
 and translateForIntegerRangeLoop (i:Var) (from:Expr) (_to:Expr) (_do:Expr) (targetContext:TargetContext<_,_>) =
-    let iName = 
-        match targetContext.Namer.LetIn i.Name with
-        | Some v -> v
-        | None -> failwith "Wow!!! Name for index not found!"
-
-    let v = translateVar i targetContext
+    let iName = targetContext.Namer.LetStart i.Name
+    let v = getVar iName targetContext
     let var = translateBinding i iName from targetContext
     let condExpr,tContext = TranslateAsExpr _to targetContext
+    targetContext.Namer.LetIn i.Name
     let body,tContext = Translate _do (clearContext targetContext)
     let cond = new Binop<_>(LessEQ, v, condExpr)
     let condModifier = new Unop<_>(UOp.Incr,v)   
@@ -231,12 +231,10 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             //translateLambda var expr targetContext
             "Lambda is not suported:" + string expr|> failwith
         | Patterns.Let (var, expr, inExpr) ->
-            let bName = 
-                match targetContext.Namer.LetIn var.Name with
-                | Some v -> v
-                | None -> failwith "Wow!!! Name for created binding not found!"
+            let bName = targetContext.Namer.LetStart var.Name                
             let vDecl = translateBinding var bName expr targetContext
             targetContext.VarDecls.Add vDecl
+            targetContext.Namer.LetIn var.Name
             let res,tContext = Translate inExpr targetContext
             let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
             sb.Add (res :?> Statement<_>)

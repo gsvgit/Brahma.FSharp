@@ -253,6 +253,31 @@ type Translator() =
         checkCode command "Binding.And.FOR.Counter.Conflict.2.gen" "Binding.And.FOR.Counter.Conflict.2.cl"
 
     [<Test>]
+    member this.``Binding and FOR counter conflict 3.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    for i in 0..1 do
+                        let i = i + 2
+                        buf.[i] <- 2
+            @>
+
+        checkCode command "Binding.And.FOR.Counter.Conflict.3.gen" "Binding.And.FOR.Counter.Conflict.3.cl"
+
+    [<Test>]
+    member this.``Binding and FOR counter conflict 4.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let i = 1
+                    for i in 0..i+1 do
+                        let i = i + 2
+                        buf.[i] <- 2
+            @>
+
+        checkCode command "Binding.And.FOR.Counter.Conflict.4.gen" "Binding.And.FOR.Counter.Conflict.4.cl"
+
+    [<Test>]
     member this.``Quotations injections 1``() = 
         let myF = <@ fun x -> x * x @>
         let command = 
@@ -278,7 +303,7 @@ type Translator() =
 
 [<EntryPoint>]
 let f _ =
-    //(new Translator()).``Quotations injections 1``()
+    (new Translator()).``Binding and FOR counter conflict 4.``()
     //(new Translator()).``Quotations injections 2``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0
