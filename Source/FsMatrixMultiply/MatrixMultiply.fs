@@ -47,7 +47,7 @@ let Main () =
 
     let rows = 200
     let columns = 200
-    let localWorkSize = 20
+    let localWorkSize = 10
     let iterations = 100
     let deviceType = Cl.DeviceType.Default
 
@@ -105,7 +105,6 @@ let Main () =
         then
             isSuccess <- false
             printfn "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
-            printfn "Maybe your GPU is not powerful enough. Problems with precision often occurs on mobile GPU."
 
     printfn "done."
 
