@@ -21,11 +21,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Printe
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuotationTest", "QuotationTest\QuotationTest.fsproj", "{9F56515E-D17B-4A19-A4F2-32E84D395831}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Core", "Brahma.FSharp.OpenCL.Wrapper\Brahma.FSharp.OpenCL.Core.fsproj", "{CBBC6D5C-5051-4D66-B616-A59A52A1A3F5}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Core", "Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj", "{CBBC6D5C-5051-4D66-B616-A59A52A1A3F5}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahma.FSharp.OpenCL.Tests", "Brahma.FSharp.OpenCL.Tests\Brahma.FSharp.OpenCL.Tests.fsproj", "{73882D44-0194-400A-BCE4-F29D66417DE0}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultiply", "FsMatrixMultiply\MatrixMultiply.fsproj", "{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultiply", "MatrixMultiply\MatrixMultiply.fsproj", "{D51DAF7E-094E-45E7-AC6B-BE22DF1C4B4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma.OpenCL", "Brahma.OpenCL\Brahma.OpenCL.csproj", "{1F52ECB5-6CD2-4D76-A4B7-A23131C9D195}"
 EndProject
