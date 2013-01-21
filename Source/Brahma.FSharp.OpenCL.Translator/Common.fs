@@ -25,5 +25,5 @@ type TargetContext<'lang,'vDecl>() =
         with get() = varDecls
     member this.Namer
         with get() = namer
-        and set v = namer <- v 
+        and set v = namer <- v
 
