@@ -111,15 +111,6 @@ namespace Brahma.OpenCL
         }        
        
 
-        // TODO: Using a range variable inside the body of a function does not carry over to OpenCL (that variable is not in scope)
-        [KernelCallable]
-        public Func<T> CompileFunction<T>(Func<T> function)
-            where T: IMem
-        {
-            throw new NotSupportedException("Cannot call this method from code, only inside a kernel");
-        }
-
-
         public override void Dispose()
         {
             if (!_disposed)

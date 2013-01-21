@@ -80,8 +80,8 @@
       <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Wrapper\Brahma.FSharp.OpenCL.Wrapper.fsproj">
-      <Name>Brahma.FSharp.OpenCL.Wrapper</Name>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Wrapper\Brahma.FSharp.OpenCL.Core.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Core</Name>
       <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
       <Private>True</Private>
     </ProjectReference>

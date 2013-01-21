@@ -18,7 +18,7 @@ module SortArray
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
-open Brahma.FSharp.OpenCL.Wrapper
+open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 
@@ -81,7 +81,6 @@ let gpuSumk (*commandQueue:CommandQueue*) (arr:array<_>) (*b*) k =
             //dbg [|0..bufLen-1|] curL k arr b
             kernelPrepare d curL k arr b
         flip <- not flip
-        
         let _ = commandQueue.Add(kernelRun())
         curL <- bufLen
         bufLen <- (min (bufLen/k+1) ((bufLen + (k-1))/k))//bufLen/2

@@ -16,7 +16,7 @@
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
-open Brahma.FSharp.OpenCL.Wrapper
+open Brahma.FSharp.OpenCL.Core
 open Brahma.FSharp.OpenCL.Extensions
 
 open Microsoft.FSharp.Quotations

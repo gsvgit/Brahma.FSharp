@@ -5,7 +5,7 @@ open System.IO
 open Brahma.Samples
 open OpenCL.Net
 open Brahma.OpenCL
-open Brahma.FSharp.OpenCL.Wrapper
+open Brahma.FSharp.OpenCL.Core
 open System
 open System.Reflection
 open Microsoft.FSharp.Quotations

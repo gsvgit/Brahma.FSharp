@@ -13,7 +13,7 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-module Brahma.FSharp.OpenCL.Wrapper
+module Brahma.FSharp.OpenCL.Core
 
 open Brahma.OpenCL
 open Microsoft.FSharp.Quotations

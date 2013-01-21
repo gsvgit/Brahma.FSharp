@@ -8,9 +8,9 @@
     <ProjectGuid>cbbc6d5c-5051-4d66-b616-a59a52a1a3f5</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Brahma.FSharp.OpenCL.Wrapper</RootNamespace>
-    <AssemblyName>Brahma.FSharp.OpenCL.Wrapper</AssemblyName>
+    <AssemblyName>Brahma.FSharp.OpenCL.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Name>Brahma.FSharp.OpenCL.Wrapper</Name>
+    <Name>Brahma.FSharp.OpenCL.Core</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
