@@ -34,7 +34,7 @@ let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let k = 1024
 
-let length = 110000000
+let length = 2//110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
 
@@ -128,6 +128,33 @@ let gpuSum (arr:array<_>) =
     commandQueue.Dispose()
     sum.[0]
 
+let gpuSum2 (arr:array<_>) = 
+    let command = 
+        <@
+            fun (rng:_1D) k l (a:array<_>) ->
+                let x = rng.GlobalID0 * k * 2
+                let y = x + k
+                if y < l
+                then a.[x] <- a.[x] + a.[y]
+        @>
+    let length = arr.Length    
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let mutable bufLen = (min (length/2+1) ((length + 1)/2))
+    let mutable k = 1
+    while k < length do
+        let d =(new _1D(bufLen,1))        
+        kernelPrepare d k length arr
+        let _ = commandQueue.Add(kernelRun()) 
+        k <- k*2
+        bufLen <- (min (bufLen/2+1) ((bufLen + 1)/2))
+
+    printfn "K = %A" k
+    let _ = commandQueue.Finish()
+    let sum = [|0|]
+    let _ = commandQueue.Add(arr.ToHost(kernel,sum)).Finish()    
+    commandQueue.Dispose()
+    sum.[0]
+
 let gpuiter (arr:array<_>) = 
     let command = 
         <@
@@ -142,6 +169,31 @@ let gpuiter (arr:array<_>) =
     let _ = commandQueue.Add(kernelRun()).Finish()    
     let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()    
     ()
+
+let gpuSort2 (arr:array<_>) =
+    let command = 
+        <@
+            fun (rng:_1D) id l (a:array<_>) (b:array<_>) (c:array<_>)->
+                let k = rng.GlobalID0
+                if id = 0
+                then
+                    let mutable count = 0                    
+                    let cur = a.[k]
+                    for i in 0..l-1 do
+                        if a.[i] < cur then count <- count + 1
+                    b.[k] <- count
+                else c.[b.[k]] <- a.[k]
+        @>
+    let b = Array.zeroCreate arr.Length
+    let c = Array.zeroCreate arr.Length
+    let kernel, kernelPrepare, kernelRun = provider.Compile command    
+    let d =(new _1D(arr.Length,1))  
+    kernelPrepare d 0 arr.Length arr b c
+    let _ = commandQueue.Add(kernelRun())//.Barrier()
+    kernelPrepare d 1 arr.Length arr b c
+    let _ = commandQueue.Add(kernelRun()).Finish
+    let _ = commandQueue.Add(c.ToHost(kernel)).Finish()
+    c
 
 let gpuSort (arr:array<_>) =
     let command = 
@@ -205,21 +257,22 @@ let timeGpuSumk () =
 
 //timeGpuSumk()
 
-let cpuSum = ref 0
-(fun () -> cpuSum := Array.sum cpuArr )
-|> time
-|> printfn "cpu time: %A"  
-
-
-let _gpuSum = ref 0
-(fun () -> _gpuSum := 
-                gpuSumk gpuArr k )
-                // gpuSum [|2;3;4;5;1|] )
-|> time
-|> printfn "gpu time: %A"
-
-printfn "%A" cpuSum
-printfn "%A" _gpuSum
+//let cpuSum = ref 0
+//(fun () -> cpuSum := Array.sum cpuArr )
+//|> time
+//|> printfn "cpu time: %A"  
+//
+//
+//let _gpuSum = ref 0
+//(fun () -> _gpuSum := 
+//                gpuSum2 gpuArr )
+//                //gpuSumk gpuArr k )
+//                // gpuSum [|2;3;4;5;1|] )
+//|> time
+//|> printfn "gpu time: %A"
+//
+//printfn "%A" cpuSum
+//printfn "%A" _gpuSum
 
 
 
@@ -238,3 +291,28 @@ printfn "%A" _gpuSum
 
 
 //_gpuSum = cpuSum |> printfn "%A"
+
+//Array.init 1000 (fun i -> 1002 - i) 
+
+//let a = Array.init 5000 (fun i -> 5002 - i)  
+//
+//let x = 
+//    
+// //[|15;14;13;12;11;10;9;8;7;6;5;4;3;2;1|]
+// 
+//    (fun () -> a |> gpuSort2 |> ignore) |> time |> printfn "GPU %A"
+//    (fun () -> Array.sort a |> ignore) |> time |> printfn "CPU %A"
+
+let s1 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
+let s2 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
+
+printfn "s1 %A" s1.Count
+printfn "s2 %A" s2.Count
+
+Set.difference s1 s2 |> printfn "%A"
+
+Set.union s1 s2 |> printfn "%A"
+
+Set.intersect s1 s2 |> printfn "%A"
+
+//printfn "%A " <|  x

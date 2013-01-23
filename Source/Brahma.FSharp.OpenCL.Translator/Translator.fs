@@ -37,8 +37,7 @@ type FSQuotationToOpenCLTranslator() =
     let translate qExpr =
         let rec go expr vars =
             match expr with
-            | Patterns.Lambda (v, body) -> 
-                go body (v::vars)
+            | Patterns.Lambda (v, body) -> go body (v::vars)
             | e -> 
                 let body =
                     let b,context =
@@ -56,7 +55,6 @@ type FSQuotationToOpenCLTranslator() =
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         let vars,(partialAst,context) = go qExpr []
         buildFullAst (List.rev vars) (partialAst :> Statement<_>) context
-
   
     member this.Translate qExpr = 
         let ast = translate qExpr
