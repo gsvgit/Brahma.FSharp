@@ -43,6 +43,7 @@
     <Compile Include="Namer.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Type.fs" />
+    <Compile Include="QuotationsTransformer.fs" />
     <Compile Include="Body.fs" />
     <Compile Include="Translator.fs" />
   </ItemGroup>

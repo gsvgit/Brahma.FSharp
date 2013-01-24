@@ -210,68 +210,68 @@ and translateApplication expr1 expr2 targetContext =
     Translate body targetContext
 
 and Translate expr (targetContext:TargetContext<_,_>) =
-        match expr with
-        | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
-        | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
-        | Patterns.Application (expr1,expr2) -> translateApplication expr1 expr2 targetContext
-        | Patterns.Call (exprOpt,mInfo,args) -> 
-            let r,tContext = translateCall exprOpt mInfo args targetContext
-            r :> Node<_>,tContext
-        | Patterns.Coerce(expr,sType) -> "Coerce is not suported:" + string expr|> failwith
-        | Patterns.DefaultValue sType -> "DefaulValue is not suported:" + string expr|> failwith
-        | Patterns.FieldGet (exprOpt,fldInfo) -> "FieldGet is not suported:" + string expr|> failwith
-        | Patterns.FieldSet (exprOpt,fldInfo,expr) -> "FieldSet is not suported:" + string expr|> failwith
-        | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
-            let r,tContext = translateForIntegerRangeLoop i from _to _do targetContext
-            r :> Node<_>, tContext
-        | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
-            let r,tContext = translateIf cond thenExpr elseExpr targetContext
-            r :> Node<_>, tContext
-        | Patterns.Lambda (var,_expr) -> 
-            //translateLambda var expr targetContext
-            "Lambda is not suported:" + string expr|> failwith
-        | Patterns.Let (var, expr, inExpr) ->
-            let bName = targetContext.Namer.LetStart var.Name                
-            let vDecl = translateBinding var bName expr targetContext
-            targetContext.VarDecls.Add vDecl
-            targetContext.Namer.LetIn var.Name
-            let res,tContext = Translate inExpr targetContext
-            let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
-            sb.Add (res :?> Statement<_>)
-            targetContext.Namer.LetOut()
-            if sb.Count > 1
-            then new StatementBlock<_>(sb) :> Node<_>
-            else res
-            , (clearContext targetContext)
+    match expr with
+    | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
+    | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
+    | Patterns.Application (expr1,expr2) -> translateApplication expr1 expr2 targetContext
+    | Patterns.Call (exprOpt,mInfo,args) -> 
+        let r,tContext = translateCall exprOpt mInfo args targetContext
+        r :> Node<_>,tContext
+    | Patterns.Coerce(expr,sType) -> "Coerce is not suported:" + string expr|> failwith
+    | Patterns.DefaultValue sType -> "DefaulValue is not suported:" + string expr|> failwith
+    | Patterns.FieldGet (exprOpt,fldInfo) -> "FieldGet is not suported:" + string expr|> failwith
+    | Patterns.FieldSet (exprOpt,fldInfo,expr) -> "FieldSet is not suported:" + string expr|> failwith
+    | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
+        let r,tContext = translateForIntegerRangeLoop i from _to _do targetContext
+        r :> Node<_>, tContext
+    | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
+        let r,tContext = translateIf cond thenExpr elseExpr targetContext
+        r :> Node<_>, tContext
+    | Patterns.Lambda (var,_expr) -> 
+        //translateLambda var expr targetContext
+        "Lambda is not suported:" + string expr|> failwith
+    | Patterns.Let (var, expr, inExpr) ->
+        let bName = targetContext.Namer.LetStart var.Name                
+        let vDecl = translateBinding var bName expr targetContext
+        targetContext.VarDecls.Add vDecl
+        targetContext.Namer.LetIn var.Name
+        let res,tContext = Translate inExpr targetContext
+        let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
+        sb.Add (res :?> Statement<_>)
+        targetContext.Namer.LetOut()
+        if sb.Count > 1
+        then new StatementBlock<_>(sb) :> Node<_>
+        else res
+        , (clearContext targetContext)
 
-        | Patterns.LetRecursive (bindings,expr) -> "LetRecursive is not suported:" + string expr|> failwith
-        | Patterns.NewArray(sType,exprs) -> "NewArray is not suported:" + string expr|> failwith
-        | Patterns.NewDelegate(sType,vars,expr) -> "NewDelegate is not suported:" + string expr|> failwith
-        | Patterns.NewObject(constrInfo,exprs) -> "NewObject is not suported:" + string expr|> failwith
-        | Patterns.NewRecord(sType,exprs) -> "NewRecord is not suported:" + string expr|> failwith
-        | Patterns.NewTuple(exprs) -> "NewTuple is not suported:" + string expr|> failwith
-        | Patterns.NewUnionCase(unionCaseinfo,exprs) -> "NewUnionCase is not suported:" + string expr|> failwith
-        | Patterns.PropertyGet(exprOpt,propInfo,exprs) -> 
-            let res, tContext = transletaPropGet exprOpt propInfo exprs targetContext
-            (res :> Node<_>), tContext
-        | Patterns.PropertySet(exprOpt,propInfo,exprs,expr) -> 
-            let res,tContext = transletaPropSet exprOpt propInfo exprs expr targetContext
-            res :> Node<_>,tContext
-        | Patterns.Quote expr -> "Quote is not suported:" + string expr|> failwith
-        | Patterns.Sequential(expr1,expr2) -> 
-            let res,tContext = translateSeq expr1 expr2 targetContext
-            res :> Node<_>,tContext
-        | Patterns.TryFinally(tryExpr,finallyExpr) -> "TryFinally is not suported:" + string expr|> failwith
-        | Patterns.TryWith(expr1,var1,expr2,var2,expr3) -> "TryWith is not suported:" + string expr|> failwith 
-        | Patterns.TupleGet(expr,i) -> "TupleGet is not suported:" + string expr|> failwith
-        | Patterns.TypeTest(expr,sType) -> "TypeTest is not suported:" + string expr|> failwith
-        | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "UnionCaseTest is not suported:" + string expr|> failwith
-        | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
-        | Patterns.Var var -> translateVar var targetContext :> Node<_>, targetContext
-        | Patterns.VarSet(var,expr) -> 
-            let res,tContext = translateVarSet var expr targetContext
-            res :> Node<_>,tContext
-        | Patterns.WhileLoop(condExpr,bodyExpr) -> 
-            let r,tContext = translateWhileLoop condExpr bodyExpr targetContext
-            r :> Node<_>, tContext
-        | other -> "OTHER!!! :" + string other |> failwith
+    | Patterns.LetRecursive (bindings,expr) -> "LetRecursive is not suported:" + string expr|> failwith
+    | Patterns.NewArray(sType,exprs) -> "NewArray is not suported:" + string expr|> failwith
+    | Patterns.NewDelegate(sType,vars,expr) -> "NewDelegate is not suported:" + string expr|> failwith
+    | Patterns.NewObject(constrInfo,exprs) -> "NewObject is not suported:" + string expr|> failwith
+    | Patterns.NewRecord(sType,exprs) -> "NewRecord is not suported:" + string expr|> failwith
+    | Patterns.NewTuple(exprs) -> "NewTuple is not suported:" + string expr|> failwith
+    | Patterns.NewUnionCase(unionCaseinfo,exprs) -> "NewUnionCase is not suported:" + string expr|> failwith
+    | Patterns.PropertyGet(exprOpt,propInfo,exprs) -> 
+        let res, tContext = transletaPropGet exprOpt propInfo exprs targetContext
+        (res :> Node<_>), tContext
+    | Patterns.PropertySet(exprOpt,propInfo,exprs,expr) -> 
+        let res,tContext = transletaPropSet exprOpt propInfo exprs expr targetContext
+        res :> Node<_>,tContext
+    | Patterns.Quote expr -> "Quote is not suported:" + string expr|> failwith
+    | Patterns.Sequential(expr1,expr2) -> 
+        let res,tContext = translateSeq expr1 expr2 targetContext
+        res :> Node<_>,tContext
+    | Patterns.TryFinally(tryExpr,finallyExpr) -> "TryFinally is not suported:" + string expr|> failwith
+    | Patterns.TryWith(expr1,var1,expr2,var2,expr3) -> "TryWith is not suported:" + string expr|> failwith 
+    | Patterns.TupleGet(expr,i) -> "TupleGet is not suported:" + string expr|> failwith
+    | Patterns.TypeTest(expr,sType) -> "TypeTest is not suported:" + string expr|> failwith
+    | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "UnionCaseTest is not suported:" + string expr|> failwith
+    | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
+    | Patterns.Var var -> translateVar var targetContext :> Node<_>, targetContext
+    | Patterns.VarSet(var,expr) -> 
+        let res,tContext = translateVarSet var expr targetContext
+        res :> Node<_>,tContext
+    | Patterns.WhileLoop(condExpr,bodyExpr) -> 
+        let r,tContext = translateWhileLoop condExpr bodyExpr targetContext
+        r :> Node<_>, tContext
+    | other -> "OTHER!!! :" + string other |> failwith

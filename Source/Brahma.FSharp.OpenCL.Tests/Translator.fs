@@ -301,9 +301,34 @@ type Translator() =
 
         checkCode command "Quotations.Injections.2.gen" "Quotations.Injections.2.cl"
 
+    [<Test>]
+    member this.``Nested functions``() =
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let f x y = x - y
+                    buf.[0] <- f 2 3
+                    buf.[1] <- f 4 5
+            @>
+
+        checkCode command "Nested.Function.gen" "Nested.Function.cl"
+
+    [<Test>]
+    member this.``Nested functions. Carring.``() =
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let f x y = x - y
+                    let g = f 2
+                    buf.[0] <- g 3
+                    buf.[1] <- g 5
+            @>
+
+        checkCode command "Nested.Function.Carring.gen" "Nested.Function.Carring.cl"
+
 [<EntryPoint>]
 let f _ =
-    (new Translator()).``Binding and FOR counter conflict 4.``()
-    //(new Translator()).``Quotations injections 2``()
+    //(new Translator()).``Nested functions``()
+    (new Translator()).``Nested functions. Carring.``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0
