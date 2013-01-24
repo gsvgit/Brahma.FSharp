@@ -43,17 +43,28 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_equality"            -> new Binop<_>(EQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_inequality"          -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_unarynegation"       -> new Unop<_>(UOp.Minus,args.[0]) :> Statement<_>,tContext
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
     | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "acos" | "asin" | "atan"
     | "cos" | "cosh" | "exp"
     | "floor" | "log" | "log10"
-    | "pow" | "sin" | "sinh" 
+    | "pow" | "sin" | "sinh" | "sqrt"
     | "tan" | "tanh" as fName ->
         if mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("System.Math")
+            || mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("Microsoft.FSharp.Core.Operators")
         then FunCall<_>(fName,args) :> Statement<_>,tContext
-        else failwithf "Seems, thet you use math function with name %s not from System.Math." fName
+        else failwithf "Seems, thet you use math function with name %s not from System.Math. or Microsoft.FSharp.Core.Operators" fName
+    | "abs" as fName ->
+        if mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("Microsoft.FSharp.Core.Operators")
+        then FunCall<_>("fabs",args) :> Statement<_>,tContext
+        else failwithf "Seems, thet you use math function with name %s not from System.Math. or Microsoft.FSharp.Core.Operators" fName
+    | "powinteger" as fName ->
+        if mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("Microsoft.FSharp.Core.Operators")
+        then FunCall<_>("powr",args) :> Statement<_>,tContext
+        else failwithf "Seems, thet you use math function with name %s not from System.Math. or Microsoft.FSharp.Core.Operators" fName
+
     | "setarray" -> 
         let item = new Item<_>(args.[0],args.[1])
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>

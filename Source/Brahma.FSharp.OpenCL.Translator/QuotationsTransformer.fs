@@ -57,9 +57,9 @@ let inlineLamdas (expr:Expr) =
             match expr with
             | Patterns.Lambda _ ->
                 inExpr.Substitute(fun x -> if x = var then Some expr else None) |> go
-            | Patterns.Application _ -> Expr.Let(var, apply expr, inExpr) |> go
+            | Patterns.Application _ -> Expr.Let(var, go expr |> apply, inExpr) |> go
             | e -> Expr.Let(var, expr, go inExpr)
-        | Patterns.Application (expr1,expr2) -> Expr.Application (go expr1, go expr2)
+        | Patterns.Application (expr1,expr2) -> Expr.Application (go expr1 |> apply, go expr2)
         | Patterns.Call (exprOpt,mInfo,args) ->
             match exprOpt with
             | Some e -> Expr.Call(go e, mInfo, args |> List.map go)

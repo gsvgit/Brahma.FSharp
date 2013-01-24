@@ -344,3 +344,11 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr
         check intInArr [|3;1;2;3|]
+
+
+let x = 
+    let d = ref 0
+    fun y ->
+        let r = !d
+        d := !d + y
+        r

@@ -99,7 +99,7 @@ let Main () =
     let _ = commandQueue.Add(cParallel.ToHost(kernel)).Finish()
     
     printfn "Verifying results..."
-    let mutable isSuccess  = true
+    let mutable isSuccess = true
     for i in 0 .. rows * columns - 1 do
         if isSuccess && System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
         then
