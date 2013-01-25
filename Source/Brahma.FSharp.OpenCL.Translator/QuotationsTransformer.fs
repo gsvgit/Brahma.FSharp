@@ -36,8 +36,12 @@ let apply (expr:Expr) =
         | Patterns.VarSet(var,expr) -> 
             Expr.VarSet(var, go expr)
         | Patterns.WhileLoop(condExpr,bodyExpr) -> 
-            Expr.WhileLoop(go condExpr, go bodyExpr)            
-        | other -> other
+            Expr.WhileLoop(go condExpr, go bodyExpr)
+        | Patterns.Lambda(v,e) ->
+            Expr.Lambda(v,go e)
+        | other -> 
+            other |> string |> printfn "%A"
+            other
 
     and translateApplication expr =
         let rec go expr =
