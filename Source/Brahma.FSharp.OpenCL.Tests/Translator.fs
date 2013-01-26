@@ -49,7 +49,7 @@ type Translator() =
                     buf.[0] <- 0
             @>
 
-        checkCode command "Array.Item.Set.gen" "Array.Item.Set.ocl"
+        checkCode command "Array.Item.Set.gen" "Array.Item.Set.cl"
 
     [<Test>]
     member this.Binding() = 
@@ -60,7 +60,7 @@ type Translator() =
                     buf.[0] <- x
             @>
 
-        checkCode command "Binding.gen" "Binding.ocl"
+        checkCode command "Binding.gen" "Binding.cl"
 
     [<Test>]
     member this.``Binop plus``() = 
@@ -70,7 +70,7 @@ type Translator() =
                     buf.[0] <- 1 + 2
             @>
         
-        checkCode command "Binop.Plus.gen" "Binop.Plus.ocl"
+        checkCode command "Binop.Plus.gen" "Binop.Plus.cl"
 
     [<Test>]
     member this.``If Then``() = 
@@ -80,7 +80,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1
             @>
 
-        checkCode command "If.Then.gen" "If.Then.ocl"
+        checkCode command "If.Then.gen" "If.Then.cl"
 
     [<Test>]
     member this.``If Then Else``() = 
@@ -90,7 +90,7 @@ type Translator() =
                     if 0 = 2 then buf.[0] <- 1 else buf.[0] <- 2
             @>
 
-        checkCode command "If.Then.Else.gen" "If.Then.Else.ocl"
+        checkCode command "If.Then.Else.gen" "If.Then.Else.cl"
 
     [<Test>]
     member this.``For Integer Loop``() = 
@@ -100,7 +100,7 @@ type Translator() =
                     for i in 1..3 do buf.[0] <- i
             @>
 
-        checkCode command "For.Integer.Loop.gen" "For.Integer.Loop.ocl"
+        checkCode command "For.Integer.Loop.gen" "For.Integer.Loop.cl"
 
     [<Test>]
     member this.``Sequential bindings``() = 
@@ -112,7 +112,7 @@ type Translator() =
                     buf.[0] <- y
             @>
 
-        checkCode command "Sequential.Bindings.gen" "Sequential.Bindings.ocl"
+        checkCode command "Sequential.Bindings.gen" "Sequential.Bindings.cl"
 
     [<Test>]
     member this.``Binary operations. Math.``() = 
@@ -127,7 +127,7 @@ type Translator() =
                     buf.[0] <- i
             @>
 
-        checkCode command "Binary.Operations.Math.gen" "Binary.Operations.Math.ocl"
+        checkCode command "Binary.Operations.Math.gen" "Binary.Operations.Math.cl"
 
     [<Test>]
     member this.``Binding in IF.``() = 
@@ -143,7 +143,7 @@ type Translator() =
                         buf.[0] <- i
             @>
 
-        checkCode command "Binding.In.IF.gen" "Binding.In.IF.ocl"
+        checkCode command "Binding.In.IF.gen" "Binding.In.IF.cl"
 
     [<Test>]
     member this.``Binding in FOR.``() = 
@@ -155,7 +155,7 @@ type Translator() =
                         buf.[0] <- x
             @>
 
-        checkCode command "Binding.In.FOR.gen" "Binding.In.FOR.ocl"
+        checkCode command "Binding.In.FOR.gen" "Binding.In.FOR.cl"
        
     [<Test>]
     member this.``Simple WHILE loop.``() = 
@@ -166,7 +166,7 @@ type Translator() =
                         buf.[0] <- buf.[0] + 1
             @>
 
-        checkCode command "Simple.WHILE.gen" "Simple.WHILE.ocl"
+        checkCode command "Simple.WHILE.gen" "Simple.WHILE.cl"
 
     [<Test>]
     member this.``Binding in WHILE.``() = 
@@ -178,7 +178,7 @@ type Translator() =
                      buf.[0] <- x * x
             @>
 
-        checkCode command "Binding.In.WHILE.gen" "Binding.In.WHILE.ocl"
+        checkCode command "Binding.In.WHILE.gen" "Binding.In.WHILE.cl"
 
     [<Test>]
     member this.``WHILE with complex condition.``() = 
