@@ -56,6 +56,7 @@ namespace Brahma.OpenCL
             {
                 kvp.Value.Dispose();
             }
+            _autoconfiguredBuffers.Clear();
         }
 
         public Dictionary<System.Array, Cl.Mem> AutoconfiguredBuffers
