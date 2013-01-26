@@ -1,11 +1,29 @@
 ﻿[<AutoOpen>]
 module OpenCL
 
-let (<+!) a b = a + b |> ignore
-let (+!) a b = a + b
-let (-!) a b = a - b
-let (<-!) a b = a - b |> ignore
-let sIncr a = a + 1
-let sDecr a = a - 1
-let (<->) (a:'a) (b:'a) = b
-let (<->>) (a:'a) (b:'a) = b 
+let private kFail () = failwith "OpenCL kernel function!"
+
+let (<!+) a b =
+    kFail ()
+    a + b |> ignore
+let (<!+>) a b = 
+    kFail ()
+    a + b
+let (<!-) a b =
+    kFail ()
+    a - b |> ignore
+let (<!->) a b =
+    kFail ()
+    a - b
+let (<!) (a:'a) (b:'a) =
+    kFail ()
+    b |> ignore 
+let (<!>) (a:'a) (b:'a) = 
+    kFail ()
+    b 
+let aIncr a = 
+    kFail ()
+    a + 1
+let aDecr a = 
+    kFail ()
+    a - 1

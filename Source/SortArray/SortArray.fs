@@ -35,7 +35,7 @@ let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let k = 1024
 
-let length =   100000000
+let length =   10000000
              //110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
@@ -168,7 +168,7 @@ let gpuSum3 (arr:array<_>) k =
                 let mutable buf = 0
                 for i in _start .. _end do
                     buf <- buf + a.[i]
-                b.[0] <+! buf
+                b.[0] <!+ buf
         @>    
     let length = arr.Length
     let sum = [|0|]
