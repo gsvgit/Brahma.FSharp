@@ -84,7 +84,7 @@ let Main () =
 
     printfn "done."
 
-    printfn "Multiplying two %Ax%A matrices %A times using Brahma.OpenCL and selected platform/device..." rows columns iterations
+    printfn "Multiplying two %Ax%A matrices %A times using OpenCL and selected platform/device..." rows columns iterations
 
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
@@ -109,7 +109,7 @@ let Main () =
     printfn "done."
 
     Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
-    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"    
+    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
 
     commandQueue.Dispose()
     provider.Dispose()
