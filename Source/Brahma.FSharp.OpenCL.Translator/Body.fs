@@ -21,6 +21,7 @@ open Brahma.FSharp.OpenCL.AST
 let clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
     c.Namer <- targetContext.Namer
+    c.Flags <- targetContext.Flags
     c
 
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
