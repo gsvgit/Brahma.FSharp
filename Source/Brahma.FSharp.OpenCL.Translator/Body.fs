@@ -45,11 +45,17 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_unarynegation"       -> new Unop<_>(UOp.Minus,args.[0]) :> Statement<_>,tContext
     | "op_lessbangplusgreater"
-    | "op_lessbangplus"        -> new FunCall<_>("atom_add",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "op_lessbangplus"        -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_add",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext
     | "op_lessbangmunus"
-    | "op_lessbangmunusgreater"-> new FunCall<_>("atom_sub",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "op_lessbangmunusgreater"->
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_sub",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
     | "op_lesssbanggreater"
-    | "op_lesssbang"           -> new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "op_lesssbang"           -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
     | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext

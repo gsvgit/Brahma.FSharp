@@ -24,7 +24,7 @@ type FSQuotationToOpenCLTranslator() =
     let brahmaDimensionsTypes = ["_1d";"_2d";"_3d"]
     let brahmaDimensionsTypesPrefix = "brahma.opencl."
     let bdts = brahmaDimensionsTypes |> List.map (fun s -> brahmaDimensionsTypesPrefix + s)
-    let buildFullAst vars partialAst context =
+    let buildFullAst vars partialAst (context:TargetContext<_,_>) =
         let formalArgs = 
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
             |> List.map 
@@ -32,7 +32,12 @@ type FSQuotationToOpenCLTranslator() =
                     let t = Type.Translate(v.Type)
                     new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
-        new AST<_>([mainKernelFun])
+        let pragmas = 
+            let res = new ResizeArray<_>()
+            if context.Flags.enableAtomic
+            then res.Add(new CLPragma<_>(CLGlobalInt32BaseAtomics) :> TopDef<_> )
+            List.ofSeq res
+        new AST<_>(pragmas @ [mainKernelFun])
 
     let translate qExpr =
         let rec go expr vars =
@@ -45,7 +50,6 @@ type FSQuotationToOpenCLTranslator() =
                         context.Namer.LetIn()
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
                         let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
-                        //newE |> printfn "%A"
                         Body.Translate newE context
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb

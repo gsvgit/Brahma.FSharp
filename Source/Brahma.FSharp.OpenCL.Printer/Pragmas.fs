@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2013 Semyon Grigorev <rsdpisuy@gmail.com>
+﻿// Copyright (c) 2013 Semyon Grigorev <rsdpisuy@gmail.com>
 // All rights reserved.
 // 
 // The contents of this file are made available under the terms of the
@@ -13,23 +13,15 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-module Brahma.FSharp.OpenCL.Printer.AST
+module Brahma.FSharp.OpenCL.Printer.Pragmas
 
 open Brahma.FSharp.OpenCL.AST
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
-
-let Print (ast:AST<'lang>) =
-    let layout = 
-        ast.TopDefs 
-        |> List.map 
-            (fun d -> 
-                match d with 
-                | :? FunDecl<'lang> as fd -> FunDecl.Print fd
-                | :? CLPragma<'lang> as clp -> Pragmas.Print clp
-                | _ -> failwithf "Printer. Unsupported toplevel declaration: %A"  d)
-        |> aboveListL
-    StructuredFormat.Display.layout_to_string 
-      {StructuredFormat.FormatOptions.Default with PrintWidth=100}
-      layout
+let Print (clp:CLPragma<_>) =
+    match clp.Type with
+    | CLGlobalInt32BaseAtomics ->
+        [
+            "#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable" |> wordL            
+        ] |> aboveListL

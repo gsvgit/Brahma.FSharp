@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Types.fs" />
     <Compile Include="Expressions.fs" />
+    <Compile Include="Pragmas.fs" />
     <Compile Include="Statements.fs" />
     <Compile Include="FunDecl.fs" />
     <Compile Include="TypeDecl.fs" />

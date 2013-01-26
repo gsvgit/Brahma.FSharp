@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2013 Semyon Grigorev <rsdpisuy@gmail.com>
+﻿// Copyright (c) 2013 Semyon Grigorev <rsdpisuy@gmail.com>
 // All rights reserved.
 // 
 // The contents of this file are made available under the terms of the
@@ -13,23 +13,12 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-[<AutoOpen>]
-module Brahma.FSharp.OpenCL.Translator.Common
+namespace Brahma.FSharp.OpenCL.AST
 
-type Flags () =
-    member val enableAtomic = false with get, set
+type CLPragmaType<'lang> =
+    | CLGlobalInt32BaseAtomics
 
-type Lang = OpenCL
-
-type TargetContext<'lang,'vDecl>() =
-    let varDecls = new ResizeArray<'vDecl>()
-    let flags = new Flags()    
-    let mutable namer = new Namer()
-    member this.VarDecls
-        with get() = varDecls
-    member this.Flags
-        with get() = flags
-    member this.Namer
-        with get() = namer
-        and set v = namer <- v
-
+type CLPragma<'lang>(pragmaType:CLPragmaType<'lang>) =
+    inherit TopDef<'lang>()
+    override this.Children = []
+    member this.Type = pragmaType

@@ -28,8 +28,7 @@ type CLCodeGenerator() =
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
         let ast = codeGenerator.Translate lambda
         let code = Printer.AST.Print ast
-        kernel.Provider <- provider
-        kernel.Source <- kernel.Source.Append "#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n"
+        kernel.Provider <- provider        
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
         kernel.SetParameters []
