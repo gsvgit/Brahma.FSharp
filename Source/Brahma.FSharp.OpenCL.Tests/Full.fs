@@ -31,10 +31,10 @@ type Translator() =
         let check (outArray:array<'a>) (expected:array<'a>) =        
             let cq = commandQueue.Add(kernelRunF()).Finish()
             let r = Array.zeroCreate expected.Length
-            let cq2 = commandQueue.Add(outArray.ToHost(kernel,r)).Finish()
+            let cq2 = commandQueue.Add(outArray.ToHost(provider,r)).Finish()
             commandQueue.Dispose()
             Assert.AreEqual(expected, r)
-            (kernel :> ICLKernel).CloseAllBuffers()
+            provider.CloseAllBuffers()
         kernelPrepareF,check
 
     [<Test>]
@@ -279,11 +279,11 @@ type Translator() =
         let _ = commandQueue.Add(kernelRunF())
         let _ = commandQueue.Finish()
         let r = Array.zeroCreate intInArr.Length
-        let _ = commandQueue.Add(intInArr.ToHost(kernel, r)).Finish()
+        let _ = commandQueue.Add(intInArr.ToHost(provider, r)).Finish()
         commandQueue.Dispose()
         let expected = [|4;1;4;3|] 
         Assert.AreEqual(expected, r)
-        (kernel :> ICLKernel).CloseAllBuffers()
+        provider.CloseAllBuffers()
 
     [<Test>]
     member this.``Sequential operations``() = 

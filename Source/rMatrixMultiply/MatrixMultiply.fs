@@ -96,7 +96,7 @@ let Main () =
     
     printfn "done."
     
-    let _ = commandQueue.Add(cParallel.ToHost(kernel)).Finish()
+    let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
     
     printfn "Verifying results..."
     let mutable isSuccess  = true
@@ -113,6 +113,6 @@ let Main () =
 
     commandQueue.Dispose()
     provider.Dispose()
-    (kernel :> ICLKernel).CloseAllBuffers()
+    provider.CloseAllBuffers()
 
 do Main()

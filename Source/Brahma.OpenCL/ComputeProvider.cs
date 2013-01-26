@@ -48,6 +48,21 @@ namespace Brahma.OpenCL
         private bool _disposed;
         private string _compileOptions = string.Empty;
 
+        private Dictionary<System.Array, Cl.Mem> _autoconfiguredBuffers = new Dictionary<System.Array, Cl.Mem>(5);
+
+        public void CloseAllBuffers()
+        {
+            foreach (var kvp in this._autoconfiguredBuffers)
+            {
+                kvp.Value.Dispose();
+            }
+        }
+
+        public Dictionary<System.Array, Cl.Mem> AutoconfiguredBuffers
+        {
+            get { return _autoconfiguredBuffers; }
+        }
+
         public String CompileOptionsStr
         {
             get

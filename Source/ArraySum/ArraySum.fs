@@ -80,7 +80,7 @@ let Main () =
     let d =(new _1D(l,localWorkSize))
     kernelPrepare d length k gpuArr sum
     let _ = commandQueue.Add(kernelRun()).Finish()
-    let _ = commandQueue.Add(sum.ToHost(kernel)).Finish()
+    let _ = commandQueue.Add(sum.ToHost provider).Finish()
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
         let _ = commandQueue.Add(kernelRun()).Finish()
@@ -100,6 +100,6 @@ let Main () =
 
     commandQueue.Dispose()
     provider.Dispose()
-    (kernel :> ICLKernel).CloseAllBuffers()
+    provider.CloseAllBuffers()
 
 do Main()

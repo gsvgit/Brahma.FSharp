@@ -161,8 +161,8 @@ let Main() =
 
     printfn "Verifying results..."
     commandQueue
-        .Add(putParallel.ToHost kernel)
-        .Add(callParallel.ToHost kernel)
+        .Add(putParallel.ToHost provider)
+        .Add(callParallel.ToHost provider)
         .Finish()
         |> ignore
 

@@ -76,7 +76,7 @@ let main () =
     kernelFunPrep (new _1D(l,1)) 2 a
     let cq = commandQueue.Add(kerRun()).Finish()
     let r = Array.zeroCreate(l)
-    let cq2 = commandQueue.Add(a.ToHost(kernel,r)).Finish()
+    let cq2 = commandQueue.Add(a.ToHost(provider,r)).Finish()
     ()
 
 do main ()

@@ -88,8 +88,8 @@ let gpuSumk (*commandQueue:CommandQueue*) (arr:array<_>) (*b*) k =
         bufLen <- (min (bufLen/k+1) ((bufLen + (k-1))/k))//bufLen/2
     let _ = commandQueue.Finish() //Add(kernelRun()).Finish()
     let sum = [|0|]
-    let _ = commandQueue.Add((if flip then b else arr).ToHost(kernel,sum)).Finish()
-    (kernel :> ICLKernel).CloseAllBuffers()
+    let _ = commandQueue.Add((if flip then b else arr).ToHost(provider,sum)).Finish()
+    provider.CloseAllBuffers()
     //let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()
     //let _ = commandQueue.Add(b.ToHost(kernel)).Finish()
     //let sum = (if flip then b else arr).[0]
@@ -123,7 +123,7 @@ let gpuSum (arr:array<_>) =
         bufLen <- (min (bufLen/2+1) ((bufLen + 1)/2))//bufLen/2
     let _ = commandQueue.Finish() //Add(kernelRun()).Finish()
     let sum = [|0|]
-    let _ = commandQueue.Add((if flip then b else arr).ToHost(kernel,sum)).Finish()
+    let _ = commandQueue.Add((if flip then b else arr).ToHost(provider,sum)).Finish()
     //let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()
     //let _ = commandQueue.Add(b.ToHost(kernel)).Finish()
     //let sum = (if flip then b else arr).[0]
@@ -153,7 +153,7 @@ let gpuSum2 (arr:array<_>) =
     printfn "K = %A" k
     let _ = commandQueue.Finish()
     let sum = [|0|]
-    let _ = commandQueue.Add(arr.ToHost(kernel,sum)).Finish()    
+    let _ = commandQueue.Add(arr.ToHost(provider,sum)).Finish()    
     commandQueue.Dispose()
     sum.[0]
 
@@ -178,8 +178,8 @@ let gpuSum3 (arr:array<_>) k =
     kernelPrepare d length k arr sum
     commandQueue.Add(kernelRun()).Finish() |> ignore
     let _ = commandQueue.Finish()    
-    let _ = commandQueue.Add(sum.ToHost(kernel)).Finish()
-    (kernel :> ICLKernel).CloseAllBuffers()    
+    let _ = commandQueue.Add(sum.ToHost provider).Finish()
+    provider.CloseAllBuffers()    
     commandQueue.Dispose()
     sum.[0]
 
@@ -196,7 +196,7 @@ let gpuiter (arr:array<_>) =
     let d =(new _1D(arr.Length,1))    
     kernelPrepare d arr        
     let _ = commandQueue.Add(kernelRun()).Finish()    
-    let _ = commandQueue.Add(arr.ToHost(kernel)).Finish()    
+    let _ = commandQueue.Add(arr.ToHost provider).Finish()    
     ()
 
 let gpuSort2 (arr:array<_>) =
@@ -221,7 +221,7 @@ let gpuSort2 (arr:array<_>) =
     let _ = commandQueue.Add(kernelRun())//.Barrier()
     kernelPrepare d 1 arr.Length arr b c
     let _ = commandQueue.Add(kernelRun()).Finish
-    let _ = commandQueue.Add(c.ToHost(kernel)).Finish()
+    let _ = commandQueue.Add(c.ToHost provider).Finish()
     c
 
 let gpuSort (arr:array<_>) =
@@ -257,7 +257,7 @@ let gpuSort (arr:array<_>) =
     let d =(new _1D(length, 1))
     kernelPrepare d arr.Length 1 arr
     let _ = commandQueue.Add(kernelRun()).Finish()
-    arr.ToHost(kernel)
+    arr.ToHost provider
 //    for i in 0 .. iterations - 1 do
 //        Timer<string>.Global.Start()
 //        let _ = commandQueue.Add(kernelRun()).Finish()  

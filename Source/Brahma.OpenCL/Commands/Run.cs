@@ -35,9 +35,9 @@ namespace Brahma.OpenCL.Commands
         private void ArrayToMem<T>(T[] data)
         {
             curArgSize = _intPtrSize;
-            if (kernel.AutoconfiguredBuffers.ContainsKey(data))
+            if (kernel.Provider.AutoconfiguredBuffers.ContainsKey(data))
             {
-                curArgVal = kernel.AutoconfiguredBuffers[data];
+                curArgVal = kernel.Provider.AutoconfiguredBuffers[data];
             }
             else
             {
@@ -48,7 +48,7 @@ namespace Brahma.OpenCL.Commands
                 var mem = Cl.CreateBuffer(kernel.Provider.Context, (Cl.MemFlags)operations | (memory == Memory.Host ? Cl.MemFlags.UseHostPtr : (Cl.MemFlags)memory | Cl.MemFlags.CopyHostPtr),
                     (IntPtr)(_elementSize * data.Length), data, out error);
                 curArgVal = mem;
-                kernel.AutoconfiguredBuffers.Add(data, mem);
+                kernel.Provider.AutoconfiguredBuffers.Add(data, mem);
                 if (error != Cl.ErrorCode.Success)
                     throw new CLException(error);
             }                        

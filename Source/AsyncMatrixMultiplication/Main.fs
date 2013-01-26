@@ -85,11 +85,11 @@ let gpuMultiplicator timerTag provider iterations (a:array<_>) aRows aCols (b:ar
         let _ = commandQueue.Add(kernelRun()).Finish()
         Timer<string>.Global.Lap(timerTag)
 
-    let _ = commandQueue.Add(c.ToHost(kernel)).Finish()        
+    let _ = commandQueue.Add(c.ToHost(provider)).Finish()        
     printfn "done."
         
     commandQueue.Dispose()
-    (kernel :> ICLKernel).CloseAllBuffers()
+    provider.CloseAllBuffers()
 
     c
 
