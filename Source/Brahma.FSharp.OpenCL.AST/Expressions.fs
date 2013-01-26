@@ -94,3 +94,8 @@ type Cast<'lang>(expr:Expression<'lang>,_type:Type<'lang>)=
     override this.Children = []
     member this.Expr = expr
     member this.Type = _type
+
+type Pointer<'lang>(expr:Expression<'lang>)=
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Expr = expr    

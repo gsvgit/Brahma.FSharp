@@ -37,6 +37,6 @@ let private printPrimitiveType (pType:PrimitiveType<'lang>) =
 let rec Print<'lang> (_type:Type<'lang>) =
     match _type with
     | :? PrimitiveType<'lang> as pt -> printPrimitiveType pt
-    | :? RefType<'lang> as rt ->  Print rt.BaseType ^^ wordL "*"
+    | :? RefType<'lang> as rt ->  Print rt.BaseType ^^ wordL "*"    
     | t -> failwithf "Printer. Unsupported type: %A" t
 

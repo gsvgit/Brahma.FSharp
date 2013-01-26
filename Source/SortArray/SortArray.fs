@@ -21,6 +21,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+//open OpenCL
 
 let random = new System.Random()
 
@@ -34,7 +35,8 @@ let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let k = 1024
 
-let length = 2//110000000
+let length =   100000000
+             //110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
 
@@ -155,6 +157,33 @@ let gpuSum2 (arr:array<_>) =
     commandQueue.Dispose()
     sum.[0]
 
+let gpuSum3 (arr:array<_>) k =
+    let command = 
+        <@
+            fun (rng:_1D) l k (a:array<_>) (b:array<int>) ->
+                let r = rng.GlobalID0
+                let _start = r * k
+                let mutable _end = _start + k - 1
+                if _end >= l then _end <- l - 1
+                let mutable buf = 0
+                for i in _start .. _end do
+                    buf <- buf + a.[i]
+                b.[0] <+! buf
+        @>    
+    let length = arr.Length
+    let sum = [|0|]
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let l =  min (length/k+1) ((length + (k-1))/k)
+    let d =(new _1D(l,20))
+    kernelPrepare d length k arr sum
+    commandQueue.Add(kernelRun()).Finish() |> ignore
+    let _ = commandQueue.Finish()    
+    let _ = commandQueue.Add(sum.ToHost(kernel)).Finish()
+    (kernel :> ICLKernel).CloseAllBuffers()    
+    commandQueue.Dispose()
+    sum.[0]
+
+
 let gpuiter (arr:array<_>) = 
     let command = 
         <@
@@ -257,22 +286,22 @@ let timeGpuSumk () =
 
 //timeGpuSumk()
 
-//let cpuSum = ref 0
-//(fun () -> cpuSum := Array.sum cpuArr )
-//|> time
-//|> printfn "cpu time: %A"  
-//
-//
-//let _gpuSum = ref 0
-//(fun () -> _gpuSum := 
-//                gpuSum2 gpuArr )
-//                //gpuSumk gpuArr k )
-//                // gpuSum [|2;3;4;5;1|] )
-//|> time
-//|> printfn "gpu time: %A"
-//
-//printfn "%A" cpuSum
-//printfn "%A" _gpuSum
+let cpuSum = ref 0
+(fun () -> cpuSum := Array.sum cpuArr )
+|> time
+|> printfn "cpu time: %A"  
+
+
+let _gpuSum = ref 0
+(fun () -> _gpuSum := 
+                gpuSum3 gpuArr 100)
+                //gpuSumk gpuArr k )
+                // gpuSum [|2;3;4;5;1|] )
+|> time
+|> printfn "gpu time: %A"
+
+printfn "%A" cpuSum
+printfn "%A" _gpuSum
 
 
 
@@ -303,16 +332,16 @@ let timeGpuSumk () =
 //    (fun () -> a |> gpuSort2 |> ignore) |> time |> printfn "GPU %A"
 //    (fun () -> Array.sort a |> ignore) |> time |> printfn "CPU %A"
 
-let s1 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
-let s2 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
-
-printfn "s1 %A" s1.Count
-printfn "s2 %A" s2.Count
-
-Set.difference s1 s2 |> printfn "%A"
-
-Set.union s1 s2 |> printfn "%A"
-
-Set.intersect s1 s2 |> printfn "%A"
+//let s1 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
+//let s2 = Array.init 10000000 (fun i -> random.Next()) |> Set.ofArray
+//
+//printfn "s1 %A" s1.Count
+//printfn "s2 %A" s2.Count
+//
+//Set.difference s1 s2 |> printfn "%A"
+//
+//Set.union s1 s2 |> printfn "%A"
+//
+//Set.intersect s1 s2 |> printfn "%A"
 
 //printfn "%A " <|  x

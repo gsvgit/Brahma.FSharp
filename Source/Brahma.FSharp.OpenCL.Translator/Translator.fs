@@ -45,7 +45,7 @@ type FSQuotationToOpenCLTranslator() =
                         context.Namer.LetIn()
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
                         let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
-                        newE |> printfn "%A"
+                        //newE |> printfn "%A"
                         Body.Translate newE context
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb

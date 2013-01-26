@@ -88,6 +88,10 @@ and private printCast (c:Cast<'lang>) =
     let expr = Print c.Expr
     (t |> bracketL) ++ expr
 
+and private printPointer (p:Pointer<'lang>) =    
+    let expr = Print p.Expr
+    wordL "&" ^^ expr
+
 and Print (expr:Expression<'lang>) =
     match expr with
     | :? Const<'lang> as c -> printConst c
@@ -98,4 +102,5 @@ and Print (expr:Expression<'lang>) =
     | :? FunCall<'lang> as fc -> printFunCall fc
     | :? Unop<'lang> as uo -> printUnOp uo
     | :? Cast<'lang> as c -> printCast c
+    | :? Pointer<'lang> as p -> printPointer p
     | c -> failwithf "Printer. Unsupported expression: %A" c

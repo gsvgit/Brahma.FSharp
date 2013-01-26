@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Array.fs" />
+    <Compile Include="OpenCL.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\OpenCL.Net\OpenCL.Net\OpenCL.Net.csproj">

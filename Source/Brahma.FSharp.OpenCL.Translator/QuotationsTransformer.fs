@@ -39,9 +39,7 @@ let apply (expr:Expr) =
             Expr.WhileLoop(go condExpr, go bodyExpr)
         | Patterns.Lambda(v,e) ->
             Expr.Lambda(v,go e)
-        | other -> 
-            other |> string |> printfn "%A"
-            other
+        | other -> other
 
     and translateApplication expr =
         let rec go expr =

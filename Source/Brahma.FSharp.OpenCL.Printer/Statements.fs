@@ -61,6 +61,10 @@ and printWhileLoop (wl:WhileLoop<_>) =
     yield body]
     |> aboveListL
 
+and printFunCall (fc:FunCall<_>) =
+    let args = fc.Args |> List.map Expressions.Print |> commaListL |> bracketL    
+    wordL fc.Name ++ args    
+
 and Print isToplevel (stmt:Statement<'lang>) =
     let res = 
         match stmt with
@@ -70,6 +74,7 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? IfThenElse<'lang> as ite -> printIf ite
         | :? ForIntegerLoop<'lang> as _for -> printForInteger _for
         | :? WhileLoop<'lang> as wl -> printWhileLoop wl
+        | :? FunCall<'lang> as fc -> printFunCall fc
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res
