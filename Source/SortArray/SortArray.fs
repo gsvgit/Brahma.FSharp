@@ -21,7 +21,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
-//open OpenCL
+open Microsoft.FSharp.Linq.QuotationEvaluation
 
 let random = new System.Random()
 
@@ -35,7 +35,7 @@ let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let k = 1024
 
-let length =   10000000
+let length =   200000000
              //110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
@@ -179,24 +179,23 @@ let gpuSum3 (arr:array<_>) k =
     commandQueue.Add(kernelRun()).Finish() |> ignore
     let _ = commandQueue.Finish()    
     let _ = commandQueue.Add(sum.ToHost provider).Finish()
-    provider.CloseAllBuffers()    
     commandQueue.Dispose()
     sum.[0]
 
 
-let gpuiter (arr:array<_>) = 
+let gpuiter (arr:array<_>) f = 
     let command = 
         <@
             fun (rng:_1D) (a:array<_>) ->
                 let r = rng.GlobalID0
                 let x = a.[r]
-                a.[r] <- x*x*x*x*x*x*x*x                
+                a.[r] <- (%f) x
         @>
     let kernel, kernelPrepare, kernelRun = provider.Compile command    
-    let d =(new _1D(arr.Length,1))    
+    let d =(new _1D(arr.Length,20))    
     kernelPrepare d arr        
     let _ = commandQueue.Add(kernelRun()).Finish()    
-    let _ = commandQueue.Add(arr.ToHost provider).Finish()    
+    let _ = commandQueue.Add(arr.ToHost provider).Finish()
     ()
 
 let gpuSort2 (arr:array<_>) =
@@ -287,35 +286,42 @@ let timeGpuSumk () =
 //timeGpuSumk()
 
 let cpuSum = ref 0
-(fun () -> cpuSum := Array.sum cpuArr )
-|> time
-|> printfn "cpu time: %A"  
-
-
 let _gpuSum = ref 0
-(fun () -> _gpuSum := 
-                gpuSum3 gpuArr 100)
-                //gpuSumk gpuArr k )
-                // gpuSum [|2;3;4;5;1|] )
+
+//
+//(fun () -> cpuSum := Array.sum cpuArr )
+//|> time
+//|> printfn "cpu time: %A"  
+//
+//
+//
+//(fun () -> _gpuSum := 
+//                gpuSum3 gpuArr 100)
+//                //gpuSumk gpuArr k )
+//                // gpuSum [|2;3;4;5;1|] )
+//|> time
+//|> printfn "gpu time: %A"
+//
+//printfn "%A" cpuSum
+//printfn "%A" _gpuSum
+//
+
+
+let f = <@fun x -> (x*x+x+x+x+x+x+x)/(x+1)/(x+1)/1000@>
+let _f = f.Compile()()
+(fun () ->  cpuSum := (Array.iteri (fun i x -> cpuArr.[i] <- _f x) cpuArr; Array.sum cpuArr) )
 |> time
-|> printfn "gpu time: %A"
+|> printfn "cpu iter time: %A"  
+
+
+(fun () -> _gpuSum :=( gpuiter gpuArr f; gpuSum3 gpuArr 1000 ))
+|> time
+|> printfn "gpu iter time: %A"  
+
+provider.CloseAllBuffers()
 
 printfn "%A" cpuSum
 printfn "%A" _gpuSum
-
-
-
-
-//(fun () -> Array.iteri (fun i x -> cpuArr.[i] <- x*x*x*x*x*x*x*x) cpuArr )
-//|> time
-//|> printfn "cpu iter time: %A"  
-//
-//
-//(fun () -> gpuiter cpuArr )
-//|> time
-//|> printfn "cpu iter time: %A"  
-
-
 //gpuSort [|1;2|] |> printfn "%A"
 
 
