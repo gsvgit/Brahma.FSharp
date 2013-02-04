@@ -22,11 +22,13 @@ let Translate (_type:System.Type):Type<Lang> =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "float"| "float32" | "single"-> PrimitiveType<Lang>(Float) :> Type<Lang>
+        | "byte" -> PrimitiveType<Lang>(UChar) :> Type<Lang>
         | "boolean" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "double" -> PrimitiveType<Lang>(Double) :> Type<Lang>        
         | "single[]" -> RefType<_>(go "single") :> Type<Lang>
         | "double[]" -> RefType<_>(go "double") :> Type<Lang>
         | "int32[]" -> RefType<_>(go "int32") :> Type<Lang>
+        | "byte[]" -> RefType<_>(go "byte") :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 
     _type.Name
     |> go

@@ -345,6 +345,21 @@ type Translator() =
         run _1d intInArr
         check intInArr [|3;1;2;3|]
 
+    [<Test>]
+    member this.``Byte type support``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<byte>) ->
+                    buf.[0] <- buf.[0] + 1uy
+                    buf.[1] <- buf.[1] + 1uy
+                    buf.[2] <- buf.[2] + 1uy
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|0uy;255uy;254uy|]
+        run _1d inByteArray
+        check inByteArray [|1uy;0uy;255uy|]
+
+
 
 let x = 
     let d = ref 0
