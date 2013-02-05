@@ -318,20 +318,38 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
 //                    if areEq then res.[i] <- 1uy
 //        @>
 
+    let genComparator i =
+        let template = <@ fun (s:array<byte>) (sub:array<byte>) count i j -> s.[i + j] = sub.[count+j] @>
+        let bTemplate = <@ fun x y -> x && y@>
+        let rec go expr vars =
+            match expr with
+            | Patterns.Lambda (v, body) ->
+                go body (v::vars)
+            | e -> e,vars
+        let bBody,bVars = go bTemplate []
+        let tBody,tVars = go template []
+        let exprs = Array.init i (fun i -> tBody.Substitute(fun v -> if v.Name = "j" then Expr.Value(i)|> Some else None))
+        let cond = exprs |> Array.fold (fun b e -> b) bBody
+        1
+
     let command =
         <@
             fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
                 let i = rng.GlobalID0
-                //let _sub = sub
                 if i <= sL - subL
                 then
                     let mutable areEq = true
                     let mutable count = 0
-                    let k = (subL + 1)/2
-                    while areEq && count < k do
-                        let x = subL - 1 - count
-                        areEq <- s.[i+count] = sub.[count] && s.[i + x] = sub.[x]
-                        count <- count + 1
+                    let e = subL % 4
+                    while areEq && count < subL - e do
+                        let i = i+ count 
+                        areEq <- s.[i] = sub.[count] 
+                                 && s.[i + 1] = sub.[count+1]
+                                 && s.[i + 2] = sub.[count+2]
+                                 && s.[i + 3] = sub.[count+3]
+                        count <- count + 4
+                    if areEq
+                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] 
                     if areEq then res.[i] <- 1uy
         @>
 
@@ -453,7 +471,7 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
-let l = 95000000
+let l = 195000000
 let sl = 1000
 let st = 2
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
@@ -477,7 +495,7 @@ let x () =
                             arr _sig
         //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;0uy;1uy;1uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;0uy;1uy;2uy;1uy;0uy;1uy;1uy;2uy|] [|0uy;1uy;1uy;2uy|]
         ) |> printfn "%A"
-    
+    (!x).Length |> printfn "Count = %A"
     //!x|> Seq.iter (printf "%A; ")
 
 do x() |> printfn "%A"
