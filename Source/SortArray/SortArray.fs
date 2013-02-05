@@ -35,7 +35,7 @@ let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let k = 1024
 
-let length =   200000000
+let length =   12//0000000
              //110000000
 
 let baseArr = Array.init length (fun _ -> random.Next(10))
@@ -192,20 +192,20 @@ let gpuiter (arr:array<_>) f =
                 a.[r] <- (%f) x
         @>
     let kernel, kernelPrepare, kernelRun = provider.Compile command    
-    let d =(new _1D(arr.Length,20))    
-    kernelPrepare d arr        
+    let d = new _1D(arr.Length,20)
+    kernelPrepare d arr
     let _ = commandQueue.Add(kernelRun()).Finish()    
     let _ = commandQueue.Add(arr.ToHost provider).Finish()
     ()
 
 let gpuSort2 (arr:array<_>) =
-    let command = 
+    let command =
         <@
             fun (rng:_1D) id l (a:array<_>) (b:array<_>) (c:array<_>)->
                 let k = rng.GlobalID0
                 if id = 0
                 then
-                    let mutable count = 0                    
+                    let mutable count = 0
                     let cur = a.[k]
                     for i in 0..l-1 do
                         if a.[i] < cur then count <- count + 1
@@ -214,14 +214,180 @@ let gpuSort2 (arr:array<_>) =
         @>
     let b = Array.zeroCreate arr.Length
     let c = Array.zeroCreate arr.Length
-    let kernel, kernelPrepare, kernelRun = provider.Compile command    
-    let d =(new _1D(arr.Length,1))  
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let d =(new _1D(arr.Length,1))
     kernelPrepare d 0 arr.Length arr b c
-    let _ = commandQueue.Add(kernelRun())//.Barrier()
+    let _ = commandQueue.Add(kernelRun())
     kernelPrepare d 1 arr.Length arr b c
     let _ = commandQueue.Add(kernelRun()).Finish
     let _ = commandQueue.Add(c.ToHost provider).Finish()
     c
+
+//let findSubstr (s:array<byte>) (sub:array<byte>) =
+//    let command =
+//        <@
+//            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL subH ->
+//                let i = rng.GlobalID0
+//                let q = 101
+//                let d = 256
+//                let mutable sH = 0                
+//                if i <= sL - subL
+//                then
+//                    //for j in 0..subL-1 do
+//                      //  sH <- (d*sH + int s.[j+i])/q
+//                    //if sH = subH
+//                    //then
+//                        let mutable areEq = true
+//                        let mutable count = 0                    
+//                        while areEq && count < subL do                        
+//                            areEq <- areEq && s.[i+count] = sub.[count]
+//                            count <- count + 1
+//                        if areEq then res.[i] <- 1uy
+//        @>
+//
+//    let length = s.Length
+//    let mutable localWorkSize = 100
+//    let kernel, kernelPrepare, kernelRun = provider.Compile command
+//    let dim =(new _1D(length, localWorkSize))
+//    let res = Array.zeroCreate length
+//    let mutable subH = 0
+//    let q = 101
+//    let d = 256
+//    for j in 0..sub.Length-1 do
+//        subH <- (d*subH + int sub.[j])/q
+//    kernelPrepare dim s sub res s.Length sub.Length subH
+//    let _ = commandQueue.Add(kernelRun()).Finish()
+//    let _ = commandQueue.Add(res.ToHost provider).Finish()
+//    res //|> Array.filter (fun x -> x <> 0uy)
+
+
+let findSubstr (s:array<byte>) (sub:array<byte>) =
+    let hashCalc1 =
+        <@
+            fun (rng:_1D) (s:array<_>) (res:array<_>) subL l ->
+                let r = rng.GlobalID0
+                let _start = r * k
+                let q = 101
+                let mutable _end = _start + k - 1
+                if _end >= l then _end <- l - 1
+                let mutable buf = 0
+                for i in _start .. _end do
+                    buf <- buf + s.[i] * pown 101 i
+                res.[_start] <- buf
+        @>
+
+//    let hashCalc2 =
+//        <@
+//            fun (rng:_1D) (res:array<_>) k ->
+//                let i = rng.GlobalID0
+//                let d = i % k
+//                if d <> 0
+//                then
+//                    let l = i - d
+//                    let r = i + 
+//                
+//        @>
+
+//    let command =
+//        <@
+//            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
+//                let i = rng.GlobalID0
+//                if i <= sL - subL
+//                then
+//                    let mutable areEq = true
+//                    let mutable count = 0
+//                    while areEq && count < subL do
+//                        areEq <- s.[i+count] = sub.[count]
+//                        count <- count + 1
+//                    if areEq then res.[i] <- 1uy
+//        @>
+
+//    let command =
+//        <@
+//            fun (rng:_1D) (s:array<_>) (_sub:array<_>) (res:array<_>) sL subL ->
+//                let i = rng.GlobalID0
+//                if i <= sL - subL
+//                then
+//                    let mutable areEq = true
+//                    let mutable count = 0
+//                    let k = (subL + 1)/2
+//                    while areEq && count < k do
+//                        let x = subL - 1 - count
+//                        areEq <- s.[i+count] = _sub.[count] && s.[i + x] = _sub.[x]
+//                        count <- count + 1
+//                    if areEq then res.[i] <- 1uy
+//        @>
+
+    let command =
+        <@
+            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
+                let i = rng.GlobalID0
+                //let _sub = sub
+                if i <= sL - subL
+                then
+                    let mutable areEq = true
+                    let mutable count = 0
+                    let k = (subL + 1)/2
+                    while areEq && count < k do
+                        let x = subL - 1 - count
+                        areEq <- s.[i+count] = sub.[count] && s.[i + x] = sub.[x]
+                        count <- count + 1
+                    if areEq then res.[i] <- 1uy
+        @>
+
+    let length = s.Length
+    let mutable localWorkSize = 100
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let dim = new _1D(length, localWorkSize)
+    let res = Array.zeroCreate length
+    kernelPrepare dim s sub res length sub.Length
+    let _ = commandQueue.Add(kernelRun()).Finish()
+    let _ = commandQueue.Add(res.ToHost provider).Finish()
+    let r = new ResizeArray<_>()
+    res |> Array.iteri (fun i x -> if x <> 0uy then r.Add i)
+    r.ToArray()
+
+let findSubstr2 (s:array<byte>) (sub:array<byte>) =
+
+    let command =
+        <@
+            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL b ->
+                let i = rng.GlobalID0
+                let k = i % subL + b
+                if s.[i] = sub.[k]
+                then res.[i] <- 1
+        @>
+
+    let cSum = 
+        <@
+            fun (rng:_1D) (res:array<_>) sL subL -> 
+                let i = rng.GlobalID0
+                let mutable e = i + subL - 1
+                if e > sL - 1 then e <- sL - 1
+                let mutable buf = 0
+                for j in i..e do
+                    buf <- buf + res.[j]
+                res.[i] <- buf
+
+        @>
+    let length = s.Length
+    let mutable localWorkSize = 100
+    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let dim = new _1D(length, localWorkSize)
+    let res = Array.zeroCreate length
+    let sl = sub.Length
+    for i in 0 .. sl-1 do
+        kernelPrepare dim s sub res length sl i
+        commandQueue.Add(kernelRun()) |> ignore
+    let kernel2, kernelPrepare2, kernelRun2 = provider.Compile cSum
+    kernelPrepare2 dim res length sl 
+    commandQueue.Add(kernelRun2()) |> ignore
+    commandQueue.Finish() |> ignore
+    let _ = commandQueue.Add(res.ToHost provider).Finish()
+    let r = new ResizeArray<_>()
+    res |> Array.iteri (fun i x -> if x = sl then r.Add i)
+    r.ToArray()
+
 
 let gpuSort (arr:array<_>) =
     let command = 
@@ -287,7 +453,34 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
+let l = 95000000
+let sl = 1000
+let st = 2
+let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
+    //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
+let _sig = 
+    let a = Array.zeroCreate sl
+    random.NextBytes a
+    a
+    //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;255uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy
+      //       ; 0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;255uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy|]
+//[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy|]
+let arr = Array.zeroCreate l
+random.NextBytes arr
+for i in idxs do
+    _sig |> Array.iteri (fun j x -> arr.[j+i] <- x)
 
+let x () =
+    
+    let x = ref [||]
+    time (fun () ->  x:= findSubstr
+                            arr _sig
+        //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;0uy;1uy;1uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;0uy;1uy;2uy;1uy;0uy;1uy;1uy;2uy|] [|0uy;1uy;1uy;2uy|]
+        ) |> printfn "%A"
+    
+    //!x|> Seq.iter (printf "%A; ")
+
+do x() |> printfn "%A"
 //
 //(fun () -> cpuSum := Array.sum cpuArr )
 //|> time
@@ -307,21 +500,21 @@ let _gpuSum = ref 0
 //
 
 
-let f = <@fun x -> (x*x+x+x+x+x+x+x)/(x+1)/(x+1)/1000@>
-let _f = f.Compile()()
-(fun () ->  cpuSum := (Array.iteri (fun i x -> cpuArr.[i] <- _f x) cpuArr; Array.sum cpuArr) )
-|> time
-|> printfn "cpu iter time: %A"  
-
-
-(fun () -> _gpuSum :=( gpuiter gpuArr f; gpuSum3 gpuArr 1000 ))
-|> time
-|> printfn "gpu iter time: %A"  
-
-provider.CloseAllBuffers()
-
-printfn "%A" cpuSum
-printfn "%A" _gpuSum
+//let f = <@fun x -> (x*x+x+x+x+x+x+x)/(x+1)/(x+1)@>
+//let _f = f.Compile()()
+//(fun () ->  cpuSum := (Array.iteri (fun i x -> cpuArr.[i] <- _f x) cpuArr; Array.iteri (fun i x -> cpuArr.[i] <- _f x) cpuArr; Array.sum cpuArr))
+//|> time
+//|> printfn "cpu iter time: %A"  
+//
+//
+//fun () -> _gpuSum :=(gpuiter gpuArr f; gpuiter gpuArr f; gpuSum3 gpuArr 1000)
+//|> time
+//|> printfn "gpu iter time: %A"  
+//
+//provider.CloseAllBuffers()
+//
+//printfn "%A" cpuSum
+//printfn "%A" _gpuSum
 //gpuSort [|1;2|] |> printfn "%A"
 
 

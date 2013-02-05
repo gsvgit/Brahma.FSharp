@@ -60,6 +60,7 @@ and private printBop (op:BOp<'lang>) =
     | GreatEQ -> ">="
     | EQ -> "=="
     | NEQ -> "!="
+    | Remainder -> "%"
     |> wordL
 
 and private printBinop (binop:Binop<'lang>) =

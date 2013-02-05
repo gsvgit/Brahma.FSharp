@@ -45,6 +45,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_inequality"          -> new Binop<_>(NEQ,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_unarynegation"       -> new Unop<_>(UOp.Minus,args.[0]) :> Statement<_>,tContext
+    | "op_modulus"             -> new Binop<_>(Remainder,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_lessbangplusgreater"
     | "op_lessbangplus"        -> 
         tContext.Flags.enableAtomic <- true
@@ -83,6 +84,8 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
         , tContext
     | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
+    //| "local"    -> 
+    //| "zerocreate" ->
     | c -> failwithf "Unsupporte call: %s" c
 
 and private itemHelper exprs hostVar tContext =
@@ -142,7 +145,7 @@ and translateValue (value:obj) (sType:System.Type) =
 
 and translateVarSet (var:Var) (expr:Expr) targetContext =
     let var = translateVar var targetContext
-    let expr,tContext = TranslateAsExpr expr targetContext
+    let expr,tContext = translateCond(*TranslateAsExpr*) expr targetContext
     new Assignment<_>(new Property<_>(PropertyType.Var var),expr),tContext
 
 and translateCond (cond:Expr) targetContext =

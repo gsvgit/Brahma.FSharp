@@ -21,7 +21,11 @@ open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
 
 let private printFunFormalParam (param:FunFormalArg<_>) =
-    [ if param.IsGlobal then yield wordL "__global"
+    [ if param.IsGlobal 
+      then if param.Name.[0] <> '_'
+           then yield wordL "__global"
+           else yield wordL "__global"
+      else yield wordL "private"
     ; yield Types.Print param.Type
     ; yield wordL param.Name
     ] |> spaceListL

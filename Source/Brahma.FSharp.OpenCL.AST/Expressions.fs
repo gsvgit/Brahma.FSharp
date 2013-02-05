@@ -68,6 +68,7 @@ type BOp<'lang> =
      | GreatEQ
      | EQ
      | NEQ
+     | Remainder
 
 type Binop<'lang>(op:BOp<'lang>,l:Expression<'lang>,r:Expression<'lang>) = 
     inherit Expression<'lang>()

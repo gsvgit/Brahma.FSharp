@@ -27,3 +27,5 @@ let aIncr a =
 let aDecr a = 
     kFail ()
     a - 1
+
+let local (a:array<'a>) = a
