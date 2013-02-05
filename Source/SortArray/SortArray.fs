@@ -318,21 +318,42 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
 //                    if areEq then res.[i] <- 1uy
 //        @>
 
-    let genComparator i =
-        let template = <@ fun (s:array<byte>) (sub:array<byte>) count i j -> s.[i + j] = sub.[count+j] @>
-        let bTemplate = <@ fun x y -> x && y@>
-        let rec go expr vars =
+    let genComparator l =
+        let getmi expr =
             match expr with
-            | Patterns.Lambda (v, body) ->
-                go body (v::vars)
-            | e -> e,vars
-        let bBody,bVars = go bTemplate []
-        let tBody,tVars = go template []
-        let exprs = Array.init i (fun i -> tBody.Substitute(fun v -> if v.Name = "j" then Expr.Value(i)|> Some else None))
-        let cond = exprs |> Array.fold (fun b e -> b) bBody
-        1
+            | Patterns.Call (_,mi,_) -> mi
+            | _ -> failwith "It is not all"
+          
+        let plusMi = getmi <@ 1 + 2 @>
+        let aGetMi = getmi <@ [|1uy|].[0] @>
+        let aSetMi = getmi <@ [|1uy|].[0] <- 1uy @>
+        let eqMi = getmi <@ 1uy = 2uy @>
 
-    let command =
+        let sV = Var("s",typeof<array<byte>>)
+        let subV = Var("sub",typeof<array<byte>>)
+        let iV = Var("i",typeof<int>)
+
+        let s = Expr.Var sV
+        let sub = Expr.Var subV
+        let i = Expr.Var iV
+
+        let makeExpr n =
+            let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
+            let eqRight = Expr.Call(aGetMi,[sub;Expr.Value(n)])
+            Expr.Call(eqMi,[eqLeft;eqRight])
+             
+        let b = 
+            let lst = Array.init l makeExpr |> List.ofArray
+            let rec go lst =
+                match lst with
+                | hd::tl -> Expr.IfThenElse(hd,go tl,Expr.Value(false))
+                | [] -> Expr.Value(true)
+            go lst
+            
+        let r  = Expr.Lambda(sV,Expr.Lambda(subV,Expr.Lambda(iV,b)))
+        r// :?> Expr<array<byte> -> array<byte> -> int -> int -> bool>
+
+    let command l =
         <@
             fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
                 let i = rng.GlobalID0
@@ -340,7 +361,8 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
                 then
                     let mutable areEq = true
                     let mutable count = 0
-                    let e = subL % 4
+                    
+                    (*let e = subL % 4
                     while areEq && count < subL - e do
                         let i = i+ count 
                         areEq <- s.[i] = sub.[count] 
@@ -349,13 +371,17 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
                                  && s.[i + 3] = sub.[count+3]
                         count <- count + 4
                     if areEq
-                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] 
+                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] *)
+                    areEq <- ((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i
                     if areEq then res.[i] <- 1uy
         @>
 
+
+    let x = genComparator 2
+
     let length = s.Length
     let mutable localWorkSize = 100
-    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let kernel, kernelPrepare, kernelRun = provider.Compile (command sub.Length)
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
     kernelPrepare dim s sub res length sub.Length
@@ -472,7 +498,7 @@ let timeGpuSumk () =
 let cpuSum = ref 0
 let _gpuSum = ref 0
 let l = 195000000
-let sl = 1000
+let sl = 60
 let st = 2
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
