@@ -28,7 +28,7 @@ let apply (expr:Expr) =
         | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
             Expr.ForIntegerRangeLoop(i, from, _to, go _do)            
         | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
-            Expr.IfThenElse(cond, go thenExpr, go elseExpr)        
+            Expr.IfThenElse(go cond, go thenExpr, go elseExpr)        
         | Patterns.Let (var, expr, inExpr) ->
             Expr.Let(var, go expr, go inExpr)
         | Patterns.Sequential(expr1,expr2) -> 

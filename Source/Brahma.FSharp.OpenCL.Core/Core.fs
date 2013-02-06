@@ -70,9 +70,9 @@ type ComputeProvider with
         let args = ref [||]
         let run = ref Unchecked.defaultof<Commands.Run<'TRange>>
         let getStarterFuncton qExpr =
-            let rec go expr vars=
+            let rec go expr vars =
                 match expr with
-                | Patterns.Lambda (v, body) -> 
+                | Patterns.Lambda (v, body) ->
                     Expr.Lambda(v,go body (v::vars))
                 | e -> 
                     let arr =                            

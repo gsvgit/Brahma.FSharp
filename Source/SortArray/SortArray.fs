@@ -322,28 +322,69 @@ let findSubstr (s:array<_>) (sub:array<_>) =
 //                    if areEq then res.[i] <- 1uy
 //        @>
 
-    let command =
+    let genComparator l =
+        let getmi expr =
+            match expr with
+            | Patterns.Call (_,mi,_) -> mi
+            | _ -> failwith "It is not all"
+          
+        let plusMi = getmi <@ 1 + 2 @>
+        let aGetMi = getmi <@ [|1uy|].[0] @>
+        let aSetMi = getmi <@ [|1uy|].[0] <- 1uy @>
+        let eqMi = getmi <@ 1uy = 2uy @>
+
+        let sV = Var("s",typeof<array<byte>>)
+        let subV = Var("sub",typeof<array<byte>>)
+        let iV = Var("i",typeof<int>)
+
+        let s = Expr.Var sV
+        let sub = Expr.Var subV
+        let i = Expr.Var iV
+
+        let makeExpr n =
+            let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
+            let eqRight = Expr.Call(aGetMi,[sub;Expr.Value(n)])
+            Expr.Call(eqMi,[eqLeft;eqRight])
+             
+        let b = 
+            let lst = Array.init l makeExpr |> List.ofArray
+            let rec go lst =
+                match lst with
+                | hd::tl -> Expr.IfThenElse(hd,go tl,Expr.Value(false))
+                | [] -> Expr.Value(true)
+            go lst
+            
+        let r  = Expr.Lambda(sV,Expr.Lambda(subV,Expr.Lambda(iV,b)))
+        r// :?> Expr<array<byte> -> array<byte> -> int -> int -> bool>
+
+    let command l =
         <@
             fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) (b:array<_>) sL subL ->
                 let i = rng.GlobalID0
-                //let _sub = sub
                 if i <= sL - subL
                 then
                     let mutable areEq = true
                     let mutable count = 0
-                    let k = (subL + 1)/2
-                    while areEq && count < k do
-                        let x = subL - 1 - count
-                        areEq <- s.[i+count] = sub.[count] && s.[i + x] = sub.[x]
-                        count <- count + 1
-                    if areEq then
-                        let ov = b.[0] <!+> 1
-                        res.[ov] <- i
+                    
+                    (*let e = subL % 4
+                    while areEq && count < subL - e do
+                        let i = i+ count 
+                        areEq <- s.[i] = sub.[count] 
+                                 && s.[i + 1] = sub.[count+1]
+                                 && s.[i + 2] = sub.[count+2]
+                                 && s.[i + 3] = sub.[count+3]
+                        count <- count + 4
+                    if areEq
+                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] *)
+                    areEq <- ((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i
         @>
+
+
+    let x = genComparator 2
 
     let length = s.Length
     let mutable localWorkSize = 100
-    let kernel, kernelPrepare, kernelRun = provider.Compile command
+    let kernel, kernelPrepare, kernelRun = provider.Compile (command sub.Length)
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
     let b = Array.zeroCreate 1
@@ -463,8 +504,8 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
-let l = 95000000 /// 4
-let sl = 1000 /// 4
+let l = 195000000
+let sl = 60
 let st = 4
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
@@ -491,7 +532,7 @@ let x () =
                             arr _sig
         //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;0uy;1uy;1uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;0uy;1uy;2uy;1uy;0uy;1uy;1uy;2uy|] [|0uy;1uy;1uy;2uy|]
         ) |> printfn "%A"
-    
+    (!x).Length |> printfn "Count = %A"
     //!x|> Seq.iter (printf "%A; ")
 
 do x() |> printfn "%A"
