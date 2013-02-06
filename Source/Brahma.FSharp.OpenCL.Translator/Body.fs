@@ -25,7 +25,7 @@ let clearContext (targetContext:TargetContext<'a,'b>) =
     c
 
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
-    let body,tContext = TranslateAsExpr expr targetContext
+    let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext
     let vType = Type.Translate(var.Type)    
     new VarDecl<Lang>(vType,newName,Some body)
 
