@@ -277,12 +277,12 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
 
         let sV = Var("s",typeof<array<byte>>)
         let iV = Var("i",typeof<int>)
-        let resV = Var("areEq",typeof<bool>)
+        //let resV = Var("areEq",typeof<bool>)
 
         let s = Expr.Var sV
         let i = Expr.Var iV
 
-        let vars = Array.init l (fun i -> Var ("s_" + string i, typeof<byte>))
+        //let vars = Array.init l (fun i -> Var ("s_" + string i, typeof<byte>))
 
         let makeExpr n =
             let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
@@ -299,40 +299,35 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
             //Expr.VarSet(resV,go lst)
             go lst
             
-        let lets = 
-            vars
-            |> Array.mapi (fun j v -> v,Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(j)])]))
-            |> Array.fold  (fun b (v,e) -> Expr.Let(v,e,b)) b
+//        let lets = 
+//            vars
+//            |> Array.mapi (fun j v -> v,Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(j)])]))
+//            |> Array.fold  (fun b (v,e) -> Expr.Let(v,e,b)) b
         let r  = Expr.Lambda(sV,Expr.Lambda(iV,b))
         r// :?> Expr<array<byte> -> array<byte> -> int -> int -> bool>
 
-    let r = <@let mutable x = 1 in x <-0@>
     let command pat =
         <@
             fun (rng:_1D) (s:array<_>) (res:array<_>) sL subL ->
                 let i = rng.GlobalID0                
-                if i <= sL - subL 
-                then
-                   let areEq1 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq2 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq3 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq4 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq5 = ((%% genComparator pat):array<byte> -> int -> bool) s i                    
-                   let areEq6 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq7 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   let areEq8 = ((%% genComparator pat):array<byte> -> int -> bool) s i
-                   if (areEq1 || areEq2 || areEq3 || areEq4 || areEq5 || areEq6 || areEq7 || areEq8)
-                   then
-                       let mutable r = 0uy
-                       if areEq1 then r <- r ||| 1uy
-                       if areEq2 then r <- r ||| 2uy
-                       if areEq3 then r <- r ||| 4uy
-                       if areEq4 then r <- r ||| 8uy
-                       if areEq5 then r <- r ||| 16uy
-                       if areEq6 then r <- r ||| 32uy
-                       if areEq7 then r <- r ||| 64uy
-                       if areEq8 then r <- r ||| 128uy
-                       res.[i] <- r
+                let mutable r = 0uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 1uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 2uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 4uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 8uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)                   
+                then r <- r ||| 16uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 32uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 64uy
+                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- r ||| 128uy
+                if r > 0uy then res.[i] <- r
         @>
 
 
@@ -459,9 +454,9 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
-let l = 195000000
+let l = 395001000
 let sl = 8
-let st = 40000
+let st = 400000
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
 let _sig = 
