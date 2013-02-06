@@ -29,3 +29,4 @@ let aDecr a =
     a - 1
 
 let local (a:array<'a>) = a
+let _byte (x:bool) = 0uy

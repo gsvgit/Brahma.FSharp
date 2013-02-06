@@ -29,9 +29,9 @@ let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:Ta
     let vType = Type.Translate(var.Type)    
     new VarDecl<Lang>(vType,newName,Some body)
 
-and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targetContext =
+and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args targetContext =
     let args,tContext = 
-        let a,c = args |> List.fold (fun (res,tc) a -> let r,tc = TranslateAsExpr a tc in r::res,tc) ([],targetContext)
+        let a,c = _args |> List.fold (fun (res,tc) a -> let r,tc = translateCond a tc in r::res,tc) ([],targetContext)
         a |> List.rev , c
     match mInfo.Name.ToLowerInvariant() with
     | "op_multiply"            -> new Binop<_>(Mult,args.[0],args.[1]) :> Statement<_>,tContext
@@ -46,6 +46,8 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
     | "op_subtraction"         -> new Binop<_>(Minus,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_unarynegation"       -> new Unop<_>(UOp.Minus,args.[0]) :> Statement<_>,tContext
     | "op_modulus"             -> new Binop<_>(Remainder,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_bitwiseand"          -> new Binop<_>(BitAnd,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_bitwiseor"          -> new Binop<_>(BitOr,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_lessbangplusgreater"
     | "op_lessbangplus"        -> 
         tContext.Flags.enableAtomic <- true
@@ -84,6 +86,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) args targ
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
         , tContext
     | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
+    | "_byte"    -> args.[0] :> Statement<_>, tContext
     //| "local"    -> 
     //| "zerocreate" ->
     | c -> failwithf "Unsupporte call: %s" c
@@ -154,10 +157,10 @@ and translateCond (cond:Expr) targetContext =
         let l,tContext = translateCond cond targetContext
         let r,tContext = translateCond _then tContext
         let e,tContext = translateCond _else tContext
-        new Binop<_>(BitOr, new Binop<_>(BitAnd,l,r),e) :> Expression<_> , tContext
+        new Binop<_>(Or, new Binop<_>(And,l,r),e) :> Expression<_> , tContext
     | Patterns.Value (v,t) ->
         let str =  (string v).ToLowerInvariant()
-        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if str = "true" then "1" elif str = "false" then "0" else str))
+        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if str = "true" then "255" elif str = "false" then "0" else str))
         r :> Expression<_>, targetContext 
     | _ -> TranslateAsExpr cond targetContext
 
