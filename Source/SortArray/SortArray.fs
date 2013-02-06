@@ -27,12 +27,16 @@ let random = new System.Random()
 
 let platformName = "*"
 let deviceType = Cl.DeviceType.Default
+
 let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
         | ex -> failwith ex.Message
 let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
+let ing,e = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.GlobalMemSize)
+let gg = ing.CastTo<uint64>()
+let ing2,e2 = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
+let ggg = ing2.CastTo<uint64>()
 let k = 1024
 
 let length =   12//0000000
@@ -261,7 +265,7 @@ let gpuSort2 (arr:array<_>) =
 //    res //|> Array.filter (fun x -> x <> 0uy)
 
 
-let findSubstr (s:array<byte>) (sub:array<byte>) =
+let findSubstr (s:array<_>) (sub:array<_>) =
     let hashCalc1 =
         <@
             fun (rng:_1D) (s:array<_>) (res:array<_>) subL l ->
@@ -320,7 +324,7 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
 
     let command =
         <@
-            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
+            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) (b:array<_>) sL subL ->
                 let i = rng.GlobalID0
                 //let _sub = sub
                 if i <= sL - subL
@@ -332,7 +336,9 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
                         let x = subL - 1 - count
                         areEq <- s.[i+count] = sub.[count] && s.[i + x] = sub.[x]
                         count <- count + 1
-                    if areEq then res.[i] <- 1uy
+                    if areEq then
+                        let ov = b.[0] <!+> 1
+                        res.[ov] <- i
         @>
 
     let length = s.Length
@@ -340,12 +346,16 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
-    kernelPrepare dim s sub res length sub.Length
+    let b = Array.zeroCreate 1
+    kernelPrepare dim s sub res b length sub.Length
     let _ = commandQueue.Add(kernelRun()).Finish()
-    let _ = commandQueue.Add(res.ToHost provider).Finish()
-    let r = new ResizeArray<_>()
-    res |> Array.iteri (fun i x -> if x <> 0uy then r.Add i)
-    r.ToArray()
+    let _ = commandQueue.Add(b.ToHost provider).Finish()
+    let result = Array.zeroCreate b.[0]
+    let _ = commandQueue.Add(res.ToHost(provider, result)).Finish()
+    result
+//    let r = new ResizeArray<_>()
+//    res |> Array.iteri (fun i x -> if x <> 0uy then r.Add i)
+//    r.ToArray()
 
 let findSubstr2 (s:array<byte>) (sub:array<byte>) =
 
@@ -453,19 +463,23 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
-let l = 95000000
-let sl = 1000
-let st = 2
+let l = 95000000 /// 4
+let sl = 1000 /// 4
+let st = 4
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
 let _sig = 
-    let a = Array.zeroCreate sl
+    let a = 
+        //Array.init sl (fun x -> random.Next())
+        Array.zeroCreate sl
     random.NextBytes a
     a
     //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;255uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy
       //       ; 0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;255uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy|]
 //[|0uy;1uy;0uy;1uy;1uy;0uy;1uy;1uy;5uy;100uy;1uy;66uy;2uy;0uy;1uy;1uy;0uy;1uy;1uy;56uy;1uy;2uy;254uy;0uy;1uy;1uy;2uy|]
-let arr = Array.zeroCreate l
+let arr = 
+    //Array.init l (fun x -> random.Next())
+    Array.zeroCreate l
 random.NextBytes arr
 for i in idxs do
     _sig |> Array.iteri (fun j x -> arr.[j+i] <- x)
