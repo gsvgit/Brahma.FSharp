@@ -310,25 +310,36 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
     let command pat =
         <@
             fun (rng:_1D) (s:array<_>) (res:array<_>) sL subL ->
-                let i = rng.GlobalID0
+                let i = rng.GlobalID0                
                 if i <= sL - subL 
                 then
-                    res.[i] <- 
-                        (_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 1uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 2uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 4uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 8uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 16uy)          
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 32uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 64uy)
-                        |||(_byte(((%% genComparator pat):array<byte> -> int -> bool) s i) &&& 128uy)
+                   let areEq1 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq2 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq3 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq4 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq5 = ((%% genComparator pat):array<byte> -> int -> bool) s i                    
+                   let areEq6 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq7 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   let areEq8 = ((%% genComparator pat):array<byte> -> int -> bool) s i
+                   if (areEq1 || areEq2 || areEq3 || areEq4 || areEq5 || areEq6 || areEq7 || areEq8)
+                   then
+                       let mutable r = 0uy
+                       if areEq1 then r <- r ||| 1uy
+                       if areEq2 then r <- r ||| 2uy
+                       if areEq3 then r <- r ||| 4uy
+                       if areEq4 then r <- r ||| 8uy
+                       if areEq5 then r <- r ||| 16uy
+                       if areEq6 then r <- r ||| 32uy
+                       if areEq7 then r <- r ||| 64uy
+                       if areEq8 then r <- r ||| 128uy
+                       res.[i] <- r
         @>
 
 
     //let x = genComparator [|2uy|]
 
     let length = s.Length
-    let mutable localWorkSize = 100
+    let mutable localWorkSize = 250
     //let c = command sub
     //printfn "%A" c
     let kernel, kernelPrepare, kernelRun = provider.Compile (command sub)
@@ -449,8 +460,8 @@ let timeGpuSumk () =
 let cpuSum = ref 0
 let _gpuSum = ref 0
 let l = 195000000
-let sl = 16
-let st = 400
+let sl = 8
+let st = 40000
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
 let _sig = 
