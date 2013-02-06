@@ -285,8 +285,8 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
         let vars = Array.init l (fun i -> Var ("s_" + string i, typeof<byte>))
 
         let makeExpr n =
-            //let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
-            let eqLeft = Expr.Var vars.[n]
+            let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
+            //let eqLeft = Expr.Var vars.[n]
             let eqRight = Expr.Value(pat.[n])
             Expr.Call(eqMi,[eqLeft;eqRight])
              
@@ -296,13 +296,14 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
                 match lst with
                 | hd::tl -> Expr.IfThenElse(hd,go tl,Expr.Value(false))
                 | [] -> Expr.Value(true)
-            Expr.VarSet(resV,go lst)
+            //Expr.VarSet(resV,go lst)
+            go lst
             
         let lets = 
             vars
             |> Array.mapi (fun j v -> v,Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(j)])]))
             |> Array.fold  (fun b (v,e) -> Expr.Let(v,e,b)) b
-        let r  = Expr.Lambda(sV,Expr.Lambda(iV,Expr.Lambda(resV,lets)))
+        let r  = Expr.Lambda(sV,Expr.Lambda(iV,b))
         r// :?> Expr<array<byte> -> array<byte> -> int -> int -> bool>
 
     let r = <@let mutable x = 1 in x <-0@>
@@ -314,17 +315,17 @@ let findSubstr (s:array<byte>) (sub:array<byte>) =
                 let mutable r = 0uy
                 if i <= sL - subL 
                 then
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq 
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq then r <- 1uy
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq  then r <- 1uy
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq  then r <- 1uy
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq  then r <- 1uy
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq then r <- 1uy
-                    ((%% genComparator pat):array<byte> -> int -> bool-> unit) s i areEq
+                    areEq <- ((%% genComparator pat):array<byte> -> int -> bool) s i
                     if areEq then r <- 1uy
                 if r = 1uy then res.[i] <- r
         @>
