@@ -155,8 +155,9 @@ and translateCond (cond:Expr) targetContext =
         let r,tContext = translateCond _then tContext
         let e,tContext = translateCond _else tContext
         new Binop<_>(BitOr, new Binop<_>(BitAnd,l,r),e) :> Expression<_> , tContext
-    | Patterns.Value (v,t) -> 
-        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if (string v).ToLowerInvariant() = "true" then  "1" else "0"))
+    | Patterns.Value (v,t) ->
+        let str =  (string v).ToLowerInvariant()
+        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if str = "true" then "1" elif str = "false" then "0" else str))
         r :> Expression<_>, targetContext 
     | _ -> TranslateAsExpr cond targetContext
 
@@ -237,6 +238,7 @@ and translateApplication expr1 expr2 targetContext =
     Translate body targetContext
 
 and Translate expr (targetContext:TargetContext<_,_>) =
+    //printfn "%A" expr
     match expr with
     | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
     | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
