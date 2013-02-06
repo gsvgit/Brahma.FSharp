@@ -103,7 +103,6 @@
     <Compile Include="Image3D.cs" />
     <Compile Include="ImageFormats.cs" />
     <Compile Include="Kernel.cs" />
-    <Compile Include="KernelCallableAttribute.cs" />
     <Compile Include="NDRange.cs" />
     <Compile Include="NDRangeDimension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

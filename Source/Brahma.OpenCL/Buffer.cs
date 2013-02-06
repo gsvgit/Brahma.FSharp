@@ -104,18 +104,18 @@ namespace Brahma.OpenCL
             Memory = memory;
         }
 
-        [KernelCallable]
-        public override T this[int index]
-        {
-            get
-            {
-                throw new InvalidOperationException("Can only index into a buffer inside a kernel");
-            }
-            set
-            {
-                throw new InvalidOperationException("Can only index into a buffer inside a kernel");
-            }
-        }
+        //[KernelCallable]
+        //public override T this[int index]
+        //{
+        //    get
+        //    {
+        //        throw new InvalidOperationException("Can only index into a buffer inside a kernel");
+        //    }
+        //    set
+        //    {
+        //        throw new InvalidOperationException("Can only index into a buffer inside a kernel");
+        //    }
+        //}
 
         public override void Dispose()
         {

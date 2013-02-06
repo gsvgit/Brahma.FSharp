@@ -43,7 +43,7 @@ namespace Brahma.OpenCL
                 _x = x;
             }
             
-            [KernelCallable]
+            
             public int x
             {
                 get
@@ -62,7 +62,7 @@ namespace Brahma.OpenCL
             _localIDs = new IDs_1D(localWorkSize);
         }
 
-        [KernelCallable]
+        
         public int GlobalID0
         {
             get
@@ -71,7 +71,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        [KernelCallable]
+        
         public int LocalID0
         {
             get
@@ -119,7 +119,7 @@ namespace Brahma.OpenCL
                 _y = y;
             }
             
-            [KernelCallable]
+            
             public int x
             {
                 get
@@ -128,7 +128,7 @@ namespace Brahma.OpenCL
                 }
             }
 
-            [KernelCallable]
+            
             public int y
             {
                 get
@@ -148,7 +148,7 @@ namespace Brahma.OpenCL
             _localIDs = new IDs_2D(localWorkSizeX, localWorkSizeY);
         }
 
-        [KernelCallable]
+        
         public int GlobalID0
         {
             get
@@ -157,7 +157,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        [KernelCallable]
+        
         public int GlobalID1
         {
             get
@@ -166,7 +166,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        [KernelCallable]
+        
         public int LocalID0
         {
             get
@@ -175,7 +175,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        [KernelCallable]
+        
         public int LocalID1
         {
             get
@@ -224,7 +224,7 @@ namespace Brahma.OpenCL
                 _z = z;
             }
 
-            [KernelCallable]
+            
             public int x
             {
                 get
@@ -233,7 +233,7 @@ namespace Brahma.OpenCL
                 }
             }
 
-            [KernelCallable]
+            
             public int y
             {
                 get
@@ -242,7 +242,7 @@ namespace Brahma.OpenCL
                 }
             }
 
-            [KernelCallable]
+            
             public int z
             {
                 get
@@ -261,8 +261,7 @@ namespace Brahma.OpenCL
             _globalIDs = new IDs_3D(globalSizeX, globalSizeY, globalSizeZ);
             _localIDs = new IDs_3D(localSizeX, localSizeY, localSizeZ);
         }
-
-        [KernelCallable]
+        
         public int GlobalID0
         {
             get
@@ -270,8 +269,7 @@ namespace Brahma.OpenCL
                 return _globalIDs.x;
             }
         }
-
-        [KernelCallable]
+        
         public int GlobalID1
         {
             get
@@ -279,8 +277,7 @@ namespace Brahma.OpenCL
                 return _globalIDs.y;
             }
         }
-        
-        [KernelCallable]
+                
         public int GlobalID2
         {
             get
@@ -288,8 +285,7 @@ namespace Brahma.OpenCL
                 return _globalIDs.z;
             }
         }
-
-        [KernelCallable]
+        
         public int LocalID0
         {
             get
@@ -297,8 +293,7 @@ namespace Brahma.OpenCL
                 return _localIDs.x;
             }
         }
-
-        [KernelCallable]
+        
         public int LocalID1
         {
             get
@@ -306,8 +301,7 @@ namespace Brahma.OpenCL
                 return _localIDs.y;
             }
         }
-
-        [KernelCallable]
+        
         public int LocalID2
         {
             get
