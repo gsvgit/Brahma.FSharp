@@ -332,7 +332,6 @@ let findSubstr (s:array<_>) (sub:array<_>) =
                 if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
                 then r <- r ||| 128uy
                 if r > 0uy then res.[i] <- r
-                    if (((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i) then res.[i] <- 1uy
         @>
 
     //let x = genComparator [|2uy|]
@@ -345,8 +344,7 @@ let findSubstr (s:array<_>) (sub:array<_>) =
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
     for l in 0..50 do
-        kernelPrepare dim s res length sub.Length
-        kernelPrepare dim s sub res length sub.Length
+        kernelPrepare dim s res length sub.Length        
         commandQueue.Add(kernelRun()).Finish() |> ignore
 
     //let _ = commandQueue.Add(b.ToHost provider).Finish()
