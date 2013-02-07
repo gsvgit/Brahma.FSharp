@@ -23,13 +23,6 @@ namespace Brahma
     {
         public abstract void Dispose();
 
-        //[KernelCallable]
-        //public abstract T this[int index]
-        //{
-        //    get;
-        //    set;
-        //}
-
         public abstract int Length
         {
             get;
