@@ -154,7 +154,7 @@ and translateCond (cond:Expr) targetContext =
         let l,tContext = translateCond cond targetContext
         let r,tContext = translateCond _then tContext
         let e,tContext = translateCond _else tContext
-        new Binop<_>(BitOr, new Binop<_>(BitAnd,l,r),e) :> Expression<_> , tContext
+        new Binop<_>(Or(*BitOr*), new Binop<_>(And(* BitAnd*),l,r),e) :> Expression<_> , tContext
     | Patterns.Value (v,t) -> 
         let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if (string v).ToLowerInvariant() = "true" then  "1" else "0"))
         r :> Expression<_>, targetContext 

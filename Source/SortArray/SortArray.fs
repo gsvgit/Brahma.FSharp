@@ -359,28 +359,30 @@ let findSubstr (s:array<_>) (sub:array<_>) =
 
     let command l =
         <@
-            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) (b:array<_>) sL subL ->
+            fun (rng:_1D) (s:array<_>) (sub:array<_>) (res:array<_>) sL subL ->
                 let i = rng.GlobalID0
                 if i <= sL - subL
                 then
-                    let mutable areEq = true
-                    let mutable count = 0
+                    //let mutable areEq = true
+                    //let mutable count = 0
                     
                     (*let e = subL % 4
                     while areEq && count < subL - e do
-                        let i = i+ count 
+                        let i = i + count 
                         areEq <- s.[i] = sub.[count] 
                                  && s.[i + 1] = sub.[count+1]
                                  && s.[i + 2] = sub.[count+2]
                                  && s.[i + 3] = sub.[count+3]
                         count <- count + 4
                     if areEq
-                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] *)
-                    areEq <- ((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i
+                    then for j in 0..e do areEq <- areEq && s.[i+subL-1-j] = sub.[subL-1-j] 
+                    *)
+                    //areEq <- ((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i
+                    
+                    if (((%% genComparator l):array<byte> -> array<byte> -> int -> bool) s sub i) then res.[i] <- 1uy
         @>
 
-
-    let x = genComparator 2
+    let x = genComparator 2 (*I just think that contribute to LLVM would be more useful.*)
 
     let length = s.Length
     let mutable localWorkSize = 100
@@ -388,15 +390,17 @@ let findSubstr (s:array<_>) (sub:array<_>) =
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
     let b = Array.zeroCreate 1
-    kernelPrepare dim s sub res b length sub.Length
-    let _ = commandQueue.Add(kernelRun()).Finish()
-    let _ = commandQueue.Add(b.ToHost provider).Finish()
-    let result = Array.zeroCreate b.[0]
-    let _ = commandQueue.Add(res.ToHost(provider, result)).Finish()
-    result
-//    let r = new ResizeArray<_>()
-//    res |> Array.iteri (fun i x -> if x <> 0uy then r.Add i)
-//    r.ToArray()
+    for i in 0..10 do
+        kernelPrepare dim s sub res length sub.Length
+        commandQueue.Add(kernelRun()).Finish() |> ignore
+
+    //let _ = commandQueue.Add(b.ToHost provider).Finish()
+    //let result = Array.zeroCreate b.[0]
+    let _ = commandQueue.Add(res.ToHost(provider)).Finish()
+    //result
+    let r = new ResizeArray<_>()
+    res |> Array.iteri (fun i x -> if x <> 0uy then r.Add i)
+    r.ToArray()
 
 let findSubstr2 (s:array<byte>) (sub:array<byte>) =
 
@@ -505,8 +509,8 @@ let timeGpuSumk () =
 let cpuSum = ref 0
 let _gpuSum = ref 0
 let l = 195000000
-let sl = 60
-let st = 4
+let sl = 16
+let st = 40000
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
 let _sig = 
