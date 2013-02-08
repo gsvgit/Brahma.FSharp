@@ -42,12 +42,15 @@ let apply (expr:Expr) =
         | other -> other
 
     and translateApplication expr =
-        let rec go expr =
+        let rec _go expr =
             match expr with            
             | Patterns.Application (Patterns.Lambda (fv,e),v) ->
-                e.Substitute(fun x -> if x = fv then Some v else None) |> go
+                e.Substitute(fun x -> if x = fv then Some v else None) |> _go
+            | Patterns.Application (e,v) ->
+                let fb = go e
+                Expr.Application(fb,v) |> _go 
             | e -> e
-        let body = go expr
+        let body = _go expr
         body
 
     go expr

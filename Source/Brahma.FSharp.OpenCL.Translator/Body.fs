@@ -81,12 +81,16 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
         then FunCall<_>("powr",args) :> Statement<_>,tContext
         else failwithf "Seems, thet you use math function with name %s not from System.Math. or Microsoft.FSharp.Core.Operators" fName
 
+    | "ref"      -> args.[0] :> Statement<_>, tContext
+    | "op_dereference" -> args.[0] :> Statement<_>, tContext
+    | "op_colonequals" -> new Assignment<_>(new Property<_>(PropertyType.Var(args.[0] :?> Variable<_>)),args.[1]) :> Statement<_>, tContext
+
     | "setarray" -> 
         let item = new Item<_>(args.[0],args.[1])
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
         , tContext
     | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
-    | "_byte"    -> args.[0] :> Statement<_>, tContext
+    | "_byte"    -> args.[0] :> Statement<_>, tContext    
     //| "local"    -> 
     //| "zerocreate" ->
     | c -> failwithf "Unsupporte call: %s" c
