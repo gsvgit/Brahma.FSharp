@@ -73,12 +73,12 @@ type ComputeProvider with
             let rec go expr vars =
                 match expr with
                 | Patterns.Lambda (v, body) ->
-                    Expr.Lambda(v,go body (v::vars))
+                    Expr.Lambda(v, go body (v::vars))
                 | e -> 
                     let arr =                            
                         let c = Expr.NewArray(typeof<obj>,vars |> List.rev 
                             |> List.map 
-                                 (fun v -> Expr.Coerce (Expr.Var(v),typeof<obj>)))
+                                 (fun v -> Expr.Coerce (Expr.Var(v), typeof<obj>)))
                         <@@ 
                             let x = %%c |> List.ofArray
                             rng := (box x.Head) :?> 'TRange
