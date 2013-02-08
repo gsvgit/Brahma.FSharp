@@ -161,7 +161,15 @@ and translateCond (cond:Expr) targetContext =
         let l,tContext = translateCond cond targetContext
         let r,tContext = translateCond _then tContext
         let e,tContext = translateCond _else tContext
-        new Binop<_>(Or, new Binop<_>(And,l,r),e) :> Expression<_> , tContext
+        let o1 = 
+            match r with
+            | :? Const<Lang> as c when c.Val = "255" -> l
+            | _ -> new Binop<_>(And,l,r) :> Expression<_>
+        match e with
+        | :? Const<Lang> as c when c.Val = "0" -> o1
+        | _ -> new Binop<_>(Or, o1, e) :> Expression<_>
+        , tContext
+
     | Patterns.Value (v,t) ->
         let str =  (string v).ToLowerInvariant()
         let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if str = "true" then "255" elif str = "false" then "0" else str))
