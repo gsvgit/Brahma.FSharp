@@ -204,28 +204,30 @@ and translateWhileLoop condExpr bodyExpr targetContext =
     new WhileLoop<_>(nCond, toStb nBody), tContext 
 
 and translateSeq expr1 expr2 (targetContext:TargetContext<_,_>) =
+    let linearized = new ResizeArray<_>()
+    let rec go e =
+        match e with
+        | Patterns.Sequential(e1,e2) -> 
+            go e1
+            go e2
+        | e -> linearized.Add e
+    go expr1
+    go expr2
     let decls = new ResizeArray<_>(targetContext.VarDecls)
     targetContext.VarDecls.Clear()
-    let nExpr1,tContext = Translate expr1 targetContext
-    let nExpr2,tContext = Translate expr2 tContext
-    let stmt = 
-        match (nExpr1:Node<_>),(nExpr2:Node<_>) with
-        | (:? StatementBlock<Lang> as s1),(:? StatementBlock<Lang> as s2) ->
-            decls.AddRange(s1.Statements)
-            decls.AddRange(s2.Statements)
-            new StatementBlock<Lang>(decls)
-        | (:? StatementBlock<Lang> as s1),s2 ->
-            decls.AddRange(s1.Statements)
-            decls.Add (s2 :?> Statement<_>)
-            new StatementBlock<Lang>(decls)
-        | s1,(:? StatementBlock<Lang> as s2) ->
-            decls.Add(s1:?> Statement<_>)
-            decls.AddRange s2.Statements
-            new StatementBlock<Lang>(decls)
-        | s1,s2 ->
-            decls.Add(s1:?> Statement<_>)
-            decls.Add (s2 :?> Statement<_>)            
-            new StatementBlock<Lang>(decls)
+    let tContext =
+        linearized
+        |> ResizeArray.fold
+            (fun (context:TargetContext<_,_>) s ->
+                context.VarDecls.Clear()
+                let nExpr,tContext = Translate s targetContext
+                match nExpr:Node<_> with
+                | :? StatementBlock<Lang> as s1 -> decls.AddRange(s1.Statements)
+                | s1 -> decls.Add(s1:?> Statement<_>)
+                tContext
+                )
+            targetContext
+    let stmt = new StatementBlock<Lang>(decls)
     stmt, tContext
 
 and translateApplication expr1 expr2 targetContext =
