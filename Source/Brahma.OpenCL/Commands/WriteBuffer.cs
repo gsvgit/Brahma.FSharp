@@ -22,8 +22,24 @@ using OpenCL.Net;
 namespace Brahma.OpenCL.Commands
 {
     public sealed class WriteBuffer<T>: Brahma.Commands.Command 
-        where T: struct, IMem
     {
+        public WriteBuffer(
+           Cl.Mem mem,
+           int elemSize,
+           bool blocking,
+           int offset,
+           int count,
+           Array data)
+        {
+            ElementSize = elemSize;
+            Mem = mem;
+            Blocking = blocking;
+            Offset = offset;
+            Count = count;
+            Data = data;
+            DataPtr = IntPtr.Zero;
+        }
+
         private WriteBuffer(Buffer<T> buffer,
             bool blocking,
             int offset,
@@ -64,6 +80,18 @@ namespace Brahma.OpenCL.Commands
                            IntPtr data)
             : this(buffer, blocking, offset, count, null, data)
         {
+        }
+
+        private Cl.Mem Mem
+        {
+            get;
+            set;
+        }
+
+        private int ElementSize
+        {
+            get;
+            set;
         }
 
         private Buffer<T> Buffer
@@ -112,15 +140,17 @@ namespace Brahma.OpenCL.Commands
                            select ev.Value;
 
             Cl.Event eventID;
-            Cl.ErrorCode error;
+            Cl.ErrorCode error;            
+            var mem = (Buffer == null) ? Mem : Buffer.Mem;
+            var elementSize = (Buffer == null) ? ElementSize : Buffer.ElementSize;
             if (Data == null)
-                error = Cl.EnqueueWriteBuffer(commandQueue.Queue, Buffer.Mem,
+                error = Cl.EnqueueWriteBuffer(commandQueue.Queue, mem,
                     Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
-                    (IntPtr)(Count * Buffer.ElementSize), DataPtr, (uint)waitList.Count(), waitList.Count() == 0? null : waitList.ToArray(), out eventID);
+                    (IntPtr)(Count * elementSize), DataPtr, (uint)waitList.Count(), waitList.Count() == 0? null : waitList.ToArray(), out eventID);
             else
-                error = Cl.EnqueueWriteBuffer(commandQueue.Queue, Buffer.Mem,
+                error = Cl.EnqueueWriteBuffer(commandQueue.Queue, mem,
                     Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
-                    (IntPtr)(Count * Buffer.ElementSize), Data, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
+                    (IntPtr)(Count * elementSize), Data, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
 
             if (error != Cl.ErrorCode.Success)
                 throw new CLException(error);
