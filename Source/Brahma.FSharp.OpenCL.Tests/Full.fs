@@ -359,6 +359,32 @@ type Translator() =
         run _1d inByteArray
         check inByteArray [|1uy;0uy;255uy|]
 
+    [<Test>]
+    member this.``Write buffer``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<byte>) ->
+                    buf.[0] <- buf.[0] + 1uy
+                    buf.[1] <- buf.[1] + 1uy
+                    buf.[2] <- buf.[2] + 1uy
+            @>
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command
+        let inArray = [|1uy;2uy;3uy|]
+        kernelPrepareF _1d inArray
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)        
+        let _ = commandQueue.Add(kernelRunF())
+        let _ = commandQueue.Add(inArray.ToHost provider).Finish()
+        let expected = [|2uy;3uy;4uy|] 
+        Assert.AreEqual(expected, inArray)
+        inArray.[0] <- 5uy
+        commandQueue.Add(inArray.ToGpu provider) |> ignore
+        let _ = commandQueue.Add(kernelRunF())
+        let _ = commandQueue.Add(inArray.ToHost provider).Finish()
+        let expected = [|6uy;4uy;5uy|] 
+        Assert.AreEqual(expected, inArray)
+        commandQueue.Dispose()        
+        provider.CloseAllBuffers()
+
 
 
 let x = 
