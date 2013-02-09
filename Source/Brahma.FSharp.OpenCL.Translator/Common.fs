@@ -21,15 +21,20 @@ type Flags () =
 
 type Lang = OpenCL
 
+type TranslatorOption =
+    | BoolAsBit
+
 type TargetContext<'lang,'vDecl>() =
     let varDecls = new ResizeArray<'vDecl>()
     let mutable flags = new Flags()    
     let mutable namer = new Namer()
+    let mutable translatorOptions = new ResizeArray<TranslatorOption>()
     member this.VarDecls
         with get() = varDecls
     member this.Flags
         with get() = flags
         and set v = flags <- v
+    member this.TranslatorOptions with get() = translatorOptions
     member this.Namer
         with get() = namer
         and set v = namer <- v

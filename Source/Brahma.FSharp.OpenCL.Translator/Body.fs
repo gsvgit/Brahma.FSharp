@@ -18,7 +18,7 @@ module Brahma.FSharp.OpenCL.Translator.Body
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.AST
 
-let clearContext (targetContext:TargetContext<'a,'b>) =
+let private clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
     c.Namer <- targetContext.Namer
     c.Flags <- targetContext.Flags
@@ -161,13 +161,14 @@ and translateCond (cond:Expr) targetContext =
         let l,tContext = translateCond cond targetContext
         let r,tContext = translateCond _then tContext
         let e,tContext = translateCond _else tContext
+        let asBit = tContext.TranslatorOptions.Contains(BoolAsBit)
         let o1 = 
             match r with
             | :? Const<Lang> as c when c.Val = "255" -> l
-            | _ -> new Binop<_>(And,l,r) :> Expression<_>
+            | _ -> new Binop<_>((if asBit then BitAnd else And),l,r) :> Expression<_>
         match e with
         | :? Const<Lang> as c when c.Val = "0" -> o1
-        | _ -> new Binop<_>(Or, o1, e) :> Expression<_>
+        | _ -> new Binop<_>((if asBit then BitOr else Or), o1, e) :> Expression<_>
         , tContext
 
     | Patterns.Value (v,t) ->

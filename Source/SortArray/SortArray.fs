@@ -286,7 +286,7 @@ let findSubstr (s:array<_>) (sub:array<_>) =
         let s = Expr.Var sV
         let i = Expr.Var iV
 
-        //let vars = Array.init l (fun i -> Var ("s_" + string i, typeof<byte>))
+        let vars = Array.init l (fun i -> Var ("s_" + string i, typeof<byte>))
 
         let makeExpr n =
             let eqLeft = Expr.Call(aGetMi,[s;Expr.Call(plusMi,[i;Expr.Value(n)])])
@@ -313,37 +313,175 @@ let findSubstr (s:array<_>) (sub:array<_>) =
     let command pat =
         <@
             fun (rng:_1D) (s:array<_>) (res:array<_>) sL subL ->
-                let i = rng.GlobalID0                
+                let i = rng.GlobalID0
+                let s_0 = s.[i]
+                let s_1 = s.[i+1]
+                let s_2 = s.[i+2]
+                let s_3 = s.[i+3]
+                let s_4 = s.[i+4]
+                let s_5 = s.[i+5]
+                let s_6 = s.[i+6]
+                let s_7 = s.[i+7]
+                let s_8 = s.[i+8]
+                let s_9 = s.[i+9]
+                let s_10 = s.[i+10]
+                let s_11 = s.[i+1]
+                let s_12 = s.[i+2]
+                let s_13 = s.[i+3]
+                let s_14 = s.[i+4]
+                let s_15 = s.[i+5]
+                let s_16 = s.[i+6]
+                let s_17 = s.[i+7]
+                let s_18 = s.[i+8]
+                let s_19 = s.[i+9]
+                let s_20 = s.[i+10]
+                let s_30 = s.[i]
+                let s_31 = s.[i+1]
+                let s_32 = s.[i+2]
+                let s_33 = s.[i+3]
+                let s_34 = s.[i+4]
+                let s_35 = s.[i+5]
+                let s_36 = s.[i+6]
+                let s_37 = s.[i+7]
+                let s_38 = s.[i+8]
+                let s_39 = s.[i+9]
                 let mutable r = 0uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 1uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 2uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 4uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 8uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)                   
-                then r <- r ||| 16uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 32uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 64uy
-                if i <= sL - subL && (((%% genComparator pat):array<byte> -> int -> bool) s i)
-                then r <- r ||| 128uy
+                let c = ref 0
+                c := !c + 2
+                let dif = sL - i
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                let dif = sL - i
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                let dif = sL - i
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                let dif = sL - i
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                if subL <= dif && (((%% genComparator pat):array<byte> -> int -> bool) s i)
+                then r <- 1uy
+                
                 if r > 0uy then res.[i] <- r
         @>
 
-    //let x = genComparator [|2uy|]
-
     let length = s.Length
-    let mutable localWorkSize = 250
-    //let c = command sub
-    //printfn "%A" c
+    let mutable localWorkSize = 100    
     let kernel, kernelPrepare, kernelRun = provider.Compile (command sub)
     let dim = new _1D(length, localWorkSize)
     let res = Array.zeroCreate length
-    for l in 0..50 do
+    for l in 0..10 do
         kernelPrepare dim s res length sub.Length        
         commandQueue.Add(kernelRun()).Finish() |> ignore
 
@@ -461,9 +599,9 @@ let timeGpuSumk () =
 
 let cpuSum = ref 0
 let _gpuSum = ref 0
-let l = 395001000
-let sl = 8
-let st = 400000
+let l = 1950 //00000
+let sl = 32
+let st = 40//00
 let idxs = Array.init ((l/(sl*st))-1 ) (fun i -> i*sl*st)
     //[|2; 45500; 1245; 9800; 10000; 6000; 3005; 200000; 3000445;8000;12000;14000;|]
 let _sig = 

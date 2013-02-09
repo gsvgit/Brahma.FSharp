@@ -39,7 +39,7 @@ type FSQuotationToOpenCLTranslator() =
             List.ofSeq res
         new AST<_>(pragmas @ [mainKernelFun])
 
-    let translate qExpr =
+    let translate qExpr translatorOptions =
         let rec go expr vars =
             match expr with
             | Patterns.Lambda (v, body) -> go body (v::vars)
@@ -48,6 +48,7 @@ type FSQuotationToOpenCLTranslator() =
                     let b,context =
                         let context = new TargetContext<_,_>()
                         context.Namer.LetIn()
+                        context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
                         let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
                         Body.Translate newE context
@@ -62,6 +63,6 @@ type FSQuotationToOpenCLTranslator() =
         let vars,(partialAst,context) = go qExpr []
         buildFullAst (List.rev vars) (partialAst :> Statement<_>) context
   
-    member this.Translate qExpr = 
-        let ast = translate qExpr
+    member this.Translate qExpr translatorOptions = 
+        let ast = translate qExpr translatorOptions
         ast

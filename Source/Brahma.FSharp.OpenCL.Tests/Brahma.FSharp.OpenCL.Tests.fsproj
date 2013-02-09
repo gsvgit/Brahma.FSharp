@@ -84,6 +84,11 @@
       <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Translator</Name>
+      <Project>{bbb08eb4-a2ae-430b-a29c-3b3446f69a6d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahma.OpenCL\Brahma.OpenCL.csproj">
       <Name>Brahma.OpenCL</Name>
       <Project>{1f52ecb5-6cd2-4d76-a4b7-a23131c9d195}</Project>

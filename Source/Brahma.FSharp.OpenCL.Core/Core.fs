@@ -24,10 +24,10 @@ open System
 
 type CLCodeGenerator() =
     static member KernelName = "brahmaKernel"
-    static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel) =        
+    static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel, translatorOptions) =        
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
-        let ast = codeGenerator.Translate lambda
-        let code = Printer.AST.Print ast
+        let ast = codeGenerator.Translate lambda translatorOptions
+        let code = Printer.AST.Print ast 
         kernel.Provider <- provider
         let newCode = 
            "__local uchar _sub[1000];\n"
@@ -44,9 +44,9 @@ type CLCodeGenerator() =
         
 type ComputeProvider with
 
-    member this.CompileQuery<'T when 'T :> ICLKernel>(lambda:Expr) =
-        let kernel = System.Activator.CreateInstance<'T>()
-        let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel)
+    member private this.CompileQuery<'T when 'T :> ICLKernel>(lambda:Expr, translatorOptions) =
+        let kernel = System.Activator.CreateInstance<'T>()        
+        let r = CLCodeGenerator.GenerateKernel(lambda, this, kernel, translatorOptions)
         let str = (kernel :> ICLKernel).Source.ToString()    
         let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|str|], null)
         let _devices = Array.ofSeq  this.Devices
@@ -62,10 +62,11 @@ type ComputeProvider with
             
         kernel            
                     
-    member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?_outCode:string ref) =
+    member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?translatorOptions, ?_outCode:string ref) =
         let options = defaultArg _options this.DefaultOptions_p
+        let tOptions = defaultArg translatorOptions []
         this.SetCompileOptions options
-        let kernel = this.CompileQuery<Kernel<'TRange>> query
+        let kernel = this.CompileQuery<Kernel<'TRange>>(query, tOptions)
         let rng = ref Unchecked.defaultof<'TRange>
         let args = ref [||]
         let run = ref Unchecked.defaultof<Commands.Run<'TRange>>
