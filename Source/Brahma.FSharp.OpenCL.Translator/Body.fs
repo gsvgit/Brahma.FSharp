@@ -164,17 +164,12 @@ and translateCond (cond:Expr) targetContext =
         let asBit = tContext.TranslatorOptions.Contains(BoolAsBit)
         let o1 = 
             match r with
-            | :? Const<Lang> as c when c.Val = "255" -> l
+            | :? Const<Lang> as c when c.Val = "1" -> l
             | _ -> new Binop<_>((if asBit then BitAnd else And),l,r) :> Expression<_>
         match e with
         | :? Const<Lang> as c when c.Val = "0" -> o1
         | _ -> new Binop<_>((if asBit then BitOr else Or), o1, e) :> Expression<_>
         , tContext
-
-    | Patterns.Value (v,t) ->
-        let str =  (string v).ToLowerInvariant()
-        let r = new Const<_>(new PrimitiveType<_>(PTypes.Int), (if str = "true" then "255" elif str = "false" then "0" else str))
-        r :> Expression<_>, targetContext 
     | _ -> TranslateAsExpr cond targetContext
 
 and toStb (s:Node<_>) =
