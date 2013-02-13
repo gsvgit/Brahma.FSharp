@@ -17,7 +17,7 @@ module Brahma.FSharp.OpenCL.Translator.Type
 
 open Brahma.FSharp.OpenCL.AST
 
-let Translate (_type:System.Type):Type<Lang> =    
+let Translate (_type:System.Type) isKernelArg size :Type<Lang>=
     let rec go (str:string) =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
@@ -25,11 +25,12 @@ let Translate (_type:System.Type):Type<Lang> =
         | "byte" -> PrimitiveType<Lang>(UChar) :> Type<Lang>
         | "boolean" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "double" -> PrimitiveType<Lang>(Double) :> Type<Lang>        
-        | "single[]" -> RefType<_>(go "single") :> Type<Lang>
-        | "double[]" -> RefType<_>(go "double") :> Type<Lang>
-        | "int32[]" -> RefType<_>(go "int32") :> Type<Lang>
-        | "byte[]" -> RefType<_>(go "byte") :> Type<Lang>
-        | s when s.StartsWith "fsharpref" -> 
+        | t when t.EndsWith "[]" ->
+            let baseT = t.Substring(0,t.Length-2)
+            if isKernelArg 
+            then RefType<_>(go baseT) :> Type<Lang>
+            else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
+        | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
         | x -> "Unsuported kernel type: " + x |> failwith 
     _type.Name

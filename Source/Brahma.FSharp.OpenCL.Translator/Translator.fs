@@ -29,7 +29,7 @@ type FSQuotationToOpenCLTranslator() =
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
             |> List.map 
                 (fun v -> 
-                    let t = Type.Translate(v.Type)
+                    let t = Type.Translate v.Type true None
                     new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         let pragmas = 

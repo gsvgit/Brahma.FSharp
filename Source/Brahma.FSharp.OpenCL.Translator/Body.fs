@@ -25,8 +25,11 @@ let private clearContext (targetContext:TargetContext<'a,'b>) =
     c
 
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
-    let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext
-    let vType = Type.Translate(var.Type)    
+    let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext    
+    let vType = 
+        match (body:Expression<_>) with 
+        | :? Const<_> as c -> c.Type
+        | _ -> Type.Translate var.Type false None
     new VarDecl<Lang>(vType,newName,Some body)
 
 and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args targetContext =
@@ -90,6 +93,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),args.[2]) :> Statement<_>
         , tContext
     | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
+    | "not" ->  new Unop<_>(UOp.Not,args.[0]) :> Statement<_>,tContext
     | "_byte"    -> args.[0] :> Statement<_>, tContext    
     //| "local"    -> 
     //| "zerocreate" ->
@@ -141,14 +145,27 @@ and translateVar (var:Var) (targetContext:TargetContext<_,_>) =
     | None -> failwith "Seems, that you try to use variable, that declared out of quotation. Please, pass it as quoted function's parametaer."
 
 and translateValue (value:obj) (sType:System.Type) =
-    let _type = Type.Translate sType
+    let mutable _type = None
     let v =
         let s = string value 
-        if sType.Name.ToLowerInvariant() = "boolean"
-        then            
+        match sType.Name.ToLowerInvariant() with
+        | "boolean" -> 
+            _type <- Type.Translate sType false None |> Some
             if s.ToLowerInvariant() = "false" then "0" else "1"
-        else s 
-    new Const<_>(_type, v)
+        | t when t.EndsWith "[]" ->            
+            let arr =
+                match t with
+                | "int32[]" -> value :?> array<int> |> Array.map string
+                | "byte[]" -> value :?> array<byte> |> Array.map string
+                | "single[]" -> value :?> array<float32> |> Array.map string
+                | _ -> failwith "Unsupported array type."
+            _type <- Type.Translate sType false (Some arr.Length) |> Some
+            arr |> String.concat ", "
+            |> fun s -> "{ " + s + "}" 
+        | _ -> 
+            _type <- Type.Translate sType false None |> Some
+            s
+    new Const<_>(_type.Value, v)
 
 and translateVarSet (var:Var) (expr:Expr) targetContext =
     let var = translateVar var targetContext

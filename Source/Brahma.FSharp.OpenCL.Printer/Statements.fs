@@ -26,6 +26,7 @@ let rec private printAssignment (a:Assignment<'lang>) =
 and private printVarDecl (vd:VarDecl<'lang>) =
     [ yield Types.Print vd.Type
     ; yield wordL vd.Name
+    ; if vd.Type :? ArrayType<_> then yield wordL "["  ^^ wordL (string vd.Type.Size)  ^^ wordL "]"
     ; if vd.Expr.IsSome then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
     ] |> spaceListL
 

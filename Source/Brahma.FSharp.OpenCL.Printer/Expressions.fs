@@ -35,6 +35,10 @@ let private printConst (c:Const<'lang>) =
         | Double
         | ULong -> wordL c.Val
         | Void -> wordL ""
+    | :? RefType<'lang> as rt
+        -> wordL c.Val
+    | :? ArrayType<'lang> as rt
+        -> wordL c.Val
     | c -> failwithf "Printer. Unsupported const with type: %A" c
 
 let private printVar (varible:Variable<'lang>) =
@@ -80,7 +84,7 @@ and private printFunCall (fc:FunCall<'lang>) =
 and private printUnOp (uo:Unop<'lang>) =
     match uo.Op with
     | UOp.Minus -> wordL "-" ++ Print uo.Expr |> bracketL
-    | UOp.Not -> wordL "not" ++ Print uo.Expr |> bracketL
+    | UOp.Not -> wordL "!" ++ Print uo.Expr |> bracketL
     | UOp.Incr -> Print uo.Expr ++ wordL "++"
     | UOp.Decr -> Print uo.Expr ++ wordL "--"
 

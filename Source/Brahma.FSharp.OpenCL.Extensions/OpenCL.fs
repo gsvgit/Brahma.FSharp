@@ -30,3 +30,5 @@ let aDecr a =
 
 let local (a:array<'a>) = a
 let _byte (x:bool) = 0uy
+
+let as_uint (b1:byte) (b2:byte) (b3:byte) (b4:byte) = uint32 1

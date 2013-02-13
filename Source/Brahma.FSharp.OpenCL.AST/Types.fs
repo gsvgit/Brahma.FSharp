@@ -32,15 +32,25 @@ type PTypes<'lang> =
 type Type<'lang>()=
     inherit Node<'lang>()
     abstract Size:int
+    //abstract SpaceModifier:SpaceModifier
 
 type PrimitiveType<'lang>(pType:PTypes<'lang>) =
     inherit Type<'lang>()
     override this.Size = 32
     override this.Children = []
+    //override this.SpaceModifier = Private
     member this.Type = pType
+
+type ArrayType<'lang>(baseType:Type<'lang>, size:int) =
+    inherit Type<'lang>()
+    override this.Size = size
+    override this.Children = []
+    //override this.SpaceModifier = match spaceModeifier with Some x -> x | None -> Private
+    member this.BaseType = baseType
 
 type RefType<'lang>(baseType:Type<'lang>) =
     inherit Type<'lang>()
     override this.Size = baseType.Size
     override this.Children = []
+    //override this.SpaceModifier = match spaceModeifier with Some x -> x | None -> Global
     member this.BaseType = baseType

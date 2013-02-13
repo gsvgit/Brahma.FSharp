@@ -36,8 +36,6 @@ type CLCodeGenerator() =
            + "for(int jj=idX*kk;jj<(idX+1)*kk;jj++){ \n"
            + "_sub[jj]=sub[jj];}\n"
            + "barrier(CLK_LOCAL_MEM_FENCE);\n"
-            
-        let code = code.Replace("uchar * _sub = sub ;",newCode)
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
         kernel.SetParameters []
