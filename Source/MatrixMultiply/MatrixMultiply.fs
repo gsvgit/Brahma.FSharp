@@ -66,7 +66,7 @@ let Main () =
 
     let command = 
         <@
-            fun (r:_2D) columns (a:array<_>) (b:array<_>) (c:array<_>) -> 
+            fun (r:_2D) (a:array<_>) (b:array<_>) (c:array<_>) -> 
                 let tx = r.GlobalID0
                 let ty = r.GlobalID1
                 let mutable buf = c.[ty * columns + tx]
@@ -88,7 +88,7 @@ let Main () =
 
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
-    kernelPrepare d columns aValues bValues cParallel
+    kernelPrepare d aValues bValues cParallel
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
         let _ = commandQueue.Add(kernelRun()).Finish()            
