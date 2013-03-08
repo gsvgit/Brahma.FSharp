@@ -76,7 +76,7 @@ let Main () =
 
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let sum = [|0|]    
-    let l =  min (length/k+1) ((length + (k-1))/k)
+    let l = (length + (k-1))/k
     let d =(new _1D(l,localWorkSize))
     kernelPrepare d length k gpuArr sum
     let _ = commandQueue.Add(kernelRun()).Finish()
