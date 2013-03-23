@@ -42,6 +42,7 @@
     <Compile Include="NaiveSearchGpu.fs" />
     <Compile Include="NaiveHashingSearchGpu.fs" />
     <Compile Include="Substrings.fs" />
+    <Compile Include="InputGenerator.fs" />
     <Compile Include="FileReading.fs" />
     <Compile Include="FileReadingSeparately.fs" />
     <None Include="App.config">

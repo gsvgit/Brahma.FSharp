@@ -8,7 +8,7 @@ open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 open System.Collections.Generic
 
-let random = new System.Random(17)
+let random = new System.Random()
 
 let computeTemplateLengths templates maxTemplateLength =
     Array.sort (Array.init templates (fun _ -> (byte) (random.Next((int) maxTemplateLength - 1) + 1)))

@@ -11,7 +11,7 @@ open Brahma.FSharp.OpenCL.Extensions
 open System.Collections.Generic
 open System.IO
 
-let mutable length = 2000000
+let length = 2000000
 
 let maxTemplateLength = 32uy
 let templates = 512
@@ -56,10 +56,10 @@ let Main () =
     let mutable lowBound = 0
     let mutable highBound = 0
 
-    let mutable count = 0
-    let mutable offset = 0L
+    //let mutable count = 0
+    //let mutable offset = 0L
 
-    let dictionary = new Dictionary<int64, int>()
+    //let dictionary = new Dictionary<int64, int>()
 
     while current < bound do
         readingTimer.Start()
@@ -68,7 +68,7 @@ let Main () =
             System.Array.Copy(buffer, (read + lowBound - (int) maxTemplateLength), buffer, 0, (int) maxTemplateLength)
             lowBound <- (int) maxTemplateLength
         
-        offset <- current - (int64) lowBound
+        //offset <- current - (int64) lowBound
 
         highBound <- (if (int64) (length - lowBound) < bound then (length - lowBound) else (int) bound)
         read <- reader.Read(buffer, lowBound, highBound)
@@ -80,10 +80,14 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        cpuMatches <- cpuMatches + NaiveSearch.filterMatches (NaiveSearch.findMatches length templates templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr dictionary offset
-        count <- count + countingBound
+        //cpuMatches <- cpuMatches + NaiveSearch.filterMatches (NaiveSearch.findMatches length templates templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr dictionary offset
+        //count <- count + countingBound
+        let cpuResult = NaiveSearch.findMatches length templates templateLengths buffer templateArr
+
+        readingTimer.Start()
+        cpuMatches <- cpuMatches + NaiveSearch.countMatches cpuResult countingBound matchBound templates maxTemplateLength templateLengths templateArr
+        readingTimer.Lap("counting")
         
-        printfn "%A: %A" count dictionary.Count
         cpuMatchesHashed <- cpuMatchesHashed + NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
         gpuMatches <- gpuMatches + NaiveSearch.countMatches (NaiveSearchGpu.findMatches length k localWorkSize templates templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
         gpuMatchesHashing <- gpuMatchesHashing + NaiveSearch.countMatches (NaiveHashingSearchGpu.findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
@@ -97,6 +101,10 @@ let Main () =
     printfn ""
 
     printfn "Reading time: %A" (readingTimer.Total("reading"))
+
+    printfn ""
+
+    printfn "Counting time: %A" (readingTimer.Total("counting"))
 
     printfn ""
 
