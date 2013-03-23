@@ -40,6 +40,7 @@ let hashingCommand =
                 if _start + i < l then localHashes.[localHashesBase + i] <- localHashes.[localHashesBase + i - 1] + input.[_start + i]
 
             for i in _start .. (_end - 1) do
+                result.[i] <- -1
                 if i > _start then
                     for current in 0..((int) maxLength - 2) do
                         localHashes.[localHashesBase + current] <- localHashes.[localHashesBase + current + 1] - input.[i - 1]
@@ -61,6 +62,43 @@ let hashingCommand =
 
                         if matches = 1 then result.[i] <- n
     @>
+
+let mutable result = null
+let mutable kernel = null
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null)))))))))))
+let mutable kernelRun = (fun _ -> null)
+let mutable input = null
+let mutable buffersCreated = false
+let mutable templateHashes = null
+let mutable localHashesArr = null
+
+let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+    timer.Start()
+    result <- Array.zeroCreate length
+    templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
+    let l = (length + (k-1))/k 
+    localHashesArr <- Array.zeroCreate((int) maxTemplateLength * l)
+    let x, y, z = provider.Compile hashingCommand
+    kernel <- x
+    kernelPrepare <- y
+    kernelRun <- z
+    input <- gpuArr
+    let d =(new _1D(l,localWorkSize))
+    kernelPrepare d length k templates templateLengths templateHashes localHashesArr maxTemplateLength input templateArr result
+    timer.Lap(label)
+    ignore null
+
+let getMatches () =
+    timer.Start()
+    Timer<string>.Global.Start()
+    if buffersCreated then
+        ignore (commandQueue.Add(input.ToGpu provider))
+    let _ = commandQueue.Add(kernelRun())
+    let _ = commandQueue.Add(result.ToHost provider).Finish()
+    buffersCreated <- true
+    Timer<string>.Global.Lap(label)
+    timer.Lap(label)
+    result
 
 let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
@@ -96,8 +134,10 @@ let Main () =
     let k = 1000    
     let localWorkSize = 20
 
+    let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
+
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) length length templates maxTemplateLength templateLengths templateArr
+    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches

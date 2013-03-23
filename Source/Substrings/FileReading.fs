@@ -25,7 +25,7 @@ let templateArr = NaiveSearch.generateTemplates templatesSum
 let k = 1000    
 let localWorkSize = 20
 
-let path = "../../random.txt"
+let path = InputGenerator.path
 
 let printTime (timer:Timer<string>) label =
     printfn "Total time, %A: %A" label (timer.Total(label))
@@ -50,6 +50,10 @@ let Main () =
     let mutable cpuMatchesHashed = 0
     let mutable gpuMatches = 0
     let mutable gpuMatchesHashing = 0
+
+    readingTimer.Start()
+    let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
+    readingTimer.Lap("counting")
 
     readingTimer.Lap("reading")
     let mutable read = 0
@@ -85,12 +89,12 @@ let Main () =
         let cpuResult = NaiveSearch.findMatches length templates templateLengths buffer templateArr
 
         readingTimer.Start()
-        cpuMatches <- cpuMatches + NaiveSearch.countMatches cpuResult countingBound matchBound templates maxTemplateLength templateLengths templateArr
+        cpuMatches <- cpuMatches + NaiveSearch.countMatches cpuResult countingBound matchBound templateLengths prefix
         readingTimer.Lap("counting")
         
-        cpuMatchesHashed <- cpuMatchesHashed + NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
-        gpuMatches <- gpuMatches + NaiveSearch.countMatches (NaiveSearchGpu.findMatches length k localWorkSize templates templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
-        gpuMatchesHashing <- gpuMatchesHashing + NaiveSearch.countMatches (NaiveHashingSearchGpu.findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr) countingBound matchBound templates maxTemplateLength templateLengths templateArr
+        cpuMatchesHashed <- cpuMatchesHashed + NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr) countingBound matchBound templateLengths prefix
+        gpuMatches <- gpuMatches + NaiveSearch.countMatches (NaiveSearchGpu.findMatches length k localWorkSize templates templateLengths buffer templateArr) countingBound matchBound templateLengths prefix
+        gpuMatchesHashing <- gpuMatchesHashing + NaiveSearch.countMatches (NaiveHashingSearchGpu.findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr) countingBound matchBound templateLengths prefix
 
     reader.Close()
 

@@ -1,4 +1,4 @@
-﻿module NaiveSearchGpu
+﻿module NaiveSearchGpu 
 
 open Brahma.Samples
 open OpenCL.Net
@@ -34,6 +34,7 @@ let command =
             let mutable _end = _start + k
             if _end > l then _end <- l
             for i in _start..(_end - 1) do
+                result.[i] <- -1
                 let mutable templateBase = 0
                 for n in 0..(templates - 1) do
                     if n > 0 then templateBase <- templateBase + (int) lengths.[n - 1]
@@ -48,6 +49,39 @@ let command =
 
                         if matches = 1 then result.[i] <- n
     @>
+
+let mutable result = null
+let mutable kernel = null
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null))))))))
+let mutable kernelRun = (fun _ -> null)
+let mutable input = null
+let mutable buffersCreated = false
+
+let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+    timer.Start()
+    result <- Array.zeroCreate length
+    let x, y, z = provider.Compile command
+    kernel <- x
+    kernelPrepare <- y
+    kernelRun <- z
+    input <- gpuArr
+    let l = (length + (k-1))/k 
+    let d =(new _1D(l,localWorkSize))
+    kernelPrepare d length k templates templateLengths input templateArr result
+    timer.Lap(label)
+    ignore null
+
+let getMatches () =
+    timer.Start()
+    Timer<string>.Global.Start()
+    if buffersCreated then
+        ignore (commandQueue.Add(input.ToGpu provider))
+    let _ = commandQueue.Add(kernelRun())
+    let _ = commandQueue.Add(result.ToHost provider).Finish()
+    buffersCreated <- true
+    Timer<string>.Global.Lap(label)
+    timer.Lap(label)
+    result
 
 let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
@@ -80,8 +114,10 @@ let Main () =
     let k = 1000
     let localWorkSize = 20
 
+    let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
+
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length k localWorkSize templates templateLengths gpuArr templateArr) length length templates maxTemplateLength templateLengths templateArr
+    let matches = NaiveSearch.countMatches (findMatches length k localWorkSize templates templateLengths gpuArr templateArr) length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches

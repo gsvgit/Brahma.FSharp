@@ -24,7 +24,7 @@ let computeTemplatesSum templates (templateLengths:array<byte>) =
 
 let generateTemplates templatesSum = Array.init templatesSum (fun _ -> (byte) (random.Next(255)))
 
-let countMatches (result:array<int>) bound length templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
+let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
     let next = Array.init (templates * (int) maxTemplateLength) (fun _ -> Array.init 256 (fun _ -> -1s))
     let leaf = Array.init (templates * (int) maxTemplateLength) (fun _ -> -1s)
     let prefix = Array.init (templates * (int) maxTemplateLength) (fun _ -> -1s)
@@ -45,7 +45,9 @@ let countMatches (result:array<int>) bound length templates maxTemplateLength (t
         leaf.[v] <- (int16) n
         templateBase <- templateBase + (int) templateLengths.[n]
 
+    prefix
 
+let countMatches (result:array<int>) bound length (templateLengths:array<byte>) (prefix:array<int16>) =
     let mutable matches = 0
     for i in 0..(bound - 1) do
         let mutable matchIndex = result.[i]
@@ -127,8 +129,10 @@ let Main () =
     let templatesSum = computeTemplatesSum templates templateLengths
     let templateArr = generateTemplates templatesSum
 
+    let prefix = findPrefixes templates maxTemplateLength templateLengths templateArr
+
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = countMatches (findMatches length templates templateLengths cpuArr templateArr) length length templates maxTemplateLength templateLengths templateArr
+    let matches = countMatches (findMatches length templates templateLengths cpuArr templateArr) length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches
