@@ -4,3 +4,4 @@ obj/
 *.suo
 *.user
 *.orig
+/Source/Substrings/random.txt

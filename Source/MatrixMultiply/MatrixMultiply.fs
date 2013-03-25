@@ -115,4 +115,6 @@ let Main () =
     provider.Dispose()
     provider.CloseAllBuffers()
 
+    ignore (System.Console.Read())
+
 do Main()
