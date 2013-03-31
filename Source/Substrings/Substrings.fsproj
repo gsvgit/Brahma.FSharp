@@ -48,6 +48,7 @@
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Compile Include="Testing.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

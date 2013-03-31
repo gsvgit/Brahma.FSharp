@@ -19,9 +19,14 @@ open Brahma.FSharp.OpenCL.AST
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
+
 let Print (clp:CLPragma<_>) =
     match clp.Type with
     | CLGlobalInt32BaseAtomics ->
         [
             "#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable" |> wordL            
+        ] |> aboveListL
+    | CLLocalInt32BaseAtomics ->
+        [
+            "#pragma OPENCL EXTENSION cl_khr_local_int32_base_atomics : enable" |> wordL            
         ] |> aboveListL
