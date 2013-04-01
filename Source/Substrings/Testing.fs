@@ -60,4 +60,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do NaiveSearchGpuLocalTemplates.Main()
+do FileReadingSeparately.Main()

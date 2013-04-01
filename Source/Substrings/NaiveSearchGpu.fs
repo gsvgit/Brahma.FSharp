@@ -74,7 +74,7 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
 let getMatches () =
     timer.Start()
     Timer<string>.Global.Start()
-    if buffersCreated then
+    if buffersCreated (*|| (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input))*) then
         ignore (commandQueue.Add(input.ToGpu provider))
     let _ = commandQueue.Add(kernelRun())
     let _ = commandQueue.Add(result.ToHost provider).Finish()

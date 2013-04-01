@@ -34,16 +34,18 @@ let command =
             let mutable _end = _start + k
             if _end > l then _end <- l
 
-            let localTemplates = local (Array.zeroCreate 16384)
+            let localTemplates = local (Array.zeroCreate 16336)
             let groupSize = 20
-            let chunk = (templatesSum + 19) / 20
+            let chunk = (templatesSum + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
             let upperBound = (id + 1) * chunk
-            let higherIndex = if upperBound <= templatesSum then upperBound - 1 else templatesSum - 1
+            let mutable higherIndex = upperBound - 1
+            if upperBound > templatesSum then
+                higherIndex <- templatesSum - 1
 
-            for i in (id * chunk)..higherIndex do
-                localTemplates.[i] <- t.[i]
+            for index in (id * chunk)..higherIndex do
+                localTemplates.[index] <- t.[index]
 
             barrier()
 
@@ -88,7 +90,7 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
 let getMatches () =
     timer.Start()
     Timer<string>.Global.Start()
-    if buffersCreated then
+    if buffersCreated (*|| (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input))*) then
         ignore (commandQueue.Add(input.ToGpu provider))
     let _ = commandQueue.Add(kernelRun())
     let _ = commandQueue.Add(result.ToHost provider).Finish()

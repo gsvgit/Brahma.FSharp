@@ -28,7 +28,7 @@ and private printVarDecl (vd:VarDecl<'lang>) =
     ; yield Types.Print vd.Type
     ; yield wordL vd.Name
     ; if vd.Type :? ArrayType<_> then yield wordL "["  ^^ wordL (string vd.Type.Size)  ^^ wordL "]"
-    ; if vd.Expr.IsSome then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
+    ; if vd.Expr.IsSome && not vd.IsLocal then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
     ] |> spaceListL
 
 and private printStmtBlock (sb:StatementBlock<'lang>) =
