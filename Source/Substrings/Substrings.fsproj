@@ -42,6 +42,8 @@
     <Compile Include="NaiveSearchGpu.fs" />
     <Compile Include="NaiveSearchGpuLocalTemplates.fs" />
     <Compile Include="NaiveHashingSearchGpu.fs" />
+    <Compile Include="NaiveHashingSearchGpuPrivate.fs" />
+    <Compile Include="NaiveHashingGpuPrivateLocal.fs" />
     <Compile Include="Substrings.fs" />
     <Compile Include="InputGenerator.fs" />
     <Compile Include="FileReading.fs" />
