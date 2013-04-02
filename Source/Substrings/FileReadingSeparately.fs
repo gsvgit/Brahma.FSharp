@@ -10,7 +10,7 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.IO
 
-let length = 3000000
+let length = 4000000
 
 let maxTemplateLength = 32uy
 let templates = 512
@@ -22,7 +22,7 @@ let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
 let templateArr = NaiveSearch.generateTemplates templatesSum
 
 let k = 1000    
-let localWorkSize = 20
+let localWorkSize = 500
 
 let path = InputGenerator.path
 
