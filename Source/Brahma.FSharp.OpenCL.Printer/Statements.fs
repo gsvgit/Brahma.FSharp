@@ -24,10 +24,11 @@ let rec private printAssignment (a:Assignment<'lang>) =
     [Expressions.Print a.Name; wordL "="; Expressions.Print a.Value] |> spaceListL
 
 and private printVarDecl (vd:VarDecl<'lang>) =
-    [ yield Types.Print vd.Type
+    [ if vd.IsLocal then yield wordL "__local"
+    ; yield Types.Print vd.Type
     ; yield wordL vd.Name
     ; if vd.Type :? ArrayType<_> then yield wordL "["  ^^ wordL (string vd.Type.Size)  ^^ wordL "]"
-    ; if vd.Expr.IsSome then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
+    ; if vd.Expr.IsSome && not vd.IsLocal then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
     ] |> spaceListL
 
 and private printStmtBlock (sb:StatementBlock<'lang>) =
@@ -64,7 +65,10 @@ and printWhileLoop (wl:WhileLoop<_>) =
 
 and printFunCall (fc:FunCall<_>) =
     let args = fc.Args |> List.map Expressions.Print |> commaListL |> bracketL    
-    wordL fc.Name ++ args    
+    wordL fc.Name ++ args 
+    
+and printBarrier (b:Barrier<_>) =
+    wordL "barrier(CLK_LOCAL_MEM_FENCE)"   
 
 and Print isToplevel (stmt:Statement<'lang>) =
     let res = 
@@ -76,6 +80,7 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? ForIntegerLoop<'lang> as _for -> printForInteger _for
         | :? WhileLoop<'lang> as wl -> printWhileLoop wl
         | :? FunCall<'lang> as fc -> printFunCall fc
+        | :? Barrier<'lang> as b -> printBarrier b
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res

@@ -34,8 +34,9 @@ type FSQuotationToOpenCLTranslator() =
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         let pragmas = 
             let res = new ResizeArray<_>()
-            if context.Flags.enableAtomic
-            then res.Add(new CLPragma<_>(CLGlobalInt32BaseAtomics) :> TopDef<_> )
+            if context.Flags.enableAtomic then
+                res.Add(new CLPragma<_>(CLGlobalInt32BaseAtomics) :> TopDef<_> )
+                res.Add(new CLPragma<_>(CLLocalInt32BaseAtomics) :> TopDef<_> )
             List.ofSeq res
         new AST<_>(pragmas @ [mainKernelFun])
 

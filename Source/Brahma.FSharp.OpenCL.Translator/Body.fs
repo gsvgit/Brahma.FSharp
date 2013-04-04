@@ -29,6 +29,7 @@ let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:Ta
     let vType = 
         match (body:Expression<_>) with 
         | :? Const<_> as c -> c.Type
+        | :? ArrayInitializer<_> as ai -> Type.Translate var.Type false (Some ai.Length)
         | _ -> Type.Translate var.Type false None
     new VarDecl<Lang>(vType,newName,Some body)
 
@@ -94,9 +95,15 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
         , tContext
     | "getarray" -> new Item<_>(args.[0],args.[1]) :> Statement<_>, tContext
     | "not" ->  new Unop<_>(UOp.Not,args.[0]) :> Statement<_>,tContext
-    | "_byte"    -> args.[0] :> Statement<_>, tContext    
+    | "_byte"    -> args.[0] :> Statement<_>, tContext
+    | "barrier" -> new Barrier<_>() :> Statement<_>, tContext
     //| "local"    -> 
-    //| "zerocreate" ->
+    | "zerocreate" -> 
+        let length = 
+            match args.[0] with
+            | :? Const<_> as c -> int c.Val
+            | other -> failwithf "Calling Array.zeroCreate with a non-const argument: %A" other
+        new ZeroArray<_>(length) :> Statement<_>, tContext
     | c -> failwithf "Unsupporte call: %s" c
 
 and private itemHelper exprs hostVar tContext =
@@ -115,6 +122,7 @@ and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     match propInfo.Name.ToLowerInvariant() with
     | "globalid0i" | "globalid0" -> new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int),"0")]) :> Expression<_>, targetContext
     | "globalid1i" | "globalid1" ->  new FunCall<_>("get_global_id",[Const(PrimitiveType<_>(Int),"1")]) :> Expression<_>, targetContext
+    | "localid0" -> new FunCall<_>("get_local_id",[Const(PrimitiveType<_>(Int),"0")]) :> Expression<_>, targetContext
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar targetContext
         new Item<_>(hVar,idx) :> Expression<_>, tContext
@@ -290,18 +298,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         //translateLambda var expr targetContext
         "Lambda is not suported:" + string expr|> failwith
     | Patterns.Let (var, expr, inExpr) ->
-        let bName = targetContext.Namer.LetStart var.Name                
-        let vDecl = translateBinding var bName expr targetContext
-        targetContext.VarDecls.Add vDecl
-        targetContext.Namer.LetIn var.Name
-        let res,tContext = Translate inExpr targetContext
-        let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
-        sb.Add (res :?> Statement<_>)
-        targetContext.Namer.LetOut()
-        if sb.Count > 1
-        then new StatementBlock<_>(sb) :> Node<_>
-        else res
-        , (clearContext targetContext)
+        translateLet var expr inExpr targetContext
 
     | Patterns.LetRecursive (bindings,expr) -> "LetRecursive is not suported:" + string expr|> failwith
     | Patterns.NewArray(sType,exprs) -> "NewArray is not suported:" + string expr|> failwith
@@ -334,3 +331,29 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         let r,tContext = translateWhileLoop condExpr bodyExpr targetContext
         r :> Node<_>, tContext
     | other -> "OTHER!!! :" + string other |> failwith
+
+
+and private translateLet var expr inExpr (targetContext:TargetContext<_,_>) =
+    let bName = targetContext.Namer.LetStart var.Name
+    let mutable isLocal = false
+    let mutable valueExpression =
+        match expr with
+        | Patterns.Call (exprOpt,mInfo,args) ->
+            if mInfo.Name.Equals("local") then
+                isLocal <- true
+                args.[0]
+            else
+                expr
+        | other -> other            
+    let vDecl = translateBinding var bName valueExpression targetContext
+    vDecl.IsLocal <- isLocal
+    targetContext.VarDecls.Add vDecl
+    targetContext.Namer.LetIn var.Name
+    let res,tContext = Translate inExpr targetContext
+    let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
+    sb.Add (res :?> Statement<_>)
+    targetContext.Namer.LetOut()
+    if sb.Count > 1
+    then new StatementBlock<_>(sb) :> Node<_>
+    else res
+    , (clearContext targetContext)

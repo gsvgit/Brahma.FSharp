@@ -97,6 +97,18 @@ and private printPointer (p:Pointer<'lang>) =
     let expr = Print p.Expr
     wordL "&" ^^ expr
 
+and private printArrayInitializer (ai:ArrayInitializer<'lang>) =
+    match ai with
+    | :? ZeroArray<_> as za -> wordL "{0}" (*(getZeros za.Length)*)
+    | other -> failwithf "Printer. Unsupported array initializer: %A" other
+
+and private getZeros x =
+    let mutable string = "{0"
+    for i in 1..(x - 1) do
+        string <- string + ",0"
+    string <- string + "}"
+    string
+
 and Print (expr:Expression<'lang>) =
     match expr with
     | :? Const<'lang> as c -> printConst c
@@ -108,4 +120,5 @@ and Print (expr:Expression<'lang>) =
     | :? Unop<'lang> as uo -> printUnOp uo
     | :? Cast<'lang> as c -> printCast c
     | :? Pointer<'lang> as p -> printPointer p
+    | :? ArrayInitializer<'lang> as ai -> printArrayInitializer ai
     | c -> failwithf "Printer. Unsupported expression: %A" c

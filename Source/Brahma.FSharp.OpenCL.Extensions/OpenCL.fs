@@ -28,7 +28,9 @@ let aDecr a =
     kFail ()
     a - 1
 
-let local (a:array<'a>) = a
+let local (a(*:array<'a>*)) = a
+let barrier () = ignore(null)
+
 let _byte (x:bool) = 0uy
 
 let as_uint (b1:byte) (b2:byte) (b3:byte) (b4:byte) = uint32 1

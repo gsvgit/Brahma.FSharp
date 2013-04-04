@@ -17,10 +17,14 @@ namespace Brahma.FSharp.OpenCL.AST
 
 type VarDecl<'lang> (vType:Type<'lang>,name:string ,expr:Option<Expression<'lang>>) =
     inherit Statement<'lang>()
+    let mutable isLocal = false
     override this.Children = []
     member this.Type = vType
     member this.Name = name
     member this.Expr = expr
+    member this.IsLocal
+        with get() = isLocal
+        and set v = isLocal <- v
 
 type Assignment<'lang> (vName:Property<'lang>,value:Expression<'lang>)=
     inherit Statement<'lang>()
@@ -54,3 +58,6 @@ type WhileLoop<'lang> (cond:Expression<'lang>, whileBlock:StatementBlock<'lang>)
     member this.Condition = cond
     member this.WhileBlock = whileBlock
     
+type Barrier<'lang> () =
+    inherit Statement<'lang>()
+    override this.Children = []

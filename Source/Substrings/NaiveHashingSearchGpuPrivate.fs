@@ -1,4 +1,4 @@
-﻿module NaiveSearchGpu 
+﻿module NaiveHashingSearchGpuPrivate
 
 open Brahma.Samples
 open OpenCL.Net
@@ -7,44 +7,48 @@ open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 
-let label = "OpenCL/Naive"
-let timer = new Timer<string>()
-
-let platformName = "*"
-
-let deviceType = Cl.DeviceType.Default
-
-let createProvider() = 
-    try  ComputeProvider.Create(platformName, deviceType)
-    with 
-    | ex -> failwith ex.Message
-
-let provider = createProvider()
+let provider = NaiveSearchGpu.provider
 
 let createQueue() = 
     new CommandQueue(provider, provider.Devices |> Seq.head) 
 
 let commandQueue = createQueue()
 
-let command = 
+let label = "OpenCL/NaiveHashingPrivate"
+let timer = new Timer<string>()
+
+let hashingCommand = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) (t:array<_>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int>) ->
             let r = rng.GlobalID0
-            let _start = r * k
+            let mutable _start = r * k
             let mutable _end = _start + k
             if _end > l then _end <- l
-            for i in _start..(_end - 1) do
+
+            let privateHashes = Array.zeroCreate 32
+            privateHashes.[0] <- input.[_start]
+            for i in 1..((int) maxLength - 1) do
+                if _start + i < l then privateHashes.[i] <- privateHashes.[i - 1] + input.[_start + i]
+
+            for i in _start .. (_end - 1) do
                 result.[i] <- -1
+                if i > _start then
+                    for current in 0..((int) maxLength - 2) do
+                        privateHashes.[current] <- privateHashes.[current + 1] - input.[i - 1]
+                    if i + (int) maxLength <= l then
+                        privateHashes.[(int) maxLength - 1] <- privateHashes.[(int) maxLength - 2] + input.[i + (int) maxLength - 1]
+
                 let mutable templateBase = 0
                 for n in 0..(templates - 1) do
                     if n > 0 then templateBase <- templateBase + (int) lengths.[n - 1]
                         
-                    let currentLength = lengths.[n]
-                    if i + (int) currentLength <= l then
+                    let currentLength = (int) lengths.[n]
+                    if (i + (int) currentLength) <= l && hashes.[n] = privateHashes.[currentLength - 1] then
                         let mutable matches = 1
+
                         let mutable j = 0
                         while (matches = 1 && j < (int) currentLength) do
-                            if input.[i + j] <> t.[templateBase + j] then matches <- 0
+                            if input.[i + j] <> t.[templateBase + j] then  matches <- 0
                             j <- j + 1
 
                         if matches = 1 then result.[i] <- n
@@ -52,22 +56,24 @@ let command =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = Unchecked.defaultof<_>
-let mutable kernelRun = Unchecked.defaultof<_>
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null))))))))))
+let mutable kernelRun = (fun _ -> null)
 let mutable input = null
 let mutable buffersCreated = false
+let mutable templateHashes = null
 
-let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
     result <- Array.zeroCreate length
-    let x, y, z = provider.Compile command
+    templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
+    let l = (length + (k-1))/k 
+    let x, y, z = provider.Compile hashingCommand
     kernel <- x
     kernelPrepare <- y
     kernelRun <- z
     input <- gpuArr
-    let l = (length + (k-1))/k 
     let d =(new _1D(l,localWorkSize))
-    kernelPrepare d length k templates templateLengths input templateArr result
+    kernelPrepare d length k templates templateLengths templateHashes maxTemplateLength input templateArr result
     timer.Lap(label)
     ignore null
 
@@ -83,15 +89,17 @@ let getMatches () =
     timer.Lap(label)
     result
 
-let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
+    
+    let templateHashes = NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
     let result = Array.init length (fun _ -> -1)
-    let kernel, kernelPrepare, kernelRun = provider.Compile command
-    let l = (length + (k-1))/k 
+    let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile hashingCommand
+    let l = (length + (k-1))/k  
     let d =(new _1D(l,localWorkSize))
-    kernelPrepare d length k templates templateLengths (Array.copy gpuArr) templateArr result
+    kernelPrepareHashed d length k templates templateLengths templateHashes maxTemplateLength (Array.copy gpuArr) templateArr result
     Timer<string>.Global.Start()
-    let _ = commandQueue.Add(kernelRun()).Finish()
+    let _ = commandQueue.Add(kernelRunHashed()).Finish()
     let _ = commandQueue.Add(result.ToHost provider).Finish()
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
@@ -111,13 +119,13 @@ let Main () =
 
     let templateArr = NaiveSearch.generateTemplates templatesSum
 
-    let k = 1000
+    let k = 1000    
     let localWorkSize = 20
 
     let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
 
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length k localWorkSize templates templateLengths gpuArr templateArr) length length templateLengths prefix
+    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches

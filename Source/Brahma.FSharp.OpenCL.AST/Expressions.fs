@@ -100,3 +100,13 @@ type Pointer<'lang>(expr:Expression<'lang>)=
     inherit Expression<'lang>()
     override this.Children = []
     member this.Expr = expr    
+
+[<AbstractClass>]
+type ArrayInitializer<'lang>() =
+    inherit Expression<'lang>()
+    override this.Children = []
+    abstract Length : int
+
+type ZeroArray<'lang>(length:int) =
+    inherit ArrayInitializer<'lang>()
+    override this.Length = length

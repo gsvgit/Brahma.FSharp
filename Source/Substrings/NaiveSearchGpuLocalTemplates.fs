@@ -1,4 +1,4 @@
-﻿module NaiveSearchGpu 
+﻿module NaiveSearchGpuLocalTemplates
 
 open Brahma.Samples
 open OpenCL.Net
@@ -7,19 +7,10 @@ open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 
-let label = "OpenCL/Naive"
+let label = "OpenCL/NaiveLocal"
 let timer = new Timer<string>()
 
-let platformName = "*"
-
-let deviceType = Cl.DeviceType.Default
-
-let createProvider() = 
-    try  ComputeProvider.Create(platformName, deviceType)
-    with 
-    | ex -> failwith ex.Message
-
-let provider = createProvider()
+let provider = NaiveSearchGpu.provider
 
 let createQueue() = 
     new CommandQueue(provider, provider.Devices |> Seq.head) 
@@ -28,11 +19,27 @@ let commandQueue = createQueue()
 
 let command = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) (t:array<_>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) templatesSum (t:array<_>) (result:array<int>) ->
             let r = rng.GlobalID0
             let _start = r * k
             let mutable _end = _start + k
             if _end > l then _end <- l
+
+            let localTemplates = local (Array.zeroCreate 16336)
+            let groupSize = 500
+            let chunk = (templatesSum + groupSize - 1) / groupSize
+            let id = rng.LocalID0
+
+            let upperBound = (id + 1) * chunk
+            let mutable higherIndex = upperBound - 1
+            if upperBound > templatesSum then
+                higherIndex <- templatesSum - 1
+
+            for index in (id * chunk)..higherIndex do
+                localTemplates.[index] <- t.[index]
+
+            barrier()
+
             for i in _start..(_end - 1) do
                 result.[i] <- -1
                 let mutable templateBase = 0
@@ -44,7 +51,7 @@ let command =
                         let mutable matches = 1
                         let mutable j = 0
                         while (matches = 1 && j < (int) currentLength) do
-                            if input.[i + j] <> t.[templateBase + j] then matches <- 0
+                            if input.[i + j] <> localTemplates.[templateBase + j] then matches <- 0
                             j <- j + 1
 
                         if matches = 1 then result.[i] <- n
@@ -52,12 +59,12 @@ let command =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = Unchecked.defaultof<_>
-let mutable kernelRun = Unchecked.defaultof<_>
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null)))))))))
+let mutable kernelRun = (fun _ -> null)
 let mutable input = null
 let mutable buffersCreated = false
 
-let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) templatesSum (templateArr:array<byte>) =
     timer.Start()
     result <- Array.zeroCreate length
     let x, y, z = provider.Compile command
@@ -67,7 +74,7 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
     input <- gpuArr
     let l = (length + (k-1))/k 
     let d =(new _1D(l,localWorkSize))
-    kernelPrepare d length k templates templateLengths input templateArr result
+    kernelPrepare d length k templates templateLengths input templatesSum templateArr result
     timer.Lap(label)
     ignore null
 
@@ -83,13 +90,13 @@ let getMatches () =
     timer.Lap(label)
     result
 
-let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) templatesSum (templateArr:array<byte>) =
     timer.Start()
     let result = Array.init length (fun _ -> -1)
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let l = (length + (k-1))/k 
     let d =(new _1D(l,localWorkSize))
-    kernelPrepare d length k templates templateLengths (Array.copy gpuArr) templateArr result
+    kernelPrepare d length k templates templateLengths (Array.copy gpuArr) templatesSum templateArr result
     Timer<string>.Global.Start()
     let _ = commandQueue.Add(kernelRun()).Finish()
     let _ = commandQueue.Add(result.ToHost provider).Finish()
@@ -117,7 +124,7 @@ let Main () =
     let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
 
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length k localWorkSize templates templateLengths gpuArr templateArr) length length templateLengths prefix
+    let matches = NaiveSearch.countMatches (findMatches length k localWorkSize templates templateLengths gpuArr templatesSum templateArr) length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches
