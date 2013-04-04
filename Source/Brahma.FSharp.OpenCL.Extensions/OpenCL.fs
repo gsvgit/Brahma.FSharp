@@ -28,7 +28,7 @@ let aDecr a =
     kFail ()
     a - 1
 
-let local (a(*:array<'a>*)) = a
+let local a = a
 let barrier () = ignore(null)
 
 let _byte (x:bool) = 0uy
