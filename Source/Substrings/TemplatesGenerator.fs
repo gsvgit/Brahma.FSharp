@@ -24,7 +24,7 @@ let generateTemplates templatesSum = Array.init templatesSum (fun _ -> (byte) (r
 
 let path = "../../templates.txt"
 
-let Main =
+let Main () =
     let mutable generated = 0L
     let mutable i = 0
 
@@ -43,6 +43,6 @@ let Main =
 
     formatter.Serialize(writer, templates)
 
-    writer.Close
+    writer.Close()
 
 //do Main()

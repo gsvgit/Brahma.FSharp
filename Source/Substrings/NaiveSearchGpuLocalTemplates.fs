@@ -26,7 +26,7 @@ let command =
             if _end > l then _end <- l
 
             let localTemplates = local (Array.zeroCreate 16336)
-            let groupSize = 500
+            let groupSize = 512
             let chunk = (templatesSum + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
