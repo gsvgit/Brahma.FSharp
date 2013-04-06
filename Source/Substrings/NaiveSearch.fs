@@ -11,18 +11,16 @@ open System.Collections.Generic
 let random = new System.Random()
 
 let computeTemplateLengths templates maxTemplateLength =
-    Array.sort (Array.init templates (fun _ -> (byte) (random.Next((int) maxTemplateLength - 1) + 1)))
+    TemplatesGenerator.computeTemplateLengths templates maxTemplateLength 1uy
 
 let generateInput length =
     Array.init length (fun _ -> (byte) (random.Next(255)))
 
 let computeTemplatesSum templates (templateLengths:array<byte>) =
-    let mutable l = 0
-    for i in 0..(templates - 1) do
-        l <- l + (int) templateLengths.[i]
-    l 
+    TemplatesGenerator.computeTemplatesSum templates templateLengths
 
-let generateTemplates templatesSum = Array.init templatesSum (fun _ -> (byte) (random.Next(255)))
+let generateTemplates templatesSum =
+    TemplatesGenerator.generateTemplates templatesSum
 
 let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
     let next = Array.init (templates * (int) maxTemplateLength) (fun _ -> Array.init 256 (fun _ -> -1s))

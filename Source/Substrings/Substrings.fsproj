@@ -37,6 +37,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
+    <Compile Include="TemplatesGenerator.fs" />
     <Compile Include="NaiveSearch.fs" />
     <Compile Include="NaiveHashingSearch.fs" />
     <Compile Include="NaiveSearchGpu.fs" />
@@ -47,11 +48,15 @@
     <Compile Include="FileReading.fs" />
     <Compile Include="FileReadingSeparately.fs" />
     <Compile Include="Testing.fs" />
+    <Compile Include="ConsoleLauncher.fs" />
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

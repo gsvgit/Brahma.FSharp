@@ -3,7 +3,7 @@
 open System.IO
 
 
-let length = 10000000L
+let length = 100000000L
 let path = "../../random.txt"
 let random = new System.Random()
 
@@ -14,7 +14,6 @@ let Main =
     let buffer = Array.zeroCreate chunk
 
     let writer = new FileStream(path, FileMode.Create)
-
 
     while generated < length do
         buffer.[i] <- (byte) (random.Next(255))

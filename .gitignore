@@ -5,3 +5,5 @@ obj/
 *.user
 *.orig
 /Source/Substrings/random.txt
+
+/Source/Substrings/templates.txt

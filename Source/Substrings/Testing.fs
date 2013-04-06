@@ -60,4 +60,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do FileReadingSeparately.Main()
+//do Main()
