@@ -1,4 +1,4 @@
-﻿module NaiveHashingSearchGpu
+﻿module NaiveHashingGpuPrivateLocal
 
 open Brahma.Samples
 open OpenCL.Net
@@ -14,36 +14,54 @@ let createQueue() =
 
 let commandQueue = createQueue()
 
-let label = "OpenCL/NaiveHashing"
+let label = "OpenCL/NaiveHashingPrivateLocal"
 let timer = new Timer<string>()
 
 let hashingCommand = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) (localHashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int>) ->
             let r = rng.GlobalID0
             let mutable _start = r * k
             let mutable _end = _start + k
             if _end > l then _end <- l
 
-            let localHashesBase = r * (int) maxLength
-            localHashes.[localHashesBase] <- input.[_start]
+            let privateHashes = Array.zeroCreate 32
+            privateHashes.[0] <- input.[_start]
             for i in 1..((int) maxLength - 1) do
-                if _start + i < l then localHashes.[localHashesBase + i] <- localHashes.[localHashesBase + i - 1] + input.[_start + i]
+                if _start + i < l then privateHashes.[i] <- privateHashes.[i - 1] + input.[_start + i]
+
+            let localTemplateHashes = local (Array.zeroCreate 512)
+            let localTemplateLengths = local (Array.zeroCreate 512)
+
+            let groupSize = 500
+            let chunk = (512 + groupSize - 1) / groupSize
+            let id = rng.LocalID0
+
+            let upperBound = (id + 1) * chunk
+            let mutable higherIndex = upperBound - 1
+            if upperBound > 512 then
+                higherIndex <- 512 - 1
+
+            for index in (id * chunk)..higherIndex do
+                localTemplateHashes.[index] <- hashes.[index]
+                localTemplateLengths.[index] <- lengths.[index]
+
+            barrier()
 
             for i in _start .. (_end - 1) do
                 result.[i] <- -1
                 if i > _start then
                     for current in 0..((int) maxLength - 2) do
-                        localHashes.[localHashesBase + current] <- localHashes.[localHashesBase + current + 1] - input.[i - 1]
+                        privateHashes.[current] <- privateHashes.[current + 1] - input.[i - 1]
                     if i + (int) maxLength <= l then
-                        localHashes.[localHashesBase + (int) maxLength - 1] <- localHashes.[localHashesBase + (int) maxLength - 2] + input.[i + (int) maxLength - 1]
+                        privateHashes.[(int) maxLength - 1] <- privateHashes.[(int) maxLength - 2] + input.[i + (int) maxLength - 1]
 
                 let mutable templateBase = 0
                 for n in 0..(templates - 1) do
-                    if n > 0 then templateBase <- templateBase + (int) lengths.[n - 1]
+                    if n > 0 then templateBase <- templateBase + (int) localTemplateLengths.[n - 1]
                         
-                    let currentLength = (int) lengths.[n]
-                    if (i + (int) currentLength) <= l && hashes.[n] = localHashes.[localHashesBase + currentLength - 1] then
+                    let currentLength = (int) localTemplateLengths.[n]
+                    if (i + (int) currentLength) <= l && localTemplateHashes.[n] = privateHashes.[currentLength - 1] then
                         let mutable matches = 1
 
                         let mutable j = 0
@@ -56,26 +74,24 @@ let hashingCommand =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null)))))))))))
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null))))))))))
 let mutable kernelRun = (fun _ -> null)
 let mutable input = null
 let mutable buffersCreated = false
 let mutable templateHashes = null
-let mutable localHashesArr = null
 
 let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
     result <- Array.zeroCreate length
     templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
     let l = (length + (k-1))/k 
-    localHashesArr <- Array.zeroCreate((int) maxTemplateLength * l)
     let x, y, z = provider.Compile hashingCommand
     kernel <- x
     kernelPrepare <- y
     kernelRun <- z
     input <- gpuArr
     let d =(new _1D(l,localWorkSize))
-    kernelPrepare d length k templates templateLengths templateHashes localHashesArr maxTemplateLength input templateArr result
+    kernelPrepare d length k templates templateLengths templateHashes maxTemplateLength input templateArr result
     timer.Lap(label)
     ignore null
 
@@ -99,8 +115,7 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile hashingCommand
     let l = (length + (k-1))/k  
     let d =(new _1D(l,localWorkSize))
-    let localHashesArr = Array.zeroCreate((int) maxTemplateLength * l)
-    kernelPrepareHashed d length k templates templateLengths templateHashes localHashesArr maxTemplateLength (Array.copy gpuArr) templateArr result
+    kernelPrepareHashed d length k templates templateLengths templateHashes maxTemplateLength (Array.copy gpuArr) templateArr result
     Timer<string>.Global.Start()
     let _ = commandQueue.Add(kernelRunHashed()).Finish()
     let _ = commandQueue.Add(result.ToHost provider).Finish()

@@ -10,16 +10,7 @@ open Brahma.FSharp.OpenCL.Extensions
 let label = "OpenCL/NaiveLocal"
 let timer = new Timer<string>()
 
-let platformName = "*"
-
-let deviceType = Cl.DeviceType.Default
-
-let createProvider() = 
-    try  ComputeProvider.Create(platformName, deviceType)
-    with 
-    | ex -> failwith ex.Message
-
-let provider = createProvider()
+let provider = NaiveSearchGpu.provider
 
 let createQueue() = 
     new CommandQueue(provider, provider.Devices |> Seq.head) 
@@ -90,7 +81,7 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
 let getMatches () =
     timer.Start()
     Timer<string>.Global.Start()
-    if buffersCreated (*|| (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input))*) then
+    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
         ignore (commandQueue.Add(input.ToGpu provider))
     let _ = commandQueue.Add(kernelRun())
     let _ = commandQueue.Add(result.ToHost provider).Finish()
