@@ -23,7 +23,7 @@ let computeTemplateHashes templates templatesSum (templateLengths:array<byte>) (
 let findMatches length maxTemplateLength templates templatesSum (templateLengths:array<byte>) (cpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
     let templateHashes = computeTemplateHashes templates templatesSum templateLengths templateArr
-    let result = Array.init length (fun _ -> -1)
+    let result = Array.init length (fun _ -> -1s)
 
     Timer<string>.Global.Start()
     let localHashes = Array.zeroCreate((int) maxTemplateLength)
@@ -50,7 +50,7 @@ let findMatches length maxTemplateLength templates templatesSum (templateLengths
                     if cpuArr.[i + j] <> templateArr.[templateBase + j] then matches <- false
                     j <- j + 1
 
-                if matches then result.[i] <- n
+                if matches then result.[i] <- (int16) n
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
     result

@@ -6,6 +6,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+open Brahma.FSharp.OpenCL.Translator.Common
 
 let provider = NaiveSearchGpu.provider
 
@@ -19,7 +20,7 @@ let timer = new Timer<string>()
 
 let hashingCommand = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
             let r = rng.GlobalID0
             let mutable _start = r * k
             let mutable _end = _start + k
@@ -49,7 +50,7 @@ let hashingCommand =
             barrier()
 
             for i in _start .. (_end - 1) do
-                result.[i] <- -1
+                result.[i] <- -1s
                 if i > _start then
                     for current in 0..((int) maxLength - 2) do
                         privateHashes.[current] <- privateHashes.[current + 1] - input.[i - 1]
@@ -69,7 +70,7 @@ let hashingCommand =
                             if input.[i + j] <> t.[templateBase + j] then  matches <- 0
                             j <- j + 1
 
-                        if matches = 1 then result.[i] <- n
+                        if matches = 1 then result.[i] <- (int16) n
     @>
 
 let mutable result = null
@@ -135,8 +136,8 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     timer.Start()
     
     let templateHashes = NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
-    let result = Array.init length (fun _ -> -1)
-    let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile hashingCommand
+    let result = Array.zeroCreate length
+    let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile(query=hashingCommand, translatorOptions=[BoolAsBit])
     let l = (length + (k-1))/k  
     let d =(new _1D(l,localWorkSize))
     kernelPrepareHashed d length k templates templateLengths templateHashes maxTemplateLength (Array.copy gpuArr) templateArr result

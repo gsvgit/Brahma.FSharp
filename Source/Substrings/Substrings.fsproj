@@ -37,6 +37,9 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Compile Include="TemplatesGenerator.fs" />
     <Compile Include="NaiveSearch.fs" />
     <Compile Include="NaiveHashingSearch.fs" />
@@ -51,9 +54,6 @@
     <Compile Include="FileReadingSeparately.fs" />
     <Compile Include="Testing.fs" />
     <Compile Include="ConsoleLauncher.fs" />
-    <None Include="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">

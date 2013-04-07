@@ -6,6 +6,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+open Brahma.FSharp.OpenCL.Translator.Common
 
 let label = "OpenCL/NaiveLocal"
 let timer = new Timer<string>()
@@ -19,7 +20,7 @@ let commandQueue = createQueue()
 
 let command = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) templatesSum (t:array<_>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) templatesSum (t:array<_>) (result:array<int16>) ->
             let r = rng.GlobalID0
             let _start = r * k
             let mutable _end = _start + k
@@ -41,7 +42,7 @@ let command =
             barrier()
 
             for i in _start..(_end - 1) do
-                result.[i] <- -1
+                result.[i] <- -1s
                 let mutable templateBase = 0
                 for n in 0..(templates - 1) do
                     if n > 0 then templateBase <- templateBase + (int) lengths.[n - 1]
@@ -54,7 +55,7 @@ let command =
                             if input.[i + j] <> localTemplates.[templateBase + j] then matches <- 0
                             j <- j + 1
 
-                        if matches = 1 then result.[i] <- n
+                        if matches = 1 then result.[i] <- (int16) n
     @>
 
 let mutable result = null
@@ -67,7 +68,7 @@ let mutable buffersCreated = false
 let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) templatesSum (templateArr:array<byte>) =
     timer.Start()
     result <- Array.zeroCreate length
-    let x, y, z = provider.Compile command
+    let x, y, z = provider.Compile(query=command, translatorOptions=[BoolAsBit])
     kernel <- x
     kernelPrepare <- y
     kernelRun <- z
@@ -116,7 +117,7 @@ let getMatches () =
 
 let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) templatesSum (templateArr:array<byte>) =
     timer.Start()
-    let result = Array.init length (fun _ -> -1)
+    let result = Array.zeroCreate length
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let l = (length + (k-1))/k 
     let d =(new _1D(l,localWorkSize))

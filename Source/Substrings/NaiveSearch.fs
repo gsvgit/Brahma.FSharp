@@ -45,14 +45,14 @@ let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (temp
 
     prefix
 
-let countMatches (result:array<int>) bound length (templateLengths:array<byte>) (prefix:array<int16>) =
+let countMatches (result:array<int16>) bound length (templateLengths:array<byte>) (prefix:array<int16>) =
     let mutable matches = 0
     for i in 0..(bound - 1) do
         let mutable matchIndex = result.[i]
-        while matchIndex >= 0 && i + (int) templateLengths.[matchIndex] > length do
-            matchIndex <- (int) prefix.[matchIndex]
+        while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
+            matchIndex <- prefix.[(int) matchIndex]
             
-        if matchIndex >= 0 then
+        if matchIndex >= 0s then
             matches <- matches + 1
     matches
 
@@ -94,7 +94,7 @@ let label = ".NET/Naive"
 let findMatches length templates (templateLengths:array<byte>) (cpuArr:array<byte>) (templateArr:array<byte>) =
     Timer<string>.Global.Start()
 
-    let result = Array.init length (fun _ -> -1)
+    let result = Array.init length (fun _ -> -1s)
     for i in 0 .. (length - 1) do
         let mutable templateBase = 0
         for n in 0..(templates - 1) do
@@ -111,7 +111,7 @@ let findMatches length templates (templateLengths:array<byte>) (cpuArr:array<byt
 
                     j <- j + 1
 
-                if matches then result.[i] <- n
+                if matches then result.[i] <- (int16) n
     Timer<string>.Global.Lap(label)
     result
 
