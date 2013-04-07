@@ -74,7 +74,7 @@ let hashingCommand =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ignore null))))))))))
+let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ()))))))))))
 let mutable kernelRun = (fun _ -> null)
 let mutable input = null
 let mutable buffersCreated = false
@@ -93,7 +93,31 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
     let d =(new _1D(l,localWorkSize))
     kernelPrepare d length k templates templateLengths templateHashes maxTemplateLength input templateArr result
     timer.Lap(label)
-    ignore null
+    ()
+
+let mutable ready = true
+
+let upload () =
+    if not ready then failwith "Already running, can't upload!"
+    ready <- false
+
+    timer.Start()
+    Timer<string>.Global.Start()
+    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
+        ignore (commandQueue.Add(input.ToGpu provider).Finish())
+    ignore (commandQueue.Add(kernelRun()))
+    ()
+
+let download () =
+    if ready then failwith "Not running, can't download!"
+    ready <- true
+
+    ignore (commandQueue.Add(result.ToHost provider).Finish())
+    buffersCreated <- true
+    Timer<string>.Global.Lap(label)
+    timer.Lap(label)
+
+    result
 
 let getMatches () =
     timer.Start()
