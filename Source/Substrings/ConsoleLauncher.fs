@@ -12,7 +12,7 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let groups = ref 2
+let groups = ref 16
 
 let maxTemplateLength = 32uy
 
@@ -148,33 +148,36 @@ let Main () =
         reader.Close()
         readingTimer.Lap(label)
 
-    let cpuMatchesInitilizer = (fun () -> ())
-    let cpuMatchesHashedInitilizer = (fun () -> ())
-    let gpuMatchesInitilizer = (fun () -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
-    let gpuMatchesHashingInitilizer = (fun () -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuMatchesLocalInitilizer = (fun () -> NaiveSearchGpuLocalTemplates.initialize length k localWorkSize templates templateLengths buffer templatesSum templateArr)
-    let gpuMatchesHashingPrivateInitilizer = (fun () -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuMatchesHashingPrivateLocalInitilizer = (fun () -> NaiveHashingGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let cpuInitilizer = (fun () -> ())
+    let cpuHashedInitilizer = (fun () -> ())
+    let gpuInitilizer = (fun () -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
+    let gpuHashingInitilizer = (fun () -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuLocalInitilizer = (fun () -> NaiveSearchGpuLocalTemplates.initialize length k localWorkSize templates templateLengths buffer templatesSum templateArr)
+    let gpuHashingPrivateInitilizer = (fun () -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuHashingPrivateLocalInitilizer = (fun () -> NaiveHashingGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuHashtableInitializer = (fun () -> HashtableGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
 
-    let cpuMatchesGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
-    let cpuMatchesHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
-//    let gpuMatchesGetter = (fun () -> NaiveSearchGpu.getMatches())
-//    let gpuMatchesHashingGetter = (fun () -> NaiveHashingSearchGpu.getMatches())
-//    let gpuMatchesLocalGetter = (fun () -> NaiveSearchGpuLocalTemplates.getMatches())
-//    let gpuMatchesHashingPrivateGetter = (fun () -> NaiveHashingSearchGpuPrivate.getMatches())
-//    let gpuMatchesHashingPrivateLocalGetter = (fun () -> NaiveHashingGpuPrivateLocal.getMatches())
+    let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
+    let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
+//    let gpuGetter = (fun () -> NaiveSearchGpu.getMatches())
+//    let gpuHashingGetter = (fun () -> NaiveHashingSearchGpu.getMatches())
+//    let gpuLocalGetter = (fun () -> NaiveSearchGpuLocalTemplates.getMatches())
+//    let gpuHashingPrivateGetter = (fun () -> NaiveHashingSearchGpuPrivate.getMatches())
+//    let gpuHashingPrivateLocalGetter = (fun () -> NaiveHashingGpuPrivateLocal.getMatches())
 
-    let gpuMatchesUploader = (fun () -> NaiveSearchGpu.upload())
-    let gpuMatchesHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
-    let gpuMatchesLocalUploader = (fun () -> NaiveSearchGpuLocalTemplates.upload())
-    let gpuMatchesHashingPrivateUploader = (fun () -> NaiveHashingSearchGpuPrivate.upload())
-    let gpuMatchesHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
+    let gpuUploader = (fun () -> NaiveSearchGpu.upload())
+    let gpuHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
+    let gpuLocalUploader = (fun () -> NaiveSearchGpuLocalTemplates.upload())
+    let gpuHashingPrivateUploader = (fun () -> NaiveHashingSearchGpuPrivate.upload())
+    let gpuHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
+    let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
 
-    let gpuMatchesDownloader = (fun () -> NaiveSearchGpu.download())
-    let gpuMatchesHashingDownloader = (fun () -> NaiveHashingSearchGpu.download())
-    let gpuMatchesLocalDownloader = (fun () -> NaiveSearchGpuLocalTemplates.download())
-    let gpuMatchesHashingPrivateDownloader = (fun () -> NaiveHashingSearchGpuPrivate.download())
-    let gpuMatchesHashingPrivateLocalDownloader = (fun () -> NaiveHashingGpuPrivateLocal.download())
+    let gpuDownloader = (fun () -> NaiveSearchGpu.download())
+    let gpuHashingDownloader = (fun () -> NaiveHashingSearchGpu.download())
+    let gpuLocalDownloader = (fun () -> NaiveSearchGpuLocalTemplates.download())
+    let gpuHashingPrivateDownloader = (fun () -> NaiveHashingSearchGpuPrivate.download())
+    let gpuHashingPrivateLocalDownloader = (fun () -> NaiveHashingGpuPrivateLocal.download())
+    let gpuHashtableDownloader = (fun () -> HashtableGpuPrivateLocal.download())
 
     let cpuMatches = ref 0  
     let cpuMatchesHashed = ref 0
@@ -183,14 +186,16 @@ let Main () =
     let gpuMatchesLocal = ref 0
     let gpuMatchesHashingPrivate = ref 0
     let gpuMatchesHashingPrivateLocal = ref 0
+    let gpuMatchesHashtable = ref 0
 
-    testAlgorithm cpuMatchesInitilizer cpuMatchesGetter NaiveSearch.label cpuMatches
-    testAlgorithm cpuMatchesHashedInitilizer cpuMatchesHashedGetter NaiveHashingSearch.label cpuMatchesHashed
-    testAlgorithmAsync gpuMatchesInitilizer gpuMatchesUploader gpuMatchesDownloader NaiveSearchGpu.label gpuMatches
-    testAlgorithmAsync gpuMatchesHashingInitilizer gpuMatchesHashingUploader gpuMatchesHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
-    testAlgorithmAsync gpuMatchesLocalInitilizer gpuMatchesLocalUploader gpuMatchesLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
-    testAlgorithmAsync gpuMatchesHashingPrivateInitilizer gpuMatchesHashingPrivateUploader gpuMatchesHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
-    testAlgorithmAsync gpuMatchesHashingPrivateLocalInitilizer gpuMatchesHashingPrivateLocalUploader gpuMatchesHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+    //testAlgorithm cpuInitilizer cpuGetter NaiveSearch.label cpuMatches
+    //testAlgorithm cpuHashedInitilizer cpuHashedGetter NaiveHashingSearch.label cpuMatchesHashed
+    testAlgorithmAsync gpuInitilizer gpuUploader gpuDownloader NaiveSearchGpu.label gpuMatches
+    //testAlgorithmAsync gpuHashingInitilizer gpuHashingUploader gpuHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
+    //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
+    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
+    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
@@ -198,6 +203,7 @@ let Main () =
     Substrings.verifyResults !cpuMatches !gpuMatchesLocal NaiveSearchGpuLocalTemplates.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
+    Substrings.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
 
     printfn ""
 
@@ -210,6 +216,7 @@ let Main () =
     FileReading.printGlobalTime NaiveSearchGpuLocalTemplates.label
     FileReading.printGlobalTime NaiveHashingSearchGpuPrivate.label
     FileReading.printGlobalTime NaiveHashingGpuPrivateLocal.label
+    FileReading.printGlobalTime HashtableGpuPrivateLocal.label
 
     printfn ""
 
@@ -221,6 +228,7 @@ let Main () =
     FileReading.printTime NaiveSearchGpuLocalTemplates.timer NaiveSearchGpuLocalTemplates.label
     FileReading.printTime NaiveHashingSearchGpuPrivate.timer NaiveHashingSearchGpuPrivate.label
     FileReading.printTime NaiveHashingGpuPrivateLocal.timer NaiveHashingGpuPrivateLocal.label
+    FileReading.printTime HashtableGpuPrivateLocal.timer HashtableGpuPrivateLocal.label
 
     printfn ""
 
@@ -232,6 +240,7 @@ let Main () =
     FileReading.printTime readingTimer NaiveSearchGpuLocalTemplates.label
     FileReading.printTime readingTimer NaiveHashingSearchGpuPrivate.label
     FileReading.printTime readingTimer NaiveHashingGpuPrivateLocal.label
+    FileReading.printTime readingTimer HashtableGpuPrivateLocal.label
 
     ignore (System.Console.Read())
 

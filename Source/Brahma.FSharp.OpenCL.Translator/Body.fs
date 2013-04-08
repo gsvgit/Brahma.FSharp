@@ -68,6 +68,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
     | "toint16"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
     | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
+    | "tobyte"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UChar)):> Statement<_>,tContext
     | "acos" | "asin" | "atan"
     | "cos" | "cosh" | "exp"
     | "floor" | "log" | "log10"
