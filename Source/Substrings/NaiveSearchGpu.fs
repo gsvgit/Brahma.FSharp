@@ -97,7 +97,6 @@ let findMatches length k localWorkSize templates (templateLengths:array<byte>) (
     timer.Lap(label)
     result
 
-
 let Main () =
     let length = 3000000
 
