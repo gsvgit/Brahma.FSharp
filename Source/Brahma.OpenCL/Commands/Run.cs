@@ -67,6 +67,7 @@ namespace Brahma.OpenCL.Commands
             else if (arg is Int64[]) ArrayToMem<Int64>((Int64[])arg);
             else if (arg is float[]) ArrayToMem<float>((float[])arg);
             else if (arg is byte[]) ArrayToMem<byte>((byte[])arg);
+            else if (arg is Int16[]) ArrayToMem<Int16>((Int16[])arg);
             //else if (arg is Single[]) ArrayToMem<Single>((Single[])arg);
             else
             {

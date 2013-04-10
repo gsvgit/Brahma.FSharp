@@ -25,7 +25,7 @@ let commandQueue = createQueue()
 
 let command = 
     <@
-        fun (rng:_1D) (result:array<int>) length ->
+        fun (rng:_1D) (result:array<int16>) length ->
             let r = rng.GlobalID0
             barrier()
             let _start = local(r * 15)
@@ -33,18 +33,18 @@ let command =
             delta <!+ delta + 1
             barrier()
             let _zero = local (Array.zeroCreate 3)
-            _zero.[0] <!+ _zero.[0] + 1
-            _zero.[1] <!+ _zero.[1] + 2
-            _zero.[2] <!+ _zero.[2] + 3
+            _zero.[0] <!+ _zero.[0]
+            _zero.[1] <!+ _zero.[1]
+            _zero.[2] <!+ _zero.[2]
             barrier()
             (*let varLength = local (Array.zeroCreate length)*)
-            result.[0] <!+ _zero.[0]
-            result.[1] <!+ _zero.[1]
-            result.[2] <!+ _zero.[2]
+            result.[0] <- result.[0] + (int16) _zero.[0]
+            result.[1] <- result.[0] + (int16) _zero.[1]
+            result.[2] <- result.[0] + (int16) _zero.[2]
     @>
 
 let findMatches () =
-    let result = Array.init 123 (fun _ -> -1)
+    let result = Array.init 123 (fun _ -> -1s)
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _1D(1000,20))
     kernelPrepare d result 10
@@ -60,4 +60,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do FileReadingSeparately.Main()
+//do Main()

@@ -6,6 +6,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+open Brahma.FSharp.OpenCL.Translator.Common
 
 let provider = NaiveSearchGpu.provider
 
@@ -19,7 +20,7 @@ let timer = new Timer<string>()
 
 let hashingCommand = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int>) ->
+        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
             let r = rng.GlobalID0
             let mutable _start = r * k
             let mutable _end = _start + k
@@ -31,7 +32,7 @@ let hashingCommand =
                 if _start + i < l then privateHashes.[i] <- privateHashes.[i - 1] + input.[_start + i]
 
             for i in _start .. (_end - 1) do
-                result.[i] <- -1
+                result.[i] <- -1s
                 if i > _start then
                     for current in 0..((int) maxLength - 2) do
                         privateHashes.[current] <- privateHashes.[current + 1] - input.[i - 1]
@@ -51,7 +52,7 @@ let hashingCommand =
                             if input.[i + j] <> t.[templateBase + j] then  matches <- 0
                             j <- j + 1
 
-                        if matches = 1 then result.[i] <- n
+                        if matches = 1 then result.[i] <- (int16) n
     @>
 
 let mutable result = null
@@ -67,7 +68,7 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
     result <- Array.zeroCreate length
     templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
     let l = (length + (k-1))/k 
-    let x, y, z = provider.Compile hashingCommand
+    let x, y, z = provider.Compile(query=hashingCommand, translatorOptions=[BoolAsBit])
     kernel <- x
     kernelPrepare <- y
     kernelRun <- z
@@ -75,7 +76,31 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
     let d =(new _1D(l,localWorkSize))
     kernelPrepare d length k templates templateLengths templateHashes maxTemplateLength input templateArr result
     timer.Lap(label)
-    ignore null
+    ()
+
+let mutable ready = true
+
+let upload () =
+    if not ready then failwith "Already running, can't upload!"
+    ready <- false
+
+    timer.Start()
+    Timer<string>.Global.Start()
+    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
+        ignore (commandQueue.Add(input.ToGpu provider).Finish())
+    ignore (commandQueue.Add(kernelRun()))
+    ()
+
+let download () =
+    if ready then failwith "Not running, can't download!"
+    ready <- true
+
+    ignore (commandQueue.Add(result.ToHost provider).Finish())
+    buffersCreated <- true
+    Timer<string>.Global.Lap(label)
+    timer.Lap(label)
+
+    result
 
 let getMatches () =
     timer.Start()
@@ -93,7 +118,7 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     timer.Start()
     
     let templateHashes = NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
-    let result = Array.init length (fun _ -> -1)
+    let result = Array.zeroCreate length
     let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile hashingCommand
     let l = (length + (k-1))/k  
     let d =(new _1D(l,localWorkSize))
