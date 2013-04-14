@@ -12,7 +12,7 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let groups = ref 16
+let groups = ref 4
 
 let maxTemplateLength = 32uy
 
@@ -84,8 +84,9 @@ let Main () =
         let reader = new FileStream(path, FileMode.Open)
         let bound = reader.Length
 
-        let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
-        initializer()
+        let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
+
+        initializer next leaf
 
         while current < bound do
             if current > 0L then
@@ -117,8 +118,9 @@ let Main () =
         let reader = new FileStream(path, FileMode.Open)
         let bound = reader.Length
 
-        let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
-        initializer()
+        let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
+
+        initializer next leaf
 
         let mutable countingBound = 0
         let mutable matchBound = 0
@@ -148,15 +150,17 @@ let Main () =
         reader.Close()
         readingTimer.Lap(label)
 
-    let cpuInitilizer = (fun () -> ())
-    let cpuHashedInitilizer = (fun () -> ())
-    let gpuInitilizer = (fun () -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
-    let gpuHashingInitilizer = (fun () -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuLocalInitilizer = (fun () -> NaiveSearchGpuLocalTemplates.initialize length k localWorkSize templates templateLengths buffer templatesSum templateArr)
-    let gpuHashingPrivateInitilizer = (fun () -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuHashingPrivateLocalInitilizer = (fun () -> NaiveHashingGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuHashtableInitializer = (fun () -> HashtableGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuExpandedHashtableInitializer = (fun () -> HashtableExpanded.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let cpuInitilizer = (fun _ _ -> ())
+    let cpuHashedInitilizer = (fun _ _ -> ())
+    let gpuInitilizer = (fun _ _ -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
+    let gpuHashingInitilizer = (fun _ _ -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuLocalInitilizer = (fun _ _ -> NaiveSearchGpuLocalTemplates.initialize length k localWorkSize templates templateLengths buffer templatesSum templateArr)
+    let gpuHashingPrivateInitilizer = (fun _ _ -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuHashingPrivateLocalInitilizer = (fun _ _ -> NaiveHashingGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuHashtableInitializer = (fun _ _ -> HashtableGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuExpandedHashtableInitializer = (fun _ _ -> HashtableExpanded.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
+    let gpuAhoCorasickInitializer = (fun next leaf -> AhoCorasickGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
+
 
     let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
     let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
@@ -173,6 +177,7 @@ let Main () =
     let gpuHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
     let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
     let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
+    let gpuAhoCorasickUploader = (fun () -> AhoCorasickGpu.upload())
 
     let gpuDownloader = (fun () -> NaiveSearchGpu.download())
     let gpuHashingDownloader = (fun () -> NaiveHashingSearchGpu.download())
@@ -181,6 +186,7 @@ let Main () =
     let gpuHashingPrivateLocalDownloader = (fun () -> NaiveHashingGpuPrivateLocal.download())
     let gpuHashtableDownloader = (fun () -> HashtableGpuPrivateLocal.download())
     let gpuExpandedHashtableDownloader = (fun () -> HashtableExpanded.download())
+    let gpuAhoCorasickDownloader = (fun () -> AhoCorasickGpu.download())
 
     let cpuMatches = ref 0  
     let cpuMatchesHashed = ref 0
@@ -191,6 +197,7 @@ let Main () =
     let gpuMatchesHashingPrivateLocal = ref 0
     let gpuMatchesHashtable = ref 0
     let gpuMatchesHashtableExpanded = ref 0
+    let gpuAhoCorasick = ref 0
 
     //testAlgorithm cpuInitilizer cpuGetter NaiveSearch.label cpuMatches
     //testAlgorithm cpuHashedInitilizer cpuHashedGetter NaiveHashingSearch.label cpuMatchesHashed
@@ -198,9 +205,10 @@ let Main () =
     //testAlgorithmAsync gpuHashingInitilizer gpuHashingUploader gpuHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
     //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
     //testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
-    //testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
     testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-    testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
+    //testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
+    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
@@ -210,6 +218,7 @@ let Main () =
     Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
+    Substrings.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
 
     printfn ""
 
@@ -224,6 +233,7 @@ let Main () =
     FileReading.printGlobalTime NaiveHashingGpuPrivateLocal.label
     FileReading.printGlobalTime HashtableGpuPrivateLocal.label
     FileReading.printGlobalTime HashtableExpanded.label
+    FileReading.printGlobalTime AhoCorasickGpu.label
 
     printfn ""
 
@@ -237,6 +247,7 @@ let Main () =
     FileReading.printTime NaiveHashingGpuPrivateLocal.timer NaiveHashingGpuPrivateLocal.label
     FileReading.printTime HashtableGpuPrivateLocal.timer HashtableGpuPrivateLocal.label
     FileReading.printTime HashtableExpanded.timer HashtableExpanded.label
+    FileReading.printTime AhoCorasickGpu.timer AhoCorasickGpu.label
 
     printfn ""
 
@@ -250,6 +261,7 @@ let Main () =
     FileReading.printTime readingTimer NaiveHashingGpuPrivateLocal.label
     FileReading.printTime readingTimer HashtableGpuPrivateLocal.label
     FileReading.printTime readingTimer HashtableExpanded.label
+    FileReading.printTime readingTimer AhoCorasickGpu.label
 
     ignore (System.Console.Read())
 

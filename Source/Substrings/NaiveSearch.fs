@@ -22,26 +22,31 @@ let computeTemplatesSum templates (templateLengths:array<byte>) =
 let generateTemplates templatesSum =
     TemplatesGenerator.generateTemplates templatesSum
 
-let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
+let buildSyntaxTree templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
     let next = Array.init (templates * (int) maxTemplateLength) (fun _ -> Array.init 256 (fun _ -> -1s))
     let leaf = Array.init (templates * (int) maxTemplateLength) (fun _ -> -1s)
     let prefix = Array.init (templates * (int) maxTemplateLength) (fun _ -> -1s)
 
-    let mutable vertices = 0
+    let mutable vertices = 0s
     let mutable templateBase = 0
 
     for n in 0..(templates - 1) do
         let mutable v = 0
         for i in 0..((int) templateLengths.[n] - 1) do
             if next.[v].[(int) templateArr.[templateBase + i]] < 0s then
-                vertices <- vertices + 1
-                next.[v].[(int) templateArr.[templateBase + i]] <- (int16) vertices
+                vertices <- vertices + 1s
+                next.[v].[(int) templateArr.[templateBase + i]] <- vertices
             v <- (int) next.[v].[(int) templateArr.[templateBase + i]]
 
             if leaf.[v] >= 0s then
                 prefix.[n] <- leaf.[v]
         leaf.[v] <- (int16) n
         templateBase <- templateBase + (int) templateLengths.[n]
+
+    prefix, next, leaf, vertices
+
+let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
+    let prefix, _, _, _ = buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
     prefix
 
