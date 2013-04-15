@@ -253,4 +253,5 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do Main()
+do //TemplatesGenerator.Main() 
+    Main()
