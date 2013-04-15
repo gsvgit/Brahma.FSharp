@@ -60,8 +60,8 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "op_lessbangmunusgreater"->
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_sub",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
-    | "op_lesssbanggreater"
-    | "op_lesssbang"           -> 
+    | "op_lessbanggreater"
+    | "op_lessbang"           -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
