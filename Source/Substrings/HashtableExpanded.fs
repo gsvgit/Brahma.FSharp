@@ -18,6 +18,11 @@ let commandQueue = createQueue()
 let label = "OpenCL/HashtableExpanded"
 let timer = new Timer<string>()
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let hashingCommand = 
     <@
         fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) (table:array<int16>) (next:array<int16>) (starts:array<int16>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
@@ -37,7 +42,7 @@ let hashingCommand =
             let localNext = local (Array.zeroCreate 512)
             let localStarts = local (Array.zeroCreate 512)
 
-            let groupSize = 512
+            let groupSize = 1024
             let chunk = (512 + groupSize - 1) / groupSize
             let tableChunk = (256 + groupSize - 1) / groupSize
 

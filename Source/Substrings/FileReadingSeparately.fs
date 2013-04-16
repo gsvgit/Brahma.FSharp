@@ -234,7 +234,7 @@ let Main () =
         gpuMatchesHashingPrivate <- gpuMatchesHashingPrivate + NaiveSearch.countMatches (NaiveHashingSearchGpuPrivate.getMatches()) countingBound matchBound templateLengths prefix
     
     reader.Close()
-    readingTimer.Lap(NaiveHashingSearchGpuPrivate.label)
+    readingTimer.Lap(NaiveHashingSearchGpuPrivate.label)    
 
     readingTimer.Start()
     let mutable read = 0

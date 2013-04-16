@@ -15,6 +15,11 @@ let createQueue() =
 
 let commandQueue = createQueue()
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let label = "OpenCL/NaiveHashing"
 let timer = new Timer<string>()
 

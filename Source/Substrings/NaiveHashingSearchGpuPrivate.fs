@@ -80,6 +80,11 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
 
 let mutable ready = true
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let upload () =
     if not ready then failwith "Already running, can't upload!"
     ready <- false

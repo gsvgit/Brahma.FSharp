@@ -74,6 +74,11 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
 
 let mutable ready = true
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let upload () =
     if not ready then failwith "Already running, can't upload!"
     ready <- false

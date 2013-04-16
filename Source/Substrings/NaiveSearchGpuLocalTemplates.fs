@@ -18,6 +18,11 @@ let createQueue() =
 
 let commandQueue = createQueue()
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let command = 
     <@
         fun (rng:_1D) l k templates (lengths:array<_>) (input:array<_>) templatesSum (t:array<_>) (result:array<int16>) ->
@@ -27,7 +32,7 @@ let command =
             if _end > l then _end <- l
 
             let localTemplates = local (Array.zeroCreate 16336)
-            let groupSize = 512
+            let groupSize = 1024
             let chunk = (templatesSum + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
