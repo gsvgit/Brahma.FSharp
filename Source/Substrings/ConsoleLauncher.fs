@@ -161,7 +161,7 @@ let Main () =
     let gpuHashtableInitializer = (fun _ _ -> HashtableGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuExpandedHashtableInitializer = (fun _ _ -> HashtableExpanded.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuAhoCorasickInitializer = (fun next leaf -> AhoCorasickGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
-
+    let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
     let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
     let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
@@ -179,6 +179,7 @@ let Main () =
     let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
     //let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
     let gpuAhoCorasickUploader = (fun () -> AhoCorasickGpu.upload())
+    let gpuAhoCorasickOptimizedUploader = (fun () -> AhoCorasickOptimized.upload())
 
     //let gpuDownloader = (fun () -> NaiveSearchGpu.download())
     //let gpuHashingDownloader = (fun () -> NaiveHashingSearchGpu.download())
@@ -188,6 +189,7 @@ let Main () =
     let gpuHashtableDownloader = (fun () -> HashtableGpuPrivateLocal.download())
     //let gpuExpandedHashtableDownloader = (fun () -> HashtableExpanded.download())
     let gpuAhoCorasickDownloader = (fun () -> AhoCorasickGpu.download())
+    let gpuAhoCorasickOptimizedDownloader = (fun () -> AhoCorasickOptimized.download())
 
     let cpuMatches = ref 0  
     let cpuMatchesHashed = ref 0
@@ -199,6 +201,7 @@ let Main () =
     let gpuMatchesHashtable = ref 0
     let gpuMatchesHashtableExpanded = ref 0
     let gpuAhoCorasick = ref 0
+    let gpuAhoCorasickOptimized = ref 0
 
     //testAlgorithm cpuInitilizer cpuGetter NaiveSearch.label cpuMatches
     //testAlgorithm cpuHashedInitilizer cpuHashedGetter NaiveHashingSearch.label cpuMatchesHashed
@@ -206,15 +209,15 @@ let Main () =
     //testAlgorithmAsync gpuHashingInitilizer gpuHashingUploader gpuHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
     //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
     //testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
-    testAlgorithmAsync 
-        gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+    //testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+    //testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
         NaiveHashingGpuPrivateLocal.close
     testAlgorithmAsync 
         gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
         HashtableGpuPrivateLocal.close
     //testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
     testAlgorithmAsync 
-        gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
+    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
         AhoCorasickGpu.close
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
@@ -226,6 +229,7 @@ let Main () =
     Substrings.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
     Substrings.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
+    Substrings.verifyResults !cpuMatches !gpuAhoCorasickOptimized AhoCorasickOptimized.label
 
     printfn ""
 
@@ -241,6 +245,7 @@ let Main () =
     FileReading.printGlobalTime HashtableGpuPrivateLocal.label
     FileReading.printGlobalTime HashtableExpanded.label
     FileReading.printGlobalTime AhoCorasickGpu.label
+    FileReading.printGlobalTime AhoCorasickOptimized.label
 
     printfn ""
 
@@ -255,6 +260,7 @@ let Main () =
     FileReading.printTime HashtableGpuPrivateLocal.timer HashtableGpuPrivateLocal.label
     FileReading.printTime HashtableExpanded.timer HashtableExpanded.label
     FileReading.printTime AhoCorasickGpu.timer AhoCorasickGpu.label
+    FileReading.printTime AhoCorasickOptimized.timer AhoCorasickOptimized.label
 
     printfn ""
 
@@ -269,6 +275,7 @@ let Main () =
     FileReading.printTime readingTimer HashtableGpuPrivateLocal.label
     FileReading.printTime readingTimer HashtableExpanded.label
     FileReading.printTime readingTimer AhoCorasickGpu.label
+    FileReading.printTime readingTimer AhoCorasickOptimized.label
 
     ignore (System.Console.Read())
 
