@@ -12,12 +12,12 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let groups = ref 64
+let groups = ref 4
 
 let maxTemplateLength = 32uy
 
-let kRef = ref 10000
-let localWorkSizeRef = ref 1024
+let kRef = ref 2000
+let localWorkSizeRef = ref 512
 
 let pathRef = ref InputGenerator.path
 let templatesPathRef = ref TemplatesGenerator.path
@@ -208,13 +208,9 @@ let Main () =
     //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
     //testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
     //testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-    //testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-        NaiveHashingGpuPrivateLocal.close
     testAlgorithmAsync 
         gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
         HashtableGpuPrivateLocal.close
-    //testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
-    testAlgorithmAsync 
     testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
         AhoCorasickGpu.close
 
