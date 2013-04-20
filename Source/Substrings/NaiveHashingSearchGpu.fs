@@ -7,6 +7,7 @@ open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 open Brahma.FSharp.OpenCL.Translator.Common
+open System.Threading.Tasks
 
 let provider = NaiveSearchGpu.provider
 
@@ -90,12 +91,20 @@ let upload () =
     Timer<string>.Global.Start()
     if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
         ignore (commandQueue.Add(input.ToGpu provider).Finish())
-    ignore (commandQueue.Add(kernelRun()))
-    ()
+        async {
+            ignore (commandQueue.Add(kernelRun()).Finish())
+        } |> Async.StartAsTask
+    else
+        ignore (commandQueue.Add(kernelRun()).Finish())
+        async {
+            ()
+        } |> Async.StartAsTask
 
-let download () =
+let download (task:Task<unit>) =
     if ready then failwith "Not running, can't download!"
     ready <- true
+
+    task.Wait()
 
     ignore (commandQueue.Add(result.ToHost provider).Finish())
     buffersCreated <- true

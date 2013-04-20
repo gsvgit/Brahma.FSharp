@@ -180,40 +180,6 @@ let Main () =
 
     let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
 
-    NaiveSearchGpuLocalTemplates.initialize length k localWorkSize templates templateLengths buffer templatesSum templateArr
-
-    while current < bound do
-
-        if current > 0L then
-            System.Array.Copy(buffer, (read + lowBound - (int) maxTemplateLength), buffer, 0, (int) maxTemplateLength)
-            lowBound <- (int) maxTemplateLength
-
-        highBound <- (if (int64) (length - lowBound) < bound then (length - lowBound) else (int) bound)
-        read <- reader.Read(buffer, lowBound, highBound)
-        current <- current + (int64) read
-
-        let mutable countingBound = read + lowBound
-        let mutable matchBound = read + lowBound
-        if current < bound then
-            countingBound <- countingBound - (int) maxTemplateLength
-
-        gpuMatchesLocal <- gpuMatchesLocal + NaiveSearch.countMatches (NaiveSearchGpuLocalTemplates.getMatches()) countingBound matchBound templateLengths prefix
-    
-    reader.Close()
-    readingTimer.Lap(NaiveSearchGpuLocalTemplates.label)
-
-    readingTimer.Start()
-    let mutable read = 0
-    let mutable lowBound = 0
-    let mutable highBound = 0
-
-    let mutable current = 0L
-
-    let reader = new FileStream(path, FileMode.Open)
-    let bound = reader.Length
-
-    let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
-
     NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr
 
     while current < bound do
@@ -273,7 +239,6 @@ let Main () =
     Substrings.verifyResults cpuMatches cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults cpuMatches gpuMatches NaiveSearchGpu.label
     Substrings.verifyResults cpuMatches gpuMatchesHashing NaiveHashingSearchGpu.label
-    Substrings.verifyResults cpuMatches gpuMatchesLocal NaiveSearchGpuLocalTemplates.label
     Substrings.verifyResults cpuMatches gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
     Substrings.verifyResults cpuMatches gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
 
@@ -285,7 +250,6 @@ let Main () =
     FileReading.printGlobalTime NaiveHashingSearch.label
     FileReading.printGlobalTime NaiveSearchGpu.label
     FileReading.printGlobalTime NaiveHashingSearchGpu.label
-    FileReading.printGlobalTime NaiveSearchGpuLocalTemplates.label
     FileReading.printGlobalTime NaiveHashingSearchGpuPrivate.label
     FileReading.printGlobalTime NaiveHashingGpuPrivateLocal.label
 
@@ -296,7 +260,6 @@ let Main () =
     FileReading.printTime NaiveHashingSearch.timer NaiveHashingSearch.label
     FileReading.printTime NaiveSearchGpu.timer NaiveSearchGpu.label
     FileReading.printTime NaiveHashingSearchGpu.timer NaiveHashingSearchGpu.label
-    FileReading.printTime NaiveSearchGpuLocalTemplates.timer NaiveSearchGpuLocalTemplates.label
     FileReading.printTime NaiveHashingSearchGpuPrivate.timer NaiveHashingSearchGpuPrivate.label
     FileReading.printTime NaiveHashingGpuPrivateLocal.timer NaiveHashingGpuPrivateLocal.label
 
@@ -307,7 +270,6 @@ let Main () =
     FileReading.printTime readingTimer NaiveHashingSearch.label
     FileReading.printTime readingTimer NaiveSearchGpu.label
     FileReading.printTime readingTimer NaiveHashingSearchGpu.label
-    FileReading.printTime readingTimer NaiveSearchGpuLocalTemplates.label
     FileReading.printTime readingTimer NaiveHashingSearchGpuPrivate.label
     FileReading.printTime readingTimer NaiveHashingGpuPrivateLocal.label
 
