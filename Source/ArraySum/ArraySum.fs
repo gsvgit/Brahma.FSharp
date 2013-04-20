@@ -86,7 +86,7 @@ let Main () =
         let _ = commandQueue.Add(kernelRun()).Finish()
         Timer<string>.Global.Lap("OpenCL")
     
-    printfn "done."        
+    printfn "done."
     
     printfn "Verifying results..."    
     if System.Math.Abs(sum.[0] - cpuSum) > 0

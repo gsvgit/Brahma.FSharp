@@ -28,14 +28,7 @@ type CLCodeGenerator() =
         let codeGenerator = new Translator.FSQuotationToOpenCLTranslator()
         let ast = codeGenerator.Translate lambda translatorOptions
         let code = Printer.AST.Print ast 
-        kernel.Provider <- provider
-        let newCode = 
-           "__local uchar _sub[1000];\n"
-           + "int idX = get_local_id(0);\n"
-           + "int kk = 10;\n"
-           + "for(int jj=idX*kk;jj<(idX+1)*kk;jj++){ \n"
-           + "_sub[jj]=sub[jj];}\n"
-           + "barrier(CLK_LOCAL_MEM_FENCE);\n"
+        kernel.Provider <- provider        
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
         kernel.SetParameters []

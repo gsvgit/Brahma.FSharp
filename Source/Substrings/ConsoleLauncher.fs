@@ -12,12 +12,12 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let groups = ref 4
+let groups = ref 64
 
 let maxTemplateLength = 32uy
 
-let kRef = ref 1024    
-let localWorkSizeRef = ref 512
+let kRef = ref 10000
+let localWorkSizeRef = ref 1024
 
 let pathRef = ref InputGenerator.path
 let templatesPathRef = ref TemplatesGenerator.path
@@ -107,7 +107,7 @@ let Main () =
         reader.Close()
         readingTimer.Lap(label)
 
-    let testAlgorithmAsync initializer uploader downloader label counter =
+    let testAlgorithmAsync initializer uploader downloader label counter close =
         readingTimer.Start()
         let mutable read = 0
         let mutable lowBound = 0
@@ -151,6 +151,7 @@ let Main () =
 
         reader.Close()
         readingTimer.Lap(label)
+        close()
 
     let cpuInitilizer = (fun _ _ -> ())
     let cpuHashedInitilizer = (fun _ _ -> ())
@@ -175,7 +176,7 @@ let Main () =
     let gpuHashingPrivateUploader = (fun () -> NaiveHashingSearchGpuPrivate.upload())
     let gpuHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
     let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
-    let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
+    //let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
     let gpuAhoCorasickUploader = (fun () -> AhoCorasickGpu.upload())
     let gpuAhoCorasickOptimizedUploader = (fun () -> AhoCorasickOptimized.upload())
 
@@ -207,10 +208,15 @@ let Main () =
     //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
     //testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
     //testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-    testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
-    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
+    //testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+        NaiveHashingGpuPrivateLocal.close
+    testAlgorithmAsync 
+        gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+        HashtableGpuPrivateLocal.close
+    //testAlgorithmAsync gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
+    testAlgorithmAsync 
     testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+        AhoCorasickGpu.close
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
@@ -267,4 +273,5 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do Main()
+do //TemplatesGenerator.Main() 
+    Main()

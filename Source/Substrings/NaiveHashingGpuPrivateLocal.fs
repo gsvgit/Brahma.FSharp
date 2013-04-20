@@ -19,6 +19,11 @@ let commandQueue = createQueue()
 let label = "OpenCL/NaiveHashingPrivateLocal"
 let timer = new Timer<string>()
 
+let close () = 
+    provider.CloseAllBuffers()
+    commandQueue.Dispose()
+    provider.Dispose()
+
 let hashingCommand = 
     <@
         fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
@@ -35,7 +40,7 @@ let hashingCommand =
             let localTemplateHashes = local (Array.zeroCreate 512)
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 512
+            let groupSize = 1024
             let chunk = (512 + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
@@ -76,8 +81,8 @@ let hashingCommand =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ()))))))))))
-let mutable kernelRun = (fun _ -> null)
+let mutable kernelPrepare = Unchecked.defaultof<_>
+let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 let mutable templateHashes = null

@@ -54,8 +54,8 @@ let command =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ()))))))))
-let mutable kernelRun = (fun _ -> null)
+let mutable kernelPrepare = Unchecked.defaultof<_>
+let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 
@@ -74,6 +74,11 @@ let initialize length k localWorkSize templates (templateLengths:array<byte>) (g
     ()
 
 let mutable ready = true
+
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
 
 let upload () =
     if not ready then failwith "Already running, can't upload!"
@@ -130,7 +135,6 @@ let findMatches length k localWorkSize templates (templateLengths:array<byte>) (
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
     result
-
 
 let Main () =
     let length = 3000000

@@ -16,6 +16,11 @@ let createQueue() =
 
 let commandQueue = createQueue()
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+
 let label = "OpenCL/NaiveHashing"
 let timer = new Timer<string>()
 
@@ -58,8 +63,8 @@ let hashingCommand =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ())))))))))))
-let mutable kernelRun = (fun _ -> null)
+let mutable kernelPrepare = Unchecked.defaultof<_>
+let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 let mutable templateHashes = null
