@@ -12,11 +12,9 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let groups = ref 4
-
 let maxTemplateLength = 32uy
 
-let kRef = ref 2000
+let kRef = ref 1024
 let localWorkSizeRef = ref 512
 
 let pathRef = ref InputGenerator.path
@@ -27,7 +25,6 @@ let Main () =
         [
          "-k", ArgType.Int (fun i -> kRef := i), "Work amount for one work item."
          "-l", ArgType.Int (fun i -> localWorkSizeRef := i), "Work group size."
-         "-g", ArgType.Int (fun i -> groups := i), "Work groups number."
          "-input", ArgType.String (fun s -> pathRef := s), "Input file path."
          "-templates", ArgType.String (fun s -> templatesPathRef := s), "Templates file path."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
@@ -35,8 +32,6 @@ let Main () =
 
     let k = !kRef  
     let localWorkSize = !localWorkSizeRef
-
-    let length = k * localWorkSize * !groups
 
     let path = !pathRef
     let templatesPath = !templatesPathRef
@@ -65,8 +60,29 @@ let Main () =
     let templatesSum = !templatesSumRef
     let templateArr = !templateArrRef
 
-    printfn "Running %A groups with %A items in each, %A in total." !groups localWorkSize (localWorkSize * !groups)
-    printfn "Each item will process %A bytes of input, %A total on each iteration." k (localWorkSize * !groups * k)
+    let memory,ex = Cl.GetDeviceInfo(NaiveSearchGpu.provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
+    let maxGpuMemory = memory.CastTo<uint64>()
+
+    let maxHostMemory = 256UL * 1024UL * 1024UL  
+
+    let additionalArgs = 2UL * (256UL + 2UL) * (uint64) maxTemplateLength * (uint64) templates + (uint64) templates +
+                         (uint64) templatesSum + 13UL + 1000UL
+
+    let additionalTempData = 2UL * (256UL + 256UL + 3UL) * (uint64) maxTemplateLength * (uint64) templates + 
+                             (uint64) maxTemplateLength * (uint64) templates + 100000UL
+
+    let availableMemory = (int) (min (maxGpuMemory - additionalArgs) (maxHostMemory - additionalArgs - additionalTempData))
+
+    let groupSize = k * localWorkSize * (1 + 2)
+
+    let groups = availableMemory / groupSize
+
+    let length = k * localWorkSize * groups
+
+    printfn "Maximum memory on GPU is %A, additional args size is %A, temp data size is %A" maxGpuMemory additionalArgs additionalTempData
+
+    printfn "Running %A groups with %A items in each, %A in total." groups localWorkSize (localWorkSize * groups)
+    printfn "Each item will process %A bytes of input, %A total on each iteration." k length
     printfn ""
 
     let buffer = Array.zeroCreate length
@@ -208,11 +224,13 @@ let Main () =
     //testAlgorithmAsync gpuLocalInitilizer gpuLocalUploader gpuLocalDownloader NaiveSearchGpuLocalTemplates.label gpuMatchesLocal
     //testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
     //testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-    testAlgorithmAsync 
-        gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-        HashtableGpuPrivateLocal.close
-    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+    //testAlgorithmAsync 
+    //    gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+    //    HashtableGpuPrivateLocal.close
+    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
         AhoCorasickGpu.close
+    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+        AhoCorasickOptimized.close
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label

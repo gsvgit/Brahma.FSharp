@@ -3,7 +3,7 @@
 open System.IO
 
 
-let length = 50000000L
+let length = 100000000L
 let path = "../../random.txt"
 let random = new System.Random()
 
