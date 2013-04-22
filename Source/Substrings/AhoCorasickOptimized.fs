@@ -116,12 +116,11 @@ let command =
                 v <- go.[256 * (int) v + (int) input.[i]]
                 let mutable parent = v
 
-                if parent > 0s then
-                    while parent > 0s do
-                        let mutable currentTemplate = leaf.[(int) parent]
-                        if currentTemplate >= 0s then
-                            result.[i - (int) localTemplateLengths.[(int) currentTemplate] + 1] <- currentTemplate
-                        parent <- exit.[(int) parent]
+                while parent > 0s do
+                    let mutable currentTemplate = leaf.[(int) parent]
+                    if currentTemplate >= 0s then
+                        result.[i - (int) localTemplateLengths.[(int) currentTemplate] + 1] <- currentTemplate
+                    parent <- exit.[(int) parent]
     @>
 
 let mutable result = null

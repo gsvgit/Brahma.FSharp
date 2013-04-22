@@ -351,8 +351,8 @@ and private translateLet var expr inExpr (targetContext:TargetContext<_,_>) =
     vDecl.IsLocal <- isLocal
     targetContext.VarDecls.Add vDecl
     targetContext.Namer.LetIn var.Name
-    let res,tContext = Translate inExpr targetContext
-    let sb = new ResizeArray<_>(tContext.VarDecls |> Seq.cast<Statement<_>>)
+    let sb = new ResizeArray<_>(targetContext.VarDecls |> Seq.cast<Statement<_>>)
+    let res,tContext = Translate inExpr (clearContext targetContext)
     sb.Add (res :?> Statement<_>)
     targetContext.Namer.LetOut()
     if sb.Count > 1

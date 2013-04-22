@@ -84,7 +84,7 @@ let command =
 
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 1024
+            let groupSize = 512
             let chunk = (512 + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
@@ -109,12 +109,11 @@ let command =
                 v <- go.[256 * (int) v + (int) input.[i]]
                 let mutable parent = v
 
-                if parent > 0s then
-                    while parent > 0s do
-                        let mutable currentTemplate = leaf.[(int) parent]
-                        if currentTemplate >= 0s then
-                            result.[i - (int) localTemplateLengths.[(int) currentTemplate] + 1] <- currentTemplate
-                        parent <- link.[(int) parent]
+                while parent > 0s do
+                    let mutable currentTemplate = leaf.[(int) parent]
+                    if currentTemplate >= 0s then
+                        result.[i - (int) localTemplateLengths.[(int) currentTemplate] + 1] <- currentTemplate
+                    parent <- link.[(int) parent]
     @>
 
 let mutable result = null
