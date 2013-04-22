@@ -18,6 +18,12 @@ let commandQueue = createQueue()
 let label = "OpenCL/AhoCorasickOptimized"
 let timer = new Timer<string>()
 
+
+let close () =     
+    provider.CloseAllBuffers()
+    commandQueue.Dispose()
+    provider.Dispose()
+
 let buildStateMachine templates maxTemplateLength (next:array<array<int16>>) (leaf:array<int16>) =
     let go = Array.init (templates * (int) maxTemplateLength * 256) (fun _ -> -1s)
     let link = Array.init (templates * (int) maxTemplateLength) (fun _ -> -1s)
@@ -85,7 +91,7 @@ let command =
 
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 512
+            let groupSize = 1024
             let chunk = (512 + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
