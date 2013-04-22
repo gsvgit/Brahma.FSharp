@@ -288,4 +288,4 @@ let Main () =
     ignore (System.Console.Read())
 
 do //TemplatesGenerator.Main() 
-    Main()
+    Testing.Main()
