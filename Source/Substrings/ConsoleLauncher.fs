@@ -75,7 +75,7 @@ let Main () =
 
     let groupSize = k * localWorkSize * (1 + 2)
 
-    let groups = 1//availableMemory / groupSize
+    let groups = availableMemory / groupSize
 
     let length = k * localWorkSize * groups
 
