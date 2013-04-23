@@ -43,7 +43,7 @@ let hashingCommand =
             let localNext = local (Array.zeroCreate 512)
             let localStarts = local (Array.zeroCreate 512)
 
-            let groupSize = 1024
+            let groupSize = 512
             let chunk = (512 + groupSize - 1) / groupSize
             let tableChunk = (256 + groupSize - 1) / groupSize
 
@@ -93,98 +93,93 @@ let hashingCommand =
                     let number = localTable.[(int) hash]
                     let mutable templateIndex = number
                     let mutable look = 1
-                    if 0s <= templateIndex then
-                        while look > 0 && templateIndex >= 0s do
-                            if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 1uy then
-                                let mutable matches = 1
+                    while look > 0 && templateIndex >= 0s do
+                        if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 1uy then
+                            let mutable matches = 1
 
-                                let mutable j = 0
-                                let templateBase = localStarts.[(int) templateIndex]
-                                while (matches = 1 && j < baseIndex + 1) do
-                                    if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
-                                    j <- j + 1
+                            let mutable j = 0
+                            let templateBase = localStarts.[(int) templateIndex]
+                            while (matches = 1 && j < baseIndex + 1) do
+                                if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
+                                j <- j + 1
 
-                                if matches = 1 then
-                                    result.[i] <- templateIndex
-                                    look <- 0
-                            templateIndex <- localNext.[(int) templateIndex]
+                            if matches = 1 then
+                                result.[i] <- templateIndex
+                                look <- 0
+                        templateIndex <- localNext.[(int) templateIndex]
                     let hash = privateHashes.[baseIndex + 1]
                     let number = localTable.[(int) hash]
                     let mutable templateIndex = number
                     let mutable look = 1
-                    if 0s <= templateIndex then
-                        while look > 0 && templateIndex >= 0s do
-                            if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 2uy then
-                                let mutable matches = 1
+                    while look > 0 && templateIndex >= 0s do
+                        if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 2uy then
+                            let mutable matches = 1
 
-                                let mutable j = 0
-                                let templateBase = localStarts.[(int) templateIndex]
-                                while (matches = 1 && j < baseIndex + 2) do
-                                    if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
-                                    j <- j + 1
+                            let mutable j = 0
+                            let templateBase = localStarts.[(int) templateIndex]
+                            while (matches = 1 && j < baseIndex + 2) do
+                                if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
+                                j <- j + 1
 
-                                if matches = 1 then
-                                    result.[i] <- templateIndex
-                                    look <- 0
-                            templateIndex <- localNext.[(int) templateIndex]
+                            if matches = 1 then
+                                result.[i] <- templateIndex
+                                look <- 0
+                        templateIndex <- localNext.[(int) templateIndex]
                     let hash = privateHashes.[baseIndex + 2]
                     let number = localTable.[(int) hash]
                     let mutable templateIndex = number
                     let mutable look = 1
-                    if 0s <= templateIndex then
-                        while look > 0 && templateIndex >= 0s do
-                            if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 3uy then
-                                let mutable matches = 1
+                    while look > 0 && templateIndex >= 0s do
+                        if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 3uy then
+                            let mutable matches = 1
 
-                                let mutable j = 0
-                                let templateBase = localStarts.[(int) templateIndex]
-                                while (matches = 1 && j < baseIndex + 3) do
-                                    if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
-                                    j <- j + 1
+                            let mutable j = 0
+                            let templateBase = localStarts.[(int) templateIndex]
+                            while (matches = 1 && j < baseIndex + 3) do
+                                if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
+                                j <- j + 1
 
-                                if matches = 1 then
-                                    result.[i] <- templateIndex
-                                    look <- 0
-                            templateIndex <- localNext.[(int) templateIndex]
+                            if matches = 1 then
+                                result.[i] <- templateIndex
+                                look <- 0
+                        templateIndex <- localNext.[(int) templateIndex]
                     let hash = privateHashes.[baseIndex + 3]
                     let number = localTable.[(int) hash]
                     let mutable templateIndex = number
                     let mutable look = 1
-                    if 0s <= templateIndex then
-                        while look > 0 && templateIndex >= 0s do
-                            if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 4uy then
-                                let mutable matches = 1
+                    while look > 0 && templateIndex >= 0s do
+                        if localTemplateLengths.[(int) templateIndex] = (byte) baseIndex + 4uy then
+                            let mutable matches = 1
 
-                                let mutable j = 0
-                                let templateBase = localStarts.[(int) templateIndex]
-                                while (matches = 1 && j < baseIndex + 4) do
-                                    if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
-                                    j <- j + 1
+                            let mutable j = 0
+                            let templateBase = localStarts.[(int) templateIndex]
+                            while (matches = 1 && j < baseIndex + 4) do
+                                if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
+                                j <- j + 1
 
-                                if matches = 1 then
-                                    result.[i] <- templateIndex
-                                    look <- 0
-                            templateIndex <- localNext.[(int) templateIndex]
+                            if matches = 1 then
+                                result.[i] <- templateIndex
+                                look <- 0
+                        templateIndex <- localNext.[(int) templateIndex]
                 for current in (4 * ((maximum + 1) / 4))..maximum do
                     let hash = privateHashes.[(int) current]
                     let number = localTable.[(int) hash]
                     let mutable templateIndex = number
                     let mutable look = 1
-                    if 0s <= templateIndex then
-                        while look > 0 && templateIndex >= 0s do
-                            if localTemplateLengths.[(int) templateIndex] = (byte) current + 1uy then
-                                let mutable matches = 1
+                    while look > 0 && templateIndex >= 0s do
+                        if localTemplateLengths.[(int) templateIndex] = (byte) current + 1uy then
+                            let mutable matches = 1
 
-                                let mutable j = 0
-                                let templateBase = localStarts.[(int) templateIndex]
-                                while (matches = 1 && j < current + 1) do
-                                    if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
-                                    j <- j + 1
+                            let mutable j = 0
+                            let templateBase = localStarts.[(int) templateIndex]
+                            while (matches = 1 && j < current + 1) do
+                                if input.[i + j] <> t.[(int) templateBase + j] then  matches <- 0
+                                j <- j + 1
 
-                                if matches = 1 then
-                                    result.[i] <- templateIndex
-                                    look <- 0
-                            templateIndex <- localNext.[(int) templateIndex]
+                            if matches = 1 then
+                                result.[i] <- templateIndex
+                                look <- 0
+                        templateIndex <- localNext.[(int) templateIndex]
     @>
 
 

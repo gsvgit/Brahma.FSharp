@@ -40,7 +40,7 @@ let hashingCommand =
             let localTemplateHashes = local (Array.zeroCreate 512)
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 1024
+            let groupSize = 512
             let chunk = (512 + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
