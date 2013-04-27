@@ -325,7 +325,7 @@ let Main () =
     let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
 
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) length length templateLengths prefix
+    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches

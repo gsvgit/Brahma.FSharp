@@ -40,19 +40,19 @@ let Main () =
     let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
 
     printfn "Finding substrings in string with length %A using .NET..." length
-    let cpuMatches = NaiveSearch.countMatches (NaiveSearch.findMatches length templates templateLengths (Array.copy input) templateArr) length length templateLengths prefix
+    let cpuMatches = NaiveSearch.countMatches (NaiveSearch.findMatches length templates templateLengths (Array.copy input) templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Finding substrings in string with length %A using .NET and hashes..." length     
-    let cpuMatchesHashed = NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths (Array.copy input) templateArr) length length templateLengths prefix
+    let cpuMatchesHashed = NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths (Array.copy input) templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Finding substrings in string with length %A using OpenCL and selected platform/device..."  length 
-    let gpuMatches = NaiveSearch.countMatches (NaiveSearchGpu.findMatches length k localWorkSize templates templateLengths (Array.copy input) templateArr) length length templateLengths prefix
+    let gpuMatches = NaiveSearch.countMatches (NaiveSearchGpu.findMatches length k localWorkSize templates templateLengths (Array.copy input) templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Finding substrings in string with length %A using OpenCL, hashes and selected platform/device..."  length
-    let gpuMatchesHashing = NaiveSearch.countMatches (NaiveHashingSearchGpu.findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths (Array.copy input) templateArr) length length templateLengths prefix
+    let gpuMatchesHashing = NaiveSearch.countMatches (NaiveHashingSearchGpu.findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths (Array.copy input) templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."   
     
     printfn ""

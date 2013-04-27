@@ -110,7 +110,7 @@ let command =
 
             let mutable v = 0s
             for i in _start .. (_end - 1) do
-                if _start - i = 33 then
+                if _start - i = 64 then
                     barrier()
 
                 v <- go.[256 * (int) v + (int) input.[i]]
@@ -119,7 +119,9 @@ let command =
                 while parent > 0s do
                     let mutable currentTemplate = leaf.[(int) parent]
                     if currentTemplate >= 0s then
-                        result.[i - (int) localTemplateLengths.[(int) currentTemplate] + 1] <- currentTemplate
+                        let position = i - (int) localTemplateLengths.[(int) currentTemplate] + 1
+                        if result.[position] < currentTemplate then
+                            result.[position] <- currentTemplate
                     parent <- exit.[(int) parent]
     @>
 
@@ -226,7 +228,7 @@ let Main () =
 
     printfn "Finding substrings in string with length %A, using %A..." length label
     let result = findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr next leaf
-    let matches = NaiveSearch.countMatches result length length templateLengths prefix
+    let matches = NaiveSearch.countMatches result maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches
