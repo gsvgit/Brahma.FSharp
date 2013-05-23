@@ -386,7 +386,31 @@ type Translator() =
         provider.CloseAllBuffers()
 
 
+    [<Test>]
+    member this.``While with preheader.``() = 
+        let command = 
+            <@
+                fun (rng:_1D) ->
+                    let mutable parent = 10s
 
+                    while parent > 0s do
+                        let currentTemplate = 10s
+                        parent <- parent - 1s
+                
+            @>
+        
+        let kernel,kernelPrepare, kernelRun = provider.Compile command                
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+        kernelPrepare _1d
+        try 
+            commandQueue.Add(kernelRun()).Finish()
+            |> ignore
+            commandQueue.Dispose()
+        with e -> 
+            commandQueue.Dispose()
+            Assert.Fail e.Message
+         
+        
 let x = 
     let d = ref 0
     fun y ->

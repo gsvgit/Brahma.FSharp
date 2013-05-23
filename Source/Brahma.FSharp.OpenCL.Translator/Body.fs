@@ -349,13 +349,15 @@ and private translateLet var expr inExpr (targetContext:TargetContext<_,_>) =
         | other -> other            
     let vDecl = translateBinding var bName valueExpression targetContext
     vDecl.IsLocal <- isLocal
-    targetContext.VarDecls.Add vDecl
-    targetContext.Namer.LetIn var.Name
+    targetContext.VarDecls.Add vDecl    
+    targetContext.Namer.LetIn var.Name    
     let sb = new ResizeArray<_>(targetContext.VarDecls |> Seq.cast<Statement<_>>)
-    let res,tContext = Translate inExpr (clearContext targetContext)
-    sb.Add (res :?> Statement<_>)
+    let res,tContext = clearContext targetContext |> Translate inExpr
+    match res with
+    | :? StatementBlock<Lang> as s -> sb.AddRange s.Statements;
+    | _ -> sb.Add (res :?> Statement<_>)
+     
+   
     targetContext.Namer.LetOut()
-    if sb.Count > 1
-    then new StatementBlock<_>(sb) :> Node<_>
-    else res
+    new StatementBlock<_>(sb) :> Node<_>
     , (clearContext targetContext)
