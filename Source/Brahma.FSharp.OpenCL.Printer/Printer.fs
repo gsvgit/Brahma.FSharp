@@ -31,5 +31,5 @@ let Print (ast:AST<'lang>) =
                 | _ -> failwithf "Printer. Unsupported toplevel declaration: %A"  d)
         |> aboveListL
     let result = StructuredFormat.Display.layout_to_string {StructuredFormat.FormatOptions.Default with PrintWidth=100} layout
-    printfn "%A" result
+    //printfn "%A" result
     result

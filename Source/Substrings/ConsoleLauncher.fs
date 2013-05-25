@@ -20,22 +20,7 @@ let localWorkSizeRef = ref 512
 let pathRef = ref InputGenerator.path
 let templatesPathRef = ref TemplatesGenerator.path
 
-let Main () =
-    let commandLineSpecs =
-        [
-         "-k", ArgType.Int (fun i -> kRef := i), "Work amount for one work item."
-         "-l", ArgType.Int (fun i -> localWorkSizeRef := i), "Work group size."
-         "-input", ArgType.String (fun s -> pathRef := s), "Input file path."
-         "-templates", ArgType.String (fun s -> templatesPathRef := s), "Templates file path."
-         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
-    ArgParser.Parse commandLineSpecs
-
-    let k = !kRef  
-    let localWorkSize = !localWorkSizeRef
-
-    let path = !pathRef
-    let templatesPath = !templatesPathRef
-
+let launch k localWorkSize inputPath templatesPath =
     let templatesReader = File.OpenRead(templatesPath)
     let formatter = new BinaryFormatter()
     let deserialized = formatter.Deserialize(templatesReader)
@@ -63,7 +48,7 @@ let Main () =
     let memory,ex = Cl.GetDeviceInfo(NaiveSearchGpu.provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
     let maxGpuMemory = memory.CastTo<uint64>()
 
-    let maxHostMemory = 256UL * 1024UL * 1024UL  
+    let maxHostMemory = 256UL * 1024UL * 1024UL
 
     let additionalArgs = 2UL * (256UL + 2UL) * (uint64) maxTemplateLength * (uint64) templates + (uint64) templates +
                          (uint64) templatesSum + 13UL + 1000UL
@@ -97,7 +82,7 @@ let Main () =
 
         let mutable current = 0L
 
-        let reader = new FileStream(path, FileMode.Open)
+        let reader = new FileStream(inputPath, FileMode.Open)
         let bound = reader.Length
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
@@ -131,7 +116,7 @@ let Main () =
 
         let mutable current = 0L
 
-        let reader = new FileStream(path, FileMode.Open)
+        let reader = new FileStream(inputPath, FileMode.Open)
         let bound = reader.Length
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
@@ -182,10 +167,6 @@ let Main () =
 
     let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
     let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
-//    let gpuGetter = (fun () -> NaiveSearchGpu.getMatches())
-//    let gpuHashingGetter = (fun () -> NaiveHashingSearchGpu.getMatches())
-//    let gpuHashingPrivateGetter = (fun () -> NaiveHashingSearchGpuPrivate.getMatches())
-//    let gpuHashingPrivateLocalGetter = (fun () -> NaiveHashingGpuPrivateLocal.getMatches())
 
     let gpuUploader = (fun () -> NaiveSearchGpu.upload())
     let gpuHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
@@ -217,23 +198,23 @@ let Main () =
     let gpuAhoCorasick = ref 0
     let gpuAhoCorasickOptimized = ref 0
 
-    testAlgorithm cpuInitilizer cpuGetter NaiveSearch.label cpuMatches
-    testAlgorithm cpuHashedInitilizer cpuHashedGetter NaiveHashingSearch.label cpuMatchesHashed
-    testAlgorithmAsync gpuInitilizer gpuUploader gpuDownloader NaiveSearchGpu.label gpuMatches
-        NaiveSearchGpu.close
-    testAlgorithmAsync gpuHashingInitilizer gpuHashingUploader gpuHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
-        NaiveHashingSearchGpu.close
-    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
-        NaiveHashingSearchGpuPrivate.close
+    //testAlgorithm cpuInitilizer cpuGetter NaiveSearch.label cpuMatches
+    //testAlgorithm cpuHashedInitilizer cpuHashedGetter NaiveHashingSearch.label cpuMatchesHashed
+//    testAlgorithmAsync gpuInitilizer gpuUploader gpuDownloader NaiveSearchGpu.label gpuMatches
+//        NaiveSearchGpu.close
+//    testAlgorithmAsync gpuHashingInitilizer gpuHashingUploader gpuHashingDownloader NaiveHashingSearchGpu.label gpuMatchesHashing
+//        NaiveHashingSearchGpu.close
+//    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
+//        NaiveHashingSearchGpuPrivate.close
     testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
         NaiveHashingGpuPrivateLocal.close
     testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
         HashtableGpuPrivateLocal.close
-    testAlgorithmAsync 
-        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
-        HashtableExpanded.close
-    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
-        AhoCorasickGpu.close
+//    testAlgorithmAsync 
+//        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
+//        HashtableExpanded.close
+//    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
+//        AhoCorasickGpu.close
     testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
         AhoCorasickOptimized.close
 
@@ -290,7 +271,28 @@ let Main () =
     FileReading.printTime readingTimer AhoCorasickGpu.label
     FileReading.printTime readingTimer AhoCorasickOptimized.label
 
+    Timer<string>.Global.Reset()
+    readingTimer.Reset()
+
+let Main () =
+    let commandLineSpecs =
+        [
+         "-k", ArgType.Int (fun i -> kRef := i), "Work amount for one work item."
+         "-l", ArgType.Int (fun i -> localWorkSizeRef := i), "Work group size."
+         "-input", ArgType.String (fun s -> pathRef := s), "Input file path."
+         "-templates", ArgType.String (fun s -> templatesPathRef := s), "Templates file path."
+         ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+    ArgParser.Parse commandLineSpecs
+
+    let k = !kRef  
+    let localWorkSize = !localWorkSizeRef
+
+    let path = !pathRef
+    let templatesPath = !templatesPathRef
+
+    launch k localWorkSize path templatesPath
+
     ignore (System.Console.Read())
 
-do //TemplatesGenerator.Main() 
-    Main()
+//do //InputGenerator.Main() 
+//    Main()

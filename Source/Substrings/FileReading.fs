@@ -28,12 +28,14 @@ let localWorkSize = 20
 let path = InputGenerator.path
 
 let printTime (timer:Timer<string>) label =
-    printfn "Total time, %A: %A" label (timer.Total(label))
+    if timer <> null then
+        printfn "Total time, %A: %A" label (timer.Total(label))
 
 let printGlobalTime = printTime (Timer<string>.Global)
 
 let printTotalTime (timer:Timer<string>) (readingTimer:Timer<string>) label =
-    printfn "Total time, %A: %A" label (timer.Total(label) + readingTimer.Total("reading"))
+    if timer <> null then
+        printfn "Total time, %A: %A" label (timer.Total(label) + readingTimer.Total("reading"))
 
 let Main () =
     let readingTimer = new Timer<string>()

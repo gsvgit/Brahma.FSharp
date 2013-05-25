@@ -29,7 +29,7 @@ let Main () =
     let mutable i = 0
 
     let maxTemplateLength = 32uy
-    let minTemplateLength = 1uy
+    let minTemplateLength = 2uy
     let templatesNumber = 512
 
     let lengths = computeTemplateLengths templatesNumber maxTemplateLength minTemplateLength

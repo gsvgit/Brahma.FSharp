@@ -10,7 +10,7 @@ open Brahma.FSharp.OpenCL.Translator.Common
 open System.Threading.Tasks
 
 let label = "OpenCL/Naive"
-let timer = new Timer<string>()
+let mutable timer = null
 
 let platformName = "*"
 
@@ -60,6 +60,7 @@ let mutable input = null
 let mutable buffersCreated = false
 
 let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+    timer <- new Timer<string>()
     timer.Start()
     result <- Array.zeroCreate length
     let x, y, z = provider.Compile(query=command, translatorOptions=[BoolAsBit])
@@ -79,6 +80,7 @@ let close () =
     commandQueue.Dispose()
     provider.CloseAllBuffers()
     provider.Dispose()
+    buffersCreated <- false
 
 let upload () =
     if not ready then failwith "Already running, can't upload!"
