@@ -50,9 +50,16 @@ let findPrefixes templates maxTemplateLength (templateLengths:array<byte>) (temp
 
     prefix
 
-let countMatches (result:array<int16>) bound length (templateLengths:array<byte>) (prefix:array<int16>) =
+let countMatches (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) =
     let mutable matches = 0
-    for i in 0..(bound - 1) do
+    let clearBound = min (bound - 1) (length - (int) maxTemplateLength)
+
+    for i in 0..clearBound do
+        let mutable matchIndex = result.[i]
+        if matchIndex >= 0s then
+            matches <- matches + 1
+
+    for i in (clearBound + 1)..(bound - 1) do
         let mutable matchIndex = result.[i]
         while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
             matchIndex <- prefix.[(int) matchIndex]
@@ -135,7 +142,7 @@ let Main () =
     let prefix = findPrefixes templates maxTemplateLength templateLengths templateArr
 
     printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = countMatches (findMatches length templates templateLengths cpuArr templateArr) length length templateLengths prefix
+    let matches = countMatches (findMatches length templates templateLengths cpuArr templateArr) maxTemplateLength length length templateLengths prefix
     printfn "done."
 
     printfn "Found: %A" matches

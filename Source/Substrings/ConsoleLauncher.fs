@@ -73,6 +73,7 @@ let launch k localWorkSize inputPath templatesPath =
     let buffer = Array.zeroCreate length
 
     let readingTimer = new Timer<string>()
+    let countingTimer = new Timer<string>()
 
     let testAlgorithm initializer getter label counter =
         readingTimer.Start()
@@ -103,7 +104,7 @@ let launch k localWorkSize inputPath templatesPath =
             if current < bound then
                 countingBound <- countingBound - (int) maxTemplateLength
 
-            counter := !counter + NaiveSearch.countMatches (getter()) countingBound matchBound templateLengths prefix
+            counter := !counter + NaiveSearch.countMatches (getter()) maxTemplateLength countingBound matchBound templateLengths prefix
     
         reader.Close()
         readingTimer.Lap(label)
@@ -137,7 +138,10 @@ let launch k localWorkSize inputPath templatesPath =
             read <- reader.Read(buffer, lowBound, highBound)
 
             if current > 0L then
-                counter := !counter + NaiveSearch.countMatches (downloader task) countingBound matchBound templateLengths prefix
+                let result = downloader task
+                countingTimer.Start()
+                counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+                countingTimer.Lap(label)
 
             current <- current + (int64) read
 
@@ -148,7 +152,10 @@ let launch k localWorkSize inputPath templatesPath =
 
             task <- uploader()
         
-        counter := !counter + NaiveSearch.countMatches (downloader task) countingBound matchBound templateLengths prefix
+        let result = downloader task
+        countingTimer.Start()
+        counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+        countingTimer.Lap(label)
 
         reader.Close()
         readingTimer.Lap(label)
@@ -271,8 +278,23 @@ let launch k localWorkSize inputPath templatesPath =
     FileReading.printTime readingTimer AhoCorasickGpu.label
     FileReading.printTime readingTimer AhoCorasickOptimized.label
 
+    printfn ""
+
+    printfn "Counting time:"
+    FileReading.printTime countingTimer NaiveSearch.label
+    FileReading.printTime countingTimer NaiveHashingSearch.label
+    FileReading.printTime countingTimer NaiveSearchGpu.label
+    FileReading.printTime countingTimer NaiveHashingSearchGpu.label
+    FileReading.printTime countingTimer NaiveHashingSearchGpuPrivate.label
+    FileReading.printTime countingTimer NaiveHashingGpuPrivateLocal.label
+    FileReading.printTime countingTimer HashtableGpuPrivateLocal.label
+    FileReading.printTime countingTimer HashtableExpanded.label
+    FileReading.printTime countingTimer AhoCorasickGpu.label
+    FileReading.printTime countingTimer AhoCorasickOptimized.label
+
     Timer<string>.Global.Reset()
     readingTimer.Reset()
+    countingTimer.Reset()
 
 let Main () =
     let commandLineSpecs =

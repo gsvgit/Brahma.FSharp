@@ -65,7 +65,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        cpuMatches <- cpuMatches + NaiveSearch.countMatches (NaiveSearch.findMatches length templates templateLengths buffer templateArr) countingBound matchBound templateLengths prefix
+        cpuMatches <- cpuMatches + NaiveSearch.countMatches (NaiveSearch.findMatches length templates templateLengths buffer templateArr) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveSearch.label)
@@ -96,7 +96,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        cpuMatchesHashed <- cpuMatchesHashed + NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr) countingBound matchBound templateLengths prefix
+        cpuMatchesHashed <- cpuMatchesHashed + NaiveSearch.countMatches (NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveHashingSearch.label)
@@ -129,7 +129,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        gpuMatches <- gpuMatches + NaiveSearch.countMatches (NaiveSearchGpu.getMatches()) countingBound matchBound templateLengths prefix
+        gpuMatches <- gpuMatches + NaiveSearch.countMatches (NaiveSearchGpu.getMatches()) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveSearchGpu.label)
@@ -163,7 +163,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        gpuMatchesHashing <- gpuMatchesHashing + NaiveSearch.countMatches (NaiveHashingSearchGpu.getMatches()) countingBound matchBound templateLengths prefix
+        gpuMatchesHashing <- gpuMatchesHashing + NaiveSearch.countMatches (NaiveHashingSearchGpu.getMatches()) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveHashingSearchGpu.label)
@@ -197,7 +197,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        gpuMatchesHashingPrivate <- gpuMatchesHashingPrivate + NaiveSearch.countMatches (NaiveHashingSearchGpuPrivate.getMatches()) countingBound matchBound templateLengths prefix
+        gpuMatchesHashingPrivate <- gpuMatchesHashingPrivate + NaiveSearch.countMatches (NaiveHashingSearchGpuPrivate.getMatches()) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveHashingSearchGpuPrivate.label)    
@@ -231,7 +231,7 @@ let Main () =
         if current < bound then
             countingBound <- countingBound - (int) maxTemplateLength
 
-        gpuMatchesHashingPrivateLocal <- gpuMatchesHashingPrivateLocal + NaiveSearch.countMatches (NaiveHashingGpuPrivateLocal.getMatches()) countingBound matchBound templateLengths prefix
+        gpuMatchesHashingPrivateLocal <- gpuMatchesHashingPrivateLocal + NaiveSearch.countMatches (NaiveHashingGpuPrivateLocal.getMatches()) maxTemplateLength countingBound matchBound templateLengths prefix
     
     reader.Close()
     readingTimer.Lap(NaiveHashingGpuPrivateLocal.label)
