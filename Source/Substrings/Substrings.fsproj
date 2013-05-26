@@ -100,6 +100,7 @@
     <Compile Include="Testing.fs" />
     <Compile Include="ConsoleLauncher.fs" />
     <Compile Include="ParametersSearch.fs" />
+    <Compile Include="RawReading.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
@@ -140,6 +141,11 @@
     <ProjectReference Include="..\Brahma\Brahma.csproj">
       <Name>Brahma</Name>
       <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RawIo\RawIo.csproj">
+      <Name>RawIo</Name>
+      <Project>{0dc13af6-3b54-4609-b490-8518ceac7ab5}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Samples.csproj">

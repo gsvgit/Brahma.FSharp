@@ -6,4 +6,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do InputGenerator.Main()
+//do InputGenerator.Main()
