@@ -3,7 +3,7 @@
 open System.IO
 
 
-let length = 8L*1024L*1024L*1024L
+let length = 1024L*1024L*1024L
 let path = "../../random.txt"
 let random = new System.Random()
 

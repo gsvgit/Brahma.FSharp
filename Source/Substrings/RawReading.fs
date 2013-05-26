@@ -321,5 +321,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do //InputGenerator.Main() 
-    Main()
+do ConsoleLauncher.Main() 

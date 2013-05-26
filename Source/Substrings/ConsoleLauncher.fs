@@ -103,9 +103,13 @@ let launch k localWorkSize inputPath templatesPath =
             let mutable matchBound = read + lowBound
             if current < bound then
                 countingBound <- countingBound - (int) maxTemplateLength
+            
+            let result = getter()
 
-            counter := !counter + NaiveSearch.countMatches (getter()) maxTemplateLength countingBound matchBound templateLengths prefix
-    
+            countingTimer.Start()
+            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+            countingTimer.Lap(label)
+
         reader.Close()
         readingTimer.Lap(label)
 
@@ -163,6 +167,7 @@ let launch k localWorkSize inputPath templatesPath =
 
     let cpuInitilizer = (fun _ _ -> ())
     let cpuHashedInitilizer = (fun _ _ -> ())
+    let cpuAhoCorasickInitializer = (fun next leaf -> AhoCorasickCpu.initialize next leaf)
     let gpuInitilizer = (fun _ _ -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
     let gpuHashingInitilizer = (fun _ _ -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuHashingPrivateInitilizer = (fun _ _ -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
@@ -174,6 +179,7 @@ let launch k localWorkSize inputPath templatesPath =
 
     let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
     let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
+    let cpuAhoCorasickGetter = (fun () -> AhoCorasickCpu.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
 
     let gpuUploader = (fun () -> NaiveSearchGpu.upload())
     let gpuHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
@@ -195,6 +201,7 @@ let launch k localWorkSize inputPath templatesPath =
 
     let cpuMatches = ref 0  
     let cpuMatchesHashed = ref 0
+    let cpuMatchesAhoCorasick = ref 0
     let gpuMatches = ref 0
     let gpuMatchesHashing = ref 0
     let gpuMatchesLocal = ref 0
@@ -213,17 +220,18 @@ let launch k localWorkSize inputPath templatesPath =
 //        NaiveHashingSearchGpu.close
 //    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
 //        NaiveHashingSearchGpuPrivate.close
-    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-        NaiveHashingGpuPrivateLocal.close
-    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-        HashtableGpuPrivateLocal.close
+//    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+//        NaiveHashingGpuPrivateLocal.close
+//    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+//        HashtableGpuPrivateLocal.close
 //    testAlgorithmAsync 
 //        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
 //        HashtableExpanded.close
-//    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
-//        AhoCorasickGpu.close
+    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
+        AhoCorasickGpu.close
     testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
         AhoCorasickOptimized.close
+    testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
@@ -234,6 +242,7 @@ let launch k localWorkSize inputPath templatesPath =
     Substrings.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
     Substrings.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
     Substrings.verifyResults !cpuMatches !gpuAhoCorasickOptimized AhoCorasickOptimized.label
+    Substrings.verifyResults !cpuMatches !cpuMatchesAhoCorasick AhoCorasickCpu.label
 
     printfn ""
 
@@ -249,6 +258,7 @@ let launch k localWorkSize inputPath templatesPath =
     FileReading.printGlobalTime HashtableExpanded.label
     FileReading.printGlobalTime AhoCorasickGpu.label
     FileReading.printGlobalTime AhoCorasickOptimized.label
+    FileReading.printGlobalTime AhoCorasickCpu.label
 
     printfn ""
 
@@ -263,6 +273,7 @@ let launch k localWorkSize inputPath templatesPath =
     FileReading.printTime HashtableExpanded.timer HashtableExpanded.label
     FileReading.printTime AhoCorasickGpu.timer AhoCorasickGpu.label
     FileReading.printTime AhoCorasickOptimized.timer AhoCorasickOptimized.label
+    FileReading.printTime AhoCorasickCpu.timer AhoCorasickCpu.label
 
     printfn ""
 
@@ -277,6 +288,7 @@ let launch k localWorkSize inputPath templatesPath =
     FileReading.printTime readingTimer HashtableExpanded.label
     FileReading.printTime readingTimer AhoCorasickGpu.label
     FileReading.printTime readingTimer AhoCorasickOptimized.label
+    FileReading.printTime readingTimer AhoCorasickCpu.label
 
     printfn ""
 
@@ -291,6 +303,7 @@ let launch k localWorkSize inputPath templatesPath =
     FileReading.printTime countingTimer HashtableExpanded.label
     FileReading.printTime countingTimer AhoCorasickGpu.label
     FileReading.printTime countingTimer AhoCorasickOptimized.label
+    FileReading.printTime countingTimer AhoCorasickCpu.label
 
     Timer<string>.Global.Reset()
     readingTimer.Reset()
