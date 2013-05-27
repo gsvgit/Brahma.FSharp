@@ -71,10 +71,19 @@ namespace RawIo
                                    long offset)
         {
             NativeOverlapped overlapped = new NativeOverlapped();
-            
-            long module = 2L << 32;
-            overlapped.OffsetHigh = (int) (offset / module);
-            overlapped.OffsetLow = (int) (offset % module);
+
+            byte[] bytes = BitConverter.GetBytes(offset);
+
+            if (BitConverter.IsLittleEndian)
+            {
+                overlapped.OffsetHigh = BitConverter.ToInt32(bytes, 32);
+                overlapped.OffsetLow = BitConverter.ToInt32(bytes, 0);
+            }
+            else
+            {
+                overlapped.OffsetHigh = BitConverter.ToInt32(bytes, 0);
+                overlapped.OffsetLow = BitConverter.ToInt32(bytes, 32);
+            }
 
             GCHandle handle = GCHandle.Alloc(overlapped, GCHandleType.Pinned);
             int read = 0;
@@ -99,11 +108,18 @@ namespace RawIo
 
         public static long GetFileSize(IntPtr hFile)
         {
-            long module = 2L << 32;
             int high = 0;
 
             int low = GetFileSize(hFile, ref high);
-            return module * (long) high + (long) low;
+
+            if (BitConverter.IsLittleEndian)
+            {
+                return (((long)low) << 32) + ((long)high);
+            }
+            else
+            {
+                return (((long)high) << 32) + ((long)low);
+            }
         }
     }
 }
