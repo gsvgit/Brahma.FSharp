@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace RawIo
 {
@@ -38,14 +39,13 @@ namespace RawIo
         public static extern bool CloseHandle(IntPtr handle);
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern IntPtr CreateFile(
-            string lpFileName,
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwCreationDisposition,
-            int dwFlagsAndAttributes,
-            IntPtr hTemplateFile);
+        static extern IntPtr CreateFile(string lpFileName,
+                                        uint dwDesiredAccess,
+                                        uint dwShareMode,
+                                        IntPtr lpSecurityAttributes,
+                                        uint dwCreationDisposition,
+                                        int dwFlagsAndAttributes,
+                                        IntPtr hTemplateFile);
 
         public static IntPtr CreateFile(int id)
         {
@@ -56,6 +56,54 @@ namespace RawIo
                               Convert.ToUInt32(CreationDispositions.OPEN_EXISTING),
                               0,
                               IntPtr.Zero);
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool ReadFile(IntPtr hFile,                        // handle to file
+                                    byte[] lpBuffer,                // data buffer
+                                    int nNumberOfBytesToRead,        // number of bytes to read
+                                    ref int lpNumberOfBytesRead,    // number of bytes read
+                                    IntPtr lpOverlapped);
+
+        public static int ReadFile(IntPtr hFile,
+                                   byte[] lpBuffer,
+                                   int nNumberOfBytesToRead,
+                                   long offset)
+        {
+            NativeOverlapped overlapped = new NativeOverlapped();
+            
+            long module = 2L << 32;
+            overlapped.OffsetHigh = (int) (offset / module);
+            overlapped.OffsetLow = (int) (offset % module);
+
+            GCHandle handle = GCHandle.Alloc(overlapped, GCHandleType.Pinned);
+            int read = 0;
+
+            bool succeeded = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, ref read, handle.AddrOfPinnedObject());
+
+            handle.Free();
+
+            if (succeeded)
+            {
+                return read;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern int GetFileSize(IntPtr hFile,
+                                      ref int high);
+
+        public static long GetFileSize(IntPtr hFile)
+        {
+            long module = 2L << 32;
+            int high = 0;
+
+            int low = GetFileSize(hFile, ref high);
+            return module * (long) high + (long) low;
         }
     }
 }
