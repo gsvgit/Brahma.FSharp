@@ -76,13 +76,13 @@ namespace RawIo
 
             if (BitConverter.IsLittleEndian)
             {
-                overlapped.OffsetHigh = BitConverter.ToInt32(bytes, 32);
+                overlapped.OffsetHigh = BitConverter.ToInt32(bytes, 4);
                 overlapped.OffsetLow = BitConverter.ToInt32(bytes, 0);
             }
             else
             {
                 overlapped.OffsetHigh = BitConverter.ToInt32(bytes, 0);
-                overlapped.OffsetLow = BitConverter.ToInt32(bytes, 32);
+                overlapped.OffsetLow = BitConverter.ToInt32(bytes, 4);
             }
 
             GCHandle handle = GCHandle.Alloc(overlapped, GCHandleType.Pinned);
