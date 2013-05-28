@@ -77,6 +77,9 @@ let launch k localWorkSize index templatesPath =
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()
 
+    let offset = 0L//100L*1024L*1024L*1024L
+    let bound = 280L*1024L*1024L*1024L
+
     let testAlgorithm initializer getter label counter =
         readingTimer.Start()
         let mutable read = 0
@@ -87,8 +90,6 @@ let launch k localWorkSize index templatesPath =
 
         let handle = Raw.CreateFile(index)
 
-        let bound = 20L*1024L*1024L*1024L
-
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
         initializer next leaf
@@ -98,7 +99,7 @@ let launch k localWorkSize index templatesPath =
                 current <- current - 512L
 
             highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
-            read <- Raw.ReadFile(handle, buffer, highBound, current)
+            read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
             
             if (read > 0) then
                 current <- current + (int64) read
@@ -126,8 +127,6 @@ let launch k localWorkSize index templatesPath =
 
         let handle = Raw.CreateFile(index)
 
-        let bound = 20L*1024L*1024L*1024L
-
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
         initializer next leaf
@@ -142,7 +141,7 @@ let launch k localWorkSize index templatesPath =
                 current <- current - 512L
 
             highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
-            read <- Raw.ReadFile(handle, buffer, highBound, current)
+            read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
 
             if current > 0L then
                 let result = downloader task

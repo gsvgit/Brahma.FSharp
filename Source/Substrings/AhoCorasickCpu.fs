@@ -20,26 +20,19 @@ let initialize (next:array<array<int16>>) (leaf:array<int16>) =
     leafArray <- leaf
 
 let count l templates (lengths:array<byte>) (go:array<int16>) (exit:array<int16>) (leaf:array<int16>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) =
-            let mutable _start = 0
-            let mutable _end = l
+    let mutable _start = 0
+    let mutable _end = l
+    let mutable v = 0s
+    for i in _start .. (_end - 1) do
+        v <- go.[256 * (int) v + (int) input.[i]]
+        let mutable parent = v
 
-            let localTemplateLengths = local (Array.zeroCreate 512)
-
-            let mutable v = 0s
-            for i in _start .. (_end - 1) do
-                if _start - i = 65 then
-                    barrier()
-
-                v <- go.[256 * (int) v + (int) input.[i]]
-                let mutable parent = v
-
-                while parent > 0s do
-                    let mutable currentTemplate = leaf.[(int) parent]
-                    if currentTemplate >= 0s then
-                        let position = i - (int) localTemplateLengths.[(int) currentTemplate] + 1
-                        if result.[position] < currentTemplate then // Not needed in single-threaded case.
-                            result.[position] <- currentTemplate
-                    parent <- exit.[(int) parent]
+        while parent > 0s do
+            let mutable currentTemplate = leaf.[(int) parent]
+            if currentTemplate >= 0s then
+                let position = i - (int) lengths.[(int) currentTemplate] + 1
+                result.[position] <- currentTemplate
+            parent <- exit.[(int) parent]
 
 let findMatches length maxTemplateLength templates templatesSum (templateLengths:array<byte>) (cpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
