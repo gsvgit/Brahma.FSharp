@@ -87,30 +87,32 @@ let launch k localWorkSize index templatesPath =
 
         let handle = Raw.CreateFile(index)
 
-        let bound = 1024L*1024L*1024L
+        let bound = 20L*1024L*1024L*1024L
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
         initializer next leaf
 
-        while current < bound do
+        while (current < bound) && ((current = 0L) || (read > 0)) do
             if current > 0L then
                 current <- current - 512L
 
             highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
             read <- Raw.ReadFile(handle, buffer, highBound, current)
-            current <- current + (int64) read
+            
+            if (read > 0) then
+                current <- current + (int64) read
 
-            let mutable countingBound = read + lowBound
-            let mutable matchBound = read + lowBound
-            if current < bound then
-                countingBound <- countingBound - 512
+                let mutable countingBound = read + lowBound
+                let mutable matchBound = read + lowBound
+                if current < bound then
+                    countingBound <- countingBound - 512
 
-            let result = getter()
+                let result = getter()
 
-            countingTimer.Start()
-            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
-            countingTimer.Lap(label)
+                countingTimer.Start()
+                counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+                countingTimer.Lap(label)
     
         ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
@@ -124,7 +126,7 @@ let launch k localWorkSize index templatesPath =
 
         let handle = Raw.CreateFile(index)
 
-        let bound = 1024L*1024L*1024L
+        let bound = 20L*1024L*1024L*1024L
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
@@ -135,7 +137,7 @@ let launch k localWorkSize index templatesPath =
 
         let mutable task = null
 
-        while current < bound do
+        while (current < bound) && ((current = 0L) || (read > 0)) do
             if current > 0L then
                 current <- current - 512L
 
@@ -148,19 +150,22 @@ let launch k localWorkSize index templatesPath =
                 counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
                 countingTimer.Lap(label)
 
-            current <- current + (int64) read
+            if (read > 0) then
+                current <- current + (int64) read
 
-            countingBound <- read
-            matchBound <- read
-            if current < bound then
-                countingBound <- countingBound - 512
+                countingBound <- read
+                matchBound <- read
+                if current < bound then
+                    countingBound <- countingBound - 512
 
-            task <- uploader()
+                task <- uploader()
         
-        let result = downloader task
-        countingTimer.Start()
-        counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
-        countingTimer.Lap(label)
+        if (read > 0) then
+            printfn "Last read is non-zero!"
+            let result = downloader task
+            countingTimer.Start()
+            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+            countingTimer.Lap(label)
 
         ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
