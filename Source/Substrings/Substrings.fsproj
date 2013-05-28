@@ -83,6 +83,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="TemplatesGenerator.fs" />
+    <Compile Include="ActualTemplates.fs" />
     <Compile Include="NaiveSearch.fs" />
     <Compile Include="NaiveHashingSearch.fs" />
     <Compile Include="NaiveSearchGpu.fs" />

@@ -25,9 +25,6 @@ let count l templates (lengths:array<byte>) (go:array<int16>) (exit:array<int16>
 
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            for i in _start .. (_end - 1) do
-                result.[i] <- -1s
-
             let mutable v = 0s
             for i in _start .. (_end - 1) do
                 if _start - i = 65 then
@@ -40,7 +37,7 @@ let count l templates (lengths:array<byte>) (go:array<int16>) (exit:array<int16>
                     let mutable currentTemplate = leaf.[(int) parent]
                     if currentTemplate >= 0s then
                         let position = i - (int) localTemplateLengths.[(int) currentTemplate] + 1
-                        if result.[position] < currentTemplate then
+                        if result.[position] < currentTemplate then // Not needed in single-threaded case.
                             result.[position] <- currentTemplate
                     parent <- exit.[(int) parent]
 
