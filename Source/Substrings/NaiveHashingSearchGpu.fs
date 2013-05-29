@@ -16,13 +16,8 @@ let createQueue() =
 
 let commandQueue = createQueue()
 
-let close () = 
-    commandQueue.Dispose()
-    provider.CloseAllBuffers()
-    provider.Dispose()
-
 let label = "OpenCL/NaiveHashing"
-let timer = new Timer<string>()
+let mutable timer = null
 
 let hashingCommand = 
     <@
@@ -70,7 +65,14 @@ let mutable buffersCreated = false
 let mutable templateHashes = null
 let mutable localHashesArr = null
 
+let close () = 
+    commandQueue.Dispose()
+    provider.CloseAllBuffers()
+    provider.Dispose()
+    buffersCreated <- false
+
 let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+    timer <- new Timer<string>()
     timer.Start()
     result <- Array.zeroCreate length
     templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr

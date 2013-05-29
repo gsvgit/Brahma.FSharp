@@ -17,12 +17,7 @@ let createQueue() =
 let commandQueue = createQueue()
 
 let label = "OpenCL/AhoCorasick"
-let timer = new Timer<string>()
-
-let close () =     
-    provider.CloseAllBuffers()
-    commandQueue.Dispose()
-    provider.Dispose()
+let mutable timer = null
 
 let buildStateMachine templates maxTemplateLength (next:array<array<int16>>) =
     let go = Array.init (templates * (int) maxTemplateLength) (fun _ -> Array.init 256 (fun _ -> -1s))
@@ -103,7 +98,7 @@ let command =
 
             let mutable v = 0s
             for i in _start .. (_end - 1) do
-                if _start - i = 64 then
+                if _start - i = 65 then
                     barrier()
 
                 v <- go.[256 * (int) v + (int) input.[i]]
@@ -125,7 +120,14 @@ let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 
+let close () =     
+    provider.CloseAllBuffers()
+    commandQueue.Dispose()
+    provider.Dispose()
+    buffersCreated <- false
+
 let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) (next:array<array<int16>>) (leaf:array<int16>) =
+    timer <- new Timer<string>()
     timer.Start()
     result <- Array.zeroCreate length
     let go, link = buildStateMachine templates maxTemplateLength next

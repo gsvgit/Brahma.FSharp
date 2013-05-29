@@ -1,4 +1,4 @@
-﻿module ConsoleLauncher
+﻿module RawReading
 
 open Brahma.Samples
 open OpenCL.Net
@@ -6,6 +6,8 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+
+open RawIo
 
 open System.IO
 open System.Runtime.Serialization.Formatters.Binary
@@ -17,10 +19,10 @@ let maxTemplateLength = 32uy
 let kRef = ref 1024
 let localWorkSizeRef = ref 512
 
-let pathRef = ref InputGenerator.path
+let indexRef = ref 0
 let templatesPathRef = ref TemplatesGenerator.path
 
-let launch k localWorkSize inputPath templatesPath =
+let launch k localWorkSize index templatesPath =
     let templatesReader = File.OpenRead(templatesPath)
     let formatter = new BinaryFormatter()
     let deserialized = formatter.Deserialize(templatesReader)
@@ -75,6 +77,9 @@ let launch k localWorkSize inputPath templatesPath =
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()
 
+    let offset = 0L//100L*1024L*1024L*1024L
+    let bound = 280L*1024L*1024L*1024L
+
     let testAlgorithm initializer getter label counter =
         readingTimer.Start()
         let mutable read = 0
@@ -83,46 +88,44 @@ let launch k localWorkSize inputPath templatesPath =
 
         let mutable current = 0L
 
-        let reader = new FileStream(inputPath, FileMode.Open)
-        let bound = reader.Length
+        let handle = Raw.CreateFile(index)
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
         initializer next leaf
 
-        while current < bound do
+        while (current < bound) && ((current = 0L) || (read > 0)) do
             if current > 0L then
-                System.Array.Copy(buffer, (read + lowBound - (int) maxTemplateLength), buffer, 0, (int) maxTemplateLength)
-                lowBound <- (int) maxTemplateLength
+                current <- current - 512L
 
-            highBound <- (if (int64) (length - lowBound) < bound then (length - lowBound) else (int) bound)
-            read <- reader.Read(buffer, lowBound, highBound)
-            current <- current + (int64) read
-
-            let mutable countingBound = read + lowBound
-            let mutable matchBound = read + lowBound
-            if current < bound then
-                countingBound <- countingBound - (int) maxTemplateLength
+            highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
+            read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
             
-            let result = getter()
+            if (read > 0) then
+                current <- current + (int64) read
 
-            countingTimer.Start()
-            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
-            countingTimer.Lap(label)
+                let mutable countingBound = read + lowBound
+                let mutable matchBound = read + lowBound
+                if current < bound then
+                    countingBound <- countingBound - 512
 
-        reader.Close()
+                let result = getter()
+
+                countingTimer.Start()
+                counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+                countingTimer.Lap(label)
+    
+        ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
 
     let testAlgorithmAsync initializer uploader downloader label counter close =
         readingTimer.Start()
         let mutable read = 0
-        let mutable lowBound = 0
         let mutable highBound = 0
 
         let mutable current = 0L
 
-        let reader = new FileStream(inputPath, FileMode.Open)
-        let bound = reader.Length
+        let handle = Raw.CreateFile(index)
 
         let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
 
@@ -133,13 +136,12 @@ let launch k localWorkSize inputPath templatesPath =
 
         let mutable task = null
 
-        while current < bound do
+        while (current < bound) && ((current = 0L) || (read > 0)) do
             if current > 0L then
-                System.Array.Copy(buffer, (read + lowBound - (int) maxTemplateLength), buffer, 0, (int) maxTemplateLength)
-                lowBound <- (int) maxTemplateLength
+                current <- current - 512L
 
-            highBound <- (if (int64) (length - lowBound) < bound then (length - lowBound) else (int) bound)
-            read <- reader.Read(buffer, lowBound, highBound)
+            highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
+            read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
 
             if current > 0L then
                 let result = downloader task
@@ -147,21 +149,24 @@ let launch k localWorkSize inputPath templatesPath =
                 counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
                 countingTimer.Lap(label)
 
-            current <- current + (int64) read
+            if (read > 0) then
+                current <- current + (int64) read
 
-            countingBound <- read + lowBound
-            matchBound <- read + lowBound
-            if current < bound then
-                countingBound <- countingBound - (int) maxTemplateLength
+                countingBound <- read
+                matchBound <- read
+                if current < bound then
+                    countingBound <- countingBound - 512
 
-            task <- uploader()
+                task <- uploader()
         
-        let result = downloader task
-        countingTimer.Start()
-        counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
-        countingTimer.Lap(label)
+        if (read > 0) then
+            printfn "Last read is non-zero!"
+            let result = downloader task
+            countingTimer.Start()
+            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+            countingTimer.Lap(label)
 
-        reader.Close()
+        ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
         close()
 
@@ -227,8 +232,8 @@ let launch k localWorkSize inputPath templatesPath =
 //    testAlgorithmAsync 
 //        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
 //        HashtableExpanded.close
-    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
-        AhoCorasickGpu.close
+//    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
+//        AhoCorasickGpu.close
     testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
         AhoCorasickOptimized.close
     testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
@@ -314,7 +319,7 @@ let Main () =
         [
          "-k", ArgType.Int (fun i -> kRef := i), "Work amount for one work item."
          "-l", ArgType.Int (fun i -> localWorkSizeRef := i), "Work group size."
-         "-input", ArgType.String (fun s -> pathRef := s), "Input file path."
+         "-index", ArgType.Int (fun i -> indexRef := i), "Input file index."
          "-templates", ArgType.String (fun s -> templatesPathRef := s), "Templates file path."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
@@ -322,12 +327,11 @@ let Main () =
     let k = !kRef  
     let localWorkSize = !localWorkSizeRef
 
-    let path = !pathRef
+    let index = !indexRef
     let templatesPath = !templatesPathRef
 
-    launch k localWorkSize path templatesPath
+    launch k localWorkSize index templatesPath
 
     ignore (System.Console.Read())
 
-//do //InputGenerator.Main() 
-//    Main()
+do Main() 
