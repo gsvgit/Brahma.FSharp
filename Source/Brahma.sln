@@ -48,7 +48,6 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Substrings", "Substrings\Substrings.fsproj", "{EF36E48C-A9D2-464E-8EFD-CBD050E0A2DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{43471557-4354-40A1-BAE9-79FF275DE13D}"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RawIo", "RawIo\RawIo.csproj", "{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}"
 EndProject
@@ -330,6 +329,13 @@ Global
 		{43471557-4354-40A1-BAE9-79FF275DE13D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{43471557-4354-40A1-BAE9-79FF275DE13D}.Release|x64.ActiveCfg = Release|Any CPU
 		{43471557-4354-40A1-BAE9-79FF275DE13D}.Release|x86.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Debug|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Debug|x64.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Debug|x86.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Release|x64.ActiveCfg = Release|Any CPU
 		{0DC13AF6-3B54-4609-B490-8518CEAC7AB5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
