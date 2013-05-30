@@ -32,35 +32,9 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Brahma.FSharp.OpenCL.Printer.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="FSharp.PowerPack">
-      <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\AssemblyInfo.fs">
       <Link>AssemblyInfo.fs</Link>
     </Compile>
-    <Compile Include="Types.fs" />
-    <Compile Include="Expressions.fs" />
-    <Compile Include="Pragmas.fs" />
-    <Compile Include="Statements.fs" />
-    <Compile Include="FunDecl.fs" />
-    <Compile Include="TypeDecl.fs" />
-    <Compile Include="Printer.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
-      <Name>Brahma.FSharp.OpenCL.AST</Name>
-      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -107,6 +81,32 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="Expressions.fs" />
+    <Compile Include="Pragmas.fs" />
+    <Compile Include="Statements.fs" />
+    <Compile Include="FunDecl.fs" />
+    <Compile Include="TypeDecl.fs" />
+    <Compile Include="Printer.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+
+    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="FSharp.PowerPack.Linq, Version=4.0.0.1, Culture=neutral, PublicKeyToken=f536804aa0eb945b" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
+      <Name>Brahma.FSharp.OpenCL.AST</Name>
+      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
