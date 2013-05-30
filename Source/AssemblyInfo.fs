@@ -9,7 +9,7 @@ open System.Runtime.InteropServices
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("Brahma.FSharp")>]
-[<assembly: AssemblyDescription("F# quotation to OpenCL translator.")>]
+[<assembly: AssemblyDescription("Brahma.FSharp is a library for F# with GPGPU integration. It is based on F# quotation to OpenCL translator.")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Saint-Petersburg State University")>]
 [<assembly: AssemblyProduct("Brahma.FSharp")>]

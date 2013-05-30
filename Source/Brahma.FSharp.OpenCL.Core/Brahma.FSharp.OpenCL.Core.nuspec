@@ -4,7 +4,7 @@
     <id>Brahma.FSharp</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>$author$</authors>
+    <authors>Senyon Grigorev</authors>
     <owners>$author$</owners>
     <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License%20(eclipse-1.0).txt</licenseUrl>
     <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
