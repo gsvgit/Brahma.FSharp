@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Brahma.FSharp</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License%20(eclipse-1.0).txt</licenseUrl>
+    <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First developer preview version.</releaseNotes>
+    <copyright>Copyright 2012-2013</copyright>
+    <tags>OpenCL GPGPU .NET F# FSharp Quotations</tags>
+  </metadata>
+  <files>
+    <file src="..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll" target="lib\net40" /> 
+    <file src="..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Linq.dll" target="lib\net40" /> 
+  </files>
+</package>
