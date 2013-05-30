@@ -43,6 +43,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AssemblyInfo.fs">
+      <Link>AssemblyInfo.fs</Link>
+    </Compile>
     <Compile Include="Types.fs" />
     <Compile Include="Expressions.fs" />
     <Compile Include="Pragmas.fs" />

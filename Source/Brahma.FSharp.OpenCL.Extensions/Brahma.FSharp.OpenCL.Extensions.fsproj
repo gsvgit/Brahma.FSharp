@@ -40,6 +40,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AssemblyInfo.fs">
+      <Link>AssemblyInfo.fs</Link>
+    </Compile>
     <Compile Include="Array.fs" />
     <Compile Include="OpenCL.fs" />
   </ItemGroup>

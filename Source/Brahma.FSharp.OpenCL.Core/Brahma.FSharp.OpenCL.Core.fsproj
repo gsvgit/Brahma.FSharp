@@ -43,6 +43,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AssemblyInfo.fs">
+      <Link>AssemblyInfo.fs</Link>
+    </Compile>
     <Compile Include="Core.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +57,11 @@
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
       <Name>Brahma.FSharp.OpenCL.AST</Name>
       <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Extensions</Name>
+      <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
