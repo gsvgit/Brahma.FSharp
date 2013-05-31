@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 
 //General assembly information
 
-[assembly: AssemblyTitle("Brahma.Samples")]
+[assembly: AssemblyTitle("Brahma.Helpers")]
 [assembly: AssemblyDescription("Provides utility, base classes and interfaces that are shared across samples")]
 
 // GUID for the ID of the typelib if this project is exposed to COM

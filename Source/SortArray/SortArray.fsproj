@@ -35,7 +35,6 @@
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-
     <Reference Include="FSharp.PowerPack.Linq">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.Linq.dll</HintPath>
     </Reference>
@@ -79,8 +78,8 @@
       <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Samples.csproj">
-      <Name>Brahma.Samples</Name>
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+      <Name>Brahma.Helpers</Name>
       <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
       <Private>True</Private>
     </ProjectReference>

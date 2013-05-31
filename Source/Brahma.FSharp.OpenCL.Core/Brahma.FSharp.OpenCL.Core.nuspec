@@ -10,7 +10,7 @@
     <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First developer preview version.</releaseNotes>
+    <releaseNotes>Developer preview version. Small fixes in package structire.</releaseNotes>
     <copyright>Copyright 2012-2013</copyright>
     <tags>OpenCL GPGPU .NET F# FSharp Quotations</tags>
   </metadata>

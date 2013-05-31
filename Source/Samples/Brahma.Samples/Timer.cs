@@ -20,7 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Brahma.Samples
+namespace Brahma.Helpers
 {
     internal static class NativeMethods
     {

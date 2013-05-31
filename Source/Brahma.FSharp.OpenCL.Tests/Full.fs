@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open System.IO
-open Brahma.Samples
+open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core

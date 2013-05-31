@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Brahma.Samples
+namespace Brahma.Helpers
 {
     public static class RandomExtensions
     {
