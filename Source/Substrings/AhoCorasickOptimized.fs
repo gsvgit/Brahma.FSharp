@@ -1,6 +1,6 @@
 ﻿module AhoCorasickOptimized
 
-open Brahma.Samples
+open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
@@ -18,6 +18,7 @@ let commandQueue = createQueue()
 
 let label = "OpenCL/AhoCorasickOptimized"
 let mutable timer = null
+
 
 let buildStateMachine templates maxTemplateLength (next:array<array<int16>>) (leaf:array<int16>) =
     let go = Array.init (templates * (int) maxTemplateLength * 256) (fun _ -> -1s)
@@ -86,7 +87,7 @@ let command =
 
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 512
+            let groupSize = 1024
             let chunk = (512 + groupSize - 1) / groupSize
             let id = rng.LocalID0
 

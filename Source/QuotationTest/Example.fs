@@ -13,7 +13,7 @@
 // By using this software in any fashion, you are agreeing to be bound by the
 // terms of the License.
 
-open Brahma.Samples
+open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core

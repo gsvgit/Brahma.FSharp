@@ -15,7 +15,7 @@
 
 module BlackScholes
 
-open Brahma.Samples
+open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core

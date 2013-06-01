@@ -105,6 +105,11 @@
     <Compile Include="RawReading.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+      <Name>Brahma.Helpers</Name>
+      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\..\3rdParty\FsPowerPack\FSharp.PowerPack.dll</HintPath>
     </Reference>
@@ -148,11 +153,6 @@
     <ProjectReference Include="..\RawIo\RawIo.csproj">
       <Name>RawIo</Name>
       <Project>{0dc13af6-3b54-4609-b490-8518ceac7ab5}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Samples.csproj">
-      <Name>Brahma.Samples</Name>
-      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

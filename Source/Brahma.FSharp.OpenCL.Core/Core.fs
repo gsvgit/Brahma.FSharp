@@ -66,18 +66,18 @@ type ComputeProvider with
                 match expr with
                 | Patterns.Lambda (v, body) ->
                     Expr.Lambda(v, go body (v::vars))
-                | e -> 
-                    let arr =                            
+                | e ->
+                    let arr =
                         let c = Expr.NewArray(typeof<obj>,vars |> List.rev 
                             |> List.map 
                                  (fun v -> Expr.Coerce (Expr.Var(v), typeof<obj>)))
-                        <@@ 
+                        <@@
                             let x = %%c |> List.ofArray
                             rng := (box x.Head) :?> 'TRange
                             args := x.Tail |> Array.ofList
                             run := kernel.Run(!rng, !args)
                         @@>
-                    arr            
+                    arr
             <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
         
         if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()

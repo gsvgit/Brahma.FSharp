@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open System.IO
-open Brahma.Samples
+open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
@@ -16,15 +16,13 @@ type Translator() =
     
     let basePath = "../../../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
 
-    let deviceType = Cl.DeviceType.Default
+    let deviceType = Cl.DeviceType.Cpu
     let platformName = "*"
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
-        | ex -> failwith ex.Message
-
-    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head );
+        | ex -> failwith ex.Message   
 
     let filesAreEqual file1 file2 =
         let all1 = File.ReadAllBytes file1
