@@ -22,6 +22,26 @@ let localWorkSizeRef = ref 512
 let indexRef = ref 0
 let templatesPathRef = ref TemplatesGenerator.path
 
+let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) =
+    let mutable matches = 0
+    let clearBound = min (bound - 1) (length - (int) maxTemplateLength)
+
+    for i in 0..clearBound do
+        let mutable matchIndex = result.[i]
+        if matchIndex >= 0s then
+            matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+            matches <- matches + 1
+
+    for i in (clearBound + 1)..(bound - 1) do
+        let mutable matchIndex = result.[i]
+        while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
+            matchIndex <- prefix.[(int) matchIndex]
+            
+        if matchIndex >= 0s then
+            matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+            matches <- matches + 1
+    matches
+
 let launch k localWorkSize index templatesPath =
     let templatesReader = File.OpenRead(templatesPath)
     let formatter = new BinaryFormatter()
@@ -123,6 +143,8 @@ let launch k localWorkSize index templatesPath =
         let mutable read = 0
         let mutable highBound = 0
 
+        let matches = Array.zeroCreate 256
+
         let mutable current = 0L
 
         let handle = Raw.CreateFile(index)
@@ -136,6 +158,8 @@ let launch k localWorkSize index templatesPath =
 
         let mutable task = null
 
+        let mutable index = 0
+
         while (current < bound) && ((current = 0L) || (read > 0)) do
             if current > 0L then
                 current <- current - 512L
@@ -146,11 +170,16 @@ let launch k localWorkSize index templatesPath =
             if current > 0L then
                 let result = downloader task
                 countingTimer.Start()
-                counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+                counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches
                 countingTimer.Lap(label)
 
             if (read > 0) then
+                index <- index + 1
                 current <- current + (int64) read
+
+                if index = 50 then
+                    printfn "I am %A and I've already read %A bytes!" label current
+                    index <- 0
 
                 countingBound <- read
                 matchBound <- read
@@ -163,8 +192,17 @@ let launch k localWorkSize index templatesPath =
             printfn "Last read is non-zero!"
             let result = downloader task
             countingTimer.Start()
-            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+            counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches
             countingTimer.Lap(label)
+
+        let hex = Array.map (fun (x : byte) -> System.String.Format("{0:X2} ", x)) templateArr
+        let mutable start = 0
+        for i in 0..(templates - 1) do
+            let pattern = System.String.Concat(Array.sub hex start ((int) templateLengths.[i]))
+            printfn "%A: %A matches found by %A" pattern matches.[i] label
+            start <- start + (int) templateLengths.[i]
+
+        printfn ""
 
         ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
@@ -227,16 +265,16 @@ let launch k localWorkSize index templatesPath =
 //        NaiveHashingSearchGpuPrivate.close
 //    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
 //        NaiveHashingGpuPrivateLocal.close
-//    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-//        HashtableGpuPrivateLocal.close
+    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+        HashtableGpuPrivateLocal.close
 //    testAlgorithmAsync 
 //        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
 //        HashtableExpanded.close
 //    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
 //        AhoCorasickGpu.close
-    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
-        AhoCorasickOptimized.close
-    testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
+//    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+//        AhoCorasickOptimized.close
+    //testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
