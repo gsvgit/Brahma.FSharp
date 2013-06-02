@@ -97,8 +97,8 @@ let launch k localWorkSize index templatesPath =
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()
 
-    let offset = 460L//100L*1024L*1024L*1024L
-    let bound = 7L*1024L*1024L*1024L
+    let offset = 0L
+    let bound = 280L*1024L*1024L*1024L
 
     let testAlgorithm initializer getter label counter =
         readingTimer.Start()
