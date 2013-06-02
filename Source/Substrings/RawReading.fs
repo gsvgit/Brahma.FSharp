@@ -263,10 +263,10 @@ let launch k localWorkSize index templatesPath =
 //        NaiveHashingSearchGpu.close
 //    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
 //        NaiveHashingSearchGpuPrivate.close
-    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-        NaiveHashingGpuPrivateLocal.close
-    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-        HashtableGpuPrivateLocal.close
+//    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+//        NaiveHashingGpuPrivateLocal.close
+//    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+//        HashtableGpuPrivateLocal.close
 //    testAlgorithmAsync 
 //        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
 //        HashtableExpanded.close
@@ -372,4 +372,4 @@ let Main () =
 
     ignore (System.Console.Read())
 
-do Main() 
+do Main()
