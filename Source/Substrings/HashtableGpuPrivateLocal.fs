@@ -102,7 +102,7 @@ let createHashTable templates (templateLengths:array<byte>) (templateHashes:arra
     let table = Array.init 256 (fun _ -> -1s)
     let next = Array.init templates (fun _ -> -1s)
 
-    for i in 0..templates do
+    for i in 0..(templates - 1) do
         let mutable current = table.[(int) templateHashes.[i]]
         
         if current = -1s then

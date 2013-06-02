@@ -97,8 +97,8 @@ let launch k localWorkSize index templatesPath =
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()
 
-    let offset = 0L//100L*1024L*1024L*1024L
-    let bound = 280L*1024L*1024L*1024L
+    let offset = 460L//100L*1024L*1024L*1024L
+    let bound = 7L*1024L*1024L*1024L
 
     let testAlgorithm initializer getter label counter =
         readingTimer.Start()
@@ -263,8 +263,8 @@ let launch k localWorkSize index templatesPath =
 //        NaiveHashingSearchGpu.close
 //    testAlgorithmAsync gpuHashingPrivateInitilizer gpuHashingPrivateUploader gpuHashingPrivateDownloader NaiveHashingSearchGpuPrivate.label gpuMatchesHashingPrivate
 //        NaiveHashingSearchGpuPrivate.close
-//    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
-//        NaiveHashingGpuPrivateLocal.close
+    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
+        NaiveHashingGpuPrivateLocal.close
     testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
         HashtableGpuPrivateLocal.close
 //    testAlgorithmAsync 
@@ -272,8 +272,8 @@ let launch k localWorkSize index templatesPath =
 //        HashtableExpanded.close
 //    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
 //        AhoCorasickGpu.close
-//    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
-//        AhoCorasickOptimized.close
+    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+        AhoCorasickOptimized.close
     //testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label

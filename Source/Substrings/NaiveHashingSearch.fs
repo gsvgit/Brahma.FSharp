@@ -11,7 +11,7 @@ let label = ".NET/NaiveHashing"
 let timer = new Timer<string>()
 
 let computeTemplateHashes templates templatesSum (templateLengths:array<byte>) (templateArr:array<byte>) =
-    let hashes = Array.zeroCreate(templatesSum)
+    let hashes = Array.zeroCreate templates
     let mutable templateBase = 0
     for n in 0..(templates - 1) do
         if n > 0 then templateBase <- templateBase + (int) templateLengths.[n - 1]
