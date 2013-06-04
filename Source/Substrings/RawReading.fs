@@ -183,7 +183,7 @@ let launch k localWorkSize index templatesPath =
             highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
             read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
 
-            if read = 0 && current = 0L then
+            if read <= 0 && current = 0L then
                 failwith "Failed to start reading!"
 
             if current > 0L then
@@ -291,8 +291,8 @@ let launch k localWorkSize index templatesPath =
 //        HashtableExpanded.close
 //    testAlgorithmAsync gpuAhoCorasickInitializer gpuAhoCorasickUploader gpuAhoCorasickDownloader AhoCorasickGpu.label gpuAhoCorasick
 //        AhoCorasickGpu.close
-    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
-        AhoCorasickOptimized.close
+//    testAlgorithmAsync gpuAhoCorasickOptimizedInitializer gpuAhoCorasickOptimizedUploader gpuAhoCorasickOptimizedDownloader AhoCorasickOptimized.label gpuAhoCorasickOptimized
+//        AhoCorasickOptimized.close
     //testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
     Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
