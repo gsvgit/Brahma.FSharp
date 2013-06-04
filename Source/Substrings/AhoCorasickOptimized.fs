@@ -106,7 +106,7 @@ let command =
 
             let mutable v = 0s
             for i in _start .. (_end - 1) do
-                if _start - i = 65 then
+                if i - _start = 65 then
                     barrier()
 
                 v <- go.[256 * (int) v + (int) input.[i]]
