@@ -98,6 +98,7 @@
     <Compile Include="FileReading.fs" />
     <Compile Include="FileReadingSeparately.fs" />
     <Compile Include="Testing.fs" />
+    <Compile Include="OneMatchSearch.fs" />
     <Compile Include="ConsoleLauncher.fs" />
     <Compile Include="ParametersSearch.fs" />
     <Compile Include="RawReading.fs" />

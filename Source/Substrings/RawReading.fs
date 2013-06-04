@@ -19,16 +19,25 @@ let maxTemplateLength = 32uy
 let kRef = ref 1024
 let localWorkSizeRef = ref 512
 
-let indexRef = ref 0
+let indexRef = ref 1
 let templatesPathRef = ref TemplatesGenerator.path
 
-let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) =
+let debugMode = ref false
+
+let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
     let mutable matches = 0
     let clearBound = min (bound - 1) (length - (int) maxTemplateLength)
+
+    if (!debugMode) then
+        printfn "%A - %A | %A" offset (offset + (int64) bound - 1L) (offset + (int64) length - 1L)
+        printfn ""
 
     for i in 0..clearBound do
         let mutable matchIndex = result.[i]
         if matchIndex >= 0s then
+            if (!debugMode) then
+                printfn "%A : %A" (offset + (int64) i) matchIndex
+
             matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
             matches <- matches + 1
 
@@ -38,8 +47,15 @@ let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (t
             matchIndex <- prefix.[(int) matchIndex]
             
         if matchIndex >= 0s then
+            if (!debugMode) then
+                printfn "%A : %A" (offset + (int64) i) matchIndex
+
             matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
             matches <- matches + 1
+
+    if (!debugMode) then
+        printfn ""
+
     matches
 
 let launch k localWorkSize index templatesPath =
@@ -167,10 +183,13 @@ let launch k localWorkSize index templatesPath =
             highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
             read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
 
+            if read = 0 && current = 0L then
+                failwith "Failed to start reading!"
+
             if current > 0L then
                 let result = downloader task
                 countingTimer.Start()
-                counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches
+                counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound + 512L)
                 countingTimer.Lap(label)
 
             if (read > 0) then
@@ -192,7 +211,7 @@ let launch k localWorkSize index templatesPath =
             printfn "Last read is non-zero!"
             let result = downloader task
             countingTimer.Start()
-            counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches
+            counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound)
             countingTimer.Lap(label)
 
         let hex = Array.map (fun (x : byte) -> System.String.Format("{0:X2} ", x)) templateArr
@@ -265,8 +284,8 @@ let launch k localWorkSize index templatesPath =
 //        NaiveHashingSearchGpuPrivate.close
 //    testAlgorithmAsync gpuHashingPrivateLocalInitilizer gpuHashingPrivateLocalUploader gpuHashingPrivateLocalDownloader NaiveHashingGpuPrivateLocal.label gpuMatchesHashingPrivateLocal
 //        NaiveHashingGpuPrivateLocal.close
-//    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
-//        HashtableGpuPrivateLocal.close
+    testAlgorithmAsync gpuHashtableInitializer gpuHashtableUploader gpuHashtableDownloader HashtableGpuPrivateLocal.label gpuMatchesHashtable
+        HashtableGpuPrivateLocal.close
 //    testAlgorithmAsync 
 //        gpuExpandedHashtableInitializer gpuExpandedHashtableUploader gpuExpandedHashtableDownloader HashtableExpanded.label gpuMatchesHashtableExpanded
 //        HashtableExpanded.close
@@ -359,6 +378,7 @@ let Main () =
          "-l", ArgType.Int (fun i -> localWorkSizeRef := i), "Work group size."
          "-index", ArgType.Int (fun i -> indexRef := i), "Input file index."
          "-templates", ArgType.String (fun s -> templatesPathRef := s), "Templates file path."
+         "-debug", ArgType.String (fun s -> if s.Equals "true" then debugMode := true), "Debug mode."
          ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
     ArgParser.Parse commandLineSpecs
 

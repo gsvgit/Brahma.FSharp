@@ -87,14 +87,14 @@ let command =
 
             let localTemplateLengths = local (Array.zeroCreate 512)
 
-            let groupSize = 1024
-            let chunk = (512 + groupSize - 1) / groupSize
+            let groupSize = 512
+            let chunk = (templates + groupSize - 1) / groupSize
             let id = rng.LocalID0
 
             let upperBound = (id + 1) * chunk
             let mutable higherIndex = upperBound - 1
-            if upperBound > 512 then
-                higherIndex <- 512 - 1
+            if upperBound > templates then
+                higherIndex <- templates - 1
 
             for index in (id * chunk)..higherIndex do
                 localTemplateLengths.[index] <- lengths.[index]

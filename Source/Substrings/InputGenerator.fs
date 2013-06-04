@@ -3,7 +3,7 @@
 open System.IO
 
 
-let length = 1024L*1024L*1024L
+let length = 100000000L
 let path = "../../random.txt"
 let random = new System.Random()
 
@@ -27,6 +27,6 @@ let Main =
     if i > 0 then
         writer.Write(buffer, 0, i)
 
-    writer.Close
+    writer.Close()
 
 //do Main()

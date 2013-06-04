@@ -39,7 +39,7 @@ let hashingCommand =
             let localStarts = local (Array.zeroCreate 512)
 
             let groupSize = 512
-            let chunk = (512 + groupSize - 1) / groupSize
+            let chunk = (templates + groupSize - 1) / groupSize
             let tableChunk = (256 + groupSize - 1) / groupSize
 
             let id = rng.LocalID0
