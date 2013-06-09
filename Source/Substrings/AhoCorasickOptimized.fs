@@ -211,34 +211,3 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
     result
-
-let Main () =
-    let length = 3000000
-
-    let maxTemplateLength = 32uy
-    let templates = 512
-
-    let templateLengths = NaiveSearch.computeTemplateLengths templates maxTemplateLength
-    let gpuArr = NaiveSearch.generateInput length
-
-    let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
-
-    let templateArr = NaiveSearch.generateTemplates templatesSum
-
-    let k = 1000    
-    let localWorkSize = 20
-
-    let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
-
-    printfn "Finding substrings in string with length %A, using %A..." length label
-    let result = findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr next leaf
-    let matches = NaiveSearch.countMatches result maxTemplateLength length length templateLengths prefix
-    printfn "done."
-
-    printfn "Found: %A" matches
-    printfn "Avg. time, %A: %A" label (Timer<string>.Global.Average(label))
-    printfn "Avg. time, %A with preparations: %A" label (timer.Average(label))
-
-    ignore (System.Console.Read())
-
-//do Main()

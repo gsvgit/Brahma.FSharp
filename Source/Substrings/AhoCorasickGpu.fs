@@ -174,18 +174,6 @@ let download (task:Task<unit>) =
 
     result
 
-let getMatches () =
-    timer.Start()
-    Timer<string>.Global.Start()
-    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
-        ignore (commandQueue.Add(input.ToGpu provider))
-    let _ = commandQueue.Add(kernelRun())
-    let _ = commandQueue.Add(result.ToHost provider).Finish()
-    buffersCreated <- true
-    Timer<string>.Global.Lap(label)
-    timer.Lap(label)
-    result
-
 let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) (next:array<array<int16>>) (leaf:array<int16>) =
     timer.Start()
     
@@ -202,34 +190,3 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
     result
-
-let Main () =
-    let length = 3000000
-
-    let maxTemplateLength = 32uy
-    let templates = 512
-
-    let templateLengths = NaiveSearch.computeTemplateLengths templates maxTemplateLength
-    let gpuArr = NaiveSearch.generateInput length
-
-    let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
-
-    let templateArr = NaiveSearch.generateTemplates templatesSum
-
-    let k = 1000    
-    let localWorkSize = 20
-
-    let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
-
-    printfn "Finding substrings in string with length %A, using %A..." length label
-    let result = findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr next leaf
-    let matches = NaiveSearch.countMatches result maxTemplateLength length length templateLengths prefix
-    printfn "done."
-
-    printfn "Found: %A" matches
-    printfn "Avg. time, %A: %A" label (Timer<string>.Global.Average(label))
-    printfn "Avg. time, %A with preparations: %A" label (timer.Average(label))
-
-    ignore (System.Console.Read())
-
-//do Main()

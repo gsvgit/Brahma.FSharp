@@ -68,7 +68,7 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
     timer <- new Timer<string>()
     timer.Start()
     result <- Array.zeroCreate length
-    templateHashes <- NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
+    templateHashes <- Helpers.computeTemplateHashes templates templatesSum templateLengths templateArr
     let l = (length + (k-1))/k 
     let x, y, z = provider.Compile(query=hashingCommand, translatorOptions=[BoolAsBit])
     kernel <- x
@@ -133,7 +133,7 @@ let getMatches () =
 let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
     
-    let templateHashes = NaiveHashingSearch.computeTemplateHashes templates templatesSum templateLengths templateArr
+    let templateHashes = Helpers.computeTemplateHashes templates templatesSum templateLengths templateArr
     let result = Array.zeroCreate length
     let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile hashingCommand
     let l = (length + (k-1))/k  
@@ -145,34 +145,3 @@ let findMatches length maxTemplateLength k localWorkSize templates templatesSum 
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
     result
-
-
-let Main () =
-    let length = 3000000
-
-    let maxTemplateLength = 32uy
-    let templates = 512
-
-    let templateLengths = NaiveSearch.computeTemplateLengths templates maxTemplateLength
-    let gpuArr = NaiveSearch.generateInput length
-
-    let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
-
-    let templateArr = NaiveSearch.generateTemplates templatesSum
-
-    let k = 1000    
-    let localWorkSize = 20
-
-    let prefix = NaiveSearch.findPrefixes templates maxTemplateLength templateLengths templateArr
-
-    printfn "Finding substrings in string with length %A, using %A..." length label
-    let matches = NaiveSearch.countMatches (findMatches length maxTemplateLength k localWorkSize templates templatesSum templateLengths gpuArr templateArr) maxTemplateLength length length templateLengths prefix
-    printfn "done."
-
-    printfn "Found: %A" matches
-    printfn "Avg. time, %A: %A" label (Timer<string>.Global.Average(label))
-    printfn "Avg. time, %A with preparations: %A" label (timer.Average(label))
-
-    ignore (System.Console.Read())
-
-//do Main()

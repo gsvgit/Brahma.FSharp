@@ -12,7 +12,7 @@ open System.Runtime.Serialization.Formatters.Binary
 
 open TemplatesGenerator
 
-let maxTemplateLength = 32uy
+let maxTemplateLength = 32//uy
 
 let kRef = ref 1024
 let localWorkSizeRef = ref 512
@@ -86,7 +86,7 @@ let launch k localWorkSize inputPath templatesPath =
         let reader = new FileStream(inputPath, FileMode.Open)
         let bound = reader.Length
 
-        let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
+        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates (int maxTemplateLength) templateLengths templateArr
 
         initializer next leaf
 
@@ -107,7 +107,7 @@ let launch k localWorkSize inputPath templatesPath =
             let result = getter()
 
             countingTimer.Start()
-            counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+            counter := !counter + Helpers.countMatches result (int maxTemplateLength) countingBound matchBound templateLengths prefix
             countingTimer.Lap(label)
 
         reader.Close()
@@ -124,7 +124,7 @@ let launch k localWorkSize inputPath templatesPath =
         let reader = new FileStream(inputPath, FileMode.Open)
         let bound = reader.Length
 
-        let prefix, next, leaf, _ = NaiveSearch.buildSyntaxTree templates maxTemplateLength templateLengths templateArr
+        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates (int maxTemplateLength) templateLengths templateArr
 
         initializer next leaf
 
@@ -144,7 +144,7 @@ let launch k localWorkSize inputPath templatesPath =
             if current > 0L then
                 let result = downloader task
                 countingTimer.Start()
-                counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+                counter := !counter + Helpers.countMatches result (int maxTemplateLength) countingBound matchBound templateLengths prefix
                 countingTimer.Lap(label)
 
             current <- current + (int64) read
@@ -158,7 +158,7 @@ let launch k localWorkSize inputPath templatesPath =
         
         let result = downloader task
         countingTimer.Start()
-        counter := !counter + NaiveSearch.countMatches result maxTemplateLength countingBound matchBound templateLengths prefix
+        counter := !counter + Helpers.countMatches result (int maxTemplateLength) countingBound matchBound templateLengths prefix
         countingTimer.Lap(label)
 
         reader.Close()
@@ -178,7 +178,6 @@ let launch k localWorkSize inputPath templatesPath =
     let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
     let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
-    let cpuHashedGetter = (fun () -> NaiveHashingSearch.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
     let cpuAhoCorasickGetter = (fun () -> AhoCorasickCpu.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
 
     let gpuUploader = (fun () -> NaiveSearchGpu.upload())
@@ -233,7 +232,6 @@ let launch k localWorkSize inputPath templatesPath =
         AhoCorasickOptimized.close
 //    testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
-    Substrings.verifyResults !cpuMatches !cpuMatchesHashed NaiveHashingSearch.label
     Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashing NaiveHashingSearchGpu.label
     Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
@@ -249,7 +247,6 @@ let launch k localWorkSize inputPath templatesPath =
     printfn "Raw computation time spent:"
     
     FileReading.printGlobalTime NaiveSearch.label
-    FileReading.printGlobalTime NaiveHashingSearch.label
     FileReading.printGlobalTime NaiveSearchGpu.label
     FileReading.printGlobalTime NaiveHashingSearchGpu.label
     FileReading.printGlobalTime NaiveHashingSearchGpuPrivate.label
@@ -264,7 +261,6 @@ let launch k localWorkSize inputPath templatesPath =
 
     printfn "Computation time with preparations:"
     FileReading.printGlobalTime NaiveSearch.label
-    FileReading.printTime NaiveHashingSearch.timer NaiveHashingSearch.label
     FileReading.printTime NaiveSearchGpu.timer NaiveSearchGpu.label
     FileReading.printTime NaiveHashingSearchGpu.timer NaiveHashingSearchGpu.label
     FileReading.printTime NaiveHashingSearchGpuPrivate.timer NaiveHashingSearchGpuPrivate.label
@@ -279,7 +275,6 @@ let launch k localWorkSize inputPath templatesPath =
 
     printfn "Total time with reading:"
     FileReading.printTime readingTimer NaiveSearch.label
-    FileReading.printTime readingTimer NaiveHashingSearch.label
     FileReading.printTime readingTimer NaiveSearchGpu.label
     FileReading.printTime readingTimer NaiveHashingSearchGpu.label
     FileReading.printTime readingTimer NaiveHashingSearchGpuPrivate.label
@@ -294,7 +289,6 @@ let launch k localWorkSize inputPath templatesPath =
 
     printfn "Counting time:"
     FileReading.printTime countingTimer NaiveSearch.label
-    FileReading.printTime countingTimer NaiveHashingSearch.label
     FileReading.printTime countingTimer NaiveSearchGpu.label
     FileReading.printTime countingTimer NaiveHashingSearchGpu.label
     FileReading.printTime countingTimer NaiveHashingSearchGpuPrivate.label
