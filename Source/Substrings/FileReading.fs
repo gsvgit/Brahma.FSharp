@@ -18,9 +18,9 @@ let templates = 512
 
 let templateLengths = Helpers.computeTemplateLengths templates (byte maxTemplateLength)
 
-let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
+//let templatesSum = NaiveSearch.computeTemplatesSum templates templateLengths
 
-let templateArr = NaiveSearch.generateTemplates templatesSum
+//let templateArr = NaiveSearch.generateTemplates templatesSum
 
 let k = 1000    
 let localWorkSize = 20

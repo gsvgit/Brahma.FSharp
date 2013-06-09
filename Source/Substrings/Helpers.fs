@@ -81,3 +81,11 @@ let filterMatches (result:array<int16>) (maxTemplateLength:byte) bound length (t
             dictionary.Add(i, matchIndex)
             matches <- matches + 1
     matches
+
+let verifyResults (expected:int) (actual:int) label =
+    printfn "Verifying %A results..." label
+    if System.Math.Abs(expected - actual) > 0 then        
+        printfn "Expected: %A Actual: %A" expected actual
+    else
+        printfn "Found: %A" actual
+    printfn "done."

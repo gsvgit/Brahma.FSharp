@@ -239,7 +239,7 @@ let launch k localWorkSize index templatesPath =
     let gpuAhoCorasickInitializer = (fun next leaf -> AhoCorasickGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
     let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
-    let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
+    //let cpuGetter = (fun () -> NaiveSearch.findMatches length templates templateLengths buffer templateArr)
     let cpuAhoCorasickGetter = (fun () -> AhoCorasickCpu.findMatches length maxTemplateLength templates templatesSum templateLengths buffer templateArr)
 
     let gpuUploader = (fun () -> NaiveSearchGpu.upload())
@@ -294,21 +294,20 @@ let launch k localWorkSize index templatesPath =
 //        AhoCorasickOptimized.close
     //testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
-    Substrings.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
-    Substrings.verifyResults !cpuMatches !gpuMatchesHashing NaiveHashingSearchGpu.label
-    Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
-    Substrings.verifyResults !cpuMatches !gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
-    Substrings.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
-    Substrings.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
-    Substrings.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
-    Substrings.verifyResults !cpuMatches !gpuAhoCorasickOptimized AhoCorasickOptimized.label
-    Substrings.verifyResults !cpuMatches !cpuMatchesAhoCorasick AhoCorasickCpu.label
+    Helpers.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
+    Helpers.verifyResults !cpuMatches !gpuMatchesHashing NaiveHashingSearchGpu.label
+    Helpers.verifyResults !cpuMatches !gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
+    Helpers.verifyResults !cpuMatches !gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
+    Helpers.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
+    Helpers.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
+    Helpers.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
+    Helpers.verifyResults !cpuMatches !gpuAhoCorasickOptimized AhoCorasickOptimized.label
+    Helpers.verifyResults !cpuMatches !cpuMatchesAhoCorasick AhoCorasickCpu.label
 
     printfn ""
 
     printfn "Raw computation time spent:"
     
-    FileReading.printGlobalTime NaiveSearch.label
     FileReading.printGlobalTime NaiveSearchGpu.label
     FileReading.printGlobalTime NaiveHashingSearchGpu.label
     FileReading.printGlobalTime NaiveHashingSearchGpuPrivate.label
@@ -322,7 +321,6 @@ let launch k localWorkSize index templatesPath =
     printfn ""
 
     printfn "Computation time with preparations:"
-    FileReading.printGlobalTime NaiveSearch.label
     FileReading.printTime NaiveSearchGpu.timer NaiveSearchGpu.label
     FileReading.printTime NaiveHashingSearchGpu.timer NaiveHashingSearchGpu.label
     FileReading.printTime NaiveHashingSearchGpuPrivate.timer NaiveHashingSearchGpuPrivate.label
@@ -336,7 +334,6 @@ let launch k localWorkSize index templatesPath =
     printfn ""
 
     printfn "Total time with reading:"
-    FileReading.printTime readingTimer NaiveSearch.label
     FileReading.printTime readingTimer NaiveSearchGpu.label
     FileReading.printTime readingTimer NaiveHashingSearchGpu.label
     FileReading.printTime readingTimer NaiveHashingSearchGpuPrivate.label
@@ -350,7 +347,6 @@ let launch k localWorkSize index templatesPath =
     printfn ""
 
     printfn "Counting time:"
-    FileReading.printTime countingTimer NaiveSearch.label
     FileReading.printTime countingTimer NaiveSearchGpu.label
     FileReading.printTime countingTimer NaiveHashingSearchGpu.label
     FileReading.printTime countingTimer NaiveHashingSearchGpuPrivate.label
