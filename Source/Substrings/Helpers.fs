@@ -1,6 +1,7 @@
 ﻿module Helpers
 
 open System.Collections.Generic
+open Brahma.Helpers
 
 let computeTemplateHashes templates templatesSum (templateLengths:array<byte>) (templateArr:array<byte>) =
     let hashes = Array.zeroCreate templates
@@ -89,3 +90,13 @@ let verifyResults (expected:int) (actual:int) label =
     else
         printfn "Found: %A" actual
     printfn "done."
+
+let printTime (timer:Timer<string>) label =
+    if timer <> null then
+        printfn "Total time, %A: %A" label (timer.Total(label))
+
+let printGlobalTime = printTime (Timer<string>.Global)
+
+let printTotalTime (timer:Timer<string>) (readingTimer:Timer<string>) label =
+    if timer <> null then
+        printfn "Total time, %A: %A" label (timer.Total(label) + readingTimer.Total("reading"))

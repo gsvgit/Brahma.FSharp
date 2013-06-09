@@ -91,10 +91,6 @@
     <Compile Include="HashtableExpanded.fs" />
     <Compile Include="AhoCorasickGpu.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
-    <Compile Include="AhoCorasickCpu.fs" />
-    <Compile Include="InputGenerator.fs" />
-    <Compile Include="FileReading.fs" />
-    <Compile Include="FileReadingSeparately.fs" />
     <Compile Include="OneMatchSearch.fs" />
     <Compile Include="RawReading.fs" />
   </ItemGroup>
