@@ -13,8 +13,16 @@ let computeTemplateHashes templates templatesSum (templateLengths:array<byte>) (
             hashes.[n] <- hashes.[n] + templateArr.[i]
     hashes
 
+let random = new System.Random()    
+
+let computeTemplatesSum templates (templateLengths:array<byte>) =
+    let mutable l = 0
+    for i in 0..(templates - 1) do
+        l <- l + (int) templateLengths.[i]
+    l 
+
 let computeTemplateLengths templates maxTemplateLength =
-    TemplatesGenerator.computeTemplateLengths templates maxTemplateLength 1uy
+    Array.sort (Array.init templates (fun _ -> (byte) (random.Next((int) maxTemplateLength - (int) 1us) + (int) 1us)))
 
 let buildSyntaxTree templates maxTemplateLength (templateLengths:array<byte>) (templateArr:array<byte>) =
     let next = Array.init (templates * (int) maxTemplateLength) (fun _ -> Array.init 256 (fun _ -> -1s))

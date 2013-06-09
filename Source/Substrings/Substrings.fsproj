@@ -80,8 +80,6 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
-    <Compile Include="TemplatesGenerator.fs" />
-    <Compile Include="ActualTemplates.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="NaiveSearchGpu.fs" />
     <Compile Include="NaiveHashingSearchGpu.fs" />
@@ -91,7 +89,6 @@
     <Compile Include="HashtableExpanded.fs" />
     <Compile Include="AhoCorasickGpu.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
-    <Compile Include="OneMatchSearch.fs" />
     <Compile Include="RawReading.fs" />
   </ItemGroup>
   <ItemGroup>

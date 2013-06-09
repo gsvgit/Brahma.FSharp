@@ -12,15 +12,13 @@ open RawIo
 open System.IO
 open System.Runtime.Serialization.Formatters.Binary
 
-open TemplatesGenerator
-
 let maxTemplateLength = 32//uy
 
 let kRef = ref 1024
 let localWorkSizeRef = ref 512
 
 let indexRef = ref 1
-let templatesPathRef = ref TemplatesGenerator.path
+let templatesPathRef = ref ""
 
 let debugMode = ref false
 
@@ -70,13 +68,13 @@ let launch k localWorkSize index templatesPath =
     let templatesSumRef = ref 0
     let templateArrRef = ref null
 
-    match deserialized with
-    | :? Templates as t -> 
-        templatesRef := t.number
-        templateLengthsRef := t.sizes
-        templatesSumRef := t.content.Length
-        templateArrRef := t.content
-    | other -> failwith "Deserialized object is not a Templates struct!"
+//    match deserialized with
+//    | :? Templates as t -> 
+//        templatesRef := t.number
+//        templateLengthsRef := t.sizes
+//        templatesSumRef := t.content.Length
+//        templateArrRef := t.content
+//    | other -> failwith "Deserialized object is not a Templates struct!"
 
     let templates = !templatesRef
     let templateLengths = !templateLengthsRef
