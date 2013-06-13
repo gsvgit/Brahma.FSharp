@@ -82,12 +82,9 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <Compile Include="NaiveSearchGpu.fs" />
-    <Compile Include="NaiveHashingSearchGpu.fs" />
-    <Compile Include="NaiveHashingSearchGpuPrivate.fs" />
     <Compile Include="NaiveHashingGpuPrivateLocal.fs" />
     <Compile Include="HashtableGpuPrivateLocal.fs" />
     <Compile Include="HashtableExpanded.fs" />
-    <Compile Include="AhoCorasickGpu.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
     <Compile Include="RawReading.fs" />
   </ItemGroup>

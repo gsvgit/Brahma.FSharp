@@ -40,7 +40,6 @@ let command =
                 let mutable templateBase = 0
                 for n in 0..(templates - 1) do
                     if n > 0 then templateBase <- templateBase + (int) lengths.[n - 1]
-                        
                     let currentLength = lengths.[n]
                     if i + (int) currentLength <= l then
                         let mutable matches = 1

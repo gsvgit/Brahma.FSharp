@@ -229,31 +229,22 @@ let launch k localWorkSize index templatesPath =
     let cpuHashedInitilizer = (fun _ _ -> ())
 
     let gpuInitilizer = (fun _ _ -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
-    let gpuHashingInitilizer = (fun _ _ -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuHashingPrivateInitilizer = (fun _ _ -> NaiveHashingSearchGpuPrivate.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuHashingPrivateLocalInitilizer = (fun _ _ -> NaiveHashingGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuHashtableInitializer = (fun _ _ -> HashtableGpuPrivateLocal.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuExpandedHashtableInitializer = (fun _ _ -> HashtableExpanded.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
-    let gpuAhoCorasickInitializer = (fun next leaf -> AhoCorasickGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
     let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
    
     let gpuUploader = (fun () -> NaiveSearchGpu.upload())
-    let gpuHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
-    let gpuHashingPrivateUploader = (fun () -> NaiveHashingSearchGpuPrivate.upload())
     let gpuHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
     let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
     let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
-    let gpuAhoCorasickUploader = (fun () -> AhoCorasickGpu.upload())
     let gpuAhoCorasickOptimizedUploader = (fun () -> AhoCorasickOptimized.upload())
 
     let gpuDownloader = (fun t -> NaiveSearchGpu.download t)
-    let gpuHashingDownloader = (fun t -> NaiveHashingSearchGpu.download t)
-    let gpuHashingPrivateDownloader = (fun t -> NaiveHashingSearchGpuPrivate.download t)
     let gpuHashingPrivateLocalDownloader = (fun t -> NaiveHashingGpuPrivateLocal.download t)
     let gpuHashtableDownloader = (fun t -> HashtableGpuPrivateLocal.download t)
     let gpuExpandedHashtableDownloader = (fun t -> HashtableExpanded.download t)
-    let gpuAhoCorasickDownloader = (fun t -> AhoCorasickGpu.download t)
     let gpuAhoCorasickOptimizedDownloader = (fun t -> AhoCorasickOptimized.download t)
 
     let cpuMatches = ref 0  
@@ -291,12 +282,9 @@ let launch k localWorkSize index templatesPath =
     //testAlgorithm cpuAhoCorasickInitializer cpuAhoCorasickGetter AhoCorasickCpu.label cpuMatchesAhoCorasick
 
     Helpers.verifyResults !cpuMatches !gpuMatches NaiveSearchGpu.label
-    Helpers.verifyResults !cpuMatches !gpuMatchesHashing NaiveHashingSearchGpu.label
-    Helpers.verifyResults !cpuMatches !gpuMatchesHashingPrivate NaiveHashingSearchGpuPrivate.label
     Helpers.verifyResults !cpuMatches !gpuMatchesHashingPrivateLocal NaiveHashingGpuPrivateLocal.label
     Helpers.verifyResults !cpuMatches !gpuMatchesHashtable HashtableGpuPrivateLocal.label
     Helpers.verifyResults !cpuMatches !gpuMatchesHashtableExpanded HashtableExpanded.label
-    Helpers.verifyResults !cpuMatches !gpuAhoCorasick AhoCorasickGpu.label
     Helpers.verifyResults !cpuMatches !gpuAhoCorasickOptimized AhoCorasickOptimized.label
 
     printfn ""
@@ -304,48 +292,36 @@ let launch k localWorkSize index templatesPath =
     printfn "Raw computation time spent:"
     
     Helpers.printGlobalTime NaiveSearchGpu.label
-    Helpers.printGlobalTime NaiveHashingSearchGpu.label
-    Helpers.printGlobalTime NaiveHashingSearchGpuPrivate.label
     Helpers.printGlobalTime NaiveHashingGpuPrivateLocal.label
     Helpers.printGlobalTime HashtableGpuPrivateLocal.label
     Helpers.printGlobalTime HashtableExpanded.label
-    Helpers.printGlobalTime AhoCorasickGpu.label
     Helpers.printGlobalTime AhoCorasickOptimized.label
     
     printfn ""
 
     printfn "Computation time with preparations:"
     Helpers.printTime NaiveSearchGpu.timer NaiveSearchGpu.label
-    Helpers.printTime NaiveHashingSearchGpu.timer NaiveHashingSearchGpu.label
-    Helpers.printTime NaiveHashingSearchGpuPrivate.timer NaiveHashingSearchGpuPrivate.label
     Helpers.printTime NaiveHashingGpuPrivateLocal.timer NaiveHashingGpuPrivateLocal.label
     Helpers.printTime HashtableGpuPrivateLocal.timer HashtableGpuPrivateLocal.label
     Helpers.printTime HashtableExpanded.timer HashtableExpanded.label
-    Helpers.printTime AhoCorasickGpu.timer AhoCorasickGpu.label
     Helpers.printTime AhoCorasickOptimized.timer AhoCorasickOptimized.label
 
     printfn ""
 
     printfn "Total time with reading:"
     Helpers.printTime readingTimer NaiveSearchGpu.label
-    Helpers.printTime readingTimer NaiveHashingSearchGpu.label
-    Helpers.printTime readingTimer NaiveHashingSearchGpuPrivate.label
     Helpers.printTime readingTimer NaiveHashingGpuPrivateLocal.label
     Helpers.printTime readingTimer HashtableGpuPrivateLocal.label
     Helpers.printTime readingTimer HashtableExpanded.label
-    Helpers.printTime readingTimer AhoCorasickGpu.label
     Helpers.printTime readingTimer AhoCorasickOptimized.label
 
     printfn ""
 
     printfn "Counting time:"
     Helpers.printTime countingTimer NaiveSearchGpu.label
-    Helpers.printTime countingTimer NaiveHashingSearchGpu.label
-    Helpers.printTime countingTimer NaiveHashingSearchGpuPrivate.label
     Helpers.printTime countingTimer NaiveHashingGpuPrivateLocal.label
     Helpers.printTime countingTimer HashtableGpuPrivateLocal.label
     Helpers.printTime countingTimer HashtableExpanded.label
-    Helpers.printTime countingTimer AhoCorasickGpu.label
     Helpers.printTime countingTimer AhoCorasickOptimized.label
 
     Timer<string>.Global.Reset()
