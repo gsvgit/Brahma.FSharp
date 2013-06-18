@@ -48,6 +48,7 @@ namespace Brahma.OpenCL.Commands
                 var mem = Cl.CreateBuffer(kernel.Provider.Context, (Cl.MemFlags)operations | (memory == Memory.Host ? Cl.MemFlags.UseHostPtr : (Cl.MemFlags)memory | Cl.MemFlags.CopyHostPtr),
                     (IntPtr)(_elementSize * data.Length), data, out error);
                 curArgVal = mem;
+                mem.Pin();
                 kernel.Provider.AutoconfiguredBuffers.Add(data, mem);
                 if (error != Cl.ErrorCode.Success)
                     throw new CLException(error);

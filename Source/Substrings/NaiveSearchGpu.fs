@@ -112,18 +112,6 @@ let download (task:Task<unit>) =
 
     result
 
-let getMatches () =
-    timer.Start()
-    Timer<string>.Global.Start()
-    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
-        ignore (commandQueue.Add(input.ToGpu provider))
-    let _ = commandQueue.Add(kernelRun())
-    let _ = commandQueue.Add(result.ToHost provider).Finish()
-    buffersCreated <- true
-    Timer<string>.Global.Lap(label)
-    timer.Lap(label)
-    result
-
 let findMatches length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
     timer.Start()
     let result = Array.zeroCreate length

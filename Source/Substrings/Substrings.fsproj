@@ -90,6 +90,7 @@
     <Compile Include="AhoCorasickGpu.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
     <Compile Include="RawReading.fs" />
+    <Compile Include="Matcher.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">

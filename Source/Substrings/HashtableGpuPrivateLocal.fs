@@ -127,8 +127,8 @@ let computeTemplateStarts templates (templateLengths:array<byte>) =
 
 let mutable result = null
 let mutable kernel = null
-let mutable kernelPrepare = (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> (fun _ -> ())))))))))))))
-let mutable kernelRun = (fun _ -> null)
+let mutable kernelPrepare = Unchecked.defaultof<_>
+let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 let mutable templateHashes = null
@@ -194,18 +194,6 @@ let download (task:Task<unit>) =
     Timer<string>.Global.Lap(label)
     timer.Lap(label)
 
-    result
-
-let getMatches () =
-    timer.Start()
-    Timer<string>.Global.Start()
-    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
-        ignore (commandQueue.Add(input.ToGpu provider))
-    let _ = commandQueue.Add(kernelRun())
-    let _ = commandQueue.Add(result.ToHost provider).Finish()
-    buffersCreated <- true
-    Timer<string>.Global.Lap(label)
-    timer.Lap(label)
     result
 
 let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
