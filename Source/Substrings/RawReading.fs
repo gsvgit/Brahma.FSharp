@@ -68,14 +68,6 @@ let launch k localWorkSize index templatesPath =
     let templatesSumRef = ref 0
     let templateArrRef = ref null
 
-//    match deserialized with
-//    | :? Templates as t -> 
-//        templatesRef := t.number
-//        templateLengthsRef := t.sizes
-//        templatesSumRef := t.content.Length
-//        templateArrRef := t.content
-//    | other -> failwith "Deserialized object is not a Templates struct!"
-
     let templates = !templatesRef
     let templateLengths = !templateLengthsRef
     let templatesSum = !templatesSumRef
@@ -114,44 +106,6 @@ let launch k localWorkSize index templatesPath =
     let offset = 0L
     let bound = 280L*1024L*1024L*1024L
 
-    let testAlgorithm initializer getter label counter =
-        readingTimer.Start()
-        let mutable read = 0
-        let mutable lowBound = 0
-        let mutable highBound = 0
-
-        let mutable current = 0L
-
-        let handle = Raw.CreateFile(index)
-
-        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates (int maxTemplateLength) templateLengths templateArr
-
-        initializer next leaf
-
-        while (current < bound) && ((current = 0L) || (read > 0)) do
-            if current > 0L then
-                current <- current - 512L
-
-            highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
-            read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
-            
-            if (read > 0) then
-                current <- current + (int64) read
-
-                let mutable countingBound = read + lowBound
-                let mutable matchBound = read + lowBound
-                if current < bound then
-                    countingBound <- countingBound - 512
-
-                let result = getter()
-
-                countingTimer.Start()
-                counter := !counter + Helpers.countMatches result (int maxTemplateLength) countingBound matchBound templateLengths prefix
-                countingTimer.Lap(label)
-    
-        ignore(Raw.CloseHandle(handle))
-        readingTimer.Lap(label)
-
     let testAlgorithmAsync initializer uploader downloader label counter close =
         readingTimer.Start()
         let mutable read = 0
@@ -178,7 +132,7 @@ let launch k localWorkSize index templatesPath =
             if current > 0L then
                 current <- current - 512L
 
-            highBound <- (if (int64) length < bound - current then length else (int) (bound - current))
+            highBound <- (if int64 length < bound - current then length else (int) (bound - current))
             read <- Raw.ReadFile(handle, buffer, highBound, offset + current)
 
             if read <= 0 && current = 0L then
@@ -223,10 +177,7 @@ let launch k localWorkSize index templatesPath =
 
         ignore(Raw.CloseHandle(handle))
         readingTimer.Lap(label)
-        close()
-
-    let cpuInitilizer = (fun _ _ -> ())
-    let cpuHashedInitilizer = (fun _ _ -> ())
+        close()    
 
     let gpuInitilizer = (fun _ _ -> NaiveSearchGpu.initialize length k localWorkSize templates templateLengths buffer templateArr)
     let gpuHashingInitilizer = (fun _ _ -> NaiveHashingSearchGpu.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
@@ -238,10 +189,9 @@ let launch k localWorkSize index templatesPath =
     let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
    
-    let gpuUploader = (fun () -> NaiveSearchGpu.upload())
+    let gpuUploader = NaiveSearchGpu.upload
     let gpuHashingUploader = (fun () -> NaiveHashingSearchGpu.upload())
     let gpuHashingPrivateUploader = (fun () -> NaiveHashingSearchGpuPrivate.upload())
-    let gpuHashingPrivateLocalUploader = (fun () -> NaiveHashingGpuPrivateLocal.upload())
     let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
     let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
     let gpuAhoCorasickUploader = (fun () -> AhoCorasickGpu.upload())
