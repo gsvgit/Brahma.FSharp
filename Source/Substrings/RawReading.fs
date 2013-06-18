@@ -185,18 +185,6 @@ let launch k localWorkSize index templatesPath =
     let gpuExpandedHashtableInitializer = (fun _ _ -> HashtableExpanded.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr)
     let gpuAhoCorasickOptimizedInitializer = (fun next leaf -> AhoCorasickOptimized.initialize length maxTemplateLength k localWorkSize templates templatesSum templateLengths buffer templateArr next leaf)
 
-   
-    let gpuUploader = NaiveSearchGpu.upload
-    let gpuHashtableUploader = (fun () -> HashtableGpuPrivateLocal.upload())
-    let gpuExpandedHashtableUploader = (fun () -> HashtableExpanded.upload())
-    let gpuAhoCorasickOptimizedUploader = (fun () -> AhoCorasickOptimized.upload())
-
-    let gpuDownloader = (fun t -> NaiveSearchGpu.download t)
-    let gpuHashingPrivateLocalDownloader = (fun t -> NaiveHashingGpuPrivateLocal.download t)
-    let gpuHashtableDownloader = (fun t -> HashtableGpuPrivateLocal.download t)
-    let gpuExpandedHashtableDownloader = (fun t -> HashtableExpanded.download t)
-    let gpuAhoCorasickOptimizedDownloader = (fun t -> AhoCorasickOptimized.download t)
-
     let cpuMatches = ref 0  
     let cpuMatchesHashed = ref 0
     let cpuMatchesAhoCorasick = ref 0

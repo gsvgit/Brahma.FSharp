@@ -128,12 +128,6 @@ let mutable kernelRun = Unchecked.defaultof<_>
 let mutable input = null
 let mutable buffersCreated = false
 
-let close () =     
-    provider.CloseAllBuffers()
-    commandQueue.Dispose()
-    provider.Dispose()
-    buffersCreated <- false
-
 
 let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) (next:array<array<int16>>) (leaf:array<int16>) =
     timer <- new Timer<string>()
@@ -150,53 +144,3 @@ let initialize length maxTemplateLength k localWorkSize templates templatesSum (
     kernelPrepare d length k templates templateLengths go exit leaf maxTemplateLength input templateArr result
     timer.Lap(label)
     ()
-
-let mutable ready = true
-
-let upload () =
-    if not ready then failwith "Already running, can't upload!"
-    ready <- false
-
-    timer.Start()
-    Timer<string>.Global.Start()
-    if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
-        ignore (commandQueue.Add(input.ToGpu provider).Finish())
-        async {
-            ignore (commandQueue.Add(kernelRun()).Finish())
-        } |> Async.StartAsTask
-    else
-        ignore (commandQueue.Add(kernelRun()).Finish())
-        async {
-            ()
-        } |> Async.StartAsTask
-
-let download (task:Task<unit>) =
-    if ready then failwith "Not running, can't download!"
-    ready <- true
-
-    task.Wait()
-
-    ignore (commandQueue.Add(result.ToHost provider).Finish())
-    buffersCreated <- true
-    Timer<string>.Global.Lap(label)
-    timer.Lap(label)
-
-    result
-
-
-let findMatches length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) (next:array<array<int16>>) (leaf:array<int16>) =
-    timer.Start()
-    
-    let go, _, exit = buildStateMachine templates maxTemplateLength next leaf
-
-    let result = Array.zeroCreate length
-    let kernelHashed, kernelPrepareHashed, kernelRunHashed = provider.Compile(query=command, translatorOptions=[BoolAsBit])
-    let l = (length + (k-1))/k  
-    let d =(new _1D(l,localWorkSize))
-    kernelPrepareHashed d length k templates templateLengths go exit leaf maxTemplateLength (Array.copy gpuArr) templateArr result
-    Timer<string>.Global.Start()
-    let _ = commandQueue.Add(kernelRunHashed()).Finish()
-    let _ = commandQueue.Add(result.ToHost provider).Finish()
-    Timer<string>.Global.Lap(label)
-    timer.Lap(label)
-    result

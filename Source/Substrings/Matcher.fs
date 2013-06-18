@@ -6,6 +6,8 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
+open Brahma.FSharp.OpenCL.Translator.Common
+open System.Threading.Tasks
 
 [<Struct>]
 type GPUConfig =    
@@ -19,6 +21,18 @@ type SearchAlgorithm =
 
 type Matcher(provider, config) =
 
+    let platformName = "*"
+    let deviceType = Cl.DeviceType.Default    
+
+    let provider =
+        try  ComputeProvider.Create(platformName, deviceType)
+        with 
+        | ex -> failwith ex.Message
+
+    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head) 
+
+    let timer = new Timer<string>()
+
     let maxTemplateLength = 32
 
     let kRef = ref 1024
@@ -28,9 +42,11 @@ type Matcher(provider, config) =
     let templatesPathRef = ref ""
 
     let debugMode = ref false
+    let mutable buffersCreated = false
+    let mutable result = null
+    let mutable ready = true
 
-
-    let memory,ex = Cl.GetDeviceInfo(NaiveSearchGpu.provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
+    let memory,ex = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
     let maxGpuMemory = memory.CastTo<uint64>()
 
     let maxHostMemory = 256UL * 1024UL * 1024UL
@@ -54,6 +70,20 @@ type Matcher(provider, config) =
     printfn "Running %A groups with %A items in each, %A in total." groups localWorkSize (localWorkSize * groups)
     printfn "Each item will process %A bytes of input, %A total on each iteration." k length
     printfn ""
+    
+    let initialize length k localWorkSize templates (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
+        timer.Start()
+        result <- Array.zeroCreate length
+        let x, y, z = provider.Compile(query=command, translatorOptions=[BoolAsBit])
+        kernel <- x
+        kernelPrepare <- y
+        kernelRun <- z
+        input <- gpuArr
+        let l = (length + (k-1))/k 
+        let d =(new _1D(l,localWorkSize))
+        kernelPrepare d length k templates templateLengths input templateArr result
+        timer.Lap(label)
+        ()
 
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()
@@ -61,7 +91,74 @@ type Matcher(provider, config) =
     let offset = 0L
     let bound = 280L*1024L*1024L*1024L
 
-    let run initializer uploader downloader label counter close =
+    let close () =     
+        provider.CloseAllBuffers()
+        commandQueue.Dispose()
+        provider.Dispose()
+        buffersCreated <- false
+
+    let downloader label (result:array<_>) (task:Task<unit>) =
+        if ready then failwith "Not running, can't download!"
+        ready <- true
+
+        task.Wait()
+
+        ignore (commandQueue.Add(result.ToHost provider).Finish())
+        buffersCreated <- true
+        Timer<string>.Global.Lap(label)
+        timer.Lap(label)
+
+        result
+
+    let uploader (input:array<_>) kernelRun =
+        if not ready then failwith "Already running, can't upload!"
+        ready <- false
+
+        timer.Start()
+        Timer<string>.Global.Start()
+        if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
+            ignore (commandQueue.Add(input.ToGpu provider).Finish())
+            async { ignore (commandQueue.Add(kernelRun()).Finish())}
+            |> Async.StartAsTask
+        else
+            ignore (commandQueue.Add(kernelRun()).Finish())
+            async {()} |> Async.StartAsTask
+
+    let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
+        let mutable matches = 0
+        let clearBound = min (bound - 1) (length - (int) maxTemplateLength)
+
+        if (!debugMode) then
+            printfn "%A - %A | %A" offset (offset + (int64) bound - 1L) (offset + (int64) length - 1L)
+            printfn ""
+
+        for i in 0..clearBound do
+            let mutable matchIndex = result.[i]
+            if matchIndex >= 0s then
+                if (!debugMode) then
+                    printfn "%A : %A" (offset + (int64) i) matchIndex
+
+                matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+                matches <- matches + 1
+
+        for i in (clearBound + 1)..(bound - 1) do
+            let mutable matchIndex = result.[i]
+            while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
+                matchIndex <- prefix.[(int) matchIndex]
+            
+            if matchIndex >= 0s then
+                if (!debugMode) then
+                    printfn "%A : %A" (offset + (int64) i) matchIndex
+
+                matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+                matches <- matches + 1
+
+        if (!debugMode) then
+            printfn ""
+
+        matches
+
+    let run initializer label counter close =
         readingTimer.Start()
         let mutable read = 0
         let mutable highBound = 0
@@ -135,4 +232,6 @@ type Matcher(provider, config) =
         close()
 
 
-    member this.Search (inputStream, templates, algo)  = 1
+    member this.Search (inputStream, templates, algo)  = 
+        timer.Reset()
+        1
