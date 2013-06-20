@@ -11,7 +11,7 @@ open System.Threading.Tasks
 
 let label = "OpenCL/NaiveHashingPrivateLocal"
 
-let hashingCommand = 
+let command = 
     <@
         fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
             let r = rng.GlobalID0
@@ -65,27 +65,3 @@ let hashingCommand =
 
                         if matches = 1 then result.[i] <- (int16) n
     @>
-
-//let mutable result = null
-//let mutable kernel = null
-//let mutable kernelPrepare = Unchecked.defaultof<_>
-//let mutable kernelRun = Unchecked.defaultof<_>
-//let mutable input = null
-//let mutable buffersCreated = false
-//let mutable templateHashes = null
-//
-//let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
-//    timer <- new Timer<string>()
-//    timer.Start()
-//    result <- Array.zeroCreate length
-//    templateHashes <- Helpers.computeTemplateHashes templates templatesSum templateLengths templateArr
-//    let l = (length + (k-1))/k 
-//    let x, y, z = provider.Compile hashingCommand
-//    kernel <- x
-//    kernelPrepare <- y
-//    kernelRun <- z
-//    input <- gpuArr
-//    let d =(new _1D(l,localWorkSize))
-//    kernelPrepare d length k templates templateLengths templateHashes maxTemplateLength input templateArr result
-//    timer.Lap(label)
-//    ()

@@ -84,9 +84,7 @@
     <Compile Include="NaiveSearchGpu.fs" />
     <Compile Include="NaiveHashingGpuPrivateLocal.fs" />
     <Compile Include="HashtableGpuPrivateLocal.fs" />
-    <Compile Include="HashtableExpanded.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
-    <Compile Include="RawReading.fs" />
     <Compile Include="Matcher.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@ open System.Threading.Tasks
 
 let label = "OpenCL/HashtablePrivateLocal"
 
-let hashingCommand = 
+let command = 
     <@
         fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) (table:array<int16>) (next:array<int16>) (starts:array<int16>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
             let r = rng.GlobalID0
@@ -116,36 +116,3 @@ let computeTemplateStarts templates (templateLengths:array<byte>) =
         current <- current + (int16) templateLengths.[i]
     
     starts
-
-//let mutable result = null
-//let mutable kernel = null
-//let mutable kernelPrepare = Unchecked.defaultof<_>
-//let mutable kernelRun = Unchecked.defaultof<_>
-//let mutable input = null
-//let mutable buffersCreated = false
-//let mutable templateHashes = null
-//let mutable table = null
-//let mutable next = null
-//let mutable starts = null
-//
-//let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) =
-//    timer <- new Timer<string>()
-//    timer.Start()
-//    result <- Array.zeroCreate length
-//
-//    templateHashes <- Helpers.computeTemplateHashes templates templatesSum templateLengths templateArr
-//    let t, n = createHashTable templates templateLengths templateHashes
-//    table <- t
-//    next <- n
-//    starts <- computeTemplateStarts templates templateLengths
-//
-//    let l = (length + (k-1))/k 
-//    let x, y, z = provider.Compile hashingCommand
-//    kernel <- x
-//    kernelPrepare <- y
-//    kernelRun <- z
-//    input <- gpuArr
-//    let d =(new _1D(l,localWorkSize))
-//    kernelPrepare d length k templates templateLengths templateHashes table next starts maxTemplateLength input templateArr result
-//    timer.Lap(label)
-//    ()

@@ -111,27 +111,3 @@ let command =
                             result.[position] <- currentTemplate
                     parent <- exit.[(int) parent]
     @>
-
-//let mutable result = null
-//let mutable kernel = null
-//let mutable kernelPrepare = Unchecked.defaultof<_>
-//let mutable kernelRun = Unchecked.defaultof<_>
-//let mutable input = null
-let mutable buffersCreated = false
-
-
-let initialize length maxTemplateLength k localWorkSize templates templatesSum (templateLengths:array<byte>) (gpuArr:array<byte>) (templateArr:array<byte>) (next:array<array<int16>>) (leaf:array<int16>) =
-//    timer <- new Timer<string>()
-//    timer.Start()
-//    result <- Array.zeroCreate length
-//    let go, _, exit = buildStateMachine templates maxTemplateLength next leaf
-//    let l = (length + (k-1))/k 
-//    let x, y, z = provider.Compile command
-//    kernel <- x
-//    kernelPrepare <- y
-//    kernelRun <- z
-//    input <- gpuArr
-//    let d =(new _1D(l,localWorkSize))
-//    kernelPrepare d length k templates templateLengths go exit leaf maxTemplateLength input templateArr result
-//    timer.Lap(label)
-    ()

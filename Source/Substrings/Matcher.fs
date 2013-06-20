@@ -22,9 +22,9 @@ type Config =
     }
 
 type Templates = {
-    mutable number : int
-    mutable sizes : byte[]
-    mutable content : byte[]
+    number : int
+    sizes : byte[]
+    content : byte[]
     }
 
 type Matcher(provider, config) =
@@ -92,7 +92,9 @@ type Matcher(provider, config) =
         printfn ""
     
     let initialize config templates command =
+        timer.Reset()
         timer.Start()
+        printConfiguration config 
         result <- Array.zeroCreate config.bufLength
         input <- Array.zeroCreate config.bufLength
         let kernel, kernelPrepare, kernelRun = provider.Compile(query=command, translatorOptions=[BoolAsBit])                
@@ -109,8 +111,8 @@ type Matcher(provider, config) =
 
     let close () =     
         provider.CloseAllBuffers()
-        commandQueue.Dispose()
-        provider.Dispose()
+        //commandQueue.Dispose()
+        //provider.Dispose()
         buffersCreated <- false
 
     let downloader label (task:Task<unit>) =
@@ -257,8 +259,22 @@ type Matcher(provider, config) =
         let readyTemplates = { number = sorted.Length; sizes = lengths; content = templateBytes;}
         readyTemplates
 
+    let finalize () =
+        close ()
+        printfn "Computation time with preparations:"
+        Helpers.printTime timer label
+
+        printfn ""
+
+        printfn "Total time with reading:"
+        Helpers.printTime readingTimer label
+
+        printfn ""
+
+        printfn "Counting time:"
+        Helpers.printTime countingTimer label
+
     member this.NaiveSearch (inputStream, templateArr)  = 
-        timer.Reset()
         label <- NaiveSearchGpu.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -266,9 +282,9 @@ type Matcher(provider, config) =
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
         kernelPrepare config.bufLength config.chankSize templates.number templates.sizes input templates.content result
         timer.Lap(label)
+        finalize()
 
-    member this.AhoCorasik (inputStream, templateArr)  = 
-        timer.Reset()
+    member this.AhoCorasik (inputStream, templateArr)  =        
         label <- NaiveSearchGpu.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -278,6 +294,35 @@ type Matcher(provider, config) =
         kernelPrepare config.bufLength config.chankSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
         run kernelRun 0 templates config prefix label close
         timer.Lap(label)
+        finalize()
+
+    member this.Hashtable (inputStream, templateArr)  = 
+        label <- HashtableGpuPrivateLocal.label
+        let config = configure templateArr
+        let templates = prepareTemplates templateArr
+        let kernel, kernelPrepare, kernelRun = initialize config templateArr HashtableGpuPrivateLocal.command        
+        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
+        let table, next = HashtableGpuPrivateLocal.createHashTable templates.number templates.sizes templates.content        
+        let starts = HashtableGpuPrivateLocal.computeTemplateStarts templates.number templates.sizes
+        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
+        kernelPrepare 
+            config.bufLength config.chankSize templates.number templates.sizes  templateHashes table next starts maxTemplateLength input templates.content result
+        run kernelRun 0 templates config prefix label close
+        timer.Lap(label)
+        finalize()
+
+    member this.RabinKarp (inputStream, templateArr) = 
+        label <- NaiveHashingGpuPrivateLocal.label
+        let config = configure templateArr
+        let templates = prepareTemplates templateArr
+        let kernel, kernelPrepare, kernelRun = initialize config templateArr NaiveHashingGpuPrivateLocal.command        
+        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
+        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
+        kernelPrepare 
+            config.bufLength config.chankSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
+        run kernelRun 0 templates config prefix label close
+        timer.Lap(label)
+        finalize()
 
 
 let first = [|
