@@ -9,10 +9,10 @@ open System.Threading;
 
 [<Flags>]
 type AccessRights =
-    | GENERIC_READ = 0x80000000
-    | GENERIC_WRITE = 0x40000000
-    | GENERIC_EXECUTE = 0x20000000
-    | GENERIC_ALL = 0x10000000
+    | GENERIC_READ = 0x80000000u
+    | GENERIC_WRITE = 0x40000000u
+    | GENERIC_EXECUTE = 0x20000000u
+    | GENERIC_ALL = 0x10000000u
 
 [<Flags>]
 type ShareModes =
@@ -41,9 +41,9 @@ extern IntPtr CreateFile(string lpFileName,
 
 [<DllImport("kernel32.dll", SetLastError = true)>]
 extern bool ReadFile(IntPtr hFile,                        // handle to file
-                            byte[] lpBuffer,                // data buffer
-                            int nNumberOfBytesToRead,        // number of bytes to read
-                            int& lpNumberOfBytesRead,    // number of bytes read
+                            byte[] lpBuffer,              // data buffer
+                            int nNumberOfBytesToRead,     // number of bytes to read
+                            int& lpNumberOfBytesRead,     // number of bytes read
                             IntPtr lpOverlapped)
 
 [<DllImport("kernel32.dll", SetLastError = true)>]
