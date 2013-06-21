@@ -63,5 +63,5 @@ let matcher = new Brahman.Substrings.Matcher.Matcher(1,1)
 
 do matcher.AhoCorasik(0, (Array.append first templates))
 do matcher.RabinKarp (0, (Array.append first templates))
-do matcher.Hashtable(0, (Array.append first templates))
+do matcher.Hashtable (0, (Array.append first templates))
 do matcher.NaiveSearch(0, (Array.append first templates))

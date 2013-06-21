@@ -8,11 +8,15 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Brahma.FSharp")>]
-[<assembly: AssemblyDescription("Brahma.FSharp is a library for F# with GPGPU integration. It is based on F# quotation to OpenCL translator.")>]
+[<assembly: AssemblyTitle("Brahman.Substrings")>]
+[<assembly: AssemblyDescription(
+    "
+     Brahman is a set of snippets, algorithms and solution for end users based on Brahma.FSharp.
+     Brahman.Substrings is a library for substrings matching."
+        )>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Semyon Grigorev")>]
-[<assembly: AssemblyProduct("Brahma.FSharp")>]
+[<assembly: AssemblyProduct("Brahman.Substrings")>]
 [<assembly: AssemblyCopyright("Copyright ©  2012-2013. Semyon Grigorev <rsdpisuy@gmail.com>")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
