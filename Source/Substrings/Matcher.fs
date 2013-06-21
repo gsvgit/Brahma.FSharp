@@ -275,18 +275,18 @@ type Matcher(provider, config) =
         printfn "Counting time:"
         Helpers.printTime countingTimer label
 
-    member this.NaiveSearch (inputStream, templateArr)  = 
+    member this.NaiveSearch (hdId, templateArr)  = 
         label <- NaiveSearch.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
         let kernel, kernelPrepare, kernelRun = initialize config templateArr NaiveSearch.command
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
         kernelPrepare config.bufLength config.chankSize templates.number templates.sizes input templates.content result
-        run kernelRun 0 templates config prefix label close
+        run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
 
-    member this.AhoCorasik (inputStream, templateArr)  =        
+    member this.AhoCorasik (hdId, templateArr)  =        
         label <- AhoCorasick.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -294,26 +294,26 @@ type Matcher(provider, config) =
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
         let go, _, exit = AhoCorasick.buildStateMachine templates.number maxTemplateLength next leaf
         kernelPrepare config.bufLength config.chankSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
-        run kernelRun 0 templates config prefix label close
+        run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
 
-    member this.Hashtable (inputStream, templateArr)  = 
+    member this.Hashtable (hdId, templateArr)  = 
         label <- Hashtables.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
         let kernel, kernelPrepare, kernelRun = initialize config templateArr Hashtables.command        
-        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
-        let table, next = Hashtables.createHashTable templates.number templates.sizes templates.content        
+        let prefix, _, _, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let starts = Hashtables.computeTemplateStarts templates.number templates.sizes
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
+        let table, next = Hashtables.createHashTable templates.number templates.sizes templateHashes
         kernelPrepare 
             config.bufLength config.chankSize templates.number templates.sizes  templateHashes table next starts maxTemplateLength input templates.content result
-        run kernelRun 0 templates config prefix label close
+        run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
 
-    member this.RabinKarp (inputStream, templateArr) = 
+    member this.RabinKarp (hdId, templateArr) = 
         label <- RabinKarp.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -322,6 +322,6 @@ type Matcher(provider, config) =
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
         kernelPrepare 
             config.bufLength config.chankSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
-        run kernelRun 0 templates config prefix label close
+        run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
