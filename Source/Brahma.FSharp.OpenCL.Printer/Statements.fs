@@ -19,6 +19,7 @@ open Brahma.FSharp.OpenCL.AST
 open Microsoft.FSharp.Text.StructuredFormat
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
+open Microsoft.FSharp.Collections
 
 let rec private printAssignment (a:Assignment<'lang>) =
     [Expressions.Print a.Name; wordL "="; Expressions.Print a.Value] |> spaceListL

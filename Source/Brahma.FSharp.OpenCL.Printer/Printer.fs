@@ -16,7 +16,7 @@
 module Brahma.FSharp.OpenCL.Printer.AST
 
 open Brahma.FSharp.OpenCL.AST
-open Microsoft.FSharp.Text.StructuredFormat
+open Microsoft.FSharp.Text
 open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 open Brahma.FSharp.OpenCL.Printer
 

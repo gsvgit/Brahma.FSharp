@@ -17,6 +17,7 @@ module Brahma.FSharp.OpenCL.Translator.Body
 
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.AST
+open Microsoft.FSharp.Collections
 
 let private clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
@@ -28,8 +29,8 @@ let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:Ta
     let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext    
     let vType = 
         match (body:Expression<_>) with 
-        | :? Const<_> as c -> c.Type
-        | :? ArrayInitializer<_> as ai -> Type.Translate var.Type false (Some ai.Length)
+        | :? Const<Lang> as c -> c.Type
+        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false (Some ai.Length)
         | _ -> Type.Translate var.Type false None
     new VarDecl<Lang>(vType,newName,Some body)
 
@@ -103,7 +104,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "zerocreate" -> 
         let length = 
             match args.[0] with
-            | :? Const<_> as c -> int c.Val
+            | :? Const<Lang> as c -> int c.Val
             | other -> failwithf "Calling Array.zeroCreate with a non-const argument: %A" other
         new ZeroArray<_>(length) :> Statement<_>, tContext
     | c -> failwithf "Unsupporte call: %s" c

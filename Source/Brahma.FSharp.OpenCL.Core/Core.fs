@@ -17,7 +17,7 @@ module Brahma.FSharp.OpenCL.Core
 
 open Brahma.OpenCL
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open FSharpx.Linq.QuotationEvaluation
 open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
