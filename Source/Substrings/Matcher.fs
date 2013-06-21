@@ -245,6 +245,8 @@ type Matcher(provider, config) =
 
         printfn ""
 
+        printfn "Total found by %A: %A" label !counter
+
         ignore(RawIO.CloseHandle(handle))
         readingTimer.Lap(label)
         close()
@@ -280,6 +282,7 @@ type Matcher(provider, config) =
         let kernel, kernelPrepare, kernelRun = initialize config templateArr NaiveSearch.command
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
         kernelPrepare config.bufLength config.chankSize templates.number templates.sizes input templates.content result
+        run kernelRun 0 templates config prefix label close
         timer.Lap(label)
         finalize()
 
