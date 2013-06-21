@@ -1,4 +1,4 @@
-﻿module AhoCorasickOptimized
+﻿module Brahman.Substrings.AhoCorasick
 
 open Brahma.Helpers
 open OpenCL.Net
@@ -9,7 +9,7 @@ open Brahma.FSharp.OpenCL.Extensions
 open Brahma.FSharp.OpenCL.Translator.Common
 open System.Threading.Tasks
 
-let label = "OpenCL/AhoCorasickOptimized"
+let label = "OpenCL/AhoCorasick"
 
 let buildStateMachine templates maxTemplateLength (next:array<array<int16>>) (leaf:array<int16>) =
     let go = Array.init (templates * (int) maxTemplateLength * 256) (fun _ -> -1s)

@@ -1,4 +1,4 @@
-﻿module NaiveHashingGpuPrivateLocal
+﻿module Brahman.Substrings.RabinKarp
 
 open Brahma.Helpers
 open OpenCL.Net
@@ -9,7 +9,7 @@ open Brahma.FSharp.OpenCL.Extensions
 open Brahma.FSharp.OpenCL.Translator.Common
 open System.Threading.Tasks
 
-let label = "OpenCL/NaiveHashingPrivateLocal"
+let label = "OpenCL/RabinKarp"
 
 let command = 
     <@

@@ -1,4 +1,4 @@
-﻿module Helpers
+﻿module Brahman.Substrings.Helpers
 
 open System.Collections.Generic
 open Brahma.Helpers

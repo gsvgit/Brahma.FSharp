@@ -1,4 +1,4 @@
-﻿module NaiveSearchGpu 
+﻿module Brahman.Substrings.NaiveSearch
 
 open Brahma.Helpers
 open OpenCL.Net
