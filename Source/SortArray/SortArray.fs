@@ -21,7 +21,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open FSharpx.Linq.QuotationEvaluation
 
 let random = new System.Random()
 
