@@ -86,7 +86,7 @@
     <Compile Include="NaiveHashingGpuPrivateLocal.fs" />
     <Compile Include="HashtableGpuPrivateLocal.fs" />
     <Compile Include="AhoCorasickOptimized.fs" />
-    <Compile Include="RawIO.fs" />
+    <Compile Include="HDReader.fs" />
     <Compile Include="Matcher.fs" />
     <None Include="packages.config" />
   </ItemGroup>

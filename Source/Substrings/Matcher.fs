@@ -26,8 +26,15 @@ type Templates = {
     content : byte[]
     }
 
-type Matcher(provider, config) =
+[<Struct>]
+type MatchRes =
+    val ChankNum: int
+    val Offset: int
+    val PatternId : int
+    new (chankNum,offset,patternId) = {ChankNum = chankNum; Offset = offset; PatternId = patternId }
 
+type Matcher(?maxHostMem) =
+    let totalResult = new ResizeArray<_>()
     let mutable label = ""
     let platformName = "*"
     let deviceType = Cl.DeviceType.Default    
@@ -52,7 +59,7 @@ type Matcher(provider, config) =
     let memory,ex = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
     let maxGpuMemory = memory.CastTo<uint64>()
 
-    let maxHostMemory = 256UL * 1024UL * 1024UL
+    let maxHostMemory = match maxHostMem with Some x -> x | _ -> 256UL * 1024UL * 1024UL
 
     let configure (templates:array<_>) =
         let tLenghth = templates |> Array.length |> uint64
@@ -91,6 +98,7 @@ type Matcher(provider, config) =
         printfn ""
     
     let initialize config templates command =
+        totalResult.Clear()
         timer.Reset()
         timer.Start()
         printConfiguration config 
@@ -106,7 +114,7 @@ type Matcher(provider, config) =
     let countingTimer = new Timer<string>()
 
     let offset = 0L
-    let bound = 280L*1024L*1024L*1024L
+    //let bound = 280L*1024L*1024L*1024L
 
     let close () =     
         provider.CloseAllBuffers()
@@ -141,33 +149,23 @@ type Matcher(provider, config) =
             ignore (commandQueue.Add(kernelRun()).Finish())
             async {()} |> Async.StartAsTask
 
-    let countMatchesDetailed (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
+    let countMatchesDetailed index (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
         let mutable matches = 0
-        let clearBound = min (bound - 1) (length - (int) maxTemplateLength)
-
-        if (!debugMode) then
-            printfn "%A - %A | %A" offset (offset + (int64) bound - 1L) (offset + (int64) length - 1L)
-            printfn ""
-
+        let clearBound = min (bound - 1) (length - (int) maxTemplateLength)        
         for i in 0..clearBound do
             let mutable matchIndex = result.[i]
-            if matchIndex >= 0s then
-                if (!debugMode) then
-                    printfn "%A : %A" (offset + (int64) i) matchIndex
-
+            if matchIndex >= 0s then                
                 matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+                totalResult.Add(new MatchRes(index, i, int result.[i]))
                 matches <- matches + 1
 
         for i in (clearBound + 1)..(bound - 1) do
             let mutable matchIndex = result.[i]
             while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
-                matchIndex <- prefix.[(int) matchIndex]
-            
-            if matchIndex >= 0s then
-                if (!debugMode) then
-                    printfn "%A : %A" (offset + (int64) i) matchIndex
-
+                matchIndex <- prefix.[(int) matchIndex]            
+            if matchIndex >= 0s then                
                 matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
+                totalResult.Add(new MatchRes(index, i, int result.[i]))
                 matches <- matches + 1
 
         if (!debugMode) then
@@ -175,21 +173,41 @@ type Matcher(provider, config) =
 
         matches
 
-    let run command hdIndex templates config prefix label close =
+    let chank overlapSize (s:seq<'a>) =
+        let firstChank = ref true
+        let overlappedBuf:array<'a> = Array.zeroCreate overlapSize
+        let sEnum = s.GetEnumerator()
+        let isLast = ref false
+        let lastChankS = ref 0
+        fun (buf:array<_>) ->
+            let l = buf.Length
+            let mutable i = if !firstChank then 0 else overlapSize
+            while i < l do
+                if sEnum.MoveNext()
+                then
+                    let b = sEnum.Current
+                    buf.[i] <- b
+                elif not !isLast
+                then 
+                    isLast := true
+                    lastChankS := i
+                i <- i + 1
+            if not !firstChank
+            then array.Copy(overlappedBuf,buf,overlappedBuf.Length)
+            array.Copy(buf, l-overlapSize, overlappedBuf, 0, overlappedBuf.Length)
+            firstChank := false
+            if !isLast then Some !lastChankS else None
+
+
+    let run command (readF: byte[] -> Option<byte[]>) templates config prefix label close =
         let counter = ref 0
         readingTimer.Start()
-        let mutable read = 0
-        let mutable highBound = 0
-
-        let matches = Array.zeroCreate 256
+        
+        let matches = Array.zeroCreate 512
 
         let length = config.bufLength
         let templateLengths = templates.sizes
         let templateArr = templates.content
-
-        let mutable current = 0L
-
-        let handle = RawIO.CreateFileW(hdIndex)        
 
         let mutable countingBound = 0
         let mutable matchBound = 0
@@ -197,21 +215,21 @@ type Matcher(provider, config) =
         let mutable task = Unchecked.defaultof<Task<unit>>
 
         let mutable index = 0
+        let mutable current = 0L
 
-        while (current < bound) && ((current = 0L) || (read > 0)) do
-            if current > 0L then
-                current <- current - 512L
+        let next = readF
+        let isLastChank = ref false
 
-            highBound <- (if int64 length < bound - current then length else (int) (bound - current))
-            read <- RawIO.ReadFileW(handle, input, highBound, offset + current)
-
-            if read <= 0 && current = 0L then
-                failwith "Failed to start reading!"
-
+        while not !isLastChank do
+            let last = next input
+            isLastChank := last.IsNone
+            let read = match last with Some x -> x.Length | _ -> -1
             if current > 0L then
                 let result = downloader label task
                 countingTimer.Start()
-                counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound + 512L)
+                counter := 
+                    !counter 
+                    + countMatchesDetailed (index-1) result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound + 512L)
                 countingTimer.Lap(label)
 
             if (read > 0) then
@@ -224,18 +242,11 @@ type Matcher(provider, config) =
 
                 countingBound <- read
                 matchBound <- read
-                if current < bound then
-                    countingBound <- countingBound - 512
+                //if current < bound then
+                  //  countingBound <- countingBound - 512
 
                 task <- uploader command
         
-        if (read > 0) then
-            printfn "Last read is non-zero!"
-            let result = downloader label task
-            countingTimer.Start()
-            counter := !counter + countMatchesDetailed result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound)
-            countingTimer.Lap(label)
-
         let hex = Array.map (fun (x : byte) -> System.String.Format("{0:X2} ", x)) templateArr
         let mutable start = 0
         for i in 0..(templates.number - 1) do
@@ -246,8 +257,7 @@ type Matcher(provider, config) =
         printfn ""
 
         printfn "Total found by %A: %A" label !counter
-
-        ignore(RawIO.CloseHandle(handle))
+                
         readingTimer.Lap(label)
         close()
 
@@ -275,6 +285,20 @@ type Matcher(provider, config) =
         printfn "Counting time:"
         Helpers.printTime countingTimer label
 
+    let rk readFun templateArr  = 
+        label <- RabinKarp.label
+        let config = configure templateArr
+        let templates = prepareTemplates templateArr
+        let kernel, kernelPrepare, kernelRun = initialize config templateArr RabinKarp.command        
+        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
+        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
+        kernelPrepare 
+            config.bufLength config.chankSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
+        run kernelRun readFun templates config prefix label close
+        timer.Lap(label)
+        finalize()
+        totalResult,templates
+
     member this.NaiveSearch (hdId, templateArr)  = 
         label <- NaiveSearch.label
         let config = configure templateArr
@@ -286,17 +310,17 @@ type Matcher(provider, config) =
         timer.Lap(label)
         finalize()
 
-    member this.AhoCorasik (hdId, templateArr)  =        
-        label <- AhoCorasick.label
-        let config = configure templateArr
-        let templates = prepareTemplates templateArr
-        let kernel, kernelPrepare, kernelRun = initialize config templateArr AhoCorasick.command        
-        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
-        let go, _, exit = AhoCorasick.buildStateMachine templates.number maxTemplateLength next leaf
-        kernelPrepare config.bufLength config.chankSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
-        run kernelRun hdId templates config prefix label close
-        timer.Lap(label)
-        finalize()
+//    member this.AhoCorasik (hdId, templateArr)  =        
+//        label <- AhoCorasick.label
+//        let config = configure templateArr
+//        let templates = prepareTemplates templateArr
+//        let kernel, kernelPrepare, kernelRun = initialize config templateArr AhoCorasick.command        
+//        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
+//        let go, _, exit = AhoCorasick.buildStateMachine templates.number maxTemplateLength next leaf
+//        kernelPrepare config.bufLength config.chankSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
+//        run kernelRun hdId templates config prefix label close
+//        timer.Lap(label)
+//        finalize()
 
     member this.Hashtable (hdId, templateArr)  = 
         label <- Hashtables.label
@@ -312,16 +336,34 @@ type Matcher(provider, config) =
         run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
+        totalResult,templates
 
-    member this.RabinKarp (hdId, templateArr) = 
-        label <- RabinKarp.label
-        let config = configure templateArr
-        let templates = prepareTemplates templateArr
-        let kernel, kernelPrepare, kernelRun = initialize config templateArr RabinKarp.command        
-        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
-        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
-        kernelPrepare 
-            config.bufLength config.chankSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
-        run kernelRun hdId templates config prefix label close
-        timer.Lap(label)
-        finalize()
+    member this.RabinKarp (readFun, templateArr) = 
+        rk readFun templateArr
+
+    member this.RabinKarp (hdId, templateArr) =         
+        let handle = RawIO.CreateFileW hdId        
+        let res = rk (RawIO.ReadHD handle) templateArr
+        RawIO.CloseHandle(handle)
+        |> ignore
+        res
+
+    member this.RabinKarp (inSeq, templateArr) = 
+        let readF = 
+            let next = chank 32 inSeq
+            let finish = ref false
+            fun buf ->
+                if !finish
+                then None
+                else
+                    let r = next buf
+                    match r with
+                    | None -> ()
+                    | Some x -> finish := true
+                    Some buf
+
+        rk readF templateArr
+
+    member this.InBufSize with get () = input.Length
+
+                

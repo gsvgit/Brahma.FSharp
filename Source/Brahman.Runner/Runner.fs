@@ -59,9 +59,22 @@ let additional = [|
     [|0x4Duy; 0x69uy; 0x63uy; 0x72uy; 0x6Fuy; 0x73uy; 0x6Fuy; 0x66uy; 0x74uy; 0x20uy; 0x43uy; 0x2Fuy; 0x43uy; 0x2Buy; 0x2Buy; 0x20uy|];//PDB
 |]
 
-let matcher = new Brahman.Substrings.Matcher.Matcher(1,1)
 
-do matcher.AhoCorasik(0, (Array.append first templates))
-do matcher.RabinKarp (0, (Array.append first templates))
-do matcher.Hashtable (0, (Array.append first templates))
-do matcher.NaiveSearch(0, (Array.append first templates))
+let demoSeqGenerator size =
+    let rand = new System.Random()
+    let buf = Array.zeroCreate 10
+    seq {
+        for i in 0 .. size do
+            for j in 0..10 do
+                rand.NextBytes buf
+                yield! buf
+                if i % 100 = 0 then yield! (Array.append first templates).[i%30]
+        }
+
+let matcher = new Brahman.Substrings.Matcher.Matcher()
+
+//do matcher.AhoCorasik(0, (Array.append first templates))
+//do matcher.RabinKarp (0, (Array.append first templates))
+do matcher.RabinKarp (demoSeqGenerator (512*1024), (Array.append first templates)) |> ignore
+//do matcher.Hashtable (0, (Array.append first templates))
+//do matcher.NaiveSearch(0, (Array.append first templates))

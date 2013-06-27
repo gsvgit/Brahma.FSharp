@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open Brahma.Helpers
+open Brahma.OpenCL
 
 let computeTemplateHashes templates templatesSum (templateLengths:array<byte>) (templateArr:array<byte>) =
     let hashes = Array.zeroCreate templates
@@ -108,3 +109,13 @@ let printGlobalTime = printTime (Timer<string>.Global)
 let printTotalTime (timer:Timer<string>) (readingTimer:Timer<string>) label =
     if timer <> null then
         printfn "Total time, %A: %A" label (timer.Total(label) + readingTimer.Total("reading"))
+
+let compressResults =
+    <@
+        fun (rng:_1D) (counter:array<int>) (inArr:array<int16>) (result:array<byte>) ->
+            let r = rng.GlobalID0
+            if inArr.[r] > -1s
+            then 
+                let i = counter.[0] <!+> 1
+                result.[i] <- byte inArr.[r]
+    @>

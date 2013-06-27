@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Brahman.OpenCL", "Brahman.O
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Runner", "Brahman.Runner\Brahman.Runner.fsproj", "{06AF6F48-A711-47F3-BADD-D582254473FA}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Test", "Brahman.Test\Brahman.Test.fsproj", "{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -308,6 +310,18 @@ Global
 		{06AF6F48-A711-47F3-BADD-D582254473FA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{06AF6F48-A711-47F3-BADD-D582254473FA}.Release|x64.ActiveCfg = Release|Any CPU
 		{06AF6F48-A711-47F3-BADD-D582254473FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -325,5 +339,6 @@ Global
 		{264509A1-82A6-4087-9C93-7E4236AA64EC} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 		{EF36E48C-A9D2-464E-8EFD-CBD050E0A2DC} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
 		{06AF6F48-A711-47F3-BADD-D582254473FA} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
+		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
 	EndGlobalSection
 EndGlobal

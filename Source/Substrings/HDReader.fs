@@ -1,9 +1,6 @@
 ﻿module Brahman.Substrings.RawIO
 
 open System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
 open System.Runtime.InteropServices
 open System.Threading;
 
@@ -76,6 +73,28 @@ let ReadFileW(hFile, lpBuffer, nNumberOfBytesToRead, offset: int64)=
     let mutable read = 0
     let succeeded = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, &read, handle.AddrOfPinnedObject())
     handle.Free()
-    if (succeeded)
+    if succeeded
     then read
     else -1
+
+let ReadHDAsSeq handle =    
+    let chank = 128 * 1024 * 1024
+    let buf = Array.zeroCreate chank
+    let offset = ref 0L
+    let flg = ref false
+    seq { 
+            while not !flg do
+                let read = ReadFileW(handle, buf, chank, !offset)
+                offset := !offset + int64 chank
+                flg := read < chank || read = -1
+                yield! buf
+        }
+
+let ReadHD handle =
+    let offset = ref 0L
+    fun (buf:array<_>) ->
+        let chank = buf.Length
+        let read = ReadFileW(handle, buf, chank, !offset)
+        offset := !offset + int64 chank
+        if read = -1
+        then None else Some buf        
