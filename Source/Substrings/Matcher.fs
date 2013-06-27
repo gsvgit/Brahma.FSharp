@@ -14,7 +14,7 @@ type Config =
         additionalArgs: uint64
         additionalTempData: uint64
         localWorkSize: int
-        chankSize: int
+        chunkSize: int
         groups: int
         groupSize: int
         bufLength: int
@@ -28,10 +28,10 @@ type Templates = {
 
 [<Struct>]
 type MatchRes =
-    val ChankNum: int
+    val ChunkNum: int
     val Offset: int
     val PatternId : int
-    new (chankNum,offset,patternId) = {ChankNum = chankNum; Offset = offset; PatternId = patternId }
+    new (chunkNum,offset,patternId) = {ChunkNum = chunkNum; Offset = offset; PatternId = patternId }
 
 type Matcher(?maxHostMem) =
     let totalResult = new ResizeArray<_>()
@@ -72,15 +72,15 @@ type Matcher(?maxHostMem) =
         let availableMemory = (int) (min (maxGpuMemory - additionalArgs) (maxHostMemory - additionalArgs - additionalTempData))
         let lws,ex = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxWorkGroupSize)
         let localWorkSize = int <| lws.CastTo<uint64>()
-        let chankSize = 1024
-        let groupSize = chankSize * localWorkSize * (1 + 2)
+        let chunkSize = 1024
+        let groupSize = chunkSize * localWorkSize * (1 + 2)
         let groups = availableMemory / groupSize
-        let length = chankSize * localWorkSize * groups
+        let length = chunkSize * localWorkSize * groups
         {
             additionalArgs = additionalArgs
             additionalTempData = additionalTempData
             localWorkSize = localWorkSize
-            chankSize = chankSize
+            chunkSize = chunkSize
             groups = groups
             groupSize = groupSize
             bufLength = length
@@ -94,7 +94,7 @@ type Matcher(?maxHostMem) =
         printfn 
             "Running %A groups with %A items in each, %A in total."
             config.groups config.localWorkSize (config.localWorkSize * config.groups)
-        printfn "Each item will process %A bytes of input, %A total on each iteration." config.chankSize config.bufLength
+        printfn "Each item will process %A bytes of input, %A total on each iteration." config.chunkSize config.bufLength
         printfn ""
     
     let initialize config templates command =
@@ -105,7 +105,7 @@ type Matcher(?maxHostMem) =
         result <- Array.zeroCreate config.bufLength
         input <- Array.zeroCreate config.bufLength
         let kernel, kernelPrepare, kernelRun = provider.Compile(query=command, translatorOptions=[BoolAsBit])                
-        let l = (config.bufLength + (config.chankSize-1))/config.chankSize 
+        let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
         let d =(new _1D(l,config.localWorkSize))        
         timer.Lap(label)
         kernel, (kernelPrepare d), kernelRun
@@ -173,15 +173,15 @@ type Matcher(?maxHostMem) =
 
         matches
 
-    let chank overlapSize (s:seq<'a>) =
-        let firstChank = ref true
+    let chunk overlapSize (s:seq<'a>) =
+        let firstChunk = ref true
         let overlappedBuf:array<'a> = Array.zeroCreate overlapSize
         let sEnum = s.GetEnumerator()
         let isLast = ref false
-        let lastChankS = ref 0
+        let lastChunkS = ref 0
         fun (buf:array<_>) ->
             let l = buf.Length
-            let mutable i = if !firstChank then 0 else overlapSize
+            let mutable i = if !firstChunk then 0 else overlapSize
             while i < l do
                 if sEnum.MoveNext()
                 then
@@ -190,13 +190,13 @@ type Matcher(?maxHostMem) =
                 elif not !isLast
                 then 
                     isLast := true
-                    lastChankS := i
+                    lastChunkS := i
                 i <- i + 1
-            if not !firstChank
+            if not !firstChunk
             then array.Copy(overlappedBuf,buf,overlappedBuf.Length)
             array.Copy(buf, l-overlapSize, overlappedBuf, 0, overlappedBuf.Length)
-            firstChank := false
-            if !isLast then Some !lastChankS else None
+            firstChunk := false
+            if !isLast then Some !lastChunkS else None
 
 
     let run command (readF: byte[] -> Option<byte[]>) templates config prefix label close =
@@ -219,11 +219,11 @@ type Matcher(?maxHostMem) =
         let mutable current = 0L
 
         let next = readF
-        let isLastChank = ref false
+        let isLastChunk = ref false
 
-        while not !isLastChank do
+        while not !isLastChunk do
             let last = next input
-            isLastChank := last.IsNone
+            isLastChunk := last.IsNone
             let read = match last with Some x -> x.Length | _ -> -1
             if current > 0L then
                 let result = downloader label task
@@ -295,7 +295,7 @@ type Matcher(?maxHostMem) =
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
         kernelPrepare 
-            config.bufLength config.chankSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
+            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
         run kernelRun readFun templates config prefix label close
         timer.Lap(label)
         finalize()
@@ -307,7 +307,7 @@ type Matcher(?maxHostMem) =
         let templates = prepareTemplates templateArr
         let kernel, kernelPrepare, kernelRun = initialize config templateArr NaiveSearch.command
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
-        kernelPrepare config.bufLength config.chankSize templates.number templates.sizes input templates.content result
+        kernelPrepare config.bufLength config.chunkSize templates.number templates.sizes input templates.content result
         run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
@@ -319,7 +319,7 @@ type Matcher(?maxHostMem) =
 //        let kernel, kernelPrepare, kernelRun = initialize config templateArr AhoCorasick.command        
 //        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
 //        let go, _, exit = AhoCorasick.buildStateMachine templates.number maxTemplateLength next leaf
-//        kernelPrepare config.bufLength config.chankSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
+//        kernelPrepare config.bufLength config.chunkSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
 //        run kernelRun hdId templates config prefix label close
 //        timer.Lap(label)
 //        finalize()
@@ -334,7 +334,7 @@ type Matcher(?maxHostMem) =
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
         let table, next = Hashtables.createHashTable templates.number templates.sizes templateHashes
         kernelPrepare 
-            config.bufLength config.chankSize templates.number templates.sizes  templateHashes table next starts maxTemplateLength input templates.content result
+            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes table next starts maxTemplateLength input templates.content result
         run kernelRun hdId templates config prefix label close
         timer.Lap(label)
         finalize()
@@ -352,7 +352,7 @@ type Matcher(?maxHostMem) =
 
     member this.RabinKarp (inSeq, templateArr) = 
         let readF = 
-            let next = chank 32 inSeq
+            let next = chunk 32 inSeq
             let finish = ref false
             fun buf ->
                 if !finish

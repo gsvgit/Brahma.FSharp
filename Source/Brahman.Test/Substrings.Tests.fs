@@ -21,7 +21,7 @@ type ``Brahman Substrings tests`` () =
         let zSeq  = seq {for i in 0 .. 10000 do if i = 0 then yield! template else yield 0uy}        
         let res,tmpl = matcher.RabinKarp (zSeq,[|template|])
         Assert.AreEqual(res.Count,1)
-        Assert.AreEqual(res.[0].ChankNum,0)
+        Assert.AreEqual(res.[0].ChunkNum,0)
         Assert.AreEqual(res.[0].Offset,0)
         Assert.AreEqual(res.[0].PatternId,0)
 
@@ -31,7 +31,7 @@ type ``Brahman Substrings tests`` () =
         let zSeq  = seq {for i in 0 .. 10000 do if i = 10 then yield! template else yield 0uy}        
         let res,tmpl = matcher.RabinKarp (zSeq,[|template|])
         Assert.AreEqual(res.Count,1)
-        Assert.AreEqual(res.[0].ChankNum,0)
+        Assert.AreEqual(res.[0].ChunkNum,0)
         Assert.AreEqual(res.[0].Offset,10)
         Assert.AreEqual(res.[0].PatternId,0)
 
@@ -41,7 +41,7 @@ type ``Brahman Substrings tests`` () =
         let zSeq  = seq {for i in 0 .. 10000 do if i = 10 then yield! templates.[1] else yield 0uy}        
         let res,tmpl = matcher.RabinKarp (zSeq,templates)
         Assert.AreEqual(res.Count,1)
-        Assert.AreEqual(res.[0].ChankNum,0)
+        Assert.AreEqual(res.[0].ChunkNum,0)
         Assert.AreEqual(res.[0].Offset,10)
         Assert.AreEqual(res.[0].PatternId, Array.findIndex ((=)templates.[1]) (sorted tmpl) )
 
@@ -51,7 +51,7 @@ type ``Brahman Substrings tests`` () =
         let zSeq  = seq {for i in 0 .. 10000 do if i = 10 then yield! templates.[1] elif i = 19 then yield! templates.[0] else yield 0uy}        
         let res,tmpl = matcher.RabinKarp (zSeq,templates)
         Assert.AreEqual(res.Count,2)
-        Assert.AreEqual(res.[0].ChankNum,0)
+        Assert.AreEqual(res.[0].ChunkNum,0)
         Assert.AreEqual(res.[0].Offset,10)
         Assert.AreEqual(res.[1].Offset,20)
         Assert.AreEqual(res.[0].PatternId, Array.findIndex ((=)templates.[1]) (sorted tmpl))
@@ -64,7 +64,7 @@ type ``Brahman Substrings tests`` () =
         let zSeq  = seq {for i in 0 .. 1024 * 1024 do if i = 1024 * 1024 / 3 + 5000 then yield! template else yield 0uy}        
         let res,tmpl = matcher.RabinKarp (zSeq,[|template|])
         Assert.AreEqual(res.Count,1)
-        Assert.AreEqual(res.[0].ChankNum,1)
+        Assert.AreEqual(res.[0].ChunkNum,1)
         Assert.AreEqual(res.[0].Offset, (1024 * 1024 / 3 + 5000) - matcher.InBufSize + 32)
         Assert.AreEqual(res.[0].PatternId,0)
 
