@@ -215,6 +215,7 @@ type Matcher(?maxHostMem) =
         let mutable task = Unchecked.defaultof<Task<unit>>
 
         let mutable index = 0
+        let mutable totalIndex = 0
         let mutable current = 0L
 
         let next = readF
@@ -229,11 +230,12 @@ type Matcher(?maxHostMem) =
                 countingTimer.Start()
                 counter := 
                     !counter 
-                    + countMatchesDetailed (index-1) result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound + 512L)
+                    + countMatchesDetailed (totalIndex-1) result maxTemplateLength countingBound matchBound templateLengths prefix matches (current - (int64) matchBound + 512L)
                 countingTimer.Lap(label)
 
             if (read > 0) then
                 index <- index + 1
+                totalIndex <- totalIndex + 1
                 current <- current + (int64) read
 
                 if index = 50 then
