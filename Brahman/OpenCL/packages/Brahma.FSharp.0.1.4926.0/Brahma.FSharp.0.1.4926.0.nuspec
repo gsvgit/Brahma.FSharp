@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Brahma.FSharp</id>
+    <version>0.1.4926.0</version>
+    <title>Brahma.FSharp</title>
+    <authors>Semyon Grigorev</authors>
+    <owners>Semyon Grigorev</owners>
+    <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License (eclipse-1.0).txt</licenseUrl>
+    <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Brahma.FSharp is a library for F# with GPGPU integration. It is based on F# quotation to OpenCL translator.</description>
+    <releaseNotes>Official OpenCL.NET from NuGet.</releaseNotes>
+    <copyright>Copyright 2012-2013</copyright>
+    <tags>OpenCL GPGPU .NET F# FSharp Quotations HPC</tags>
+    <dependencies>
+      <dependency id="OpenCL.Net" version="1.3.5.0" />
+      <dependency id="FSharpx.Text.StructuredFormat" version="1.8.31" />
+    </dependencies>
+  </metadata>
+</package>

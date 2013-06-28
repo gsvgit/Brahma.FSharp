@@ -45,7 +45,7 @@
     <Compile Include="Substrings.Tests.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Substrings\Brahman.Substrings.fsproj">
+    <ProjectReference Include="..\Brahman.Substrings\Brahman.Substrings.fsproj">
       <Name>Brahman.Substrings</Name>
       <Project>{ef36e48c-a9d2-464e-8efd-cbd050e0a2dc}</Project>
       <Private>True</Private>

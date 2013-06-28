@@ -47,10 +47,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Substrings\Brahman.Substrings.fsproj">
+    <ProjectReference Include="..\Brahman.Substrings\Brahman.Substrings.fsproj">
       <Project>{ef36e48c-a9d2-464e-8efd-cbd050e0a2dc}</Project>
       <Name>Brahman.Substrings</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
