@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="Full.fs" />
     <Compile Include="Translator.fs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
@@ -93,14 +94,12 @@
     <Reference Include="nunit.framework">
       <HintPath>C:\Program Files (x86)\NUnit 2.6.2\bin\framework\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="OpenCL.Net, Version=0.1.4920.19109, Culture=neutral, PublicKeyToken=null">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\Libraries\OpenCL.Net\OpenCL.Net\OpenCL.Net.csproj">
-      <Name>OpenCL.Net</Name>
-      <Project>{70ac8a83-9850-4f73-b7bc-541eb2505be6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">
       <Name>Brahma.FSharp.OpenCL.Core</Name>
       <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
