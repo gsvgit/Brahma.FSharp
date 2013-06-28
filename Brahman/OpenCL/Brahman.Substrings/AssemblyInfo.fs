@@ -17,7 +17,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Semyon Grigorev")>]
 [<assembly: AssemblyProduct("Brahman.Substrings")>]
-[<assembly: AssemblyCopyright("Copyright ©  2012-2013. Semyon Grigorev <rsdpisuy@gmail.com>")>]
+[<assembly: AssemblyCopyright("Copyright ©  2013. Semyon Grigorev <rsdpisuy@gmail.com>")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 

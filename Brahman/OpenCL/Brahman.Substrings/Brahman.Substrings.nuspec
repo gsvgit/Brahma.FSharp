@@ -7,18 +7,18 @@
     <authors>Semyon Grigorev</authors>
     <owners>$author$</owners>
     <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License%20(eclipse-1.0).txt</licenseUrl>
-    <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
+    <projectUrl>https://sites.google.com/site/semathsrprojects/home/brahman-opencl/brahman-substrings</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
 	Developer preview version.
         Brahman.Substrings is a library for substrings matching. Current version is customized for data carving.
     </releaseNotes>
-    <copyright>Copyright 2012-2013 Semyon Grigorev [rsdpisuy@gmail.com]</copyright>
+    <copyright>Copyright 2013 Semyon Grigorev [rsdpisuy@gmail.com]</copyright>
     <tags>OpenCL GPGPU .NET F# FSharp Substrings Matching Search Carving</tags>
   </metadata>
 <files>
-    <file src="..\..\..\Readme.txt" target="" /> 
-    <file src="..\..\..\..\License (eclipse-1.0).txt" target="" /> 
+    <file src="..\..\Readme.txt" target="" /> 
+    <file src="..\..\..\License (eclipse-1.0).txt" target="" /> 
 </files>
 </package>
