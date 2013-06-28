@@ -110,6 +110,31 @@ let printTotalTime (timer:Timer<string>) (readingTimer:Timer<string>) label =
     if timer <> null then
         printfn "Total time, %A: %A" label (timer.Total(label) + readingTimer.Total("reading"))
 
+let chunk overlapSize (s:seq<'a>) =
+    let firstChunk = ref true
+    let overlappedBuf:array<'a> = Array.zeroCreate overlapSize
+    let sEnum = s.GetEnumerator()
+    let isLast = ref false
+    let lastChunkS = ref 0
+    fun (buf:array<_>) ->
+        let l = buf.Length
+        let mutable i = if !firstChunk then 0 else overlapSize
+        while i < l do
+            if sEnum.MoveNext()
+            then
+                let b = sEnum.Current
+                buf.[i] <- b
+            elif not !isLast
+            then 
+                isLast := true
+                lastChunkS := i
+            i <- i + 1
+        if not !firstChunk
+        then array.Copy(overlappedBuf,buf,overlappedBuf.Length)
+        array.Copy(buf, l-overlapSize, overlappedBuf, 0, overlappedBuf.Length)
+        firstChunk := false
+        if !isLast then Some !lastChunkS else None
+
 let compressResults =
     <@
         fun (rng:_1D) (counter:array<int>) (inArr:array<int16>) (result:array<byte>) ->

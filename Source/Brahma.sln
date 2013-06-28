@@ -53,6 +53,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Runner", "Brahman.R
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Test", "Brahman.Test\Brahman.Test.fsproj", "{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahman.Runner.CS", "Brahman.Runner.CS\Brahman.Runner.CS.csproj", "{89C75587-E3FF-4CDA-93C4-9725081766ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -322,6 +324,18 @@ Global
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x64.ActiveCfg = Release|Any CPU
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x86.ActiveCfg = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|x64.ActiveCfg = Release|Any CPU
+		{89C75587-E3FF-4CDA-93C4-9725081766ED}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -340,5 +354,6 @@ Global
 		{EF36E48C-A9D2-464E-8EFD-CBD050E0A2DC} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
 		{06AF6F48-A711-47F3-BADD-D582254473FA} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
+		{89C75587-E3FF-4CDA-93C4-9725081766ED} = {15CA2E60-DB2E-4AD5-91F1-C3C8962D473B}
 	EndGlobalSection
 EndGlobal

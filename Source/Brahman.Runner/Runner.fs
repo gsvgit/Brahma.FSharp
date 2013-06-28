@@ -74,7 +74,9 @@ let demoSeqGenerator size =
 let matcher = new Brahman.Substrings.Matcher.Matcher()
 
 //do matcher.AhoCorasik(0, (Array.append first templates))
-//do matcher.RabinKarp (0, (Array.append first templates))
-do matcher.RabinKarp (demoSeqGenerator (512*1024), (Array.append first templates)) |> ignore
+do 
+    let res = matcher.RabinKarp (0, (Array.append first templates))
+    printfn "Add Total: %A" res.Data.Length
+//do matcher.RabinKarp (demoSeqGenerator (512*1024), (Array.append first templates)) |> ignore
 //do matcher.Hashtable (0, (Array.append first templates))
 //do matcher.NaiveSearch(0, (Array.append first templates))
