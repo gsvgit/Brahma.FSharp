@@ -86,14 +86,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.8.28.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="OpenCL.Net, Version=0.1.4920.19109, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\packages\OpenCL.Net.1.3.5.0\lib\net40-Client\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

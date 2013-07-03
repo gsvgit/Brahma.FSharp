@@ -89,13 +89,12 @@
     <Compile Include="QuotationsTransformer.fs" />
     <Compile Include="Body.fs" />
     <Compile Include="Translator.fs" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core, Version=1.8.28.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FSharpx.Core, Version=1.8.31.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

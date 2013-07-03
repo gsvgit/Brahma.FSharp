@@ -31,5 +31,8 @@ Please send comments and/or suggestions to ananth&lt;at&gt;ananthonline&lt;dot&g
     <releaseNotes />
     <copyright>Copyright 2010</copyright>
     <tags>OpenCL C# .NET GPGPU Dataparallel Compute multicore multi-core parallel HPC</tags>
+    <references>
+      <reference file="OpenCL.Net.dll" />
+    </references>
   </metadata>
 </package>
