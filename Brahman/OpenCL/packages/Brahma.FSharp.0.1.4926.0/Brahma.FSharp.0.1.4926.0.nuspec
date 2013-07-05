@@ -17,5 +17,15 @@
       <dependency id="OpenCL.Net" version="1.3.5.0" />
       <dependency id="FSharpx.Text.StructuredFormat" version="1.8.31" />
     </dependencies>
+    <references>
+      <reference file="Brahma.dll" />
+      <reference file="Brahma.FSharp.OpenCL.AST.dll" />
+      <reference file="Brahma.FSharp.OpenCL.Core.dll" />
+      <reference file="Brahma.FSharp.OpenCL.Extensions.dll" />
+      <reference file="Brahma.FSharp.OpenCL.Printer.dll" />
+      <reference file="Brahma.FSharp.OpenCL.Translator.dll" />
+      <reference file="Brahma.Helpers.dll" />
+      <reference file="Brahma.OpenCL.dll" />
+    </references>
   </metadata>
 </package>
