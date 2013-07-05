@@ -87,10 +87,12 @@ namespace Brahman.Runner.CS
         {
             var matcher = new MatcherCS.MatcherCS();            
             var r = matcher.RabinKarp( new HDReader(), templates);
-            System.Console.WriteLine("Ordered templates: " + r.Templates);
+            System.Console.WriteLine("Ordered templates count: " + r.Templates.Length);
             System.Console.WriteLine("Chunk size: " + r.ChunkSize);
             foreach (var i in r.Data)
             {
+                // i.PatternID is a pattern's id in r.Templates. Not in templates from matcher.RabinKarp. 
+                // It is because we need to order patres by length while processing. 
                 System.Console.WriteLine(i.PatternId + "; " + i.ChunkNum + "; " + i.Offset);
             }
         }
