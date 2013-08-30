@@ -22,7 +22,7 @@ open Brahma.FSharp.OpenCL.Extensions
 open Microsoft.FSharp.Quotations
 open System
 
-let deviceType = Cl.DeviceType.Default
+let deviceType = DeviceType.Default
 let platformName = "*"
 
 let provider =

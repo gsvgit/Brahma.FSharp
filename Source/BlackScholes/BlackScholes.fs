@@ -88,7 +88,7 @@ let main () =
         let iterations = 1
         let optionCount = 40000
         let localWorkSize = 32
-        let deviceType = Cl.DeviceType.Default
+        let deviceType = DeviceType.Default
 
     
         let provider =

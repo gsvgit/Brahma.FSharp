@@ -26,16 +26,16 @@ open FSharpx.Linq.QuotationEvaluation
 let random = new System.Random()
 
 let platformName = "*"
-let deviceType = Cl.DeviceType.Default
+let deviceType = DeviceType.Default
 
 let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
         | ex -> failwith ex.Message
 let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-let ing,e = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.GlobalMemSize)
+let ing,e = Cl.GetDeviceInfo(provider.Devices |> Seq.head,DeviceInfo.GlobalMemSize)
 let gg = ing.CastTo<uint64>()
-let ing2,e2 = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
+let ing2,e2 = Cl.GetDeviceInfo(provider.Devices |> Seq.head,DeviceInfo.MaxMemAllocSize)
 let ggg = ing2.CastTo<uint64>()
 let k = 1024
 

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Brahma.Commands;
 using OpenCL.Net;
+using ClNet = OpenCL.Net;
 using System;
 using System.Runtime.InteropServices;
 
@@ -49,7 +50,7 @@ namespace Brahma.OpenCL.Commands
                     (IntPtr)(_elementSize * data.Length), data, out error);
                 curArgVal = mem;
                 mem.Pin();
-                kernel.Provider.AutoconfiguredBuffers.Add(data, mem);
+                kernel.Provider.AutoconfiguredBuffers.Add(data, (Mem)mem);
                 if (error != ErrorCode.Success)
                     throw new CLException(error);
             }                        
@@ -108,7 +109,7 @@ namespace Brahma.OpenCL.Commands
                             select ev.Value).ToArray();
 
             Event eventID;
-            ErrorCode error = EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint)kernel.WorkDim, null,
+            ErrorCode error = Cl.EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint)kernel.WorkDim, null,
                 range.GlobalWorkSize, range.LocalWorkSize, (uint)waitList.Length, waitList.Length == 0 ? null : waitList.ToArray(), out eventID);
             if (error != ErrorCode.Success)
                 throw new CLException(error);

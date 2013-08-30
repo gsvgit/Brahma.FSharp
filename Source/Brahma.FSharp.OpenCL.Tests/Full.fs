@@ -17,7 +17,7 @@ type Translator() =
     let intInArr = [|0..defaultInArrayLength-1|]
     let float32Arr = Array.init defaultInArrayLength (fun i -> float32 i)
     let _1d = new _1D(defaultInArrayLength, 1)
-    let deviceType = Cl.DeviceType.Default
+    let deviceType = DeviceType.Default
     let platformName = "*"
 
     let provider =

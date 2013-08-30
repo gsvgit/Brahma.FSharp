@@ -16,7 +16,7 @@ type Translator() =
     
     let basePath = "../../../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
 
-    let deviceType = Cl.DeviceType.Cpu
+    let deviceType = DeviceType.Cpu
     let platformName = "*"
 
     let provider =

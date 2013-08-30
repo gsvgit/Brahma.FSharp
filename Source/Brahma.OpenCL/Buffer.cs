@@ -18,52 +18,57 @@
 using System;
 using System.Runtime.InteropServices;
 using Brahma.OpenCL.Commands;
-using OpenCL.Net;
+//using OpenCL.Net;
+using ClNet = OpenCL.Net;
+using Cl = OpenCL.Net.Cl;
 
 namespace Brahma.OpenCL
 {
     public enum Operations: ulong
     {
-        ReadWrite = MemFlags.ReadWrite,
-        ReadOnly = MemFlags.ReadOnly,
-        WriteOnly = MemFlags.WriteOnly,
+        ReadWrite = ClNet.MemFlags.ReadWrite,
+        ReadOnly = ClNet.MemFlags.ReadOnly,
+        WriteOnly = ClNet.MemFlags.WriteOnly,
     }
 
     public enum Memory : ulong 
     {
         Device = 0,
-        HostAccessible = MemFlags.AllocHostPtr,
-        Host = MemFlags.UseHostPtr
+        HostAccessible = ClNet.MemFlags.AllocHostPtr,
+        Host = ClNet.MemFlags.UseHostPtr
     }
     
     public class Buffer<T>: Brahma.Buffer<T>
     {
         private static readonly IntPtr _intPtrSize = (IntPtr)Marshal.SizeOf(typeof(IntPtr));
         private static readonly int _elementSize = Marshal.SizeOf(typeof(T));
-        
-        private Mem _mem;
+
+        private ClNet.IMem _mem;
         private bool _disposed;
         private readonly int _length;
 
         public readonly Operations Operations;
         public readonly Memory Memory;
 
-        internal Mem Mem
+        internal ClNet.Mem Mem
         {
             get
             {
-                return _mem;
+                return (ClNet.Mem)_mem;
             }
         }
 
         public Buffer(ComputeProvider provider, Operations operations, bool hostAccessible, int length) // Create, no data
         {
-            ErrorCode error;
+            ClNet.ErrorCode error;
             _length = length;
             var size = (IntPtr)(_length * _elementSize);
-            _mem = Cl.CreateBuffer(provider.Context, (MemFlags)operations | (hostAccessible ? MemFlags.AllocHostPtr : 0), size, null, out error);
-
-            if (error != ErrorCode.Success)
+            _mem = Cl.CreateBuffer(
+                        provider.Context
+                        , (ClNet.MemFlags)operations | (hostAccessible ? ClNet.MemFlags.AllocHostPtr : 0)
+                        , size, null, out error);
+            
+            if (error != ClNet.ErrorCode.Success)
                 throw new Cl.Exception(error);
 
             Operations = operations;
@@ -72,13 +77,13 @@ namespace Brahma.OpenCL
 
         public Buffer(ComputeProvider provider, Operations operations, Memory memory, Array data) // Create and copy/use data from host
         {
-            ErrorCode error;
+            ClNet.ErrorCode error;
             _length = data.Length;
 
-            _mem = Cl.CreateBuffer(provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
+            _mem = Cl.CreateBuffer(provider.Context, (ClNet.MemFlags)operations | (memory == Memory.Host ? ClNet.MemFlags.UseHostPtr : (ClNet.MemFlags)memory | ClNet.MemFlags.CopyHostPtr),
                 (IntPtr)(_elementSize * data.Length), data, out error);
 
-            if (error != ErrorCode.Success)
+            if (error != ClNet.ErrorCode.Success)
                 throw new Cl.Exception(error);
 
             Operations = operations;
@@ -92,12 +97,12 @@ namespace Brahma.OpenCL
 
         public Buffer(ComputeProvider provider, Operations operations, Memory memory, IntPtr data, int length) // Create and copy/use data from host
         {
-            ErrorCode error;
+            ClNet.ErrorCode error;
             _length = length;
-            _mem = Cl.CreateBuffer(provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | (data != IntPtr.Zero ? MemFlags.CopyHostPtr : 0)),
+            _mem = Cl.CreateBuffer(provider.Context, (ClNet.MemFlags)operations | (memory == Memory.Host ? ClNet.MemFlags.UseHostPtr : (ClNet.MemFlags)memory | (data != IntPtr.Zero ? ClNet.MemFlags.CopyHostPtr : 0)),
                 (IntPtr)(_elementSize * _length), data, out error);
 
-            if (error != ErrorCode.Success)
+            if (error != ClNet.ErrorCode.Success)
                 throw new Cl.Exception(error);
 
             Operations = operations;

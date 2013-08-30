@@ -22,6 +22,10 @@ open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
 
+//type Context = OpenCL.Net.
+//type ClNet = OpenCL.Net
+
+
 type CLCodeGenerator() =
     static member KernelName = "brahmaKernel"
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel, translatorOptions) =        
@@ -31,7 +35,7 @@ type CLCodeGenerator() =
         kernel.Provider <- provider        
         kernel.Source <- kernel.Source.Append code
         kernel.SetClosures [||]
-        kernel.SetParameters []
+        kernel.SetParameters []        
         
 type ComputeProvider with
 
@@ -42,9 +46,9 @@ type ComputeProvider with
         let program, error = Cl.CreateProgramWithSource(this.Context, 1u, [|str|], null)
         let _devices = Array.ofSeq  this.Devices
         let error = Cl.BuildProgram(program, _devices.Length |> uint32, _devices, this.CompileOptionsStr, null, IntPtr.Zero)
-        if error <> Cl.ErrorCode.Success
+        if error <> ErrorCode.Success
         then 
-            let s = _devices |> Array.map (fun device -> Cl.GetProgramBuildInfo(program, device, Cl.ProgramBuildInfo.Log ) |> fst |> string)
+            let s = _devices |> Array.map (fun device -> Cl.GetProgramBuildInfo(program, device, ProgramBuildInfo.Log ) |> fst |> string)
             s
             |> String.concat "\n"
             |> failwith

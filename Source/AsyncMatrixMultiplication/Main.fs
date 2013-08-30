@@ -100,7 +100,7 @@ let Main () =
     let rows = 600
     let columns = 600    
     let iterations = 10
-    let deviceType = Cl.DeviceType.Default
+    let deviceType = DeviceType.Default
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
