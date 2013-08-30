@@ -38,7 +38,7 @@ namespace Brahma.OpenCL
             set;
         }       
 
-        Cl.Kernel ClKernel
+        Kernel ClKernel
         {
             get;
             set;
@@ -78,7 +78,7 @@ namespace Brahma.OpenCL
             set;
         }
 
-        Cl.Kernel ICLKernel.ClKernel
+        Kernel ICLKernel.ClKernel
         {
             get; set;
         }

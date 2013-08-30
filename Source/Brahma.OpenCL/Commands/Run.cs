@@ -41,16 +41,16 @@ namespace Brahma.OpenCL.Commands
             }
             else
             {
-                Cl.ErrorCode error;
+                ErrorCode error;
                 var operations = Operations.ReadWrite;
                 var memory = Memory.Device;
                 var _elementSize = Marshal.SizeOf(typeof(T));
-                var mem = Cl.CreateBuffer(kernel.Provider.Context, (Cl.MemFlags)operations | (memory == Memory.Host ? Cl.MemFlags.UseHostPtr : (Cl.MemFlags)memory | Cl.MemFlags.CopyHostPtr),
+                var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
                     (IntPtr)(_elementSize * data.Length), data, out error);
                 curArgVal = mem;
                 mem.Pin();
                 kernel.Provider.AutoconfiguredBuffers.Add(data, mem);
-                if (error != Cl.ErrorCode.Success)
+                if (error != ErrorCode.Success)
                     throw new CLException(error);
             }                        
         }
@@ -82,11 +82,11 @@ namespace Brahma.OpenCL.Commands
         {
             kernel = Kernel as ICLKernel;
             ToIMem(arg);            
-            Cl.ErrorCode error = 
+            ErrorCode error = 
                     Cl.SetKernelArg(kernel.ClKernel, (uint)index
                     , curArgSize
                     , curArgVal);
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
                 throw new CLException(error);
         }
         
@@ -107,10 +107,10 @@ namespace Brahma.OpenCL.Commands
                             where ev != null
                             select ev.Value).ToArray();
 
-            Cl.Event eventID;
-            Cl.ErrorCode error = Cl.EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint)kernel.WorkDim, null,
+            Event eventID;
+            ErrorCode error = EnqueueNDRangeKernel(queue.Queue, kernel.ClKernel, (uint)kernel.WorkDim, null,
                 range.GlobalWorkSize, range.LocalWorkSize, (uint)waitList.Length, waitList.Length == 0 ? null : waitList.ToArray(), out eventID);
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
                 throw new CLException(error);
 
             if (Name == string.Empty)

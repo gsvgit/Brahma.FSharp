@@ -23,11 +23,11 @@ namespace Brahma.OpenCL
     [Serializable]
     public class CLException : Exception
     {
-        public CLException(Cl.ErrorCode error) : base(error.ToString())
+        public CLException(ErrorCode error) : base(error.ToString())
         {
         }
 
-        public CLException(Cl.ErrorCode error, Exception inner) : base(error.ToString(), inner)
+        public CLException(ErrorCode error, Exception inner) : base(error.ToString(), inner)
         { 
         }
 

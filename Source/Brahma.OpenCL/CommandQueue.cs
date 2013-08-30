@@ -17,20 +17,20 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Brahma.Commands;
+//using Brahma.Commands;
 using OpenCL.Net;
 
 namespace Brahma.OpenCL
 {
     public sealed class CommandQueue: Brahma.CommandQueue
     {
-        private static readonly Dictionary<string, Cl.Event> _namedEvents = 
-            new Dictionary<string, Cl.Event>();
+        private static readonly Dictionary<string, Event> _namedEvents = 
+            new Dictionary<string, Event>();
         
         private bool _disposed = false;
-        private readonly Cl.CommandQueue _queue;
+        private readonly OpenCL.Net.CommandQueue _queue;
 
-        internal Cl.CommandQueue Queue
+        internal CommandQueue Queue
         {
             get
             {
@@ -40,12 +40,12 @@ namespace Brahma.OpenCL
 
         public static void Cleanup()
         {
-            Cl.ErrorCode error;
+            ErrorCode error;
             foreach (var name in (from kvp in _namedEvents
                                   let name = kvp.Key
                                   let ev = kvp.Value
-                                  let status = Cl.GetEventInfo(ev, Cl.EventInfo.CommandExecutionStatus, out error).CastTo<Cl.ExecutionStatus>()
-                                  where status == Cl.ExecutionStatus.Complete
+                                  let status = Cl.GetEventInfo(ev, EventInfo.CommandExecutionStatus, out error).CastTo<ExecutionStatus>()
+                                  where status == ExecutionStatus.Complete
                                   select name))
             {
                 _namedEvents[name].Dispose();
@@ -53,12 +53,12 @@ namespace Brahma.OpenCL
             }
         }
 
-        internal static void AddEvent(string name, Cl.Event ev)
+        internal static void AddEvent(string name, Event ev)
         {
             _namedEvents.Add(name, ev);
         }
 
-        internal static Cl.Event? FindEvent(string eventName)
+        internal static Event? FindEvent(string eventName)
         {
             if (_namedEvents.ContainsKey(eventName))
                 return _namedEvents[eventName];
@@ -66,13 +66,13 @@ namespace Brahma.OpenCL
             return null;
         }
         
-        public CommandQueue(ComputeProvider provider, Cl.Device device, bool outOfOrderExecution = false)
+        public CommandQueue(ComputeProvider provider, Device device, bool outOfOrderExecution = false)
         {
-            Cl.ErrorCode error;
-            _queue = Cl.CreateCommandQueue(provider.Context, device, outOfOrderExecution ? Cl.CommandQueueProperties.OutOfOrderExecModeEnable : Cl.CommandQueueProperties.None, out error);
+            ErrorCode error;
+            _queue = Cl.CreateCommandQueue(provider.Context, device, outOfOrderExecution ? CommandQueueProperties.OutOfOrderExecModeEnable : CommandQueueProperties.None, out error);
 
-            if (error != Cl.ErrorCode.Success)
-                throw new CLException(error);
+            if (error != ErrorCode.Success)
+                throw new Cl.Exception(error);
         }
 
         public override Brahma.CommandQueue Add(params Command[] commands)
@@ -85,20 +85,20 @@ namespace Brahma.OpenCL
 
         public override Brahma.CommandQueue Finish()
         {
-            Cl.ErrorCode error = Cl.Finish(_queue);
+            ErrorCode error = Cl.Finish(_queue);
 
-            if (error != Cl.ErrorCode.Success)
-                throw new CLException(error);
+            if (error != ErrorCode.Success)
+                throw new Cl.Exception(error);
 
             return this;
         }
 
         public override Brahma.CommandQueue Barrier()
         {
-            Cl.ErrorCode error = Cl.EnqueueBarrier(_queue);
+            ErrorCode error = Cl.EnqueueBarrier(_queue);
             
-            if (error != Cl.ErrorCode.Success)
-                throw new CLException(error);
+            if (error != ErrorCode.Success)
+                throw new Cl.Exception(error);
 
             return this;
         }
