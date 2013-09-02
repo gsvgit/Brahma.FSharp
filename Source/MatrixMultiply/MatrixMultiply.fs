@@ -48,7 +48,7 @@ let Main () =
     let rows = 200
     let columns = 200
     let localWorkSize = 10
-    let iterations = 100
+    let iterations = 1
     let deviceType = DeviceType.Default
 
     let provider =

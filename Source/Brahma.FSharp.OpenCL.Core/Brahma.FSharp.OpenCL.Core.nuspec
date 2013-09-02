@@ -10,7 +10,7 @@
     <projectUrl>http://sites.google.com/site/semathsrprojects/home/brahma-fsharp</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Official OpenCL.NET from NuGet.</releaseNotes>
+    <releaseNotes>Update OpenCL.Net to 2.1.3.0</releaseNotes>
     <copyright>Copyright 2012-2013</copyright>
     <tags>OpenCL GPGPU .NET F# FSharp Quotations HPC</tags>
   </metadata>
