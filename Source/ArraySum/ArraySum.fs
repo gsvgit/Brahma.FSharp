@@ -39,7 +39,7 @@ let Main () =
     
     let localWorkSize = 20
     let iterations = 100
-    let deviceType = Cl.DeviceType.Default
+    let deviceType = DeviceType.Default
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)

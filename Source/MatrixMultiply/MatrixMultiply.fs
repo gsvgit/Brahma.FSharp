@@ -49,7 +49,7 @@ let Main () =
     let columns = 1000
     let localWorkSize = 10
     let iterations = 4
-    let deviceType = Cl.DeviceType.Default
+    let deviceType = DeviceType.Default
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)

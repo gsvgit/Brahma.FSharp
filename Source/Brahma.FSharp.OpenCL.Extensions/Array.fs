@@ -22,7 +22,7 @@ open Brahma.OpenCL
 
 type ``[]``<'t> with
     member this.ToGpu(provider:ComputeProvider) =
-        new Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,this.Length,this)
+        new Brahma.OpenCL.Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,this.Length,this)
     member this.ToGpu(provider:ComputeProvider, hostArray:array<'t>) =
         new Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,(min hostArray.Length this.Length),hostArray)
     member this.ToHost(provider:ComputeProvider) =       

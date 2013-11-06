@@ -24,7 +24,7 @@ namespace Brahma.OpenCL.Commands
     public sealed class WriteBuffer<T>: Brahma.Commands.Command 
     {
         public WriteBuffer(
-           Cl.Mem mem,
+           Mem mem,
            int elemSize,
            bool blocking,
            int offset,
@@ -82,7 +82,7 @@ namespace Brahma.OpenCL.Commands
         {
         }
 
-        private Cl.Mem Mem
+        private Mem Mem
         {
             get;
             set;
@@ -139,21 +139,21 @@ namespace Brahma.OpenCL.Commands
                            where ev != null
                            select ev.Value;
 
-            Cl.Event eventID;
-            Cl.ErrorCode error;            
+            Event eventID;
+            ErrorCode error;            
             var mem = (Buffer == null) ? Mem : Buffer.Mem;
             var elementSize = (Buffer == null) ? ElementSize : Buffer.ElementSize;
             if (Data == null)
                 error = Cl.EnqueueWriteBuffer(commandQueue.Queue, mem,
-                    Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
+                    Blocking ? Bool.True : Bool.False, (IntPtr)Offset,
                     (IntPtr)(Count * elementSize), DataPtr, (uint)waitList.Count(), waitList.Count() == 0? null : waitList.ToArray(), out eventID);
             else
                 error = Cl.EnqueueWriteBuffer(commandQueue.Queue, mem,
-                    Blocking ? Cl.Bool.True : Cl.Bool.False, (IntPtr)Offset,
+                    Blocking ? Bool.True : Bool.False, (IntPtr)Offset,
                     (IntPtr)(Count * elementSize), Data, (uint)waitList.Count(), waitList.Count() == 0 ? null : waitList.ToArray(), out eventID);
 
-            if (error != Cl.ErrorCode.Success)
-                throw new CLException(error);
+            if (error != ErrorCode.Success)
+                throw new Cl.Exception(error);
 
             if (Name == string.Empty)
                 eventID.Dispose();
