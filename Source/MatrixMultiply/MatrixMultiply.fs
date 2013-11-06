@@ -45,10 +45,10 @@ let Main () =
 
     let platformName = "*"
 
-    let rows = 200
-    let columns = 200
+    let rows = 1000
+    let columns = 1000
     let localWorkSize = 10
-    let iterations = 100
+    let iterations = 4
     let deviceType = Cl.DeviceType.Default
 
     let provider =
@@ -108,7 +108,7 @@ let Main () =
 
     printfn "done."
 
-    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
+    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, F#: %A"
     Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
 
     commandQueue.Dispose()
