@@ -8,7 +8,7 @@
     <owners>Semyon Grigorev</owners>
     <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License%20(eclipse-1.0).txt</licenseUrl>
     <projectUrl>https://sites.google.com/site/semathsrprojects/home/brahman-opencl/brahman-substrings</projectUrl>
-    <iconUrl>https://raw.github.com/gsvgit/Brahma.FSharp/master/Assets/BrahmaFSharpLogoBW_small1.jpg</iconUrl>
+    <iconUrl>https://raw.github.com/gsvgit/Brahma.FSharp/master/Assets/BrahmanSubstringLogoBW_small1.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>     Brahman is a set of snippets, algorithms and solution for end users based on Brahma.FSharp.
      Brahman.Substrings is a library for substrings matching."
