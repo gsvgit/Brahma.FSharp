@@ -2,8 +2,8 @@
 <package >
   <metadata>
     <id>Brahman.Substrings</id>
-    <version>0.2.0.0</version>
-    <title>rahman.Substrings</title>
+    <version>0.2.0.1</version>
+    <title>Brahman.Substrings</title>
     <authors>Semyon Grigorev</authors>
     <owners>Semyon Grigorev</owners>
     <licenseUrl>http://github.com/gsvgit/Brahma.FSharp/blob/master/License%20(eclipse-1.0).txt</licenseUrl>
