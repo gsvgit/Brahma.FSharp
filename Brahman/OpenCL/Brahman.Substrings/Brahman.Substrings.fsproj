@@ -9,30 +9,11 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Substrings</RootNamespace>
     <AssemblyName>Brahman.Substrings</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>Brahman.Substrings</Name>
-    <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\Substrings.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Substrings.XML</DocumentationFile>
-    <StartArguments>-index 0</StartArguments>
-  </PropertyGroup>
+  <Import Project="..\Brahman.OpenCL.targets" />
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
@@ -93,43 +74,43 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.Helpers.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.Helpers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.0.1.4926.0\lib\net40\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.OpenCL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.31\lib\40\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.31\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -137,13 +118,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenCL.Net">
-      <HintPath>..\packages\OpenCL.Net.1.3.5.0\lib\net40-Client\OpenCL.Net.dll</HintPath>
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

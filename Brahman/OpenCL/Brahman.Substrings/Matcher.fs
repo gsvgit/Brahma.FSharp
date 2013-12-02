@@ -1,8 +1,8 @@
 ﻿module Brahman.Substrings.Matcher
 
 open Brahma.Helpers
-open OpenCL.Net
 open Brahma.OpenCL
+//open OpenCL.Net
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
@@ -44,14 +44,14 @@ type Matcher(?maxHostMem) =
     let totalResult = new ResizeArray<_>()
     let mutable label = ""
     let platformName = "*"
-    let deviceType = Cl.DeviceType.Default    
+    let deviceType = OpenCL.Net.DeviceType.Default    
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
         | ex -> failwith ex.Message
 
-    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head) 
+    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
     let timer = new Timer<string>()
 
@@ -62,7 +62,7 @@ type Matcher(?maxHostMem) =
     let mutable input = [||]
     let mutable ready = true
 
-    let memory,ex = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxMemAllocSize)
+    let memory,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxMemAllocSize)
     let maxGpuMemory = memory.CastTo<uint64>()
 
     let maxHostMemory = match maxHostMem with Some x -> x | _ -> 256UL * 1024UL * 1024UL
@@ -76,7 +76,7 @@ type Matcher(?maxHostMem) =
                                  (uint64) maxTemplateLength * tLenghth + 100000UL
 
         let availableMemory = (int) (min (maxGpuMemory - additionalArgs) (maxHostMemory - additionalArgs - additionalTempData))
-        let lws,ex = Cl.GetDeviceInfo(provider.Devices |> Seq.head,Cl.DeviceInfo.MaxWorkGroupSize)
+        let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
         let localWorkSize = int <| lws.CastTo<uint64>()
         let chunkSize = 1024
         let groupSize = chunkSize * localWorkSize * (1 + 2)
@@ -342,7 +342,3 @@ type Matcher(?maxHostMem) =
         rk readF templateArr
 
     member this.InBufSize with get () = input.Length
-
-
-
-                
