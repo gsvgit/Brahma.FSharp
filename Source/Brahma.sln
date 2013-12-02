@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma", "Brahma\Brahma.csproj", "{0E731438-DD9E-4444-950D-EF2DE31D3E97}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E54DCF27-1592-467F-8E05-F0B9745111E0}"
@@ -40,6 +40,13 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BlackScholes", "BlackScholes\BlackScholes.fsproj", "{0A633FC7-B805-49D6-8597-0E86E566C972}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArraySum", "ArraySum\ArraySum.fsproj", "{571CC936-D324-431E-A671-1131C2525A15}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D8F6A57A-1A70-4135-8790-5A11D4C2ECB3}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

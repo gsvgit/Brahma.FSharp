@@ -9,3 +9,4 @@ obj/
 /Source/Substrings/templates.txt
 YMNIK/*
 NuGet/*.nupkg
+Source/packages/*
