@@ -41,12 +41,10 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
                  buf <- buf + a.[i * aCols + k] * b.[k * bCols + j]
             c.[i * cCols + j] <- c.[i * cCols + j] + buf
 
-let Main () =
+let Main platformName =    
 
-    let platformName = "*"
-
-    let rows = 200
-    let columns = 200
+    let rows = 2000
+    let columns = 2000
     let localWorkSize = 10
     let iterations = 1
     let deviceType = DeviceType.Default
@@ -79,7 +77,7 @@ let Main () =
     let cNormal = Array.zeroCreate (rows * columns)
     for i in 0 .. iterations - 1 do
         Timer<string>.Global.Start()
-        Multiply aValues rows columns bValues rows columns cNormal
+        //Multiply aValues rows columns bValues rows columns cNormal
         Timer<string>.Global.Lap(".NET")
 
     printfn "done."
@@ -115,6 +113,9 @@ let Main () =
     provider.Dispose()
     provider.CloseAllBuffers()
 
-    ignore (System.Console.Read())
+    //ignore (System.Console.Read())
 
-do Main()
+Main "NVIDIA*"
+Main "AMD*"
+Main "NVIDIA*"
+Main "AMD*"

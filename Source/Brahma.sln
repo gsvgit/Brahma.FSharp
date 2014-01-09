@@ -41,6 +41,15 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BlackScholes", "BlackSchole
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArraySum", "ArraySum\ArraySum.fsproj", "{571CC936-D324-431E-A671-1131C2525A15}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Agents", "Agents\Agents.fsproj", "{442EBA5D-E78D-4C48-8466-67D14D97F826}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{36DC1614-B33B-4368-AC93-8E5673E885E2}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -259,6 +268,18 @@ Global
 		{571CC936-D324-431E-A671-1131C2525A15}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{571CC936-D324-431E-A671-1131C2525A15}.Release|x64.ActiveCfg = Release|Any CPU
 		{571CC936-D324-431E-A671-1131C2525A15}.Release|x86.ActiveCfg = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|x64.ActiveCfg = Release|Any CPU
+		{442EBA5D-E78D-4C48-8466-67D14D97F826}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -273,5 +294,6 @@ Global
 		{75119B7F-6521-405B-A646-2BDD77A7BF67} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 		{9F56515E-D17B-4A19-A4F2-32E84D395831} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 		{264509A1-82A6-4087-9C93-7E4236AA64EC} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
+		{442EBA5D-E78D-4C48-8466-67D14D97F826} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 	EndGlobalSection
 EndGlobal

@@ -11,6 +11,8 @@
     <AssemblyName>rMatrixMultiply</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <Name>rMatrixMultiply</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -80,7 +82,6 @@
   <ItemGroup>
     <Compile Include="MatrixMultiply.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
@@ -92,8 +93,7 @@
     <Reference Include="FSharp.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="OpenCL.Net">
-      <HintPath>..\packages\OpenCL.Net.2.1.4.0\lib\net40\OpenCL.Net.dll</HintPath>
+    <Reference Include="OpenCL.Net, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -125,7 +125,8 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\OpenCL.Net.2.1.4.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.1.4.0\build\net40\OpenCL.Net.targets')" />
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
