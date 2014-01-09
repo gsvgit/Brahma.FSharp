@@ -43,8 +43,8 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
 
 let Main platformName =    
 
-    let rows = 2000
-    let columns = 2000
+    let rows = 200
+    let columns = 200
     let localWorkSize = 10
     let iterations = 1
     let deviceType = DeviceType.Default
