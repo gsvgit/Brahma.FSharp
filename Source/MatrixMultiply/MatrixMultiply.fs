@@ -43,10 +43,10 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
 
 let Main platformName =    
 
-    let rows = 200
-    let columns = 200
+    let rows = 1000
+    let columns = 1000
     let localWorkSize = 10
-    let iterations = 1
+    let iterations = 4
     let deviceType = DeviceType.Default
 
     let provider =
@@ -106,7 +106,7 @@ let Main platformName =
 
     printfn "done."
 
-    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
+    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, F#: %A"
     Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
 
     commandQueue.Dispose()

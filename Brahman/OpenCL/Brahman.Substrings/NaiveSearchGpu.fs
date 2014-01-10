@@ -1,7 +1,6 @@
 ﻿module Brahman.Substrings.NaiveSearch
 
 open Brahma.Helpers
-open OpenCL.Net
 open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
