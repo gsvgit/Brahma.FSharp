@@ -54,7 +54,6 @@
   <ItemGroup>
     <Compile Include="Example.fs" />
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">

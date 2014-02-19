@@ -82,7 +82,6 @@
   <ItemGroup>
     <Compile Include="MatrixMultiply.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
