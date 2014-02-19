@@ -25,13 +25,15 @@ let private clearContext (targetContext:TargetContext<'a,'b>) =
     c.Flags <- targetContext.Flags
     c
 
+let dummyTypes = new System.Collections.Generic.Dictionary<_,Struct<_>>()
+
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
     let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext    
     let vType = 
         match (body:Expression<_>) with 
         | :? Const<Lang> as c -> c.Type
-        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false (Some ai.Length)
-        | _ -> Type.Translate var.Type false None
+        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false dummyTypes (Some ai.Length)
+        | _ -> Type.Translate var.Type false dummyTypes None
     new VarDecl<Lang>(vType,newName,Some body)
 
 and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args targetContext =
@@ -161,7 +163,7 @@ and translateValue (value:obj) (sType:System.Type) =
         let s = string value 
         match sType.Name.ToLowerInvariant() with
         | "boolean" -> 
-            _type <- Type.Translate sType false None |> Some
+            _type <- Type.Translate sType false dummyTypes None |> Some
             if s.ToLowerInvariant() = "false" then "0" else "1"
         | t when t.EndsWith "[]" ->            
             let arr =
@@ -170,11 +172,11 @@ and translateValue (value:obj) (sType:System.Type) =
                 | "byte[]" -> value :?> array<byte> |> Array.map string
                 | "single[]" -> value :?> array<float32> |> Array.map string
                 | _ -> failwith "Unsupported array type."
-            _type <- Type.Translate sType false (Some arr.Length) |> Some
+            _type <- Type.Translate sType false dummyTypes (Some arr.Length) |> Some
             arr |> String.concat ", "
             |> fun s -> "{ " + s + "}" 
         | _ -> 
-            _type <- Type.Translate sType false None |> Some
+            _type <- Type.Translate sType false dummyTypes None |> Some
             s
     new Const<_>(_type.Value, v)
 

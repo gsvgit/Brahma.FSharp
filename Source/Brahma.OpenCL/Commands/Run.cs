@@ -38,7 +38,7 @@ namespace Brahma.OpenCL.Commands
             curArgSize = _intPtrSize;
             if (kernel.Provider.AutoconfiguredBuffers.ContainsKey(data))
             {
-                curArgVal = kernel.Provider.AutoconfiguredBuffers[data];
+                curArgVal = kernel.Provider.AutoconfiguredBuffers[data].Pin();
             }
             else
             {

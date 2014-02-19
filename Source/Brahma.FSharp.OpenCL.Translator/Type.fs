@@ -16,8 +16,9 @@
 module Brahma.FSharp.OpenCL.Translator.Type
 
 open Brahma.FSharp.OpenCL.AST
+open System.Reflection
 
-let Translate (_type:System.Type) isKernelArg size :Type<Lang>=
+let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size : Type<Lang> =
     let rec go (str:string) =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
@@ -33,7 +34,15 @@ let Translate (_type:System.Type) isKernelArg size :Type<Lang>=
             else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
+        | x when collectedTypes.ContainsKey x 
+            -> StructType(collectedTypes.[x]) :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 
     _type.Name
     |> go
 
+
+let TransleteStructDecl collectedTypes (t:System.Type) =
+    let name = t.Name
+    let fields = [ for f in t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) ->
+                    new StructField<_> (f.Name, Translate f.PropertyType true collectedTypes None)]
+    new Struct<_>(name, fields)

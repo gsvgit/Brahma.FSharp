@@ -20,6 +20,54 @@ open  Brahma.FSharp.OpenCL.AST
 
 type FSQuotationToOpenCLTranslator() =
    
+    let dummyTypes = new System.Collections.Generic.Dictionary<_,_>()
+
+    let CollectStructs e =
+        let structs = new System.Collections.Generic.Dictionary<System.Type, _> () 
+        let  add (t:System.Type) =
+            if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum) || t.Name.StartsWith "Tuple`") && not (structs.ContainsKey(t))
+            then structs.Add(t, ())
+        let rec go (e: Expr) = 
+            add e.Type
+            match e with
+            | ExprShape.ShapeVar(v) -> ()
+            | ExprShape.ShapeLambda(v, body) -> go body            
+            | ExprShape.ShapeCombination(o, l) ->
+                o.GetType() |> add 
+                List.iter go l
+        go e
+        structs
+
+    
+    /// The parameter 'vars' is an immutable map that assigns expressions to variables
+    /// (as we recursively process the tree, we replace all known variables)
+    let rec expand vars expr = 
+
+      // First recursively process & replace variables
+      let expanded = 
+        match expr with
+        // If the variable has an assignment, then replace it with the expression
+        | ExprShape.ShapeVar v when Map.containsKey v vars -> vars.[v]
+        // Apply 'expand' recursively on all sub-expressions
+        | ExprShape.ShapeVar v -> Expr.Var v
+        | Patterns.Call(body, DerivedPatterns.MethodWithReflectedDefinition meth, args) ->
+            let this = match body with Some b -> Expr.Application(meth, b) | _ -> meth
+            let res = Expr.Applications(this, [ for a in args -> [a]])
+            expand vars res
+        | ExprShape.ShapeLambda(v, expr) -> 
+            Expr.Lambda(v, expand vars expr)
+        | ExprShape.ShapeCombination(o, exprs) ->
+            ExprShape.RebuildShapeCombination(o, List.map (expand vars) exprs)
+
+      // After expanding, try reducing the expression - we can replace 'let'
+      // expressions and applications where the first argument is lambda
+      match expanded with
+      | Patterns.Application(ExprShape.ShapeLambda(v, body), assign)
+      | Patterns.Let(v, assign, body) ->
+          expand (Map.add v (expand vars assign) vars) body
+      | _ -> expanded
+
+
     let mainKernelName = "brahmaKernel"
     let brahmaDimensionsTypes = ["_1d";"_2d";"_3d"]
     let brahmaDimensionsTypesPrefix = "brahma.opencl."
@@ -29,7 +77,7 @@ type FSQuotationToOpenCLTranslator() =
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
             |> List.map 
                 (fun v -> 
-                    let t = Type.Translate v.Type true None
+                    let t = Type.Translate v.Type true dummyTypes None
                     new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         let pragmas = 
@@ -41,6 +89,9 @@ type FSQuotationToOpenCLTranslator() =
         new AST<_>(pragmas @ [mainKernelFun])
 
     let translate qExpr translatorOptions =
+        let structs = CollectStructs qExpr
+        let translatedStructs = structs.Keys |> Seq.map (Type.TransleteStructDecl dummyTypes)
+        let qExpr = expand Map.empty qExpr
         let rec go expr vars =
             match expr with
             | Patterns.Lambda (v, body) -> go body (v::vars)
@@ -51,7 +102,8 @@ type FSQuotationToOpenCLTranslator() =
                         context.Namer.LetIn()
                         context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
-                        let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
+                        let newE = e //|> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
+                        printfn "%A" e
                         Body.Translate newE context
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb
