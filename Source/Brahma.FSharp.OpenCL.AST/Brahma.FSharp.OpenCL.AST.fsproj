@@ -52,7 +52,6 @@
     <Compile Include="Expressions.fs" />
     <Compile Include="Statements.fs" />
     <Compile Include="FunDecl.fs" />
-    <Compile Include="TypeDecl.fs" />
     <Compile Include="AST.fs" />
   </ItemGroup>
   <PropertyGroup>

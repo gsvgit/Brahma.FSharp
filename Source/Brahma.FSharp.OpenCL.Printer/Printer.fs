@@ -28,6 +28,7 @@ let Print (ast:AST<'lang>) =
                 match d with 
                 | :? FunDecl<'lang> as fd -> FunDecl.Print fd
                 | :? CLPragma<'lang> as clp -> Pragmas.Print clp
+                | :? Struct<'lang> as s -> TypeDecl.PrintStructDeclaration s
                 | _ -> failwithf "Printer. Unsupported toplevel declaration: %A"  d)
         |> aboveListL
     let result = StructuredFormat.Display.layout_to_string {StructuredFormat.FormatOptions.Default with PrintWidth=100} layout

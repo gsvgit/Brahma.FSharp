@@ -48,6 +48,24 @@ type ArrayType<'lang>(baseType:Type<'lang>, size:int) =
     //override this.SpaceModifier = match spaceModeifier with Some x -> x | None -> Private
     member this.BaseType = baseType
 
+[<Struct>]
+type StructField<'lang> =
+    val FName: string
+    val FType: Type<'lang>
+
+    new (fName, fType) = {FName = fName; FType = fType}
+
+type Struct<'lang>(name: string, fields: List<StructField<'lang>>) =
+    inherit TopDef<'lang>()
+    override this.Children = []
+    member this.Fields = fields
+    member this.Name = name
+
+type StructType<'lang>(decl:Struct<'lang>) =
+    inherit Type<'lang>()
+    override this.Children = []
+    override this.Size = decl.Fields |> List.sumBy (fun f -> f.FType.Size)
+
 type RefType<'lang>(baseType:Type<'lang>) =
     inherit Type<'lang>()
     override this.Size = baseType.Size
