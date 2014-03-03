@@ -10,13 +10,18 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Quotations
 
+[<Struct>]
+type TestStruct =
+    val x: int 
+    val y: float
+    new (x,y) = {x=x; y=y} 
 
 [<TestFixture>]
 type Translator() =
     
     let basePath = "../../../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
 
-    let deviceType = DeviceType.Cpu
+    let deviceType = DeviceType.Gpu
     let platformName = "*"
 
     let provider =
@@ -201,6 +206,17 @@ type Translator() =
         checkCode command "Simple.Seq.gen" "Simple.Seq.cl"
 
     [<Test>]
+    member this.``Simple seq of struct.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<TestStruct>) ->
+                    buf.[0] <- buf.[1]
+                    buf.[1] <- buf.[0]
+            @>
+
+        checkCode command "Simple.Seq.gen" "Simple.Seq.cl"
+
+    [<Test>]
     member this.``Seq with bindings.``() = 
         let command = 
             <@ 
@@ -324,9 +340,35 @@ type Translator() =
 
         checkCode command "Nested.Function.Carring.gen" "Nested.Function.Carring.cl"
 
+    //[<Test>]
+    member this.``Nested functions. Carring22.``() =
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->                    
+                    let f x y = 
+                        let gg = ref 0
+                        for i in 1..x do gg := !gg + y
+                        !gg
+                    let g x = f 2 x
+                    buf.[0] <- g 2
+                    buf.[1] <- g 3
+            @>
+
+        checkCode command "Nested.Function.Carring.gen" "Nested.Function.Carring.cl"
+
+    member this.``Nested functions. Carring23.``() =
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int*int>) ->                                        
+                    buf.[0] <- 2,3
+                    buf.[1] <- 2,4
+            @>
+
+        checkCode command "Nested.Function.Carring.gen" "Nested.Function.Carring.cl"
+
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-    (new Translator()).``Nested functions. Carring.``()
+    (new Translator()).``Simple seq of struct.``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0
