@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultiplt.test", "MatrixMultiplt.test\MatrixMultiplt.test.fsproj", "{AE6F896B-6A40-43CA-AD3A-C93124510B5D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE6F896B-6A40-43CA-AD3A-C93124510B5D}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
