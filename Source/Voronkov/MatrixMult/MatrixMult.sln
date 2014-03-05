@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMult", "MatrixMult\MatrixMult.fsproj", "{5FC6C94A-055E-4823-9E78-854490AE1FAA}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "Tests\Tests.fsproj", "{450DBCEC-F0AE-4D9E-B76C-E06165840AC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FC6C94A-055E-4823-9E78-854490AE1FAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC6C94A-055E-4823-9E78-854490AE1FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC6C94A-055E-4823-9E78-854490AE1FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC6C94A-055E-4823-9E78-854490AE1FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{450DBCEC-F0AE-4D9E-B76C-E06165840AC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{450DBCEC-F0AE-4D9E-B76C-E06165840AC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{450DBCEC-F0AE-4D9E-B76C-E06165840AC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{450DBCEC-F0AE-4D9E-B76C-E06165840AC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
