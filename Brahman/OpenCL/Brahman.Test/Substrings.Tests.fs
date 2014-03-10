@@ -54,17 +54,19 @@ type ``Brahman Substrings tests`` () =
     [<Test>]
     member this.``RabinKarp two chanks 1`` () = 
         let template = [|1uy;1uy|]
-        let zSeq  = seq {for i in 0 .. 1024 * 1024 do if i = 1024 * 1024 / 3 + 5000 then yield! template else yield 0uy}        
+        let x = 1024 * 1024 / 3 + 5000
+        let zSeq  = seq {for i in 0 .. 1024 * 1024 do if i = x  then yield! template else yield 0uy}        
         let res = matcher.RabinKarp (zSeq,[|template|])
         Assert.AreEqual(res.Data.Length,1)
         Assert.AreEqual(res.Data.[0].ChunkNum,1)
-        Assert.AreEqual(res.Data.[0].Offset, (1024 * 1024 / 3 + 5000) - res.ChunkSize + 32)
+        Assert.AreEqual(x - res.ChunkSize + 32, res.Data.[0].Offset)
         Assert.AreEqual(res.Data.[0].PatternId,0)
 
-//[<EntryPoint>]
-//let f x =
-//    let t = new ``Brahman Substrings tests``()
-//    //t.``RabinKarp simple test 1``()
-//    //t.``RabinKarp simple test 2``()
-//    t.``RabinKarp two patterns.``()
-//    1
+[<EntryPoint>]
+let f x =
+    let t = new ``Brahman Substrings tests``()
+    //t.``RabinKarp simple test 2``()
+    //t.``RabinKarp simple test 2``()
+    //t.``RabinKarp two patterns 2.``()
+    t.``RabinKarp two chanks 1``()
+    1

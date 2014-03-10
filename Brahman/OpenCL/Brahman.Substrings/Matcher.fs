@@ -60,6 +60,7 @@ type Matcher(?maxHostMem) =
     let mutable buffersCreated = false
     let mutable result = [||]
     let mutable input = [||]
+    let c = [|0|]
     let mutable ready = true
 
     let memory,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxMemAllocSize)
@@ -128,8 +129,9 @@ type Matcher(?maxHostMem) =
         ready <- true
 
         task.Wait()
-
-        ignore (commandQueue.Add(result.ToHost provider).Finish())
+        ignore (commandQueue.Add(c.ToHost provider).Finish())
+        ignore (commandQueue.Add(c.ToGpu(provider, [|0|])).Finish())
+        ignore (commandQueue.Add(result.ToHost(provider,c.[0])).Finish())
         buffersCreated <- true
         Timer<string>.Global.Lap(label)
         timer.Lap(label)
@@ -150,26 +152,27 @@ type Matcher(?maxHostMem) =
             ignore (commandQueue.Add(kernelRun()).Finish())
             async {()} |> Async.StartAsTask
 
-    let countMatchesDetailed index (result:array<int16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
+    let countMatchesDetailed index (result:array<uint16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
         let mutable matches = 0
         let clearBound = min (bound - 1) (length - (int) maxTemplateLength)        
-        for i in 0..clearBound do
-            let matchIndex = result.[i]
-            if matchIndex >= 0s then                
+        let mutable resultOffset = 0
+        while resultOffset <= c.[0] - 3  do
+            let i = int ((uint32 result.[resultOffset] <<< 16) ||| uint32 result.[resultOffset+1])
+            let mutable matchIndex = result.[resultOffset+2]                            
+            if 0 < i && i < clearBound
+            then
                 matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
-                totalResult.Add(new MatchRes(index, i, int result.[i]))
+                totalResult.Add(new MatchRes(index, i, int matchIndex))
                 matches <- matches + 1
-
-        for i in (clearBound + 1)..(bound - 1) do
-            let mutable matchIndex = result.[i]
-            while matchIndex >= 0s && i + (int) templateLengths.[(int) matchIndex] > length do
-                matchIndex <- prefix.[(int) matchIndex]            
-            if matchIndex >= 0s then                
+            else           
+                while matchIndex >= 0us && i + (int) templateLengths.[(int) matchIndex] > length do
+                    matchIndex <- uint16 prefix.[(int) matchIndex]                                            
                 matchesArray.[(int) matchIndex] <- matchesArray.[(int) matchIndex] + 1UL
-                totalResult.Add(new MatchRes(index, i, int result.[i]))
+                totalResult.Add(new MatchRes(index, i, int matchIndex))
                 matches <- matches + 1
+            resultOffset <- resultOffset + 3
 
-        matches    
+        matches
 
     let printResult (templates:Templates) (matches:array<_>) counter =
         let hex = Array.map (fun (x : byte) -> System.String.Format("{0:X2} ", x)) templates.content
@@ -267,15 +270,16 @@ type Matcher(?maxHostMem) =
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
         kernelPrepare 
-            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result
+            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result c
         run kernelRun readFun templates prefix label close
         timer.Lap(label)
         finalize()
+        c.[0] <- 0
         new FindRes(totalResult.ToArray(), sorted templates, input.Length)
 
     new () = Matcher (256UL * 1024UL * 1024UL)
 
-    member this.NaiveSearch (hdId, templateArr)  = 
+    (*member this.NaiveSearch (hdId, templateArr)  = 
         label <- NaiveSearch.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -286,7 +290,7 @@ type Matcher(?maxHostMem) =
         timer.Lap(label)
         finalize()
         new FindRes(totalResult.ToArray(), sorted templates, input.Length)
-
+        *)
 //    member this.AhoCorasik (hdId, templateArr)  =        
 //        label <- AhoCorasick.label
 //        let config = configure templateArr
@@ -299,7 +303,7 @@ type Matcher(?maxHostMem) =
 //        timer.Lap(label)
 //        finalize()
 
-    member this.Hashtable (hdId, templateArr)  = 
+   (* member this.Hashtable (hdId, templateArr)  = 
         label <- Hashtables.label
         let config = configure templateArr
         let templates = prepareTemplates templateArr
@@ -313,7 +317,7 @@ type Matcher(?maxHostMem) =
         run kernelRun hdId templates prefix label close
         timer.Lap(label)
         finalize()
-        new FindRes(totalResult.ToArray(), sorted templates, input.Length)
+        new FindRes(totalResult.ToArray(), sorted templates, input.Length)*)
 
     member this.RabinKarp (readFun, templateArr) = 
         rk readFun templateArr

@@ -12,7 +12,7 @@ let label = "OpenCL/RabinKarp"
 
 let command = 
     <@
-        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<int16>) ->
+        fun (rng:_1D) l k templates (lengths:array<byte>) (hashes:array<byte>) maxLength (input:array<byte>) (t:array<byte>) (result:array<uint16>) (resLenth:array<int>)->
             let r = rng.GlobalID0
             let mutable _start = r * k
             let mutable _end = _start + k
@@ -42,7 +42,7 @@ let command =
             barrier()
 
             for i in _start .. (_end - 1) do
-                result.[i] <- -1s
+                //result.[i] <- -1s
                 if i > _start then
                     for current in 0..((int) maxLength - 2) do
                         privateHashes.[current] <- privateHashes.[current + 1] - input.[i - 1]
@@ -62,5 +62,10 @@ let command =
                             if input.[i + j] <> t.[templateBase + j] then  matches <- 0
                             j <- j + 1
 
-                        if matches = 1 then result.[i] <- (int16) n
+                        if matches = 1
+                        then
+                            let j = resLenth.[0] <!+> 3 
+                            result.[j] <- uint16 (uint32(i >>> 16) &&& 0xFFFFFFFFu)
+                            result.[j+1] <- uint16 (uint32 i &&& 0xFFFFFFFFu)
+                            result.[j+2] <- (uint16) n
     @>
