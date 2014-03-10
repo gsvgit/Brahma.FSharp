@@ -60,6 +60,8 @@ type BOp<'lang> =
      | Pow
      | BitAnd
      | BitOr
+     | LeftShift
+     | RightShift
      | And
      | Or
      | Less

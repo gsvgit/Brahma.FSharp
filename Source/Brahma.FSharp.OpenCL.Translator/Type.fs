@@ -23,6 +23,8 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "int16" -> PrimitiveType<Lang>(Short) :> Type<Lang>
+        | "uint16" -> PrimitiveType<Lang>(UShort) :> Type<Lang>
+        | "uint32" -> PrimitiveType<Lang>(UInt) :> Type<Lang>
         | "float"| "float32" | "single"-> PrimitiveType<Lang>(Float) :> Type<Lang>
         | "byte" -> PrimitiveType<Lang>(UChar) :> Type<Lang>
         | "boolean" -> PrimitiveType<Lang>(Int) :> Type<Lang>

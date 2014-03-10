@@ -91,7 +91,7 @@ type FSQuotationToOpenCLTranslator() =
     let translate qExpr translatorOptions =
         let structs = CollectStructs qExpr
         let translatedStructs = structs.Keys |> Seq.map (Type.TransleteStructDecl dummyTypes)
-        let qExpr = expand Map.empty qExpr
+        //let qExpr = expand Map.empty qExpr
         let rec go expr vars =
             match expr with
             | Patterns.Lambda (v, body) -> go body (v::vars)
@@ -102,7 +102,7 @@ type FSQuotationToOpenCLTranslator() =
                         context.Namer.LetIn()
                         context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
-                        let newE = e //|> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
+                        let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
                         printfn "%A" e
                         Body.Translate newE context
                     match b  with

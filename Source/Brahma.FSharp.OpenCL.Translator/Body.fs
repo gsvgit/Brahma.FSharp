@@ -54,7 +54,9 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "op_unarynegation"       -> new Unop<_>(UOp.Minus,args.[0]) :> Statement<_>,tContext
     | "op_modulus"             -> new Binop<_>(Remainder,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_bitwiseand"          -> new Binop<_>(BitAnd,args.[0],args.[1]) :> Statement<_>,tContext
-    | "op_bitwiseor"          -> new Binop<_>(BitOr,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_bitwiseor"           -> new Binop<_>(BitOr,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_leftshift"           -> new Binop<_>(LeftShift,args.[0],args.[1]) :> Statement<_>,tContext
+    | "op_rightshift"          -> new Binop<_>(RightShift,args.[0],args.[1]) :> Statement<_>,tContext
     | "op_lessbangplusgreater"
     | "op_lessbangplus"        -> 
         tContext.Flags.enableAtomic <- true
@@ -72,6 +74,8 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "toint16"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
     | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "tobyte"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UChar)):> Statement<_>,tContext
+    | "touint32"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UInt)):> Statement<_>,tContext
+    | "touint16"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UShort)):> Statement<_>,tContext
     | "acos" | "asin" | "atan"
     | "cos" | "cosh" | "exp"
     | "floor" | "log" | "log10"

@@ -22,10 +22,6 @@ open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
 
-//type Context = OpenCL.Net.
-//type ClNet = OpenCL.Net
-
-
 type CLCodeGenerator() =
     static member KernelName = "brahmaKernel"
     static member GenerateKernel(lambda: Expr, provider: ComputeProvider, kernel:ICLKernel, translatorOptions) =        
@@ -79,11 +75,15 @@ type ComputeProvider with
                             let x = %%c |> List.ofArray
                             rng := (box x.Head) :?> 'TRange
                             args := x.Tail |> Array.ofList
+                            let brahmsRunCls = new Brahma.OpenCL.Commands.Run<_>(kernel,!rng)
+                            !args |> Array.iteri (fun i x -> brahmsRunCls.SetupArgument(1,i,x))
                             run := kernel.Run(!rng, !args)
                         @@>
                     arr
-            <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
-        
+            let res = <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
+            
+            res
+                    
         if _outCode.IsSome then (_outCode.Value) := (kernel :> ICLKernel).Source.ToString()
 
         kernel

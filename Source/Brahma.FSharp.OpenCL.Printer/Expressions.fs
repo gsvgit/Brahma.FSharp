@@ -58,6 +58,8 @@ and private printBop (op:BOp<'lang>) =
     | BitOr -> "|"
     | And -> "&&"
     | Or -> "||"
+    | LeftShift -> "<<"
+    | RightShift -> ">>"
     | Less -> "<" 
     | LessEQ -> "<="
     | Great -> ">" 

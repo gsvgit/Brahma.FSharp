@@ -387,6 +387,29 @@ type Translator() =
 
 
     [<Test>]
+    member this.``Buffers initialisation``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<byte>) ->
+                    buf.[0] <- buf.[0] + 1uy
+                    buf.[1] <- buf.[1] + 1uy
+                    buf.[2] <- buf.[2] + 1uy
+            @>
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command
+        let inArray = [|1uy;2uy;3uy|]
+        kernelPrepareF _1d inArray
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)        
+        let _ = commandQueue.Add(inArray.ToGpu(provider,[|2uy;3uy;4uy|]))
+        let _ = commandQueue.Add(kernelRunF())
+        let _ = commandQueue.Add(inArray.ToHost provider).Finish()
+        let expected = [|3uy;4uy;5uy|] 
+        Assert.AreEqual(expected, inArray)
+        commandQueue.Dispose()        
+        provider.CloseAllBuffers()
+
+
+
+    [<Test>]
     member this.``While with preheader.``() = 
         let command = 
             <@

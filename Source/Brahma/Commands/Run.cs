@@ -37,7 +37,7 @@ namespace Brahma.Commands
             get;
         }
 
-        protected abstract void SetupArgument(object sender, int index, object argument);
+        public abstract void SetupArgument(object sender, int index, object argument);
 
         public override void Execute(object sender)
         {

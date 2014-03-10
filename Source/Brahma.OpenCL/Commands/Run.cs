@@ -79,7 +79,7 @@ namespace Brahma.OpenCL.Commands
 
         }
 
-        protected override void SetupArgument(object sender, int index, object arg)
+        public override void SetupArgument(object sender, int index, object arg)
         {
             kernel = Kernel as ICLKernel;
             ToIMem(arg);            
@@ -132,7 +132,7 @@ namespace Brahma.OpenCL.Commands
             }
         }
         
-        internal Run(IKernel kernel, TRange range)
+        public Run(IKernel kernel, TRange range)
             : base(kernel, range)
         {
                 
