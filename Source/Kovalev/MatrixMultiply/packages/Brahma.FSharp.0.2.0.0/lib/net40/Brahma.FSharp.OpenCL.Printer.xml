@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>Brahma.FSharp.OpenCL.Printer</name></assembly>
+<members>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.AST">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.Expressions">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.FunDecl">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.Pragmas">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.Statements">
+
+</member>
+<member name="">
+
+</member>
+<member name="">
+
+</member>
+<member name="T:Brahma.FSharp.OpenCL.Printer.Types">
+
+</member>
+<member name="T:TypeDecl">
+
+</member>
+</members>
+</doc>
