@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultAndrey", "MatrixMultAndrey\MatrixMultAndrey.fsproj", "{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultAndrey.Tests", "MatrixMultAndrey.Tests\MatrixMultAndrey.Tests.fsproj", "{836B4543-88DB-40DF-9798-1EC4CA6FCC26}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{836B4543-88DB-40DF-9798-1EC4CA6FCC26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{836B4543-88DB-40DF-9798-1EC4CA6FCC26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{836B4543-88DB-40DF-9798-1EC4CA6FCC26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{836B4543-88DB-40DF-9798-1EC4CA6FCC26}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
