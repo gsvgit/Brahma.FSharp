@@ -95,6 +95,7 @@
     <Compile Include="Rev.fs" />
     <Compile Include="Min.fs" />
     <Compile Include="Max.fs" />
+    <Compile Include="Main.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
