@@ -48,7 +48,58 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|1;1;2;3|]
-                
+
+    [<Test>]
+    member this.``Array item set. Long``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int64>) -> 
+                    buf.[0] <- 1L
+            @>
+
+        let run,check = checkResult command
+        let initInArr = [|0L; 1L; 2L; 3L|]
+        run _1d initInArr
+        check initInArr [|1L; 1L; 2L; 3L|]
+
+    [<Test>]
+    member this.``Cast. Long``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int64>) -> 
+                    buf.[0] <- (int64)1UL
+            @>
+
+        let run,check = checkResult command
+        let initInArr = [|0L; 1L|]
+        run _1d initInArr
+        check initInArr [|1L; 1L|]
+
+    [<Test>]
+    member this.``Cast. ULong``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<uint64>) -> 
+                    buf.[0] <- (uint64)1L
+            @>
+
+        let run,check = checkResult command
+        let initInArr = [|0UL; 1UL|]
+        run _1d initInArr
+        check initInArr [|1UL; 1UL|]
+
+    [<Test>]
+    member this.``Array item set. ULong``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<uint64>) -> 
+                    buf.[0] <- 1UL
+            @>
+
+        let run,check = checkResult command
+        let initInArr = [|0UL; 1UL; 2UL; 3UL|]
+        run _1d initInArr
+        check initInArr [|1UL; 1UL; 2UL; 3UL|]                
 
     [<Test>]
     member this.Binding() = 

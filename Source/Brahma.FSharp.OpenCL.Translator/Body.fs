@@ -71,11 +71,13 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
         new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
-    | "toint16"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
+    | "toint16"                -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
     | "tosingle"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
-    | "tobyte"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UChar)):> Statement<_>,tContext
+    | "tobyte"                 -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UChar)):> Statement<_>,tContext
     | "touint32"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UInt)):> Statement<_>,tContext
     | "touint16"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.UShort)):> Statement<_>,tContext
+    | "toint64"                -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Long)):> Statement<_>,tContext
+    | "touint64"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.ULong)):> Statement<_>,tContext
     | "acos" | "asin" | "atan"
     | "cos" | "cosh" | "exp"
     | "floor" | "log" | "log10"

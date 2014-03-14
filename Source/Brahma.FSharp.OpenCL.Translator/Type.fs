@@ -27,6 +27,8 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         | "uint32" -> PrimitiveType<Lang>(UInt) :> Type<Lang>
         | "float"| "float32" | "single"-> PrimitiveType<Lang>(Float) :> Type<Lang>
         | "byte" -> PrimitiveType<Lang>(UChar) :> Type<Lang>
+        | "int64" -> PrimitiveType<Lang>(Long) :> Type<Lang>
+        | "uint64" -> PrimitiveType<Lang>(ULong) :> Type<Lang>
         | "boolean" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "double" -> PrimitiveType<Lang>(Double) :> Type<Lang>        
         | t when t.EndsWith "[]" ->
