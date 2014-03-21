@@ -11,3 +11,4 @@ YMNIK/*
 NuGet/*.nupkg
 Source/packages/*
 Brahman/OpenCL/packages/*
+Source/ArrayFunctions/packages/*
