@@ -32,8 +32,8 @@ let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:Ta
     let vType = 
         match (body:Expression<_>) with 
         | :? Const<Lang> as c -> c.Type
-        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false dummyTypes (Some ai.Length)
-        | _ -> Type.Translate var.Type false dummyTypes None
+        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false dummyTypes (Some ai.Length) targetContext
+        | _ -> Type.Translate var.Type false dummyTypes None targetContext
     new VarDecl<Lang>(vType,newName,Some body)
 
 and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args targetContext =
@@ -163,13 +163,13 @@ and translateVar (var:Var) (targetContext:TargetContext<_,_>) =
     | Some n -> getVar n targetContext
     | None -> failwith "Seems, that you try to use variable, that declared out of quotation. Please, pass it as quoted function's parametaer."
 
-and translateValue (value:obj) (sType:System.Type) =
+and translateValue (value:obj) (sType:System.Type) targetContext =
     let mutable _type = None
     let v =
         let s = string value 
         match sType.Name.ToLowerInvariant() with
         | "boolean" -> 
-            _type <- Type.Translate sType false dummyTypes None |> Some
+            _type <- Type.Translate sType false dummyTypes None targetContext |> Some
             if s.ToLowerInvariant() = "false" then "0" else "1"
         | t when t.EndsWith "[]" ->            
             let arr =
@@ -178,11 +178,11 @@ and translateValue (value:obj) (sType:System.Type) =
                 | "byte[]" -> value :?> array<byte> |> Array.map string
                 | "single[]" -> value :?> array<float32> |> Array.map string
                 | _ -> failwith "Unsupported array type."
-            _type <- Type.Translate sType false dummyTypes (Some arr.Length) |> Some
+            _type <- Type.Translate sType false dummyTypes (Some arr.Length) targetContext |> Some
             arr |> String.concat ", "
             |> fun s -> "{ " + s + "}" 
         | _ -> 
-            _type <- Type.Translate sType false dummyTypes None |> Some
+            _type <- Type.Translate sType false dummyTypes None targetContext |> Some
             s
     new Const<_>(_type.Value, v)
 
@@ -333,7 +333,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
     | Patterns.TupleGet(expr,i) -> "TupleGet is not suported:" + string expr|> failwith
     | Patterns.TypeTest(expr,sType) -> "TypeTest is not suported:" + string expr|> failwith
     | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "UnionCaseTest is not suported:" + string expr|> failwith
-    | Patterns.Value(_obj,sType) -> translateValue _obj sType :> Node<_>, targetContext 
+    | Patterns.Value(_obj,sType) -> translateValue _obj sType  targetContext :> Node<_> , targetContext 
     | Patterns.Var var -> translateVar var targetContext :> Node<_>, targetContext
     | Patterns.VarSet(var,expr) -> 
         let res,tContext = translateVarSet var expr targetContext

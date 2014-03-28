@@ -77,14 +77,16 @@ type FSQuotationToOpenCLTranslator() =
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
             |> List.map 
                 (fun v -> 
-                    let t = Type.Translate v.Type true dummyTypes None
+                    let t = Type.Translate v.Type true dummyTypes None context
                     new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         let pragmas = 
             let res = new ResizeArray<_>()
             if context.Flags.enableAtomic then
-                res.Add(new CLPragma<_>(CLGlobalInt32BaseAtomics) :> TopDef<_> )
-                res.Add(new CLPragma<_>(CLLocalInt32BaseAtomics) :> TopDef<_> )
+                res.Add(new CLPragma<_>(CLGlobalInt32BaseAtomics) :> TopDef<_>)
+                res.Add(new CLPragma<_>(CLLocalInt32BaseAtomics) :> TopDef<_>)
+            if context.Flags.enableFP64 then
+                res.Add(new CLPragma<_>(CLFP64))
             List.ofSeq res
         new AST<_>(pragmas @ [mainKernelFun])
 

@@ -30,3 +30,7 @@ let Print (clp:CLPragma<_>) =
         [
             "#pragma OPENCL EXTENSION cl_khr_local_int32_base_atomics : enable" |> wordL            
         ] |> aboveListL
+    | CLFP64 -> 
+        [
+            "#pragma OPENCL EXTENSION cl_khr_fp64 : enable" |> wordL            
+        ] |> aboveListL

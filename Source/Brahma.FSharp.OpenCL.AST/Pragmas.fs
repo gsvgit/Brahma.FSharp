@@ -18,6 +18,7 @@ namespace Brahma.FSharp.OpenCL.AST
 type CLPragmaType<'lang> =
     | CLGlobalInt32BaseAtomics
     | CLLocalInt32BaseAtomics
+    | CLFP64
 
 type CLPragma<'lang>(pragmaType:CLPragmaType<'lang>) =
     inherit TopDef<'lang>()

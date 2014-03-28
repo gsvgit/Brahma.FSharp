@@ -17,6 +17,7 @@ type Translator() =
     let intInArr = [|0..defaultInArrayLength-1|]
     let float32Arr = Array.init defaultInArrayLength (fun i -> float32 i)
     let _1d = new _1D(defaultInArrayLength, 1)
+    let _2d = new _2D(defaultInArrayLength, 1)
     let deviceType = DeviceType.Default
     let platformName = "*"
 
@@ -484,7 +485,33 @@ type Translator() =
             commandQueue.Dispose()
             Assert.Fail e.Message
          
-        
+    [<Test>]
+    member this.``Double on GPU.``() =
+        let command = 
+            <@                            
+                fun (r:_2D) ->                
+                    let x = r.GlobalID0
+                    let y = r.GlobalID1
+                    let scaling = 0.5 
+                    let b = ref 0.0
+                    let size : float = 100.0
+                    let fx = float x / size * scaling + float -1.5
+                    b := 0.0
+            @>
+
+        let kernel,kernelPrepare, kernelRun = provider.Compile command                
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)       
+        kernelPrepare _2d
+        try 
+            commandQueue.Add(kernelRun()).Finish()
+            |> ignore
+            commandQueue.Dispose()
+        with e -> 
+            commandQueue.Dispose()
+            Assert.Fail e.Message
+
+
+
 let x = 
     let d = ref 0
     fun y ->

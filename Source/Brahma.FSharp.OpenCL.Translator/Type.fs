@@ -18,7 +18,7 @@ module Brahma.FSharp.OpenCL.Translator.Type
 open Brahma.FSharp.OpenCL.AST
 open System.Reflection
 
-let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size : Type<Lang> =
+let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
@@ -30,7 +30,9 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         | "int64" -> PrimitiveType<Lang>(Long) :> Type<Lang>
         | "uint64" -> PrimitiveType<Lang>(ULong) :> Type<Lang>
         | "boolean" -> PrimitiveType<Lang>(Int) :> Type<Lang>
-        | "double" -> PrimitiveType<Lang>(Double) :> Type<Lang>        
+        | "double" -> 
+            context.Flags.enableFP64 <- true
+            PrimitiveType<Lang>(Double) :> Type<Lang>        
         | t when t.EndsWith "[]" ->
             let baseT = t.Substring(0,t.Length-2)
             if isKernelArg 
@@ -45,8 +47,8 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
     |> go
 
 
-let TransleteStructDecl collectedTypes (t:System.Type) =
+let TransleteStructDecl collectedTypes (t:System.Type) targetContext =
     let name = t.Name
     let fields = [ for f in t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) ->
-                    new StructField<_> (f.Name, Translate f.PropertyType true collectedTypes None)]
+                    new StructField<_> (f.Name, Translate f.PropertyType true collectedTypes None targetContext)]
     new Struct<_>(name, fields)
