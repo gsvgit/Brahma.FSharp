@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Brahma.FSharp</id>
-    <version>0.2.3.0</version>
+    <version>0.2.4.0</version>
     <title>Brahma.FSharp</title>
     <authors>Semyon Grigorev</authors>
     <owners>Semyon Grigorev</owners>
@@ -11,9 +11,8 @@
     <iconUrl>https://raw.github.com/gsvgit/Brahma.FSharp/master/Assets/BrahmaFSharpLogoBW_small1.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Brahma.FSharp is a library for F# with GPGPU integration. It is based on F# quotation to OpenCL translator.</description>
-    <releaseNotes>int64 and uint64 types suported.</releaseNotes>
+    <releaseNotes>FP64 pragma fo double suported.</releaseNotes>
     <copyright>Copyright 2012-2014</copyright>
-    <language />
     <tags>OpenCL GPGPU .NET F# FSharp Quotations HPC</tags>
     <dependencies>
       <dependency id="FSharpX.Core" version="[1.8.41]" />
