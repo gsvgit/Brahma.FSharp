@@ -7,6 +7,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultAndrey.Tests", "M
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MatrixMultAndrey", "..\MatrixMultAndrey\MatrixMultAndrey.fsproj", "{2C16BB32-7A71-41D6-A1BE-077B45FE9DBE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{028DB4CC-C302-4B5F-B78B-60C26AF67E99}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
