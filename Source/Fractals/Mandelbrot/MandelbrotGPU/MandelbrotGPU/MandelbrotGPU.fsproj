@@ -95,7 +95,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="Mandelbrot.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
