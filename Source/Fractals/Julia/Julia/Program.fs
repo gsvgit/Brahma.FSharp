@@ -26,7 +26,6 @@ let JuliaDraw scaling size mx my cr ci =
             fun (r:_2D) (cx: array<_>) scaling size mx my cr ci ->
                 let x = r.GlobalID0
                 let y = r.GlobalID1
-
                 let fx = float x / size * scaling + mx
                 let fy = float y / size * scaling + my 
                 let iter = 4000
@@ -51,9 +50,9 @@ let JuliaDraw scaling size mx my cr ci =
                     cx.[x*400 + y] <- count
 
         @>
+
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d = (new _2D(400, 400, localWorkSize, localWorkSize))
-
     kernelPrepare d cParallel scaling size mx my cr ci
     let _ = commandQueue.Add(kernelRun()).Finish()
     let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
@@ -63,7 +62,7 @@ let JuliaDraw scaling size mx my cr ci =
     cParallel
 
 
-let draw (scaling, size, mx, my, cr, ci) = 
+let draw scaling size mx my cr ci = 
     let image = new Bitmap (400,400)
     let arr1 = JuliaDraw scaling size mx my cr ci
     let mutable s = -400
@@ -74,10 +73,14 @@ let draw (scaling, size, mx, my, cr, ci) =
         image.SetPixel(x, y, color)
     image
 
-let form = 
-    let temp = new Form()
-    temp.Paint.Add(fun e -> e.Graphics.DrawImage(draw (0.8, 100.0, -1.5, -1.0, -0.75, 0.17), 0, 0))
-    temp.SetBounds(400, 400, 410, 450)
-    temp
+let f scaling size mx my cr ci = 
+    let form = 
+        let temp = new Form()
+        temp.Paint.Add(fun e -> e.Graphics.DrawImage(draw scaling size mx my cr ci, 0, 0))
+        temp.SetBounds(400, 400, 410, 450)
+        temp
+    do Application.Run(form)
 
-do Application.Run(form)
+f 0.75 100.0 -1.5 -1.0 -0.75 0.17
+//f 0.7 100.0 -1.5 -1.5 0.4  0.24
+//f 0.7 100.0 -1.5 -1.5 0.4  0.27
