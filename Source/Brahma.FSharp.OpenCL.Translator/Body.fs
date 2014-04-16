@@ -23,17 +23,17 @@ let private clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
     c.Namer <- targetContext.Namer
     c.Flags <- targetContext.Flags
+    c.UserDefinedTypes.AddRange(targetContext.UserDefinedTypes)
+    for kvp in targetContext.UserDefinedTypesOpenCLDeclaration do c.UserDefinedTypesOpenCLDeclaration.Add (kvp.Key,kvp.Value)
     c
-
-let dummyTypes = new System.Collections.Generic.Dictionary<_,Struct<_>>()
 
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
     let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext    
     let vType = 
         match (body:Expression<_>) with 
         | :? Const<Lang> as c -> c.Type
-        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false dummyTypes (Some ai.Length) targetContext
-        | _ -> Type.Translate var.Type false dummyTypes None targetContext
+        | :? ArrayInitializer<Lang> as ai -> Type.Translate var.Type false (Some ai.Length) targetContext
+        | _ -> Type.Translate var.Type false None targetContext
     new VarDecl<Lang>(vType,newName,Some body)
 
 and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args targetContext =
@@ -169,7 +169,7 @@ and translateValue (value:obj) (sType:System.Type) targetContext =
         let s = string value 
         match sType.Name.ToLowerInvariant() with
         | "boolean" -> 
-            _type <- Type.Translate sType false dummyTypes None targetContext |> Some
+            _type <- Type.Translate sType false None targetContext |> Some
             if s.ToLowerInvariant() = "false" then "0" else "1"
         | t when t.EndsWith "[]" ->            
             let arr =
@@ -178,11 +178,11 @@ and translateValue (value:obj) (sType:System.Type) targetContext =
                 | "byte[]" -> value :?> array<byte> |> Array.map string
                 | "single[]" -> value :?> array<float32> |> Array.map string
                 | _ -> failwith "Unsupported array type."
-            _type <- Type.Translate sType false dummyTypes (Some arr.Length) targetContext |> Some
+            _type <- Type.Translate sType false (Some arr.Length) targetContext |> Some
             arr |> String.concat ", "
             |> fun s -> "{ " + s + "}" 
         | _ -> 
-            _type <- Type.Translate sType false dummyTypes None targetContext |> Some
+            _type <- Type.Translate sType false None targetContext |> Some
             s
     new Const<_>(_type.Value, v)
 

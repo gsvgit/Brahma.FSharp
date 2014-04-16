@@ -49,7 +49,7 @@ namespace Brahma.OpenCL
         private bool _disposed;
         private string _compileOptions = string.Empty;
 
-        private Dictionary<System.Array, Mem> _autoconfiguredBuffers = new Dictionary<System.Array, Mem>(5);
+        private Dictionary<object, Mem> _autoconfiguredBuffers = new Dictionary<object, Mem>(5);
 
         public void CloseAllBuffers()
         {
@@ -60,7 +60,7 @@ namespace Brahma.OpenCL
             _autoconfiguredBuffers.Clear();
         }
 
-        public Dictionary<System.Array, Mem> AutoconfiguredBuffers
+        public Dictionary<object, Mem> AutoconfiguredBuffers
         {
             get { return _autoconfiguredBuffers; }
         }

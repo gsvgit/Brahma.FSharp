@@ -18,7 +18,7 @@ module Brahma.FSharp.OpenCL.Translator.Type
 open Brahma.FSharp.OpenCL.AST
 open System.Reflection
 
-let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
+let Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
         match str.ToLowerInvariant() with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
@@ -40,15 +40,32 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
             else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
-        | x when collectedTypes.ContainsKey x 
-            -> StructType(collectedTypes.[x]) :> Type<Lang>
+        | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)
+            -> 
+                let decl =
+                    if context.UserDefinedTypesOpenCLDeclaration.ContainsKey x
+                    then Some context.UserDefinedTypesOpenCLDeclaration.[x]
+                    else None 
+                StructType(decl) :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 
     _type.Name
     |> go
 
 
-let TransleteStructDecl collectedTypes (t:System.Type) targetContext =
-    let name = t.Name
-    let fields = [ for f in t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) ->
-                    new StructField<_> (f.Name, Translate f.PropertyType true collectedTypes None targetContext)]
-    new Struct<_>(name, fields)
+let TransleteStructDecls structs (targetContext:TargetContext<_,_>) =    
+    let translateStruct (t:System.Type) =
+        let name = t.Name
+        let fields = [ for f in t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) -> //GetFields(BindingFlags.Public ||| BindingFlags.Instance) -> //
+                        new StructField<_> (f.Name, Translate f.PropertyType true None targetContext)]
+        new Struct<_>(name, fields)
+
+    let translated = 
+        do targetContext.UserDefinedTypes.AddRange(structs)
+        structs
+        |> List.ofSeq
+        |> List.map 
+            (fun t -> 
+                let r = translateStruct t
+                targetContext.UserDefinedTypesOpenCLDeclaration.Add(t.Name.ToLowerInvariant(),r)
+                r)
+    translated

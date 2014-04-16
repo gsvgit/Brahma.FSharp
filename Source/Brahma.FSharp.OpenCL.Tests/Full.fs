@@ -10,6 +10,11 @@ open System
 open System.Reflection
 open Microsoft.FSharp.Quotations
 
+[<Struct>]
+type TestStruct =
+    val x: int 
+    val y: float
+    new (x,y) = {x=x; y=y} 
 
 [<TestFixture>]
 type Translator() =
@@ -510,7 +515,19 @@ type Translator() =
             commandQueue.Dispose()
             Assert.Fail e.Message
 
-
+    [<Test>]
+    member this.``Simple seq of struct.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<TestStruct>) ->
+                    let b = buf.[0]
+                    buf.[0] <- buf.[1]
+                    buf.[1] <- b
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|new TestStruct(1, 2.0);new TestStruct(3, 4.0)|]
+        run _1d inByteArray
+        check inByteArray [|new TestStruct(3, 4.0); new TestStruct(1, 2.0)|]
 
 let x = 
     let d = ref 0

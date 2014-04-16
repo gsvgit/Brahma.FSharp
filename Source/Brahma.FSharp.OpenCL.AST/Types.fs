@@ -61,10 +61,17 @@ type Struct<'lang>(name: string, fields: List<StructField<'lang>>) =
     member this.Fields = fields
     member this.Name = name
 
-type StructType<'lang>(decl:Struct<'lang>) =
+type StructType<'lang>(decl)=    
     inherit Type<'lang>()
+    member val Declaration : Option<Struct<'lang>> = decl with get, set
     override this.Children = []
-    override this.Size = decl.Fields |> List.sumBy (fun f -> f.FType.Size)
+    override this.Size = 
+        match  this.Declaration with
+        | Some decl -> decl.Fields |> List.sumBy (fun f -> f.FType.Size)
+        | None -> 0
+   
+
+        
 
 type RefType<'lang>(baseType:Type<'lang>) =
     inherit Type<'lang>()

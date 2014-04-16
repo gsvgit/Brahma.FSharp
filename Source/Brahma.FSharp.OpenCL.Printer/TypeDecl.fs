@@ -22,6 +22,7 @@ open Microsoft.FSharp.Text.StructuredFormat.LayoutOps
 let PrintStructDeclaration (decl:Struct<_>) =
     let header = 
         [
+            wordL "typedef"
             wordL "struct "
             wordL decl.Name
 
@@ -40,5 +41,11 @@ let PrintStructDeclaration (decl:Struct<_>) =
         ]
         |> aboveListL
         |> braceL
-    header ^^ flds
+    let footer = 
+        [            
+            wordL decl.Name
+            wordL ";"
+        ]
+        |> spaceListL
+    header ^^ flds ^^ footer
 

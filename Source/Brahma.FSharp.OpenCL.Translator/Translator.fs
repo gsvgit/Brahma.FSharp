@@ -20,12 +20,10 @@ open  Brahma.FSharp.OpenCL.AST
 
 type FSQuotationToOpenCLTranslator() =
    
-    let dummyTypes = new System.Collections.Generic.Dictionary<_,_>()
-
     let CollectStructs e =
         let structs = new System.Collections.Generic.Dictionary<System.Type, _> () 
         let  add (t:System.Type) =
-            if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum) || t.Name.StartsWith "Tuple`") && not (structs.ContainsKey(t))
+            if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum) (*|| t.Name.StartsWith "Tuple`"*)) && not (structs.ContainsKey(t))
             then structs.Add(t, ())
         let rec go (e: Expr) = 
             add e.Type
@@ -72,12 +70,12 @@ type FSQuotationToOpenCLTranslator() =
     let brahmaDimensionsTypes = ["_1d";"_2d";"_3d"]
     let brahmaDimensionsTypesPrefix = "brahma.opencl."
     let bdts = brahmaDimensionsTypes |> List.map (fun s -> brahmaDimensionsTypesPrefix + s)
-    let buildFullAst vars partialAst (context:TargetContext<_,_>) =
+    let buildFullAst vars types partialAst (context:TargetContext<_,_>) =
         let formalArgs = 
             vars |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
             |> List.map 
                 (fun v -> 
-                    let t = Type.Translate v.Type true dummyTypes None context
+                    let t = Type.Translate v.Type true None context
                     new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
         let mainKernelFun = new FunDecl<_>(true, mainKernelName, new PrimitiveType<_>(Void), formalArgs,partialAst)
         let pragmas = 
@@ -88,11 +86,12 @@ type FSQuotationToOpenCLTranslator() =
             if context.Flags.enableFP64 then
                 res.Add(new CLPragma<_>(CLFP64))
             List.ofSeq res
-        new AST<_>(pragmas @ [mainKernelFun])
+        new AST<_>(pragmas @ types @ [mainKernelFun])
 
     let translate qExpr translatorOptions =
         let structs = CollectStructs qExpr
-        let translatedStructs = structs.Keys |> Seq.map (Type.TransleteStructDecl dummyTypes)
+        let context = new TargetContext<_,_>()
+        let translatedStructs = Type.TransleteStructDecls structs.Keys context |> Seq.cast<_> |> List.ofSeq
         //let qExpr = expand Map.empty qExpr
         let rec go expr vars =
             match expr with
@@ -100,7 +99,6 @@ type FSQuotationToOpenCLTranslator() =
             | e -> 
                 let body =
                     let b,context =
-                        let context = new TargetContext<_,_>()
                         context.Namer.LetIn()
                         context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
@@ -116,7 +114,7 @@ type FSQuotationToOpenCLTranslator() =
 
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         let vars,(partialAst,context) = go qExpr []
-        buildFullAst (List.rev vars) (partialAst :> Statement<_>) context
+        buildFullAst (List.rev vars) translatedStructs (partialAst :> Statement<_>) context
   
     member this.Translate qExpr translatorOptions = 
         let ast = translate qExpr translatorOptions

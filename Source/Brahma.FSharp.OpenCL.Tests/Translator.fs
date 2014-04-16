@@ -9,8 +9,10 @@ open Brahma.FSharp.OpenCL.Core
 open System
 open System.Reflection
 open Microsoft.FSharp.Quotations
+open System.Runtime.InteropServices
 
 [<Struct>]
+[<StructLayout(LayoutKind.Sequential, Pack = 1)>]
 type TestStruct =
     val x: int 
     val y: float
@@ -214,7 +216,7 @@ type Translator() =
                     buf.[1] <- buf.[0]
             @>
 
-        checkCode command "Simple.Seq.gen" "Simple.Seq.cl"
+        checkCode command "Simple.Seq.Struct.gen" "Simple.Seq.Struct.cl"
 
     [<Test>]
     member this.``Seq with bindings.``() = 
@@ -369,6 +371,6 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-    (new Translator()).``Simple seq of struct.``()
-    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
+    //(new Translator()).``Simple seq of struct.``()
+    (new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
     0
