@@ -64,7 +64,7 @@ let Mandelbrot scaling size mx my =
     cParallel
 let drawIm (scaling, size, mx, my) =
     let image = new Bitmap(400, 400);
-    let arr1 = Mandelbrot 0.5 100.0 -1.5 -1.0
+    let arr1 = Mandelbrot scaling size mx my
     let mutable t = -400; 
     for x = 0 to 399 do
         t <- t + 400    
