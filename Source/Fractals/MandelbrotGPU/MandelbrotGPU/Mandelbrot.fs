@@ -8,7 +8,8 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Drawing
 open System.Windows.Forms 
-let Mandelbrot scaling size mx my =    
+//let cParallel: array<int> = Array.zeroCreate 160000
+let Mandelbrot scaling size mx my (cParallel:array<int>)=    
     let localWorkSize = 10
     let deviceType = DeviceType.Gpu
 
@@ -19,10 +20,10 @@ let Mandelbrot scaling size mx my =
 
     printfn "Using %A" provider
     let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-    let cParallel: array<int> = Array.zeroCreate 160000
+//    let cParallel: array<int> = Array.zeroCreate 160000
     let command = 
         <@                            
-            fun (r:_2D)  (cx:array<_>) scaling size mx my->                
+            fun (r:_2D) (cx:array<_>) scaling size mx my->                
                 let x = r.GlobalID0
                 let y = r.GlobalID1
 //                let scaling = 0.5 
@@ -61,10 +62,10 @@ let Mandelbrot scaling size mx my =
     provider.Dispose()
     provider.CloseAllBuffers()
     //ignore (System.Console.Read())
-    cParallel
-let drawIm (scaling, size, mx, my) =
+//    cParallel
+let drawIm (scaling, size, mx, my, (arr1:array<int>)) =
     let image = new Bitmap(400, 400);
-    let arr1 = Mandelbrot scaling size mx my
+    Mandelbrot scaling size mx my arr1
     let mutable t = -400; 
     for x = 0 to 399 do
         t <- t + 400    
@@ -73,10 +74,10 @@ let drawIm (scaling, size, mx, my) =
             image.SetPixel(x, y, color)
     image
 
-let form =
-    let temp = new Form()
-    temp.Paint.Add(fun e -> e.Graphics.DrawImage(drawIm (0.5, 100.0, -1.5, -1.0), 0, 0))
-    temp.SetBounds(400, 400, 410, 450)
-    temp
-
-do Application.Run(form);;
+//let form =
+//    let temp = new Form()
+//    temp.Paint.Add(fun e -> e.Graphics.DrawImage(drawIm (0.5, 100.0, -1.5, -1.0, cParallel), 0, 0))
+//    temp.SetBounds(400, 400, 410, 450)
+//    temp
+//
+//do Application.Run(form);;

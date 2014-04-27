@@ -11,6 +11,6 @@ YMNIK/*
 NuGet/*.nupkg
 Source/packages/*
 Brahman/OpenCL/packages/*
-/Source/Fractals/Mandelbrot/FractalsGPU/packages/*
-/Source/Fractals/Mandelbrot/MandelbrotGPU/packages/*
+/Source/Fractals/FractalsGPU/packages/*
+/Source/Fractals/MandelbrotGPU/packages/*
 /Source/Fractals/Julia/packages/*

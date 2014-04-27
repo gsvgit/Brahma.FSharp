@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6A7798
 		..\MandelbrotGPU\.nuget\NuGet.targets = ..\MandelbrotGPU\.nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Julia", "..\Julia\Julia\Julia.fsproj", "{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{5F65455C-EB70-462A-BC83-19F38233566A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F65455C-EB70-462A-BC83-19F38233566A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F65455C-EB70-462A-BC83-19F38233566A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

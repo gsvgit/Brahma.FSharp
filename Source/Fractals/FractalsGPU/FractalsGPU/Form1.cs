@@ -17,6 +17,9 @@ namespace FractalsGPU
         static double size= 100.0;
         static double mx= -1.5;
         static double my= -1.0;
+        static double cr = 0.4;
+        static double ci = 0.24;
+        static int[] array = new int[160000];
         public FractalsForm()
         {
             InitializeComponent();
@@ -38,12 +41,15 @@ namespace FractalsGPU
                 size = Convert.ToDouble(this.textBox2.Text);
                 mx = Convert.ToDouble(this.textBox3.Text);
                 my = Convert.ToDouble(this.textBox4.Text);
+                cr = Convert.ToDouble(this.textBox5.Text);
+                cr = Convert.ToDouble(this.textBox5.Text);
             }
             catch (Exception e) { Console.WriteLine(e); }
         }
         public void drawFractal()
         {
-            pictureBox1.Image = Mandelbrot.drawIm(scaling, size, mx, my);
+            pictureBox1.Image = (this.comboBox1.SelectedIndex == 0)?Mandelbrot.drawIm(scaling, size, mx, my, array):JuliaDraw.drawIm(scaling, size, mx, my, cr, ci);
+
         }
         public void setCords()
         {
@@ -52,7 +58,24 @@ namespace FractalsGPU
             this.textBox3.Text = mx.ToString();
             this.textBox4.Text = my.ToString();
         }
-
+        
+        private void comboBox1_Change(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex == 1)
+            {
+                this.label5.Visible = true;
+                this.label6.Visible = true;
+                this.textBox5.Visible = true;
+                this.textBox6.Visible = true;
+            }
+            else
+            {
+                this.label5.Visible = false;
+                this.label6.Visible = false;
+                this.textBox5.Visible = false;
+                this.textBox6.Visible = false;
+            }
+        }
         private void up_Click(object sender, EventArgs e)
         {
             my -= 0.05D;
