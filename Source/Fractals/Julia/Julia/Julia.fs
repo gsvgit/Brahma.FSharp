@@ -72,13 +72,13 @@ let drawIm (scaling, size, mx, my, cr, ci) =
         let color = Color.FromArgb(10 * arr1.[s + y] % 255, 5 * arr1.[s + y] % 255, arr1.[s + y] % 255)
         image.SetPixel(x, y, color)
     image
-let f scaling size mx my cr ci = 
-    let form = 
-        let temp = new Form()
-        temp.Paint.Add(fun e -> e.Graphics.DrawImage(drawIm (scaling, size, mx, my, cr, ci), 0, 0))
-        temp.SetBounds(400, 400, 410, 450)
-        temp 
-    do Application.Run(form)
+//let f scaling size mx my cr ci = 
+//    let form = 
+//        let temp = new Form()
+//        temp.Paint.Add(fun e -> e.Graphics.DrawImage(drawIm (scaling, size, mx, my, cr, ci), 0, 0))
+//        temp.SetBounds(400, 400, 410, 450)
+//        temp 
+//    do Application.Run(form)
 
 //f 0.75 100.0 -1.5 -1.0 -0.75 0.17
 //f 0.7 100.0 -1.5 -1.5 0.4  0.24
