@@ -19,18 +19,34 @@ namespace FractalsGPU
         static double my= -1.0;
         static double cr = 0.4;
         static double ci = 0.24;
-        static int[] array = new int[160000];
+        static double step = 0.05;
+        static int boxwidth = 400;
+        static int boxheight = 400;
+        static int[] array = new int[boxwidth * boxheight];
         public FractalsForm()
         {
             InitializeComponent();
             getCords();
-
+            this.comboBox1.SelectedIndex = 0;
+            this.Disposed += FractalsForm_Disposed;
         }
 
+        void FractalsForm_Disposed(object sender, EventArgs e)
+        {
+            Mandelbrot.closeAll();
+        }
+
+        
         private void fDraw_Click_1(object sender, EventArgs e)
         {
             getCords();
             drawFractal();
+        }
+
+        private void form_ResizeEnd(object sender, EventArgs e)
+        {
+            boxwidth = pictureBox1.Width;
+            boxheight = pictureBox1.Height;
         }
 
         public void getCords()
@@ -43,12 +59,13 @@ namespace FractalsGPU
                 my = Convert.ToDouble(this.textBox4.Text);
                 cr = Convert.ToDouble(this.textBox5.Text);
                 cr = Convert.ToDouble(this.textBox5.Text);
+                step = Convert.ToDouble(this.textBox7.Text);
             }
             catch (Exception e) { Console.WriteLine(e); }
         }
         public void drawFractal()
         {
-            pictureBox1.Image = (this.comboBox1.SelectedIndex == 0)?Mandelbrot.drawIm(scaling, size, mx, my, array):JuliaDraw.drawIm(scaling, size, mx, my, cr, ci);
+            pictureBox1.Image = (this.comboBox1.SelectedIndex == 0)?Mandelbrot.drawIm(scaling, size, mx, my, array, boxwidth, boxheight):JuliaDraw.drawIm(scaling, size, mx, my, cr, ci);
 
         }
         public void setCords()
@@ -78,7 +95,7 @@ namespace FractalsGPU
         }
         private void up_Click(object sender, EventArgs e)
         {
-            my -= 0.05D;
+            my -= step;
             setCords();
             drawFractal();
 
@@ -86,21 +103,21 @@ namespace FractalsGPU
 
         private void down_Click(object sender, EventArgs e)
         {
-            my += 0.05D;
+            my += step;
             setCords();
             drawFractal();
         }
 
         private void left_Click(object sender, EventArgs e)
         {
-            mx -= 0.05D;
+            mx -= step;
             setCords();
             drawFractal();
         }
 
         private void right_Click(object sender, EventArgs e)
         {
-            mx += 0.05D;
+            mx += step;
             setCords();
             drawFractal();
         }
@@ -108,8 +125,8 @@ namespace FractalsGPU
         private void zoomin_Click(object sender, EventArgs e)
         {
             size += 100;
-            mx += 0.05;
-            my += 0.05;
+            mx += step;
+            my += step;
             setCords();
             drawFractal();
         }
