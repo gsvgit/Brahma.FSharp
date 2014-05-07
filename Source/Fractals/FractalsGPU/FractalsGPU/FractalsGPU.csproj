@@ -81,13 +81,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Julia\Julia\Julia.fsproj">
-      <Project>{f9ec6a2e-c334-4ea4-9300-9cd40d9f25ed}</Project>
-      <Name>Julia</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MandelbrotGPU\MandelbrotGPU\MandelbrotGPU.fsproj">
-      <Project>{5f65455c-eb70-462a-bc83-19f38233566a}</Project>
-      <Name>MandelbrotGPU</Name>
+    <ProjectReference Include="..\FracSharpGPU\FracSharpGPU.fsproj">
+      <Project>{9b8efec6-6e1d-4ba7-bf86-1547b927a7fc}</Project>
+      <Name>FracSharpGPU</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -13,10 +13,10 @@ namespace FractalsGPU
 {
     public partial class FractalsForm : Form
     {
-        static double scaling = 0.5 ;
-        static double size= 100.0;
-        static double mx= -1.5;
-        static double my= -1.0;
+        static double scaling = 0.5;
+        static double size = 100.0;
+        static double mx = -1.5;
+        static double my = -1.0;
         static double cr = 0.4;
         static double ci = 0.24;
         static double step = 0.05;
@@ -29,25 +29,26 @@ namespace FractalsGPU
             getCords();
             this.comboBox1.SelectedIndex = 0;
             this.Disposed += FractalsForm_Disposed;
+
         }
 
         void FractalsForm_Disposed(object sender, EventArgs e)
         {
-            Mandelbrot.closeAll();
+            FracSharpGPU.closeAll();
         }
 
-        
+
         private void fDraw_Click_1(object sender, EventArgs e)
         {
             getCords();
             drawFractal();
         }
 
-        private void form_ResizeEnd(object sender, EventArgs e)
-        {
-            boxwidth = pictureBox1.Width;
-            boxheight = pictureBox1.Height;
-        }
+        //private void form_ResizeEnd(object sender, EventArgs e)
+        //{
+        //    boxwidth = pictureBox1.Width;
+        //    boxheight = pictureBox1.Height;
+        //}
 
         public void getCords()
         {
@@ -65,8 +66,8 @@ namespace FractalsGPU
         }
         public void drawFractal()
         {
-            pictureBox1.Image = (this.comboBox1.SelectedIndex == 0)?Mandelbrot.drawIm(scaling, size, mx, my, array, boxwidth, boxheight):JuliaDraw.drawIm(scaling, size, mx, my, cr, ci);
-
+            //pictureBox1.Image = (this.comboBox1.SelectedIndex == 0)?FracSharpGPU.drawIm(scaling, size, mx, my, array, boxwidth, boxheight):JuliaDraw.drawIm(scaling, size, mx, my, cr, ci);
+            pictureBox1.Image = FracSharpGPU.drawIm(scaling, size, mx, my, array, boxwidth, boxheight, cr, ci, this.comboBox1.SelectedIndex);
         }
         public void setCords()
         {
@@ -75,7 +76,7 @@ namespace FractalsGPU
             this.textBox3.Text = mx.ToString();
             this.textBox4.Text = my.ToString();
         }
-        
+
         private void comboBox1_Change(object sender, EventArgs e)
         {
             if (comboBox1.SelectedIndex == 1)
@@ -95,6 +96,7 @@ namespace FractalsGPU
         }
         private void up_Click(object sender, EventArgs e)
         {
+            getCords();
             my -= step;
             setCords();
             drawFractal();
@@ -103,6 +105,7 @@ namespace FractalsGPU
 
         private void down_Click(object sender, EventArgs e)
         {
+            getCords();
             my += step;
             setCords();
             drawFractal();
@@ -110,6 +113,7 @@ namespace FractalsGPU
 
         private void left_Click(object sender, EventArgs e)
         {
+            getCords();
             mx -= step;
             setCords();
             drawFractal();
@@ -117,6 +121,7 @@ namespace FractalsGPU
 
         private void right_Click(object sender, EventArgs e)
         {
+            getCords();
             mx += step;
             setCords();
             drawFractal();
@@ -124,6 +129,7 @@ namespace FractalsGPU
 
         private void zoomin_Click(object sender, EventArgs e)
         {
+            getCords();
             size += 100;
             mx += step;
             my += step;
@@ -133,7 +139,10 @@ namespace FractalsGPU
 
         private void zoomout_Click(object sender, EventArgs e)
         {
+            getCords();
             size -= 100;
+            mx -= step;
+            my -= step;
             setCords();
             drawFractal();
         }

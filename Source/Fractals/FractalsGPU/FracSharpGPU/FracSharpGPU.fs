@@ -1,4 +1,5 @@
-﻿module Mandelbrot
+﻿module FracSharpGPU
+
 open Brahma.Helpers
 open OpenCL.Net
 open Brahma.OpenCL
@@ -22,7 +23,7 @@ let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.he
 let localWorkSize = 20
 //let d = (new _2D(400, 400, localWorkSize, localWorkSize))
 
-let command =
+let mandelbrot =
     <@                            
         fun (r:_2D) (cx:array<_>) scaling size mx my boxwidth boxheight->                
             let x = r.GlobalID0
@@ -52,7 +53,39 @@ let command =
                 cx.[x * boxwidth + y] <- count
         @>
 
-let kernel, kernelPrepare, kernelRun = provider.Compile command
+let julia = 
+        <@
+            fun (r:_2D) (cx: array<_>) scaling size mx my cr ci boxwidth boxheight ->
+                let x = r.GlobalID0
+                let y = r.GlobalID1
+                let fx = float x / size * scaling + mx
+                let fy = float y / size * scaling + my 
+                let iter = 4000
+                let mutable fl =  true
+                let mutable zr1 = fx
+                let mutable zi1 = fy
+                let mutable count =  0
+                let mutable t = 0.0
+                while fl && (count < iter) do
+                    if zr1 * zr1 + zi1 * zi1 <= 4.0
+                    then 
+                        t <- zr1
+                        zr1 <- zr1 * zr1 - zi1 * zi1 + cr
+                        zi1 <- 2.0 * zi1 * t + ci
+                        count <- count + 1
+                    else
+                        fl <- false
+                if count = iter
+                then
+                    cx.[x * boxwidth + y] <- 0
+                else
+                    cx.[x * boxwidth + y] <- count
+
+        @>
+
+
+let kernel, kernelPrepare, kernelRun = provider.Compile mandelbrot
+let kernel2, kernelPrepare2, kernelRun2 = provider.Compile julia
 
 let Mandelbrot () =    
     fun scaling size mx my (cParallel:array<int>) boxwidth boxheight ->
@@ -62,10 +95,21 @@ let Mandelbrot () =
         commandQueue.Add(cParallel.ToHost provider).Finish()
         |> ignore
 
-let m = Mandelbrot ()
-let drawIm (scaling, size, mx, my, (arr1:array<int>), (boxwidth:int), (boxheight:int)) =
-    let image = new Bitmap(boxwidth, boxheight); 
-    m scaling size mx my arr1 boxwidth boxheight
+let Julia () =
+    fun scaling size mx my (cParallel:array<int>) cr ci boxwidth boxheight ->
+        let d = (new _2D(boxwidth, boxheight, localWorkSize, localWorkSize))
+        kernelPrepare2 d cParallel scaling size mx my cr ci boxwidth boxheight  
+        let _ = commandQueue.Add(kernelRun2()).Finish()            
+        commandQueue.Add(cParallel.ToHost provider).Finish()
+        |> ignore
+
+let drawIm (scaling, size, mx, my, (arr1:array<int>), (boxwidth:int), (boxheight:int), cr, ci, fcode) =
+    let image = new Bitmap(boxwidth, boxheight);
+    if fcode = 0
+    then  
+        Mandelbrot () scaling size mx my arr1 boxwidth boxheight
+    else
+        Julia () scaling size mx my arr1 cr ci boxwidth boxheight
     let mutable t = -boxwidth; 
     for x = 0 to boxwidth-1 do
         t <- t + boxwidth    

@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FractalsGPU", "FractalsGPU\FractalsGPU.csproj", "{58B0A1B4-29A7-404A-9B64-D576A3128E6F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MandelbrotGPU", "..\MandelbrotGPU\MandelbrotGPU\MandelbrotGPU.fsproj", "{5F65455C-EB70-462A-BC83-19F38233566A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6A779819-78A4-4673-915F-5980C459195D}"
 	ProjectSection(SolutionItems) = preProject
 		..\MandelbrotGPU\.nuget\NuGet.Config = ..\MandelbrotGPU\.nuget\NuGet.Config
@@ -14,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6A7798
 		..\MandelbrotGPU\.nuget\NuGet.targets = ..\MandelbrotGPU\.nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Julia", "..\Julia\Julia\Julia.fsproj", "{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FracSharpGPU", "FracSharpGPU\FracSharpGPU.fsproj", "{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,14 +24,10 @@ Global
 		{58B0A1B4-29A7-404A-9B64-D576A3128E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58B0A1B4-29A7-404A-9B64-D576A3128E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58B0A1B4-29A7-404A-9B64-D576A3128E6F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F65455C-EB70-462A-BC83-19F38233566A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F65455C-EB70-462A-BC83-19F38233566A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F65455C-EB70-462A-BC83-19F38233566A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F65455C-EB70-462A-BC83-19F38233566A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9EC6A2E-C334-4EA4-9300-9CD40D9F25ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

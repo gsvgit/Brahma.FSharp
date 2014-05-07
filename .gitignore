@@ -12,5 +12,5 @@ NuGet/*.nupkg
 Source/packages/*
 Brahman/OpenCL/packages/*
 /Source/Fractals/FractalsGPU/packages/*
-/Source/Fractals/MandelbrotGPU/packages/*
-/Source/Fractals/Julia/packages/*
+/Source/Fractals/FractalsGPU/packages/!.config
+

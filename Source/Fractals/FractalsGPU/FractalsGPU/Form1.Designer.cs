@@ -323,7 +323,7 @@
             this.Controls.Add(this.up);
             this.Name = "FractalsForm";
             this.Text = "FractalsGPU";
-            this.ResizeEnd += new System.EventHandler(this.form_ResizeEnd);
+//            this.ResizeEnd += new System.EventHandler(this.form_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
