@@ -27,6 +27,7 @@ namespace FractalsGPU
         {
             InitializeComponent();
             getCords();
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.comboBox1.SelectedIndex = 0;
             this.Disposed += FractalsForm_Disposed;
 
@@ -145,6 +146,18 @@ namespace FractalsGPU
             my -= step;
             setCords();
             drawFractal();
+        }
+
+        private void about_Click(object sender, EventArgs e)
+        {
+            String message = "Thank you for using our product. \n Please buy the full version of this program, just 9.9$. \n © Bulgakov & Govoruha Labs";
+            MessageBoxButtons buttons = MessageBoxButtons.OK;
+            MessageBoxIcon icon = MessageBoxIcon.Asterisk;
+            DialogResult result = MessageBox.Show(message, "About", buttons,icon);
+            if (result == DialogResult.Yes)
+            {
+                this.Close();
+            }
         }
 
     }
