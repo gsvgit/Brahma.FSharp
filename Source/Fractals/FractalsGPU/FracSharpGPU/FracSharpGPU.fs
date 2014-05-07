@@ -111,10 +111,10 @@ let drawIm (scaling, size, mx, my, (arr1:array<int>), (boxwidth:int), (boxheight
     else
         Julia () scaling size mx my arr1 cr ci boxwidth boxheight
     let mutable t = -boxwidth; 
-    for x = 0 to boxwidth-1 do
+    for x = 0 to boxwidth - 1 do
         t <- t + boxwidth    
-        for y = 0 to boxheight-1 do
-            let color = Color.FromArgb(10*arr1.[t+y]%255, 5*arr1.[t+y]%255, arr1.[t+y]%255)
+        for y = 0 to boxheight - 1 do
+            let color = Color.FromArgb(10 * arr1.[t + y] % 255, 5 * arr1.[t + y] % 255, arr1.[t + y] % 255)
             image.SetPixel(x, y, color)
     image
 
