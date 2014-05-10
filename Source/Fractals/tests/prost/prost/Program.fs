@@ -1,4 +1,4 @@
-﻿module allfractals
+﻿module fr
 
 open Brahma.Helpers
 open OpenCL.Net
@@ -76,18 +76,20 @@ let Mandelbrotgpu scaling size mx my  =
                 let y = r.GlobalID1
                 let fx = float x / size * scaling + mx
                 let fy = float y / size * scaling + my 
+                let cr = fx
+                let ci = fy
                 let iter = 4000
                 let mutable fl =  true
-                let mutable zr1 = fx
-                let mutable zi1 = fy
+                let mutable zr1 = 0.0
+                let mutable zi1 = 0.0
                 let mutable count =  0
                 let mutable t = 0.0
                 while fl && (count < iter) do
                     if zr1 * zr1 + zi1 * zi1 <= 4.0
                     then 
                         t <- zr1
-                        zr1 <- zr1 * zr1 - zi1 * zi1 
-                        zi1 <- 2.0 * zi1 * t
+                        zr1 <- zr1 * zr1 - zi1 * zi1 + cr 
+                        zi1 <- 2.0 * zi1 * t + ci
                         count <- count + 1
                     else
                         fl <- false
@@ -150,17 +152,19 @@ let Mandelbrotcpu scaling size mx my =
         let fx = float x / size * scaling + mx
         let fy = float y / size * scaling + my 
         let iter = 4000
+        let cr = fx
+        let ci = fy
         let mutable fl =  true
-        let mutable zr1 = fx
-        let mutable zi1 = fy
+        let mutable zr1 = 0.0
+        let mutable zi1 = 0.0
         let mutable count =  0
         let mutable t = 0.0
         while fl && (count < iter) do
                 if zr1 * zr1 + zi1 * zi1 <= 4.0
                 then 
                     t <- zr1
-                    zr1 <- zr1 * zr1 - zi1 * zi1 
-                    zi1 <- 2.0 * zi1 * t 
+                    zr1 <- zr1 * zr1 - zi1 * zi1 + cr
+                    zi1 <- 2.0 * zi1 * t + ci
                     count <- count + 1
                 else
                     fl <- false
