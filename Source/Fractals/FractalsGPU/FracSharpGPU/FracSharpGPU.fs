@@ -11,10 +11,10 @@ open System.Drawing
 open System.Windows.Forms 
 //let cParallel: array<int> = Array.zeroCreate 160000
 
-let deviceType = DeviceType.Gpu
+let deviceType = DeviceType.Default
 
 let provider =
-    try  ComputeProvider.Create("NVIDIA*", deviceType)
+    try  ComputeProvider.Create("*", deviceType)
     with 
     | ex -> failwith ex.Message
 
