@@ -8,8 +8,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6A779819-78A4-4673-915F-5980C459195D}"
 	ProjectSection(SolutionItems) = preProject
 		..\MandelbrotGPU\.nuget\NuGet.Config = ..\MandelbrotGPU\.nuget\NuGet.Config
+		.nuget\NuGet.Config = .nuget\NuGet.Config
 		..\MandelbrotGPU\.nuget\NuGet.exe = ..\MandelbrotGPU\.nuget\NuGet.exe
+		.nuget\NuGet.exe = .nuget\NuGet.exe
 		..\MandelbrotGPU\.nuget\NuGet.targets = ..\MandelbrotGPU\.nuget\NuGet.targets
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FracSharpGPU", "FracSharpGPU\FracSharpGPU.fsproj", "{9B8EFEC6-6E1D-4BA7-BF86-1547B927A7FC}"
