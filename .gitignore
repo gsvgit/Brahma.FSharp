@@ -11,7 +11,5 @@ YMNIK/*
 NuGet/*.nupkg
 Source/packages/*
 Brahman/OpenCL/packages/*
-/a/Source/Fractals/FractalsGPU/packages/*
-!/a/Source/Fractals/FractalsGPU/packages/repositories.config
 
 
