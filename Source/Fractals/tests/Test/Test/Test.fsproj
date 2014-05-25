@@ -38,6 +38,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="fortests">
+      <HintPath>..\..\fortests\fortests\bin\Debug\fortests.exe</HintPath>
+    </Reference>
     <Reference Include="FSharp.Charting">
       <HintPath>..\..\..\..\..\Сергей\Desktop\tests\Test\packages\FSharp.Charting.0.90.6\lib\net40\FSharp.Charting.dll</HintPath>
       <Private>True</Private>
@@ -49,9 +52,6 @@
     <Reference Include="MSDN.FSharpChart">
       <HintPath>..\..\..\..\..\Сергей\Desktop\tests\Test\packages\MSDN.FSharpChart.dll.0.60\lib\MSDN.FSharpChart.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="prost">
-      <HintPath>..\..\prost\prost\bin\Debug\prost.exe</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

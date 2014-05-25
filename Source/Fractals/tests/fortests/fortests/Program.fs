@@ -164,4 +164,3 @@ let Juliagpu (cx: int[]) scaling size mx my cr ci boxwidth boxheight =
     provider.Dispose()
     provider.CloseAllBuffers()
     cParallel
-

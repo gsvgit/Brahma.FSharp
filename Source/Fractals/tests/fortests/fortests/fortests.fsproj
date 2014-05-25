@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>468ee931-cba7-42e6-af1b-69e8133b3427</ProjectGuid>
+    <ProjectGuid>765a2445-f800-4196-a2a2-888137dead78</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>prost</RootNamespace>
-    <AssemblyName>prost</AssemblyName>
+    <RootNamespace>fortests</RootNamespace>
+    <AssemblyName>fortests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>prost</Name>
+    <Name>fortests</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\prost.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\fortests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,48 +32,48 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\prost.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\fortests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Brahma">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.Helpers">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.Helpers.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.Helpers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Brahma.OpenCL">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.OpenCL.dll</HintPath>
+      <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.OpenCL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Text.StructuredFormat">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
+      <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -81,7 +81,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenCL.Net">
-      <HintPath>..\..\..\..\..\Сергей\Desktop\tests\prost\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
