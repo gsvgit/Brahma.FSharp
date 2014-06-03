@@ -55,7 +55,7 @@ namespace Brahma.OpenCL
         {
             foreach (var kvp in this._autoconfiguredBuffers)
             {
-                kvp.Value.Dispose();
+                kvp.Value.Dispose();                
             }
             _autoconfiguredBuffers.Clear();
         }
@@ -132,7 +132,8 @@ namespace Brahma.OpenCL
         {
             if (!_disposed)
             {
-                _context.Dispose();
+                _context.Release();                
+                _context.Dispose();                
                 _disposed = true;
             }
         }

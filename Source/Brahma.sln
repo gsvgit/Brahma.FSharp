@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brahma", "Brahma\Brahma.csproj", "{0E731438-DD9E-4444-950D-EF2DE31D3E97}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E54DCF27-1592-467F-8E05-F0B9745111E0}"
@@ -325,5 +327,8 @@ Global
 		{9F56515E-D17B-4A19-A4F2-32E84D395831} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 		{264509A1-82A6-4087-9C93-7E4236AA64EC} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
 		{442EBA5D-E78D-4C48-8466-67D14D97F826} = {898BC1D2-623D-4048-A88C-89974E01FCC8}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
