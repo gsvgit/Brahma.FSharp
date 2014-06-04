@@ -113,21 +113,34 @@ let rec recLet expr =
             | _ -> 
                 Expr.Let(v, recLet valExpr, inExpr1)
         
-
-        let res =  
-                match e with
+        let rec funUp expr =
+            match expr with
                 | Patterns.Let (var, inExpr, afterExpr) -> 
-                    if(isLetFun e) then
-                        Expr.Let (var, inExpr, recLet afterExpr) 
+                    if(isLetFun expr) then
+                        Expr.Let (var, inExpr, funUp afterExpr) 
                     else
                         match afterExpr with
                         | Patterns.Let (var1, inExpr1, afterExpr1) ->
                             if(isLetFun afterExpr) then
                                 let newAfterExpr = Expr.Let(var, inExpr, afterExpr1)
-                                Expr.Let(var1, inExpr1, recLet newAfterExpr)
+                                Expr.Let(var1, inExpr1, funUp newAfterExpr)
                             else
-                                Expr.Let (var, inExpr, recLet afterExpr)
-                        | _ -> e
+                                let fUp = funUp afterExpr
+                                match fUp with
+                                | Patterns.Let (var2, inExpr2, afterExpr2) ->
+                                    if(isLetFun fUp) then
+                                        let newAfterExpr = Expr.Let(var, inExpr, afterExpr2)
+                                        Expr.Let(var2, inExpr2, funUp newAfterExpr)
+                                    else 
+                                        Expr.Let (var, inExpr, fUp)
+                                | _ -> Expr.Let (var, inExpr, fUp)
+                                 //Expr.Let (var, inExpr, fUp)
+                                //fUp
+                        | _ -> expr
+                | _ -> expr
+
+        let res =  funUp e
+                
         res
     | ExprShape.ShapeVar(var) ->
         expr           
