@@ -1,0 +1,13 @@
+
+bin/
+obj/
+*.suo
+*.user
+*.orig
+/Source/Substrings/random.txt
+
+/Source/Substrings/templates.txt
+YMNIK/*
+NuGet/*.nupkg
+Source/packages/*
+Brahman/OpenCL/packages/*

@@ -1,0 +1,1 @@
+nuget.exe pack "..\Brahman\OpenCL\Brahman.Substrings\Brahman.Substrings.nuspec"
