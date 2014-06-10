@@ -529,38 +529,67 @@ type Translator() =
 
             member this.``Template Let Transformation Test 9``() =
             let command = 
-                <@ fun (range:_1D) (m:array<int>) -> 
-                        let p = 8
+                <@ fun (range:_1D) (buf:array<int>) -> 
                         let x n = 
-                            let y = n - p
-                            y
+                            let mutable r = 8
+                            let mutable h = r + n
+                            h
                         x 9
                 @>
             checkCode command "Template Test 9.gen" "Template Test 9.cl"
 
         member this.``Template Let Transformation Test 10``() =
             let command = 
-                <@ fun (range:_1D) (m:int) -> 
+                <@ fun (range:_1D) (m:array<int>) -> 
                         let p = 9
-                        let x n = n + p
-                        x 7
+                        let x n b = 
+                            let mutable t = 0
+                            n + b + t
+                        m.[0] <- x 7 9
                 @>
             checkCode command "Template Test 10.gen" "Template Test 10.cl"
 
         member this.``Template Let Transformation Test 11``() =
             let command = 
                 <@ fun (range:_1D) (m:int) -> 
-                        let p = m
-                        let n = 1
-                        let x = n + p
-                        x + p + n
+                        let p = 1
+                        let m = 
+                            let r l =
+                                l - 8
+                            r 9
+                        let z k = k - 2
+                        m
                 @>
             checkCode command "Template Test 11.gen" "Template Test 11.cl"
+
+        member this.``Template Let Transformation Test 12``() =
+            let command = 
+                <@ fun (range:_1D) (m:int) -> 
+                        let f x y =
+                            let y = y
+                            let y = y
+                            let g x m = m + x
+                            g x y
+                        f 1 7
+                @>
+            checkCode command "Template Test 12.gen" "Template Test 12.cl"
+
+//            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
+//
+//            fsharp.org academic publications посмотреть для библиотеки
+//            добавить в обзор всяких трансляций функионалки (haskell). во всякие императивщины и ООП
+//
+//            сказать аккуратно про академические компиляторы haskell в C. окамль, лисп .... 
+//
+//            Поискать публикации FSCL . если их нет, то печаль. 
+//            Можно просто написать парняги и спросить е него есть ли они у него
+//
+//            про апробацию. надо сказать, что ранее не запускалось.
 
 
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-    (new Translator()).``Template Let Transformation Test 10``()
+    (new Translator()).``Template Let Transformation Test 9``()
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
     0

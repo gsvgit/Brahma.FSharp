@@ -18,12 +18,17 @@ module Brahma.FSharp.OpenCL.Translator.Body
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.AST
 open Microsoft.FSharp.Collections
+open System.Collections.Generic
 
 let private clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
     c.Namer <- targetContext.Namer
     c.Flags <- targetContext.Flags
     c
+
+
+
+let dictionaryFun = new System.Collections.Generic.Dictionary<string,StatementBlock<Lang>>()
 
 let dummyTypes = new System.Collections.Generic.Dictionary<_,Struct<_>>()
 
@@ -271,27 +276,59 @@ and translateSeq expr1 expr2 (targetContext:TargetContext<_,_>) =
     stmt, tContext
 
 and translateApplication expr1 expr2 targetContext =
+    let rec go expr _vals args  = 
+        match expr with
+        | Patterns.Lambda (v,e) ->
+            go e _vals (v::args) 
+        | Patterns.Application (e1,e2) ->
+            go e1 (e2::_vals) args
+        | e ->
+            if _vals.Length = args.Length then
+                let d =
+                    List.zip (List.rev args) _vals |> dict
+            
+                    //failwith "Partial evaluation is not supported in kernel function."
+                e.Substitute (fun v -> if d.ContainsKey v then Some d.[v] else None) ,true
+            else e, false
+    let body, doing = go expr1 [expr2] []
+    body, doing, targetContext
+    //if(body = null) then
+    //    translateApplicationFun expr1 expr2 targetContext
+    //else
+    
+                //else 
+                //let getStatementFun = dictionaryFun.[expr.
+                    //new FunCall<_>(expr.ToString(), _vals) :> Statement<_>,targetContext
+                    //failwith "-Partial evaluation is not supported in kernel function."
+
+and translateApplicationFun expr1 expr2 targetContext =
     let rec go expr _vals args = 
         match expr with
         | Patterns.Lambda (v,e) ->
             go e _vals (v::args)
         | Patterns.Application (e1,e2) ->
-            go e1 (e2::_vals) args
+            let exp, tc = (TranslateAsExpr (e2) targetContext)
+            go e1 (exp::_vals) args
         | e ->
-            let d =
-                if _vals.Length = args.Length
-                then List.zip (List.rev args) _vals |> dict
-                else failwith "Partial evaluation is not supported in kernel function."
-            e.Substitute (fun v -> if d.ContainsKey v then Some d.[v] else None)
-    let body = go expr1 [expr2] []
-    Translate body targetContext
+            let listArg = List.rev _vals
+            let funCall = new FunCall<_>(expr.ToString(), _vals) :> Statement<_>
+            funCall, targetContext
+                //failwith "-Partial evaluation is not supported in kernel function."
+    let exp, tc = (TranslateAsExpr (expr2) targetContext)
+    go expr1 [exp] []
 
 and Translate expr (targetContext:TargetContext<_,_>) =
     //printfn "%A" expr
     match expr with
     | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
     | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
-    | Patterns.Application (expr1,expr2) -> translateApplication expr1 expr2 targetContext
+    | Patterns.Application (expr1,expr2) -> 
+        let e, appling, targetContext = translateApplication expr1 expr2 targetContext
+        if(appling) then
+            Translate e targetContext
+        else
+            let r, tContext= translateApplicationFun expr1 expr2 targetContext
+            r :> Node<_>,tContext
     | Patterns.Call (exprOpt,mInfo,args) -> 
         let r,tContext = translateCall exprOpt mInfo args targetContext
         r :> Node<_>,tContext
@@ -363,8 +400,8 @@ and private translateLet var expr inExpr (targetContext:TargetContext<_,_>) =
     let sb = new ResizeArray<_>(targetContext.VarDecls |> Seq.cast<Statement<_>>)
     let res,tContext = clearContext targetContext |> Translate inExpr //вот тут мб нужно проверять на call или application
     match res with
-    | :? StatementBlock<Lang> as s -> sb.AddRange s.Statements; // что тут происходит?
-    | _ -> sb.Add (res :?> Statement<_>)                        // и тут что происходит?
+    | :? StatementBlock<Lang> as s -> sb.AddRange s.Statements; 
+    | _ -> sb.Add (res :?> Statement<_>)                       
      
    
     targetContext.Namer.LetOut()

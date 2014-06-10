@@ -21,7 +21,8 @@ open Microsoft.FSharp.Quotations
 
 let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
-        match str.ToLowerInvariant() with
+        let low = str.ToLowerInvariant()
+        match low with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "int16" -> PrimitiveType<Lang>(Short) :> Type<Lang>
         | "uint16" -> PrimitiveType<Lang>(UShort) :> Type<Lang>
@@ -34,6 +35,7 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         | "double" -> 
             context.Flags.enableFP64 <- true
             PrimitiveType<Lang>(Double) :> Type<Lang>        
+        | "unit" -> PrimitiveType<Lang>(Void) :> Type<Lang>
         | t when t.EndsWith "[]" ->
             let baseT = t.Substring(0,t.Length-2)
             if isKernelArg 
@@ -41,6 +43,8 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
             else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
+        | f when f.StartsWith "fsharpfunc" ->
+            go (_type.GetGenericArguments().[1].Name)
         | x when collectedTypes.ContainsKey x 
             -> StructType(collectedTypes.[x]) :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 
@@ -400,7 +404,7 @@ type Method(var:Var, expr:Expr) =
     let mutable funVar = var
     let funExpr = expr
 
-    member this.FunVar =
+    member this.FunVar:Var =
         funVar
     member this.FunExpr =
         funExpr

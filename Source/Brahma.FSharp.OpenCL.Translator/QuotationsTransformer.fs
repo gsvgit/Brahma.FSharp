@@ -98,7 +98,8 @@ let isLetFun expr =
 let rec recLet expr = 
     match expr with
     | Patterns.Let(v, valExpr, inExpr1) ->
-        let e = match valExpr with
+//        let e = match valExpr with
+        match valExpr with
             | Patterns.Let (var, inExpr, afterExpr) -> 
                 let newLet = recLet ( Expr.Let(v, afterExpr, inExpr1))
                 recLet (Expr.Let(var, inExpr, recLet newLet))
@@ -113,35 +114,36 @@ let rec recLet expr =
             | _ -> 
                 Expr.Let(v, recLet valExpr, inExpr1)
         
-        let rec funUp expr =
-            match expr with
-                | Patterns.Let (var, inExpr, afterExpr) -> 
-                    if(isLetFun expr) then
-                        Expr.Let (var, inExpr, funUp afterExpr) 
-                    else
-                        match afterExpr with
-                        | Patterns.Let (var1, inExpr1, afterExpr1) ->
-                            if(isLetFun afterExpr) then
-                                let newAfterExpr = Expr.Let(var, inExpr, afterExpr1)
-                                Expr.Let(var1, inExpr1, funUp newAfterExpr)
-                            else
-                                let fUp = funUp afterExpr
-                                match fUp with
-                                | Patterns.Let (var2, inExpr2, afterExpr2) ->
-                                    if(isLetFun fUp) then
-                                        let newAfterExpr = Expr.Let(var, inExpr, afterExpr2)
-                                        Expr.Let(var2, inExpr2, funUp newAfterExpr)
-                                    else 
-                                        Expr.Let (var, inExpr, fUp)
-                                | _ -> Expr.Let (var, inExpr, fUp)
-                                 //Expr.Let (var, inExpr, fUp)
-                                //fUp
-                        | _ -> expr
-                | _ -> expr
-
-        let res =  funUp e
-                
-        res
+//        let rec funUp expr =
+//            match expr with
+//                | Patterns.Let (var, inExpr, afterExpr) -> 
+//                    if(isLetFun expr) then
+//                        Expr.Let (var, inExpr, funUp afterExpr) 
+//                    else
+//                        match afterExpr with
+//                        | Patterns.Let (var1, inExpr1, afterExpr1) ->
+//                            if(isLetFun afterExpr) then
+//                                let newAfterExpr = Expr.Let(var, inExpr, afterExpr1)
+//                                Expr.Let(var1, inExpr1, funUp newAfterExpr)
+//                            else
+//                                let fUp = funUp afterExpr
+//                                match fUp with
+//                                | Patterns.Let (var2, inExpr2, afterExpr2) ->
+//                                    if(isLetFun fUp) then
+//                                        let newAfterExpr = Expr.Let(var, inExpr, afterExpr2)
+//                                        Expr.Let(var2, inExpr2, funUp newAfterExpr)
+//                                    else 
+//                                        Expr.Let (var, inExpr, fUp)
+//                                | _ -> Expr.Let (var, inExpr, fUp)
+//                                 //Expr.Let (var, inExpr, fUp)
+//                                //fUp
+//                        | _ -> expr
+//                | _ -> expr
+//
+//        //let res =  funUp e
+//                
+//        //res
+//        e
     | ExprShape.ShapeVar(var) ->
         expr           
     | ExprShape.ShapeLambda(lv, lb) ->
@@ -164,12 +166,44 @@ let rec recLet expr =
     | ExprShape.ShapeCombination(o, args) ->
         ExprShape.RebuildShapeCombination(o, List.map (fun (e:Expr) -> recLet (e)) args)
 
+let rec letFunUp expr =
+    match expr with
+    | Patterns.Let(var, inExpr, body) ->
+        let recResOutLetFun = recLet expr
+        match recResOutLetFun with
+        | Patterns.Let(v, iE, b) ->
+            let retFunUp = letFunUp b
+            if(isLetFun expr) then
+                Expr.Let(v, iE, retFunUp)
+            else
+                match retFunUp with
+                | Patterns.Let(vF, iEF, bF) ->
+                    if(isLetFun retFunUp) then
+                        let newAfterExpr = Expr.Let(v, iE, bF)
+                        Expr.Let(vF, iEF, letFunUp newAfterExpr)
+                    else 
+                        let fUp = letFunUp retFunUp
+                        match fUp with
+                        | Patterns.Let (var2, inExpr2, afterExpr2) ->
+                            if(isLetFun fUp) then
+                                let newAfterExpr = Expr.Let(v, iE, afterExpr2)
+                                Expr.Let(var2, inExpr2, letFunUp newAfterExpr)
+                            else 
+                                Expr.Let (v, iE, fUp)
+                        | _ -> Expr.Let (v, iE, fUp)
+                | _ -> recResOutLetFun
+        | _ -> recResOutLetFun
+    | _ -> expr
+                
+
+
 let rec quontationTransformerRec expr = 
     match expr with
     | ExprShape.ShapeLambda(lv, lb) ->
         Expr.Lambda(lv, quontationTransformerRec lb)
     | _ ->
-        recLet expr
+        //recLet expr
+        letFunUp expr
 
 let renameAllTree expr (letScope:LetScope) (renamer1:Renamer) = 
     let rec renameRec expr =
