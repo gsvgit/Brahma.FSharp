@@ -518,6 +518,23 @@ type Translator() =
             commandQueue.Dispose()
             Assert.Fail e.Message
 
+    [<Test>]
+    member this.``Template Let Transformation Test 9``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) -> 
+                        let x n = 
+                            let mutable r = 8
+                            let mutable h = r + n
+                            h
+//                        x 9
+                        buf.[0] <- x 9
+            @>
+
+        let run,check = checkResult command
+        run _1d intInArr        
+        check intInArr [|17;1;2;3|]
+
 let x = 
     let d = ref 0
     fun y ->

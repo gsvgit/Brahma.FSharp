@@ -534,7 +534,9 @@ type Translator() =
                             let mutable r = 8
                             let mutable h = r + n
                             h
-                        x 9
+//                        x 9
+                        buf.[0] <- x 9
+
                 @>
             checkCode command "Template Test 9.gen" "Template Test 9.cl"
 
@@ -574,14 +576,14 @@ type Translator() =
                 @>
             checkCode command "Template Test 12.gen" "Template Test 12.cl"
 
-//            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
+////            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
 //
 //            fsharp.org academic publications посмотреть для библиотеки
 //            добавить в обзор всяких трансляций функионалки (haskell). во всякие императивщины и ООП
 //
 //            сказать аккуратно про академические компиляторы haskell в C. окамль, лисп .... 
 //
-//            Поискать публикации FSCL . если их нет, то печаль. 
+//            Поискать публикации FSCL. если их нет, то печаль. 
 //            Можно просто написать парняги и спросить е него есть ли они у него
 //
 //            про апробацию. надо сказать, что ранее не запускалось.
@@ -590,6 +592,7 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-    (new Translator()).``Template Let Transformation Test 9``()
-    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq.``()
+//    (new Translator()).``Template Let Transformation Test 9``()
+    
+    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 9``()
     0

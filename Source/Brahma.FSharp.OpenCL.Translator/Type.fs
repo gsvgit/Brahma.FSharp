@@ -239,7 +239,7 @@ type InfoScope(orgnName, nName, originVar, isFunc:bool, nameInFunc) =
                             if(v.GetOriginalName = orgnName) then 
                                 if(var = null) then
                                     var <- v
-                        if(nameInFun <> null) then
+                        if((nameInFun <> null) && (not isAfter)) then
                             let inFunction:InfoScope = allLets.[nameInFun]
                             let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
                             let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
@@ -381,16 +381,25 @@ type LetScope() =
         lastInLet.Pop()
 
     member this.GetNameForVarInLet name isAfter =
-        let infoLet = allLet.[this.GetLastInLet]
-        //тут проверку на пустоту стека funLastLet
-        //смотреть внутри это функции или нет
-        let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
-        if(getingName = null) then 
-            let v = FindInVars(name)
-            infoLet.AddNeedVar (v.GetOriginalName) (v.GetNewName) (v.GetVarType)
-            v
+        if(allLet.Count > 0) then
+            let infoLet = allLet.[this.GetLastInLet]
+            //тут проверку на пустоту стека funLastLet
+            //смотреть внутри это функции или нет
+            let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
+            if(getingName = null) then 
+                let v = FindInVars(name)
+                infoLet.AddNeedVar (v.GetOriginalName) (v.GetNewName) (v.GetVarType)
+                v
+            else
+                getingName
         else
-            getingName
+            let mutable var = null
+            for v in kernelVars do
+                if(v.GetOriginalName = name) then 
+                    if(var = null) then
+                        var <- v
+            var
+
 
     member this.AddVarInLastLet orgnName nName varType =
         let last = allLet.[this.GetLastInLet]

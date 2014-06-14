@@ -386,7 +386,7 @@ let quontationTransformer expr translatorOptions =
     printf "\n%A" qTransd
     let addedLam = addNeededLamAndAppicatins qTransd letScope
 
-    printf "\n%A" addedLam
+    printf "\n%A\n\n" addedLam
 
 //    let qq = <@ fun (m:int) -> 
 //                        let g k m = k + m + m
