@@ -44,7 +44,7 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
         | f when f.StartsWith "fsharpfunc" ->
-            go (_type.GetGenericArguments().[1].Name)
+            go (_type.GetGenericArguments().[0].Name)
         | x when collectedTypes.ContainsKey x 
             -> StructType(collectedTypes.[x]) :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 

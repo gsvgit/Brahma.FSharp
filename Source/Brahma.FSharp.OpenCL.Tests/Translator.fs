@@ -45,7 +45,7 @@ type Translator() =
     let checkCode command outFile expected =
         let code = ref ""
         let _ = provider.Compile(command,_outCode = code)
-        printfn "%s" !code
+        printfn "\n%s" !code
         System.IO.File.WriteAllText(outFile,!code)
         filesAreEqual outFile (System.IO.Path.Combine(basePath,expected))
 
@@ -425,11 +425,11 @@ type Translator() =
     member this.``Template Let Transformation Test 1``() =
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int*int>) ->                                        
+                fun (range:_1D) (buf:array<int>) ->                                        
                     let f = 
                         let x = 3
                         x
-                    f
+                    buf.[0] <- f
             @>
 
         checkCode command "Template Test 1.gen" "Template Test 1.cl"
@@ -437,13 +437,13 @@ type Translator() =
         member this.``Template Let Transformation Test 2``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f = 
                             let x = 
                                 let y = 3
                                 y
                             x
-                        f
+                        buf.[0] <- f
                 @>
 
             checkCode command "Template Test 2.gen" "Template Test 2.cl"
@@ -451,11 +451,11 @@ type Translator() =
         member this.``Template Let Transformation Test 3``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f = 
                             let f = 5
                             f
-                        f
+                        buf.[0] <- f
                 @>
 
             checkCode command "Template Test 3.gen" "Template Test 3.cl"
@@ -463,13 +463,13 @@ type Translator() =
          member this.``Template Let Transformation Test 4``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f = 
                             let f = 
                                 let f = 5
                                 f
                             f
-                        f
+                        buf.[0] <- f
                 @>
 
             checkCode command "Template Test 4.gen" "Template Test 4.cl"
@@ -477,11 +477,11 @@ type Translator() =
         member this.``Template Let Transformation Test 5``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f a b = 
                             let x y z = y + z
                             x a b
-                        f
+                        buf.[0] <- f 1 7
                 @>
 
             checkCode command "Template Test 5.gen" "Template Test 5.cl"
@@ -489,22 +489,22 @@ type Translator() =
         member this.``Template Let Transformation Test 6``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f x y = 
                             let x = x
                             x + y
-                        f 7 8
+                        buf.[0] <- f 7 8
                 @>
             checkCode command "Template Test 6.gen" "Template Test 6.cl"
 
         member this.``Template Let Transformation Test 7``() =
             let command = 
                 <@ 
-                    fun (range:_1D) (buf:array<int*int>) ->                                        
+                    fun (range:_1D) (buf:array<int>) ->                                        
                         let f y = 
                             let x y = 6 - y
                             x y
-                        f 7
+                        buf.[0] <- f 7
                 @>
             checkCode command "Template Test 7.gen" "Template Test 7.cl"
 
@@ -542,39 +542,67 @@ type Translator() =
 
         member this.``Template Let Transformation Test 10``() =
             let command = 
-                <@ fun (range:_1D) (m:array<int>) -> 
+                <@ fun (range:_1D) (buf:array<int>) -> 
                         let p = 9
                         let x n b = 
                             let mutable t = 0
                             n + b + t
-                        m.[0] <- x 7 9
+                        buf.[0] <- x 7 9
                 @>
             checkCode command "Template Test 10.gen" "Template Test 10.cl"
 
         member this.``Template Let Transformation Test 11``() =
             let command = 
-                <@ fun (range:_1D) (m:int) -> 
+                <@ fun (range:_1D) (buf:array<int>) -> 
                         let p = 1
                         let m = 
-                            let r l =
-                                l - 8
+                            let r (l:int) =
+                                l
                             r 9
-                        let z k = k - 2
-                        m
+                        let z (k:int) = k
+                        buf.[0] <- m
                 @>
             checkCode command "Template Test 11.gen" "Template Test 11.cl"
 
         member this.``Template Let Transformation Test 12``() =
             let command = 
-                <@ fun (range:_1D) (m:int) -> 
+                <@ fun (range:_1D) (buf:array<int>) -> 
                         let f x y =
                             let y = y
                             let y = y
                             let g x m = m + x
                             g x y
-                        f 1 7
+                        buf.[0] <- f 1 7
                 @>
             checkCode command "Template Test 12.gen" "Template Test 12.cl"
+
+        member this.``Template Let Transformation Test 13``() =
+            let command = 
+                <@ fun (range:_1D) (buf:array<int>) -> 
+                        let f (y:int) =
+                            let y = y
+                            let y = y
+                            let g (m:int) = m
+                            g y
+                        buf.[0] <- f 7
+                @>
+            checkCode command "Template Test 13.gen" "Template Test 13.cl"
+
+        member this.``Template Let Transformation Test 14``() =
+            let command = 
+                <@ fun (range:_1D) (buf:array<int>) -> 
+                        let f (y:int) =
+                            let y = y
+                            let y = y
+                            let g (m:int) = 
+                                let g r t = r + y - t
+                                let n o = o - (g y 2)
+                                n 5
+                            g y
+                        let z y = y - 2
+                        buf.[0] <- f (z 7)
+                @>
+            checkCode command "Template Test 14.gen" "Template Test 14.cl"
 
 ////            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
 //
@@ -592,7 +620,7 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-//    (new Translator()).``Template Let Transformation Test 9``()
+    (new Translator()).``Template Let Transformation Test 14``()
     
-    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 9``()
+//    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 9``()
     0
