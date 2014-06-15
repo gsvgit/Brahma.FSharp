@@ -604,6 +604,95 @@ type Translator() =
                 @>
             checkCode command "Template Test 14.gen" "Template Test 14.cl"
 
+        member this.``Template Let Transformation Test 15``() =
+            let command = 
+                <@ fun (range:_1D) (buf:array<int>) -> 
+                        let f (y:int) =
+                            let Argi index =  
+                                if(index = 0) then buf.[1]
+                                else buf.[2]
+                            Argi y
+                        buf.[0] <- f 0
+                @>
+            checkCode command "Template Test 15.gen" "Template Test 15.cl"
+
+        member this.``Template Let Transformation Test 16``() =
+            let command = 
+                <@ fun (range:_1D) (buf:array<int>) -> 
+                        let f (y:int) =
+                            if(y = 0) 
+                            then 
+                                let z (a:int) = a
+                                z 9
+                            else buf.[2]
+                        buf.[0] <- f 0
+                @>
+            checkCode command "Template Test 16.gen" "Template Test 16.cl"
+
+        member this.``createStartStoreKernel``() =
+            let command = 
+                <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
+                        let column = r.GlobalID0
+                        let row = r.GlobalID1
+
+                        if(row < scaleExp && column < scaleM) then 
+                            if(row < scaleVar) then
+                                if(column % scaleM = 0) then
+                                    devStore.[row*scaleM + column] <- 1
+                                else
+                                    devStore.[row*scaleM + column] <- -1
+                            else
+                                if(column = 0) then
+                                    devStore.[row*scaleM + column] <- 2
+                                else 
+                                    if(column = 1) then
+                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
+                                    else 
+                                        devStore.[row*scaleM + column] <- -1 
+                @>
+            checkCode command "createStartStoreKernel.gen" "createStartStoreKernel.cl"
+
+        member this.``EigenCFA``() =
+            let command = 
+                <@ fun (r:_2D)
+                    (devFun:array<_>)
+                    (devArg1:array<_>)
+                    (devArg2:array<_>)
+                    (devStore:array<_>)
+                    (devRep:array<_>)
+                    devScaleM
+                    devScaleCall
+                    devScaleLam ->
+                       let column = r.GlobalID0
+                       let row = r.GlobalID1
+                       if(column < devScaleCall && row < 2) then
+                            let numCall = column
+                            let Argi index =  
+                                if(index = 0) then devArg1.[numCall]
+                                else devArg2.[numCall]
+                            let L index = devStore.[devFun.[numCall]*devScaleM + index]
+                            let Li index = devStore.[(Argi row)*devScaleM + index]
+                            let rowStore row column = devStore.[row*devScaleM + column]
+                            let vL j =
+                                if(row = 0) then
+                                    (L j) - 1
+                                else
+                                    (L j) - 1 + devScaleLam
+                            for j in 1 .. ((L 0) - 1) do
+                                for k in 1 .. ((Li 0) - 1) do
+                                    let mutable isAdd = 1
+                                    let addVar = (Li k)
+                                    for i in 1 .. ((rowStore (vL j) 0) - 1) do
+                                        if((rowStore (vL j) i) = addVar) then 
+                                            isAdd <- 0
+                                    if(isAdd > 0) then
+                                        devRep.[0] <- devRep.[0] + 1
+                                        let tail = (rowStore (vL j) 0)
+                                        devStore.[(vL j)*devScaleM] <- devStore.[(vL j)*devScaleM] + 1
+                                        devStore.[(vL j)*devScaleM + tail] <- addVar
+                @>
+            checkCode command "EigenCFA.gen" "EigenCFA.cl"
+
 ////            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
 //
 //            fsharp.org academic publications посмотреть для библиотеки
@@ -620,7 +709,7 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-    (new Translator()).``Template Let Transformation Test 14``()
+//    (new Translator()).EigenCFA()
     
-//    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 9``()
+    (new Brahma.FSharp.OpenCL.Full.Translator()).EigenCFA()
     0

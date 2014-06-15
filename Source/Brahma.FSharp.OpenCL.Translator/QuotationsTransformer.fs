@@ -187,6 +187,36 @@ and letFunUp expr =
                         | _ -> Expr.Let (v, iE, fUp)
                 | _ -> recResOutLetFun
         | _ -> recResOutLetFun
+    | Patterns.IfThenElse (cond, thenExpr, elseExpr) ->
+        let newCond = cond
+        let newThenExpr = letFunUp thenExpr
+        match newThenExpr with
+        | Patterns.Let (var2, inExpr2, afterExpr2) ->
+            if(isLetFun newThenExpr) then
+                let newAfterExpr = Expr.IfThenElse(cond, afterExpr2, elseExpr)
+                Expr.Let(var2, inExpr2, recLet newAfterExpr)
+            else 
+                let newElseExpr = letFunUp elseExpr
+                match newElseExpr with
+                | Patterns.Let (var1, inExpr1, afterExpr1) ->
+                    if(isLetFun newElseExpr) then
+                        let newAfterExpr = Expr.IfThenElse(cond, thenExpr, afterExpr1)
+                        Expr.Let(var1, inExpr1, recLet newAfterExpr)
+                    else
+                        Expr.IfThenElse(cond, thenExpr,elseExpr)
+                | _ ->
+                    Expr.IfThenElse(cond, thenExpr,elseExpr)
+        | _ -> 
+            let newElseExpr = letFunUp elseExpr
+            match newElseExpr with
+            | Patterns.Let (var1, inExpr1, afterExpr1) ->
+                if(isLetFun newElseExpr) then
+                    let newAfterExpr = Expr.IfThenElse(cond, thenExpr, afterExpr1)
+                    Expr.Let(var1, inExpr1, recLet newAfterExpr)
+                else
+                    Expr.IfThenElse(cond, thenExpr,elseExpr)
+            | _ ->
+                Expr.IfThenElse(cond, thenExpr,elseExpr)
     | _ -> expr
                 
 
@@ -242,6 +272,22 @@ let renameAllTree expr (letScope:LetScope) (renamer1:Renamer) =
             letScope.LetOut |> ignore
             let newLet = Expr.Let(NewVar, exprIn, exprAfter)
             newLet
+        | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
+            let newName = renamer1.addName (i.Name)
+            let NewVar = new Var(newName, i.Type, i.IsMutable)
+
+            let nameInFun = letScope.GetLastInFunLet
+
+            letScope.LetIn i.Name newName i false nameInFun
+
+//            letScope.AddForVars (new VarInfo(i.Name, NewVar.Name, true, NewVar.Type))
+            
+            let newFrom = renameRec from
+            let newTo = renameRec _to
+            let newDo = renameRec _do
+            letScope.LetOut |> ignore
+//            letScope.RemoveForVar |> ignore
+            Expr.ForIntegerRangeLoop(NewVar, newFrom, newTo, newDo)
         | Patterns.Application(expr1, expr2) ->
             Expr.Application(renameRec expr1, renameRec expr2)
         | Patterns.Call(exprOpt, methodInfo, exprList) ->
@@ -274,7 +320,7 @@ let addNeededLamAndAppicatins expr (letScope:LetScope) =
         match expr with
         | ExprShape.ShapeVar(var) ->
             if(letScope.ContainsInfo var.Name) then
-                let listNeededVars = (letScope.GetLetInfo var.Name).GetNeedVars
+                let listNeededVars = ((letScope.GetLetInfo var.Name).GetNeedVars)
                 if(listNeededVars.Count > 0) then
                     let mutable readyLet = Expr.Var((letScope.GetLetInfo var.Name).GetOrgnVar)
                     for elem in listNeededVars do
@@ -293,6 +339,7 @@ let addNeededLamAndAppicatins expr (letScope:LetScope) =
                     readyLet <- Expr.Lambda(new Var(elem.GetNewName, elem.GetVarType), readyLet)
                 let newVar = new Var(var.Name, readyLet.Type)
                 (letScope.GetLetInfo var.Name).ChangeOrgnVar newVar
+                listNeededVars.Reverse()
                 Expr.Let( newVar, readyLet, addNeededLam expr2)
             else
                 let ex1 = addNeededLam expr1
@@ -319,6 +366,7 @@ let addNeededLamAndAppicatins expr (letScope:LetScope) =
         | _ ->
             addNeededLam expr
     run expr
+
 
 //get list expr for translation
 let getListLet expr =
@@ -371,16 +419,16 @@ let quontationTransformer expr translatorOptions =
     let letScope = LetScope()
     let renamedTree = renameAllTree expr letScope renamer
 
-    printf "\n%A" renamedTree
+//    printf "\n%A" renamedTree
 
 //    quontationTransformerRec expr context caller
 
     let qTransd = quontationTransformerRec renamedTree
 
-    printf "\n%A" qTransd
+//    printf "\n%A" qTransd
     let addedLam = addNeededLamAndAppicatins qTransd letScope
 
-    printf "\n%A\n\n" addedLam
+//    printf "\n%A\n\n" addedLam
 
 //    let qq = <@ fun (m:int) -> 
 //                        let g k m = k + m + m

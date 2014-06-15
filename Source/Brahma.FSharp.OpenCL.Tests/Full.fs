@@ -35,8 +35,8 @@ type Translator() =
         | ex -> failwith ex.Message
 
     let checkResult command =
-        let kernel,kernelPrepareF, kernelRunF = provider.Compile command                
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command    
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)            
         let check (outArray:array<'a>) (expected:array<'a>) =        
             let cq = commandQueue.Add(kernelRunF()).Finish()
             let r = Array.zeroCreate expected.Length
@@ -535,6 +535,203 @@ type Translator() =
         run _1d intInArr        
         check intInArr [|17;1;2;3|]
 
+    [<Test>]
+    member this.``createStartStoreKernel``() = 
+        let command = 
+                <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
+                        let column = r.GlobalID0
+                        let row = r.GlobalID1
+
+                        if(row < scaleExp && column < scaleM) then 
+                            if(row < scaleVar) then
+                                if(column % scaleM = 0) then
+                                    devStore.[row*scaleM + column] <- 1
+                                else
+                                    devStore.[row*scaleM + column] <- -1
+                            else
+                                if(column = 0) then
+                                    devStore.[row*scaleM + column] <- 2
+                                else 
+                                    if(column = 1) then
+                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
+                                    else 
+                                        devStore.[row*scaleM + column] <- -1 
+                @>
+        let initStore,check = checkResult command
+        let intArr = Array.zeroCreate 45
+        initStore (new _2D(5, 9)) intArr 9 5 6      
+        check intArr   [|1;-1;-1;-1;-1;
+                         1;-1;-1;-1;-1;
+                         1;-1;-1;-1;-1;
+                         1;-1;-1;-1;-1;  
+                         1;-1;-1;-1;-1;
+                         1;-1;-1;-1;-1;
+                         2; 1;-1;-1;-1;
+                         2; 2;-1;-1;-1;
+                         2; 3;-1;-1;-1
+        |]
+
+    [<Test>]
+    member this.twoFun() = 
+        let command = 
+                <@ fun (r:_2D) (devStore:array<int>) -> 
+                        let x y = 
+                            devStore.[0] <- devStore.[0] + 1
+                            y - 8
+                        devStore.[1] <- x 9
+                        
+                @>
+
+
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile command    
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)            
+        let check (outArray:array<'a>) (expected:array<'a>) =        
+            let cq = commandQueue.Add(kernelRunF()).Finish()
+            let r = Array.zeroCreate expected.Length
+            let cq2 = commandQueue.Add(outArray.ToHost(provider,r)).Finish()
+            commandQueue.Dispose()
+            //Assert.AreEqual(expected, r)
+            printf "%A\n" r
+            //provider.CloseAllBuffers()
+
+        let intArr = Array.zeroCreate 2
+       
+
+        while(true) do
+            kernelPrepareF (new _2D(3, 1)) (intArr) 
+            let cq = commandQueue.Add(kernelRunF()).Finish()
+            let r = Array.zeroCreate 2
+            let cq2 = commandQueue.Add(intArr.ToHost(provider,r)).Finish()
+            printf "%A\n" r
+            //check intArr [|6;7|]
+           // let r = Array.zeroCreate 2
+           // let a = commandQueue.Add(intArr.ToHost(provider,r)).Finish()
+           // printf "\n%A" r
+             
+            
+
+    [<Test>]
+    member this.EigenCFA() = 
+        let command = 
+                <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
+                        let column = r.GlobalID0
+                        let row = r.GlobalID1
+
+                        if(row < scaleExp && column < scaleM) then 
+                            if(row < scaleVar) then
+                                if(column % scaleM = 0) then
+                                    devStore.[row*scaleM + column] <- 1
+                                else
+                                    devStore.[row*scaleM + column] <- -1
+                            else
+                                if(column = 0) then
+                                    devStore.[row*scaleM + column] <- 2
+                                else 
+                                    if(column = 1) then
+                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
+                                    else 
+                                        devStore.[row*scaleM + column] <- -1 
+                @>
+
+        let qEigenCFA = 
+                <@ fun (r:_2D)
+                    (devFun:array<_>)
+                    (devArg1:array<_>)
+                    (devArg2:array<_>)
+                    (devStore:array<_>)
+                    (devRep:array<_>)
+                    devScaleM
+                    devScaleCall
+                    devScaleLam ->
+                       let column = r.GlobalID0
+                       let row = r.GlobalID1
+                       if(column < devScaleCall && row < 2) then
+                            let numCall = column
+                            let Argi index =  
+                                if(index = 0) then devArg1.[numCall]
+                                else devArg2.[numCall]
+                            let L index = devStore.[devFun.[numCall]*devScaleM + index]
+                            let Li index = devStore.[(Argi row)*devScaleM + index]
+                            let rowStore row column = devStore.[row*devScaleM + column]
+                            let vL j =
+                                if(row = 0) then
+                                    (L j) - 1
+                                else
+                                    (L j) - 1 + devScaleLam
+                            for j in 1 .. ((L 0) - 1) do
+                                for k in 1 .. ((Li 0) - 1) do
+                                    let mutable isAdd = 1
+                                    let addVar = (Li k)
+                                    for i in 1 .. ((rowStore (vL j) 0) - 1) do
+                                        if((rowStore (vL j) i) = addVar) then 
+                                            isAdd <- 0
+                                    if(isAdd > 0) then
+                                        devRep.[0] <- devRep.[0] + 1
+                                        let tail = (rowStore (vL j) 0)
+                                        devStore.[(vL j)*devScaleM] <- devStore.[(vL j)*devScaleM] + 1
+                                        devStore.[(vL j)*devScaleM + tail] <- addVar
+                @>
+//        let initStore,check = checkResult command
+//        let intArr = Array.zeroCreate 45
+//        initStore (new _2D(5, 9)) intArr 9 5 6   
+        
+        let intArr =  [|1;-1;-1;-1;-1;
+                        1;-1;-1;-1;-1;
+                        1;-1;-1;-1;-1;
+                        1;-1;-1;-1;-1;  
+                        1;-1;-1;-1;-1;
+                        1;-1;-1;-1;-1;
+                        2; 1;-1;-1;-1;
+                        2; 2;-1;-1;-1;
+                        2; 3;-1;-1;-1
+                        |]
+
+        let kernel,kernelPrepareF, kernelRunF = provider.Compile qEigenCFA    
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head) 
+
+//        let EigenCFAStart,checkCFA = checkResult qEigenCFA
+
+        let mutable rep = -1
+        let mutable curRep = -2
+        let mutable iter = 1
+
+        let Fun = [|5;1;0;8|]
+        let Arg1 = [|5;4;3;7|]
+        let Arg2 = [|5;4;3;6|]
+        let repArray = Array.zeroCreate 1
+
+        while(rep <> curRep) do
+            iter <- iter + 1
+            rep <- curRep
+            let EigenCFA = 
+                kernelPrepareF (new _2D(4, 2)) Fun Arg1 Arg2 intArr repArray 5 4 3
+                let cq = commandQueue.Add(kernelRunF()).Finish()
+                let r = Array.zeroCreate 1
+                let cq2 = commandQueue.Add(repArray.ToHost(provider,r)).Finish()
+                printf "%A\n" r
+                r
+            let a = EigenCFA
+            curRep <- a.[0]
+
+        
+        let expectedResult =  [|2; 1;-1;-1;-1;
+                                1;-1;-1;-1;-1;
+                                2; 2;-1;-1;-1;
+                                2; 1;-1;-1;-1;  
+                                1;-1;-1;-1;-1;
+                                2; 1;-1;-1;-1;
+                                2; 1;-1;-1;-1;
+                                2; 2;-1;-1;-1;
+                                2; 3;-1;-1;-1
+                                |]
+
+        let cq = commandQueue.Add(kernelRunF()).Finish()
+        let r = Array.zeroCreate 45
+        let cq2 = commandQueue.Add(intArr.ToHost(provider,r)).Finish()
+
+        Assert.AreEqual(expectedResult, r)
+
+        provider.CloseAllBuffers()
 let x = 
     let d = ref 0
     fun y ->

@@ -80,6 +80,14 @@ type FSQuotationToOpenCLTranslator() =
                 sb.Append(adding lastStatement)
                 sb :> Statement<_>
             | :? Expression<'lang> as ex -> (new Return<_>(ex)) :> Statement<_>
+            | :? IfThenElse<'lang> as ite -> 
+                let newThen = (adding (ite.Then)) :?> StatementBlock<_>
+                let newElse =
+                    if(ite.Else = None) then
+                        None
+                    else
+                        Some((adding (ite.Else.Value)) :?> StatementBlock<_> )
+                (new IfThenElse<_>(ite.Condition,newThen, newElse)) :> Statement<_>
 
         adding subAST
 
@@ -150,7 +158,7 @@ type FSQuotationToOpenCLTranslator() =
                         context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
                         let newE = e //|> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
-                        printfn "%A" e
+//                        printfn "%A" e
                         Body.Translate newE context
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb

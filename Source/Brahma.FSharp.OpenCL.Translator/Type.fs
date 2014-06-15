@@ -19,7 +19,7 @@ open Brahma.FSharp.OpenCL.AST
 open System.Reflection
 open Microsoft.FSharp.Quotations
 
-let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
+let rec Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
         let low = str.ToLowerInvariant()
         match low with
@@ -44,7 +44,8 @@ let Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
         | f when f.StartsWith "fsharpfunc" ->
-            go (_type.GetGenericArguments().[0].Name)
+//            go (_type.GetGenericArguments().[1].Name)
+            Translate (_type.GetGenericArguments().[1]) isKernelArg collectedTypes size context
         | x when collectedTypes.ContainsKey x 
             -> StructType(collectedTypes.[x]) :> Type<Lang>
         | x -> "Unsuported kernel type: " + x |> failwith 
@@ -220,17 +221,18 @@ type InfoScope(orgnName, nName, originVar, isFunc:bool, nameInFunc) =
                         let (nameFromInLet:VarInfo), listNeedV = inLet.GetNameForVar orgnName false nextIsAboveFun allLets globalVars
                         //возможно лучше список нужных варов возвраать
                         if((not isAfter)) then
-                            let inFunction:InfoScope = allLets.[nameInFun]
-                            let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                            let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                            if(nameFromInLet.IsVar) then
-                                if((not (needVarsFunList.Contains(nameFromInLet))) &&
-                                     (not (containsVars.Contains(nameFromInLet)))) then
-                                    needVarsFunList.Add(nameFromInLet)
-                            for need in listNeedV do
-                                if((not (needVarsFunList.Contains(need))) &&
-                                    (not (containsVars.Contains(need)))) then
-                                    needVarsFunList.Add(need)
+                            if(nameInFun <> null) then
+                                let inFunction:InfoScope = allLets.[nameInFun]
+                                let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
+                                let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
+                                if(nameFromInLet.IsVar) then
+                                    if((not (needVarsFunList.Contains(nameFromInLet))) &&
+                                         (not (containsVars.Contains(nameFromInLet)))) then
+                                        needVarsFunList.Add(nameFromInLet)
+                                for need in listNeedV do
+                                    if((not (needVarsFunList.Contains(need))) &&
+                                        (not (containsVars.Contains(need)))) then
+                                        needVarsFunList.Add(need)
 
                         nameFromInLet, listNeedV
                     else
@@ -261,13 +263,14 @@ type InfoScope(orgnName, nName, originVar, isFunc:bool, nameInFunc) =
                             newNeedList.Add(nameFromListAfter)
                             nameFromListAfter, newNeedList
                         else 
-                            let inFunction:InfoScope = allLets.[nameInFun]
-                            let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                            let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                            for need in listNeed do
-                                if((not (needVarsFunList.Contains(need))) &&
-                                    (not (containsVars.Contains(need)))) then
-                                    needVarsFunList.Add(need)
+                            if(nameInFun <> null) then
+                                let inFunction:InfoScope = allLets.[nameInFun]
+                                let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
+                                let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
+                                for need in listNeed do
+                                    if((not (needVarsFunList.Contains(need))) &&
+                                        (not (containsVars.Contains(need)))) then
+                                        needVarsFunList.Add(need)
                             nameFromListAfter, listNeed
                     else
                         nameFromListAfter, new ResizeArray<_>()
@@ -290,7 +293,8 @@ type InfoScope(orgnName, nName, originVar, isFunc:bool, nameInFunc) =
         listVars
 
     member this.AddNeedVar oName nNane typeV =
-        needVars.Add(new VarInfo(oName, nNane, true, typeV))
+        if(oName = nameInFun) then
+            needVars.Add(new VarInfo(oName, nNane, true, typeV))
     member this.GetNeedVars =
         needVars
 
@@ -325,6 +329,7 @@ type LetScope() =
     let lastInFunLet = new Stack<_>(10)
     let mutable isInLastLet = true
     let kernelVars = new ResizeArray<VarInfo>()
+//    let forVars = new Stack<_>(10)
 
     let FindInVars (orName:string) =
         let mutable var = null
@@ -383,8 +388,9 @@ type LetScope() =
     member this.GetNameForVarInLet name isAfter =
         if(allLet.Count > 0) then
             let infoLet = allLet.[this.GetLastInLet]
-            //тут проверку на пустоту стека funLastLet
-            //смотреть внутри это функции или нет
+            
+//            let forVar:VarInfo = (this.FindVarInForVars name)
+//            if(forVar = null) then
             let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
             if(getingName = null) then 
                 let v = FindInVars(name)
@@ -392,6 +398,22 @@ type LetScope() =
                 v
             else
                 getingName
+//            else
+//                infoLet.AddNeedVar (forVar.GetOriginalName) (forVar.GetNewName) (forVar.GetVarType)
+//                forVar
+
+//            let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
+//            if(getingName = null) then 
+//                let forVar:VarInfo = (this.FindVarInForVars name)
+//                if(forVar = null) then
+//                    let v = FindInVars(name)
+//                    infoLet.AddNeedVar (v.GetOriginalName) (v.GetNewName) (v.GetVarType)
+//                    v
+//                else
+//                    infoLet.AddNeedVar (forVar.GetOriginalName) (forVar.GetNewName) (forVar.GetVarType)
+//                    forVar
+//            else
+//                getingName
         else
             let mutable var = null
             for v in kernelVars do
@@ -407,6 +429,17 @@ type LetScope() =
 
     member this.AddKernelVars orgnName nName varType =
         kernelVars.Add(new VarInfo(orgnName, nName, true, varType))
+
+//    member this.AddForVars (var:VarInfo) = 
+//        forVars.Push(var)
+//    member this.RemoveForVar =
+//        forVars.Pop()
+//    member this.FindVarInForVars name =
+//        let mutable needVars = null
+//        for elem in forVars do
+//            if(elem.GetOriginalName = name) then
+//                needVars <- elem
+//        needVars
 
 
 type Method(var:Var, expr:Expr) = 
