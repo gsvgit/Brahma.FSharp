@@ -71,6 +71,18 @@ and printFunCall (fc:FunCall<_>) =
 and printBarrier (b:Barrier<_>) =
     wordL "barrier(CLK_LOCAL_MEM_FENCE)"   
 
+and printFieldSet (fs:FieldSet<_>) =
+    let host = Expressions.Print fs.Host
+    let fld = wordL fs.Field
+    let _val = Expressions.Print fs.Val
+    [
+        host |> bracketL
+        wordL "."
+        fld
+        wordL "="
+        _val
+    ] |> spaceListL
+
 and Print isToplevel (stmt:Statement<'lang>) =
     let res = 
         match stmt with
@@ -82,6 +94,7 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? WhileLoop<'lang> as wl -> printWhileLoop wl
         | :? FunCall<'lang> as fc -> printFunCall fc
         | :? Barrier<'lang> as b -> printBarrier b
+        | :? FieldSet<'lang> as fs -> printFieldSet fs
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res

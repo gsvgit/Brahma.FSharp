@@ -111,6 +111,28 @@ and private getZeros x =
     string <- string + "}"
     string
 
+and printNewStruct (newStruct:NewStruct<_>) =
+    let args = 
+        List.map Print newStruct.ConstructorArgs
+        |> commaListL
+        |> bracketL
+    [ 
+        //wordL "new"
+        wordL newStruct.Struct.Name
+        args
+    ]
+    |> spaceListL
+
+and printFfieldGet (fg:FieldGet<_>) =
+    let host = Print fg.Host
+    let fld = wordL fg.Field
+    [
+        host |> bracketL
+        wordL "."
+        fld
+    ]
+    |> spaceListL
+
 and Print (expr:Expression<'lang>) =
     match expr with
     | :? Const<'lang> as c -> printConst c
@@ -123,4 +145,6 @@ and Print (expr:Expression<'lang>) =
     | :? Cast<'lang> as c -> printCast c
     | :? Pointer<'lang> as p -> printPointer p
     | :? ArrayInitializer<'lang> as ai -> printArrayInitializer ai
+    | :? NewStruct<'lang> as ns -> printNewStruct ns
+    | :? FieldGet<'lang> as fg -> printFfieldGet fg
     | c -> failwithf "Printer. Unsupported expression: %A" c

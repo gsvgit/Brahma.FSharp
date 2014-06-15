@@ -61,3 +61,10 @@ type WhileLoop<'lang> (cond:Expression<'lang>, whileBlock:StatementBlock<'lang>)
 type Barrier<'lang> () =
     inherit Statement<'lang>()
     override this.Children = []
+
+type FieldSet<'lang>(host:Expression<'lang>, field:string, _val:Expression<'lang>) =
+    inherit Statement<'lang>()
+    override this.Children = host :> _ :: [_val]
+    member this.Host = host
+    member this.Field = field
+    member this.Val = _val

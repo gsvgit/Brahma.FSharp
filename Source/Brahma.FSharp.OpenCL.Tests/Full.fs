@@ -12,8 +12,8 @@ open Microsoft.FSharp.Quotations
 
 [<Struct>]
 type TestStruct =
-    val x: int 
-    val y: float
+    val mutable x: int 
+    val mutable y: float
     new (x,y) = {x=x; y=y} 
 
 [<TestFixture>]
@@ -528,6 +528,138 @@ type Translator() =
         let inByteArray = [|new TestStruct(1, 2.0);new TestStruct(3, 4.0)|]
         run _1d inByteArray
         check inByteArray [|new TestStruct(3, 4.0); new TestStruct(1, 2.0)|]
+
+    [<Test>]
+    member this.``Simple seq of struct changes.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<TestStruct>) ->
+                    buf.[0] <- new TestStruct(5,6.0)                    
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|new TestStruct(1, 2.0);new TestStruct(3, 4.0)|]
+        run _1d inByteArray
+        check inByteArray [|new TestStruct(3, 4.0); new TestStruct(1, 2.0)|]
+
+    [<Test>]
+    member this.``Simple seq of struct prop set.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<TestStruct>) ->
+                    buf.[0].x <- 5
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|new TestStruct(1, 2.0)|]
+        run _1d inByteArray
+        check inByteArray [|new TestStruct(5, 2.0)|]
+
+    [<Test>]
+    member this.``Simple seq of struct prop get.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<TestStruct>) ->
+                    buf.[0].x <- buf.[1].x + 1                    
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|new TestStruct(1, 2.0);new TestStruct(3, 4.0)|]
+        run _1d inByteArray
+        check inByteArray [|new TestStruct(4, 2.0); new TestStruct(3, 4.0)|]
+
+    [<Test>]
+    member this.``Atomic max.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    b.[0] <- aMax buf.[0] 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|2|]
+
+    [<Test>]
+    member this.``Atomic max 2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    b.[0] <- aMax buf.[0] 1
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|2|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|2|]
+
+    [<Test>]
+    member this.``Atomic min.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    b.[0] <- aMin buf.[0] 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|1|]
+
+    [<Test>]
+    member this.``Atomic min 2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    b.[0] <- aMin buf.[0] 1
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|2|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|1|]
+
+    [<Test>]
+    member this.``Atomic exchange.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    b.[0] <- buf.[0] <!>  2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|2|]
+
+    [<Test>]
+    member this.``Atomic exchange 2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    buf.[0] <! 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray
+        check inByteArray [|2|]
+
+    [<Test>]
+    member this.``Atomic decr.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
+                    ()//b.[0] <- aDecr buf.[0]
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|0|]
+
+    [<Test>]
+    member this.``Atomic incr.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>)  (b:array<_>) ->
+                    ()//b.[0] <- <!--> buf.[0]
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1|]
+        run _1d inByteArray [|0|]
+        check inByteArray [|2|]
 
 let x = 
     let d = ref 0

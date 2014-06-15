@@ -112,3 +112,16 @@ type ArrayInitializer<'lang>() =
 type ZeroArray<'lang>(length:int) =
     inherit ArrayInitializer<'lang>()
     override this.Length = length
+
+type NewStruct<'lang>(structInfo:Struct<'lang>, cArgs:List<Expression<'lang>>) =
+    inherit Expression<'lang>()
+    override this.Children = structInfo :> _ :: List.ofSeq (Seq.cast<_> cArgs)
+    member this.Struct = structInfo
+    member this.ConstructorArgs = cArgs
+
+type FieldGet<'lang>(host:Expression<'lang>, field:string) =
+    inherit Expression<'lang>()
+    override this.Children = []
+    member this.Host = host
+    member this.Field = field
+    
