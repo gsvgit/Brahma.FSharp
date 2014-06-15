@@ -373,343 +373,331 @@ type Translator() =
 
         checkCode command "Nested.Function.Carring.gen" "Nested.Function.Carring.cl"
 
-    member this.``Let renamed``() =
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int*int>) ->                                        
-                    let f x = 
-                        let g = 1 + x
-                        g
-                    f 1
-            @>
-
-        checkCode command "Let renamed.gen" "Let renamed.cl"
-
-    member this.``Let renamed 2``() =
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int*int>) ->                                        
-                    let f m k = 
-                        let g q w = 1 + q + w
-                        let t p = 7 - p
-                        (g 1 2) - m * k / (t 53)
-                    f 1 4
-            @>
-
-        checkCode command "Let renamed 2.gen" "Let renamed 2.cl"
-
-    member this.``Renamer Test``() =
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int*int>) ->                                        
-                    let f x y = 
-                        let y = y
-                        let y = y
-                        let g x m = m + x
-                        g x y
-                    f 1 7
-            @>
-
-        checkCode command "Renamer Test.gen" "Renamer Test.cl"
-
-     member this.``Template Let Transformation Test 0``() =
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int>) ->                                        
-                    let f = 3
-                    buf.[0] <- f
-            @>
-
-        checkCode command "Template Test 0.gen" "Template Test 0.cl"
-
-    member this.``Template Let Transformation Test 1``() =
-        let command = 
-            <@ 
-                fun (range:_1D) (buf:array<int>) ->                                        
-                    let f = 
-                        let x = 3
-                        x
-                    buf.[0] <- f
-            @>
-
-        checkCode command "Template Test 1.gen" "Template Test 1.cl"
-        
-        member this.``Template Let Transformation Test 2``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f = 
-                            let x = 
-                                let y = 3
-                                y
-                            x
-                        buf.[0] <- f
-                @>
-
-            checkCode command "Template Test 2.gen" "Template Test 2.cl"
-
-        member this.``Template Let Transformation Test 3``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f = 
-                            let f = 5
-                            f
-                        buf.[0] <- f
-                @>
-
-            checkCode command "Template Test 3.gen" "Template Test 3.cl"
-
-         member this.``Template Let Transformation Test 4``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f = 
-                            let f = 
-                                let f = 5
-                                f
-                            f
-                        buf.[0] <- f
-                @>
-
-            checkCode command "Template Test 4.gen" "Template Test 4.cl"
-
-        member this.``Template Let Transformation Test 5``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f a b = 
-                            let x y z = y + z
-                            x a b
-                        buf.[0] <- f 1 7
-                @>
-
-            checkCode command "Template Test 5.gen" "Template Test 5.cl"
-
-        member this.``Template Let Transformation Test 6``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f x y = 
-                            let x = x
-                            x + y
-                        buf.[0] <- f 7 8
-                @>
-            checkCode command "Template Test 6.gen" "Template Test 6.cl"
-
-        member this.``Template Let Transformation Test 7``() =
-            let command = 
-                <@ 
-                    fun (range:_1D) (buf:array<int>) ->                                        
-                        let f y = 
-                            let x y = 6 - y
-                            x y
-                        buf.[0] <- f 7
-                @>
-            checkCode command "Template Test 7.gen" "Template Test 7.cl"
-
-        member this.``Template Let Transformation Test 8``() =
-            let command = 
-                <@ fun (range:_1D) (m:array<int>) -> 
-                        let p = m
-                        let x n = 
-                            let l = m.[9]
-                            let g k = k + m.[0] + m.[1]
-                            let r = 
-                                let y a = 
-                                    let x = 5 - n + (g 4)
-                                    let z t = m.[2] + a - t
-                                    z (a + x + l)
-                                y 6
-                            r + m.[3]
-                        x 7
-                @>
-            checkCode command "Template Test 8.gen" "Template Test 8.cl"
-
-
-            member this.``Template Let Transformation Test 9``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let x n = 
-                            let mutable r = 8
-                            let mutable h = r + n
-                            h
-//                        x 9
-                        buf.[0] <- x 9
-
-                @>
-            checkCode command "Template Test 9.gen" "Template Test 9.cl"
-
-        member this.``Template Let Transformation Test 10``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let p = 9
-                        let x n b = 
-                            let mutable t = 0
-                            n + b + t
-                        buf.[0] <- x 7 9
-                @>
-            checkCode command "Template Test 10.gen" "Template Test 10.cl"
-
-        member this.``Template Let Transformation Test 11``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let p = 1
-                        let m = 
-                            let r (l:int) =
-                                l
-                            r 9
-                        let z (k:int) = k
-                        buf.[0] <- m
-                @>
-            checkCode command "Template Test 11.gen" "Template Test 11.cl"
-
-        member this.``Template Let Transformation Test 12``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let f x y =
-                            let y = y
-                            let y = y
-                            let g x m = m + x
-                            g x y
-                        buf.[0] <- f 1 7
-                @>
-            checkCode command "Template Test 12.gen" "Template Test 12.cl"
-
-        member this.``Template Let Transformation Test 13``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let f (y:int) =
-                            let y = y
-                            let y = y
-                            let g (m:int) = m
-                            g y
-                        buf.[0] <- f 7
-                @>
-            checkCode command "Template Test 13.gen" "Template Test 13.cl"
-
-        member this.``Template Let Transformation Test 14``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let f (y:int) =
-                            let y = y
-                            let y = y
-                            let g (m:int) = 
-                                let g r t = r + y - t
-                                let n o = o - (g y 2)
-                                n 5
-                            g y
-                        let z y = y - 2
-                        buf.[0] <- f (z 7)
-                @>
-            checkCode command "Template Test 14.gen" "Template Test 14.cl"
-
-        member this.``Template Let Transformation Test 15``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let f (y:int) =
-                            let Argi index =  
-                                if(index = 0) then buf.[1]
-                                else buf.[2]
-                            Argi y
-                        buf.[0] <- f 0
-                @>
-            checkCode command "Template Test 15.gen" "Template Test 15.cl"
-
-        member this.``Template Let Transformation Test 16``() =
-            let command = 
-                <@ fun (range:_1D) (buf:array<int>) -> 
-                        let f (y:int) =
-                            if(y = 0) 
-                            then 
-                                let z (a:int) = a
-                                z 9
-                            else buf.[2]
-                        buf.[0] <- f 0
-                @>
-            checkCode command "Template Test 16.gen" "Template Test 16.cl"
-
-        member this.``createStartStoreKernel``() =
-            let command = 
-                <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
-                        let column = r.GlobalID0
-                        let row = r.GlobalID1
-
-                        if(row < scaleExp && column < scaleM) then 
-                            if(row < scaleVar) then
-                                if(column % scaleM = 0) then
-                                    devStore.[row*scaleM + column] <- 1
-                                else
-                                    devStore.[row*scaleM + column] <- -1
-                            else
-                                if(column = 0) then
-                                    devStore.[row*scaleM + column] <- 2
-                                else 
-                                    if(column = 1) then
-                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
-                                    else 
-                                        devStore.[row*scaleM + column] <- -1 
-                @>
-            checkCode command "createStartStoreKernel.gen" "createStartStoreKernel.cl"
-
-        member this.``EigenCFA``() =
-            let command = 
-                <@ fun (r:_2D)
-                    (devFun:array<_>)
-                    (devArg1:array<_>)
-                    (devArg2:array<_>)
-                    (devStore:array<_>)
-                    (devRep:array<_>)
-                    devScaleM
-                    devScaleCall
-                    devScaleLam ->
-                       let column = r.GlobalID0
-                       let row = r.GlobalID1
-                       if(column < devScaleCall && row < 2) then
-                            let numCall = column
-                            let Argi index =  
-                                if(index = 0) then devArg1.[numCall]
-                                else devArg2.[numCall]
-                            let L index = devStore.[devFun.[numCall]*devScaleM + index]
-                            let Li index = devStore.[(Argi row)*devScaleM + index]
-                            let rowStore row column = devStore.[row*devScaleM + column]
-                            let vL j =
-                                if(row = 0) then
-                                    (L j) - 1
-                                else
-                                    (L j) - 1 + devScaleLam
-                            for j in 1 .. ((L 0) - 1) do
-                                for k in 1 .. ((Li 0) - 1) do
-                                    let mutable isAdd = 1
-                                    let addVar = (Li k)
-                                    for i in 1 .. ((rowStore (vL j) 0) - 1) do
-                                        if((rowStore (vL j) i) = addVar) then 
-                                            isAdd <- 0
-                                    if(isAdd > 0) then
-                                        devRep.[0] <- devRep.[0] + 1
-                                        let tail = (rowStore (vL j) 0)
-                                        devStore.[(vL j)*devScaleM] <- devStore.[(vL j)*devScaleM] + 1
-                                        devStore.[(vL j)*devScaleM + tail] <- addVar
-                @>
-            checkCode command "EigenCFA.gen" "EigenCFA.cl"
-
-////            в тексте к сноскам добивать коментарий, чтобы небыло голыхх ссылок
+//    member this.``Let renamed``() =
+//        let command = 
+//            <@ 
+//                fun (range:_1D) (buf:array<int*int>) ->                                        
+//                    let f x = 
+//                        let g = 1 + x
+//                        g
+//                    f 1
+//            @>
 //
-//            fsharp.org academic publications посмотреть для библиотеки
-//            добавить в обзор всяких трансляций функионалки (haskell). во всякие императивщины и ООП
+//        checkCode command "Let renamed.gen" "Let renamed.cl"
 //
-//            сказать аккуратно про академические компиляторы haskell в C. окамль, лисп .... 
+//    member this.``Let renamed 2``() =
+//        let command = 
+//            <@ 
+//                fun (range:_1D) (buf:array<int*int>) ->                                        
+//                    let f m k = 
+//                        let g q w = 1 + q + w
+//                        let t p = 7 - p
+//                        (g 1 2) - m * k / (t 53)
+//                    f 1 4
+//            @>
 //
-//            Поискать публикации FSCL. если их нет, то печаль. 
-//            Можно просто написать парняги и спросить е него есть ли они у него
+//        checkCode command "Let renamed 2.gen" "Let renamed 2.cl"
 //
-//            про апробацию. надо сказать, что ранее не запускалось.
+//    member this.``Renamer Test``() =
+//        let command = 
+//            <@ 
+//                fun (range:_1D) (buf:array<int*int>) ->                                        
+//                    let f x y = 
+//                        let y = y
+//                        let y = y
+//                        let g x m = m + x
+//                        g x y
+//                    f 1 7
+//            @>
+//
+//        checkCode command "Renamer Test.gen" "Renamer Test.cl"
+//
+//     member this.``Template Let Transformation Test 0``() =
+//        let command = 
+//            <@ 
+//                fun (range:_1D) (buf:array<int>) ->                                        
+//                    let f = 3
+//                    buf.[0] <- f
+//            @>
+//
+//        checkCode command "Template Test 0.gen" "Template Test 0.cl"
+//
+//    member this.``Template Let Transformation Test 1``() =
+//        let command = 
+//            <@ 
+//                fun (range:_1D) (buf:array<int>) ->                                        
+//                    let f = 
+//                        let x = 3
+//                        x
+//                    buf.[0] <- f
+//            @>
+//
+//        checkCode command "Template Test 1.gen" "Template Test 1.cl"
+//        
+//        member this.``Template Let Transformation Test 2``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f = 
+//                            let x = 
+//                                let y = 3
+//                                y
+//                            x
+//                        buf.[0] <- f
+//                @>
+//
+//            checkCode command "Template Test 2.gen" "Template Test 2.cl"
+//
+//        member this.``Template Let Transformation Test 3``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f = 
+//                            let f = 5
+//                            f
+//                        buf.[0] <- f
+//                @>
+//
+//            checkCode command "Template Test 3.gen" "Template Test 3.cl"
+//
+//         member this.``Template Let Transformation Test 4``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f = 
+//                            let f = 
+//                                let f = 5
+//                                f
+//                            f
+//                        buf.[0] <- f
+//                @>
+//
+//            checkCode command "Template Test 4.gen" "Template Test 4.cl"
+//
+//        member this.``Template Let Transformation Test 5``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f a b = 
+//                            let x y z = y + z
+//                            x a b
+//                        buf.[0] <- f 1 7
+//                @>
+//
+//            checkCode command "Template Test 5.gen" "Template Test 5.cl"
+//
+//        member this.``Template Let Transformation Test 6``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f x y = 
+//                            let x = x
+//                            x + y
+//                        buf.[0] <- f 7 8
+//                @>
+//            checkCode command "Template Test 6.gen" "Template Test 6.cl"
+//
+//        member this.``Template Let Transformation Test 7``() =
+//            let command = 
+//                <@ 
+//                    fun (range:_1D) (buf:array<int>) ->                                        
+//                        let f y = 
+//                            let x y = 6 - y
+//                            x y
+//                        buf.[0] <- f 7
+//                @>
+//            checkCode command "Template Test 7.gen" "Template Test 7.cl"
+//
+//        member this.``Template Let Transformation Test 8``() =
+//            let command = 
+//                <@ fun (range:_1D) (m:array<int>) -> 
+//                        let p = m.[0]
+//                        let x n = 
+//                            let l = m.[9]
+//                            let g k = k + m.[0] + m.[1]
+//                            let r = 
+//                                let y a = 
+//                                    let x = 5 - n + (g 4)
+//                                    let z t = m.[2] + a - t
+//                                    z (a + x + l)
+//                                y 6
+//                            r + m.[3]
+//                        m.[0] <- x 7
+//                @>
+//            checkCode command "Template Test 8.gen" "Template Test 8.cl"
+//
+//
+//            member this.``Template Let Transformation Test 9``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let x n = 
+//                            let mutable r = 8
+//                            let mutable h = r + n
+//                            h
+////                        x 9
+//                        buf.[0] <- x 9
+//
+//                @>
+//            checkCode command "Template Test 9.gen" "Template Test 9.cl"
+//
+//        member this.``Template Let Transformation Test 10``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let p = 9
+//                        let x n b = 
+//                            let mutable t = 0
+//                            n + b + t
+//                        buf.[0] <- x 7 9
+//                @>
+//            checkCode command "Template Test 10.gen" "Template Test 10.cl"
+//
+//        member this.``Template Let Transformation Test 11``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let p = 1
+//                        let m = 
+//                            let r (l:int) =
+//                                l + p
+//                            r 9
+//                        let z (k:int) = k
+//                        buf.[0] <- m
+//                @>
+//            checkCode command "Template Test 11.gen" "Template Test 11.cl"
+//
+//        member this.``Template Let Transformation Test 12``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let f x y =
+//                            let y = y
+//                            let y = y
+//                            let g x m = m + x
+//                            g x y
+//                        buf.[0] <- f 1 7
+//                @>
+//            checkCode command "Template Test 12.gen" "Template Test 12.cl"
+//
+//        member this.``Template Let Transformation Test 13``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let f (y:int) =
+//                            let y = y
+//                            let y = y
+//                            let g (m:int) = m
+//                            g y
+//                        buf.[0] <- f 7
+//                @>
+//            checkCode command "Template Test 13.gen" "Template Test 13.cl"
+//
+//        member this.``Template Let Transformation Test 14``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let f (y:int) =
+//                            let y = y
+//                            let y = y
+//                            let g (m:int) = 
+//                                let g r t = r + y - t
+//                                let n o = o - (g y 2)
+//                                n 5
+//                            g y
+//                        let z y = y - 2
+//                        buf.[0] <- f (z 7)
+//                @>
+//            checkCode command "Template Test 14.gen" "Template Test 14.cl"
+//
+//        member this.``Template Let Transformation Test 15``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let f (y:int) =
+//                            let Argi index =  
+//                                if(index = 0) then buf.[1]
+//                                else buf.[2]
+//                            Argi y
+//                        buf.[0] <- f 0
+//                @>
+//            checkCode command "Template Test 15.gen" "Template Test 15.cl"
+//
+//        member this.``Template Let Transformation Test 16``() =
+//            let command = 
+//                <@ fun (range:_1D) (buf:array<int>) -> 
+//                        let f (y:int) =
+//                            if(y = 0) 
+//                            then 
+//                                let z (a:int) = a
+//                                z 9
+//                            else buf.[2]
+//                        buf.[0] <- f 0
+//                @>
+//            checkCode command "Template Test 16.gen" "Template Test 16.cl"
+//
+//        member this.``createStartStoreKernel``() =
+//            let command = 
+//                <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
+//                        let column = r.GlobalID0
+//                        let row = r.GlobalID1
+//
+//                        if(row < scaleExp && column < scaleM) then 
+//                            if(row < scaleVar) then
+//                                if(column % scaleM = 0) then
+//                                    devStore.[row*scaleM + column] <- 1
+//                                else
+//                                    devStore.[row*scaleM + column] <- -1
+//                            else
+//                                if(column = 0) then
+//                                    devStore.[row*scaleM + column] <- 2
+//                                else 
+//                                    if(column = 1) then
+//                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
+//                                    else 
+//                                        devStore.[row*scaleM + column] <- -1 
+//                @>
+//            checkCode command "createStartStoreKernel.gen" "createStartStoreKernel.cl"
+//
+//        member this.``EigenCFA``() =
+//            let command = 
+//                <@ fun (r:_2D)
+//                    (devFun:array<_>)
+//                    (devArg1:array<_>)
+//                    (devArg2:array<_>)
+//                    (devStore:array<_>)
+//                    (devRep:array<_>)
+//                    devScaleM
+//                    devScaleCall
+//                    devScaleLam ->
+//                       let column = r.GlobalID0
+//                       let row = r.GlobalID1
+//                       if(column < devScaleCall && row < 2) then
+//                            let numCall = column
+//                            let Argi index =  
+//                                if(index = 0) then devArg1.[numCall]
+//                                else devArg2.[numCall]
+//                            let L index = devStore.[devFun.[numCall]*devScaleM + index]
+//                            let Li index = devStore.[(Argi row)*devScaleM + index]
+//                            let rowStore row column = devStore.[row*devScaleM + column]
+//                            let vL j =
+//                                if(row = 0) then
+//                                    (L j) - 1
+//                                else
+//                                    (L j) - 1 + devScaleLam
+//                            for j in 1 .. ((L 0) - 1) do
+//                                for k in 1 .. ((Li 0) - 1) do
+//                                    let mutable isAdd = 1
+//                                    let addVar = (Li k)
+//                                    for i in 1 .. ((rowStore (vL j) 0) - 1) do
+//                                        if((rowStore (vL j) i) = addVar) then 
+//                                            isAdd <- 0
+//                                    if(isAdd > 0) then
+//                                        devRep.[0] <- devRep.[0] + 1
+//                                        let tail = (rowStore (vL j) 0)
+//                                        devStore.[(vL j)*devScaleM] <- devStore.[(vL j)*devScaleM] + 1
+//                                        devStore.[(vL j)*devScaleM + tail] <- addVar
+//                @>
+//            checkCode command "EigenCFA.gen" "EigenCFA.cl"
 
 
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-//    (new Translator()).EigenCFA()
+//    (new Translator()).``Template Let Transformation Test 8``()
     
-    (new Brahma.FSharp.OpenCL.Full.Translator()).EigenCFA()
+    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 16``()
     0
