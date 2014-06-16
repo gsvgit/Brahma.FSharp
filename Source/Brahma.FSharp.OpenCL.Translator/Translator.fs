@@ -105,7 +105,7 @@ type FSQuotationToOpenCLTranslator() =
                         context.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
                         let newE = e |> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
-                        printfn "%A" e
+                        //printfn "%A" e
                         Body.Translate newE context
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb
