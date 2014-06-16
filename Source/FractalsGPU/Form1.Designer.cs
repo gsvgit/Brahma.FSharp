@@ -29,6 +29,7 @@
         
         private void InitializeComponent()
         {   
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FractalsForm));
             this.up = new System.Windows.Forms.Button();
             this.down = new System.Windows.Forms.Button();
             this.left = new System.Windows.Forms.Button();
@@ -322,6 +323,7 @@
             this.Controls.Add(this.left);
             this.Controls.Add(this.down);
             this.Controls.Add(this.up);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FractalsForm";
             this.Text = "FractalsGPU";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
