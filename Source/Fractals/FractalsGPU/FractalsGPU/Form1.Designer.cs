@@ -33,7 +33,6 @@
             this.down = new System.Windows.Forms.Button();
             this.left = new System.Windows.Forms.Button();
             this.right = new System.Windows.Forms.Button();
-            this.zoomin = new System.Windows.Forms.Button();
             this.zoomout = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.fDraw = new System.Windows.Forms.Button();
@@ -52,73 +51,62 @@
             this.label6 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.zoomin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // up
             // 
             this.up.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.up.Location = new System.Drawing.Point(494, 38);
+            this.up.Location = new System.Drawing.Point(528, 31);
             this.up.Name = "up";
-            this.up.Size = new System.Drawing.Size(40, 23);
+            this.up.Size = new System.Drawing.Size(25, 25);
             this.up.TabIndex = 0;
-            this.up.Text = "UP";
+            this.up.Text = "^";
             this.up.UseVisualStyleBackColor = true;
             this.up.Click += new System.EventHandler(this.up_Click);
             // 
             // down
             // 
             this.down.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.down.Location = new System.Drawing.Point(494, 96);
+            this.down.Location = new System.Drawing.Point(528, 124);
             this.down.Name = "down";
-            this.down.Size = new System.Drawing.Size(40, 23);
+            this.down.Size = new System.Drawing.Size(25, 25);
             this.down.TabIndex = 1;
-            this.down.Text = "Down";
+            this.down.Text = "_";
             this.down.UseVisualStyleBackColor = true;
             this.down.Click += new System.EventHandler(this.down_Click);
             // 
             // left
             // 
             this.left.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.left.Location = new System.Drawing.Point(457, 67);
+            this.left.Location = new System.Drawing.Point(499, 77);
             this.left.Name = "left";
-            this.left.Size = new System.Drawing.Size(40, 23);
+            this.left.Size = new System.Drawing.Size(25, 25);
             this.left.TabIndex = 2;
-            this.left.Text = "Left";
+            this.left.Text = "<";
             this.left.UseVisualStyleBackColor = true;
             this.left.Click += new System.EventHandler(this.left_Click);
             // 
             // right
             // 
             this.right.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.right.Location = new System.Drawing.Point(531, 67);
+            this.right.Location = new System.Drawing.Point(559, 77);
             this.right.Name = "right";
-            this.right.Size = new System.Drawing.Size(40, 23);
+            this.right.Size = new System.Drawing.Size(25, 25);
             this.right.TabIndex = 3;
-            this.right.Text = "Right";
+            this.right.Text = ">";
             this.right.UseVisualStyleBackColor = true;
             this.right.Click += new System.EventHandler(this.right_Click);
-            // 
-            // zoomin
-            // 
-            this.zoomin.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.zoomin.Location = new System.Drawing.Point(478, 313);
-            this.zoomin.Name = "zoomin";
-            this.zoomin.Size = new System.Drawing.Size(75, 23);
-            this.zoomin.TabIndex = 4;
-            this.zoomin.Text = "Zoom In";
-            this.zoomin.UseVisualStyleBackColor = true;
-            this.zoomin.Click += new System.EventHandler(this.zoomin_Click);
             // 
             // zoomout
             // 
             this.zoomout.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.zoomout.Location = new System.Drawing.Point(478, 342);
+            this.zoomout.Location = new System.Drawing.Point(528, 93);
             this.zoomout.Name = "zoomout";
-            this.zoomout.Size = new System.Drawing.Size(75, 23);
+            this.zoomout.Size = new System.Drawing.Size(25, 25);
             this.zoomout.TabIndex = 5;
-            this.zoomout.Text = "Zoom Out";
+            this.zoomout.Text = "-";
             this.zoomout.UseVisualStyleBackColor = true;
             this.zoomout.Click += new System.EventHandler(this.zoomout_Click);
             // 
@@ -132,15 +120,16 @@
             this.pictureBox1.Size = new System.Drawing.Size(404, 399);
             this.pictureBox1.TabIndex = 6;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // fDraw
             // 
             this.fDraw.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.fDraw.Location = new System.Drawing.Point(478, 371);
+            this.fDraw.Location = new System.Drawing.Point(430, 33);
             this.fDraw.Name = "fDraw";
             this.fDraw.Size = new System.Drawing.Size(75, 23);
             this.fDraw.TabIndex = 7;
-            this.fDraw.Text = "fDraw";
+            this.fDraw.Text = "Draw";
             this.fDraw.UseVisualStyleBackColor = true;
             this.fDraw.Click += new System.EventHandler(this.fDraw_Click_1);
             // 
@@ -148,7 +137,7 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(470, 159);
+            this.label1.Location = new System.Drawing.Point(470, 190);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(42, 13);
             this.label1.TabIndex = 8;
@@ -158,7 +147,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(478, 185);
+            this.label2.Location = new System.Drawing.Point(478, 216);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(27, 13);
             this.label2.TabIndex = 9;
@@ -168,7 +157,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(473, 212);
+            this.label3.Location = new System.Drawing.Point(473, 243);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(42, 13);
             this.label3.TabIndex = 10;
@@ -178,7 +167,7 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(473, 238);
+            this.label4.Location = new System.Drawing.Point(473, 269);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(42, 13);
             this.label4.TabIndex = 11;
@@ -187,7 +176,7 @@
             // textBox1
             // 
             this.textBox1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox1.Location = new System.Drawing.Point(524, 156);
+            this.textBox1.Location = new System.Drawing.Point(524, 187);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(38, 20);
             this.textBox1.TabIndex = 12;
@@ -196,7 +185,7 @@
             // textBox2
             // 
             this.textBox2.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox2.Location = new System.Drawing.Point(524, 182);
+            this.textBox2.Location = new System.Drawing.Point(524, 213);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(38, 20);
             this.textBox2.TabIndex = 13;
@@ -205,7 +194,7 @@
             // textBox3
             // 
             this.textBox3.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox3.Location = new System.Drawing.Point(524, 209);
+            this.textBox3.Location = new System.Drawing.Point(524, 240);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(38, 20);
             this.textBox3.TabIndex = 14;
@@ -214,7 +203,7 @@
             // textBox4
             // 
             this.textBox4.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox4.Location = new System.Drawing.Point(524, 235);
+            this.textBox4.Location = new System.Drawing.Point(524, 266);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(38, 20);
             this.textBox4.TabIndex = 15;
@@ -236,7 +225,7 @@
             // textBox5
             // 
             this.textBox5.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox5.Location = new System.Drawing.Point(524, 261);
+            this.textBox5.Location = new System.Drawing.Point(524, 292);
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(38, 20);
             this.textBox5.TabIndex = 17;
@@ -246,7 +235,7 @@
             // textBox6
             // 
             this.textBox6.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox6.Location = new System.Drawing.Point(524, 287);
+            this.textBox6.Location = new System.Drawing.Point(524, 318);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(38, 20);
             this.textBox6.TabIndex = 18;
@@ -257,7 +246,7 @@
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(473, 264);
+            this.label5.Location = new System.Drawing.Point(473, 295);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(39, 13);
             this.label5.TabIndex = 19;
@@ -268,7 +257,7 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(470, 290);
+            this.label6.Location = new System.Drawing.Point(470, 321);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(54, 13);
             this.label6.TabIndex = 20;
@@ -278,7 +267,7 @@
             // textBox7
             // 
             this.textBox7.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.textBox7.Location = new System.Drawing.Point(524, 126);
+            this.textBox7.Location = new System.Drawing.Point(524, 157);
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(38, 20);
             this.textBox7.TabIndex = 22;
@@ -288,28 +277,28 @@
             // 
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(470, 129);
+            this.label7.Location = new System.Drawing.Point(470, 160);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(29, 13);
             this.label7.TabIndex = 21;
             this.label7.Text = "Step";
             // 
-            // about
+            // zoomin
             // 
-            this.button1.Location = new System.Drawing.Point(469, 399);
-            this.button1.Name = "about";
-            this.button1.Size = new System.Drawing.Size(93, 25);
-            this.button1.TabIndex = 23;
-            this.button1.Text = "About";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.about_Click);
+            this.zoomin.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.zoomin.Location = new System.Drawing.Point(528, 62);
+            this.zoomin.Name = "zoomin";
+            this.zoomin.Size = new System.Drawing.Size(25, 25);
+            this.zoomin.TabIndex = 4;
+            this.zoomin.Text = "+";
+            this.zoomin.UseVisualStyleBackColor = true;
+            this.zoomin.Click += new System.EventHandler(this.zoomin_Click);
             // 
             // FractalsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(622, 435);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox7);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
@@ -347,7 +336,6 @@
         private System.Windows.Forms.Button down;
         private System.Windows.Forms.Button left;
         private System.Windows.Forms.Button right;
-        private System.Windows.Forms.Button zoomin;
         private System.Windows.Forms.Button zoomout;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button fDraw;
@@ -366,7 +354,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button zoomin;
         
     }
 }

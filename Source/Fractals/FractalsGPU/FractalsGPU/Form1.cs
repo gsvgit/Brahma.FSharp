@@ -20,16 +20,18 @@ namespace FractalsGPU
         static double cr = 0.4;
         static double ci = 0.24;
         static double step = 0.05;
-        static int boxwidth = 400;
-        static int boxheight = 400;
-        static int[] array = new int[boxwidth * boxheight];
+        int boxwidth = 320;
+        int boxheight = 320;
+        int[] array = new int[3200 * 3200];
         public FractalsForm()
         {
             InitializeComponent();
             getCords();
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            //this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.comboBox1.SelectedIndex = 0;
             this.Disposed += FractalsForm_Disposed;
+            this.boxheight = (pictureBox1.Height/32)*32;
+            this.boxwidth = (pictureBox1.Width / 32) * 32;
 
         }
 
@@ -41,6 +43,9 @@ namespace FractalsGPU
 
         private void fDraw_Click_1(object sender, EventArgs e)
         {
+            this.boxheight = (pictureBox1.Height / 32) * 32;
+            this.boxwidth = (pictureBox1.Width / 32) * 32;
+            //array = new int[boxheight * boxwidth];
             getCords();
             drawFractal();
         }
@@ -60,7 +65,7 @@ namespace FractalsGPU
                 mx = Convert.ToDouble(this.textBox3.Text);
                 my = Convert.ToDouble(this.textBox4.Text);
                 cr = Convert.ToDouble(this.textBox5.Text);
-                cr = Convert.ToDouble(this.textBox5.Text);
+                ci = Convert.ToDouble(this.textBox6.Text);
                 step = Convert.ToDouble(this.textBox7.Text);
             }
             catch (Exception e) { Console.WriteLine(e); }
@@ -158,6 +163,11 @@ namespace FractalsGPU
             {
                 this.Close();
             }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
         }
 
     }

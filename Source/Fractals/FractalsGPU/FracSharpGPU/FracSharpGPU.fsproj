@@ -67,7 +67,7 @@
       <HintPath>..\packages\Brahma.FSharp.0.2.4.0\lib\net40\Brahma.OpenCL.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Core, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharpx.Core">
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
@@ -89,7 +89,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FracSharpGPU.fs" />
-    <None Include="Script.fsx" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>

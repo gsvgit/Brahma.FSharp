@@ -14,13 +14,13 @@ open System.Windows.Forms
 let deviceType = DeviceType.Default
 
 let provider =
-    try  ComputeProvider.Create("*", deviceType)
+    try  ComputeProvider.Create("NVIDIA*", deviceType)
     with 
     | ex -> failwith ex.Message
 
 let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
-let localWorkSize = 20
+let localWorkSize = 32
 //let d = (new _2D(400, 400, localWorkSize, localWorkSize))
 
 let mandelbrot =
