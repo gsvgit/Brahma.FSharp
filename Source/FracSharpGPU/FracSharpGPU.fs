@@ -9,7 +9,6 @@ open Brahma.FSharp.OpenCL.Extensions
 
 open System.Drawing
 open System.Windows.Forms 
-//let cParallel: array<int> = Array.zeroCreate 160000
 
 let deviceType = DeviceType.Default
 
@@ -21,7 +20,6 @@ let provider =
 let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
 let localWorkSize = 32
-//let d = (new _2D(400, 400, localWorkSize, localWorkSize))
 
 let mandelbrot =
     <@                            
@@ -38,11 +36,11 @@ let mandelbrot =
             let mutable zi1 = 0.0
             let mutable count = 0;
             while flag && count < iter do
-                if (zr1 * zr1 + zi1 * zi1 ) <= 4.0
+                if zr1 * zr1 + zi1 * zi1 <= 4.0
                 then                        
                     let t = zr1
-                    zr1 <- (zr1 * zr1 - zi1 * zi1 + cr)
-                    zi1 <- (2.0 * zi1 * t + ci)
+                    zr1 <- zr1 * zr1 - zi1 * zi1 + cr
+                    zi1 <- 2.0 * zi1 * t + ci
                     count <- count + 1
                 else
                     flag <- false
@@ -66,7 +64,7 @@ let julia =
                 let mutable zi1 = fy
                 let mutable count =  0
                 let mutable t = 0.0
-                while fl && (count < iter) do
+                while fl && count < iter do
                     if zr1 * zr1 + zi1 * zi1 <= 4.0
                     then 
                         t <- zr1
