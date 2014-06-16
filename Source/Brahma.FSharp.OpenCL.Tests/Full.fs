@@ -529,7 +529,6 @@ type Translator() =
                             let mutable r = 8
                             let mutable h = r + n
                             h
-//                        x 9
                         buf.[0] <- x 9
             @>
 
@@ -576,7 +575,7 @@ type Translator() =
     [<Test>]
     member this.twoFun() = 
         let command = 
-                <@ fun (r:_2D) (devStore:array<int>) -> 
+                <@ fun (r:_1D) (devStore:array<int>) -> 
                         let x y = 
                             devStore.[0] <- devStore.[0] + 1
                             y - 8
@@ -587,28 +586,11 @@ type Translator() =
 
         let kernel,kernelPrepareF, kernelRunF = provider.Compile command    
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)            
-        let check (outArray:array<'a>) (expected:array<'a>) =        
-            let cq = commandQueue.Add(kernelRunF()).Finish()
-            let r = Array.zeroCreate expected.Length
-            let cq2 = commandQueue.Add(outArray.ToHost(provider,r)).Finish()
-            commandQueue.Dispose()
-            //Assert.AreEqual(expected, r)
-            printf "%A\n" r
-            //provider.CloseAllBuffers()
-
-        let intArr = Array.zeroCreate 2
-       
-
-        while(true) do
-            kernelPrepareF (new _2D(3, 1)) (intArr) 
-            let cq = commandQueue.Add(kernelRunF()).Finish()
-            let r = Array.zeroCreate 2
-            let cq2 = commandQueue.Add(intArr.ToHost(provider,r)).Finish()
-            printf "%A\n" r
-            //check intArr [|6;7|]
-           // let r = Array.zeroCreate 2
-           // let a = commandQueue.Add(intArr.ToHost(provider,r)).Finish()
-           // printf "\n%A" r
+        let intArr = Array.zeroCreate 3
+               
+        let run,check = checkResult command
+        run _1d intInArr        
+        check intInArr [|1;11;0|]
              
             
 
