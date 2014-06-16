@@ -28,7 +28,7 @@ let private clearContext (targetContext:TargetContext<'a,'b>) =
 
 
 
-let dictionaryFun = new System.Collections.Generic.Dictionary<string,StatementBlock<Lang>>()
+let mutable dictionaryFun = new System.Collections.Generic.Dictionary<string,StatementBlock<Lang>>()
 
 let dummyTypes = new System.Collections.Generic.Dictionary<_,Struct<_>>()
 
