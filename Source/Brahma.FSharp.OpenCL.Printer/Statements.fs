@@ -32,6 +32,9 @@ and private printVarDecl (vd:VarDecl<'lang>) =
     ; if vd.Expr.IsSome && not vd.IsLocal then yield [wordL "="; Expressions.Print vd.Expr.Value] |> spaceListL
     ] |> spaceListL
 
+and private printVar (v: Variable<'lang>) =
+    wordL v.Name
+
 and private printStmtBlock (sb:StatementBlock<'lang>) =
     sb.Statements |> ResizeArray.map (Print false) |> List.ofSeq |> aboveListL |> braceL
 
@@ -71,6 +74,10 @@ and printFunCall (fc:FunCall<_>) =
 and printBarrier (b:Barrier<_>) =
     wordL "barrier(CLK_LOCAL_MEM_FENCE)"   
 
+
+and printRetun (r:Return<_>) =
+    wordL "return" ++ Expressions.Print r.Expression
+
 and Print isToplevel (stmt:Statement<'lang>) =
     let res = 
         match stmt with
@@ -82,6 +89,8 @@ and Print isToplevel (stmt:Statement<'lang>) =
         | :? WhileLoop<'lang> as wl -> printWhileLoop wl
         | :? FunCall<'lang> as fc -> printFunCall fc
         | :? Barrier<'lang> as b -> printBarrier b
+        | :? Return<'lang> as r -> printRetun r
+        //| :? Variable<'lang> as v -> printVar v
         | t -> failwithf "Printer. Unsupported statement: %A" t
     if isToplevel
     then res

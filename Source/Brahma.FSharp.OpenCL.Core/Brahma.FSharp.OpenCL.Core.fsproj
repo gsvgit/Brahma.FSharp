@@ -123,6 +123,11 @@
       <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Extensions</Name>
+      <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
       <Name>Brahma.FSharp.OpenCL.Printer</Name>
       <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
@@ -141,6 +146,11 @@
     <ProjectReference Include="..\Brahma\Brahma.csproj">
       <Name>Brahma</Name>
       <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+      <Name>Brahma.Helpers</Name>
+      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

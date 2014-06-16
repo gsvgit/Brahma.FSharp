@@ -50,7 +50,7 @@ namespace Brahma.OpenCL.Commands
                     (IntPtr)(_elementSize * data.Length), data, out error);
                 curArgVal = mem;
                 //mem.Pin();
-                kernel.Provider.AutoconfiguredBuffers.Add(data, (Mem)mem);                
+                kernel.Provider.AutoconfiguredBuffers.Add(data, (Mem)mem);
                 if (error != ErrorCode.Success)
                     throw new CLException(error);
             }                        

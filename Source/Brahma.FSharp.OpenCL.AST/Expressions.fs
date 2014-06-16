@@ -46,7 +46,7 @@ type Item<'lang>(arr:Expression<'lang>,idx:Expression<'lang>) =
 type PropertyType<'lang>=
     | Var of Variable<'lang>
     | Item of Item<'lang>
-    
+
 type Property<'lang>(property:PropertyType<'lang>) =
     inherit Expression<'lang>()
     override this.Children = []
