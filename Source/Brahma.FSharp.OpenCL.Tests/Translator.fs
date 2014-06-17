@@ -699,7 +699,7 @@ type Translator() =
 [<EntryPoint>]
 let f _ =
     //(new Translator()).``Nested functions``()
-//    (new Translator()).``Template Let Transformation Test 8``()
+//    (new Translator()).``Template Let Transformation Test 8``()    
     
-    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 1``()
+    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 8``()
     0

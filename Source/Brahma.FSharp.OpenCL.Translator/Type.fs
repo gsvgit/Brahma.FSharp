@@ -17,6 +17,7 @@ module Brahma.FSharp.OpenCL.Translator.Type
 
 open Brahma.FSharp.OpenCL.AST
 open System.Reflection
+open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Quotations
 
 let rec Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
@@ -60,7 +61,6 @@ let TransleteStructDecl collectedTypes (t:System.Type) targetContext =
     new Struct<_>(name, fields)
 
 
-// Copyright (c) 2014 Klimov Ivan <ivan.klimov.92@gmail.com>
 open System.Collections.Generic
 
 type Caller() =
@@ -104,33 +104,26 @@ type Caller() =
 
 type Renamer() =
     let allNames = new Dictionary<_,Stack<_>>()
-//    let setNames = Set.empty
     let mutable counter = 0
 
-    let newName vName = 
-//        setNames.Add(vName) |> ignore
+    let newName vName =
         if allNames.ContainsKey vName
         then 
-            let mutable name = vName + string counter
+            let name = vName + string counter
             counter <- counter + 1
-//            while(setNames.Contains(name)) do
-//                name <- vName + string counter
-//                counter <- counter + 1
-//            setNames.Add(name) |> ignore
             name
-        else
-            vName
+        else vName
 
     member this.addName name =
         if allNames.ContainsKey name
         then
             let nName = newName name
             let scope = allNames.[name]
-            scope.Push(nName)
+            scope.Push nName
             nName
         else
             let scope = new Stack<_>(10)
-            scope.Push(name)
+            scope.Push name
             allNames.Add(name, scope)
             name
 
@@ -144,10 +137,10 @@ type Renamer() =
 
 [<AllowNullLiteral>]
 type VarInfo(orName:string, nName:string, isVar, typeV:System.Type) =
-    let mutable origName = orName
-    let mutable newName = nName
-    let mutable isV = isVar
-    let mutable typeVar = typeV
+    let origName = orName
+    let newName = nName
+    let isV = isVar
+    let typeVar = typeV
 
     member this.GetOriginalName =
         origName
@@ -159,169 +152,121 @@ type VarInfo(orName:string, nName:string, isVar, typeV:System.Type) =
         typeVar
 
 [<AllowNullLiteral>]
-type InfoScope(orgnName, nName, originVar, isFunc:bool, nameInFunc) =
+type InfoScope(orgnName, nName, originVar, isFunc, nameInFunc:Option<string>) as this =
     let listVars = new ResizeArray<VarInfo>() // var current scope
-    let needVars = new ResizeArray<VarInfo>()
-    let mutable after:InfoScope = null//new ResizeArray<_>() // after some let
-    let mutable inLet:InfoScope = null//new ResizeArray<_>() // in some lets
-    let mutable originalName = orgnName
-    let mutable newName = nName
-    let mutable orgnVar:Var = originVar
-    let mutable isFun = isFunc
+    let needVars = new ResizeArray<VarInfo>()    
     let mutable nameInFun = nameInFunc
 
-    let FindInVars (orName:string) =
-        let mutable var = null
-        //listVars.ForEach( fun (x:VarInfo) -> if(x.GetOriginalName = orName) then if(var = null) then var <- x)
-        for v in listVars do
-            if(v.GetOriginalName = orName) then 
-                if(var = null) then
-                    var <- v
-        if(var = null) then
-            for v in needVars do
-                if(v.GetOriginalName = orName) then 
-                    if(var = null) then
-                        var <- v
-        var
-    
+    let FindInVars orName =        
+        match listVars |> ResizeArray.tryFind (fun v -> v.GetOriginalName = orName) with 
+        | Some x -> Some x
+        | None -> needVars |> ResizeArray.tryFind (fun v -> v.GetOriginalName = orName)
+        
     let FindInAfter orName =
-        let mutable var = null
-        let mutable curAfter:InfoScope = after
+        let mutable var = None
+        let mutable curAfter = this.After
         let mutable needList = new ResizeArray<_>()
-        while(curAfter <> null) do
-            if(curAfter.GetOriginalName = orName) then
-                let varAfter:Var = curAfter.GetOrgnVar
-                var <- new VarInfo(curAfter.GetOriginalName, curAfter.GetNewName, false, varAfter.Type)
-                needList.AddRange(curAfter.GetNeedVars)
-                curAfter <- null
-            else
-                curAfter <- curAfter.GetAfter
+        while curAfter.IsSome do
+            let ca = curAfter.Value
+            if ca.OriginalName = orName
+            then
+                let varAfter = ca.OriginalVar
+                var <- Some <| new VarInfo(ca.OriginalName, ca.NewName, false, varAfter.Type)
+                needList.AddRange ca.GetNeedVars
+                curAfter <- None
+            else curAfter <- ca.After
         var, needList
 
-    let rec GetNameForCurVar orgnName isAfter (isAboveFun:bool) (allLets:Dictionary<string, InfoScope>) (globalVars:ResizeArray<VarInfo>) =
-        let nextIsAboveFun = 
-            if(not isAboveFun) then
-                if(originalName = nameInFun) then
-                    true
-                else isAboveFun
-            else isAboveFun
+    let GetNameForCurVar orgnName isAfter isAboveFun (allLets:Dictionary<_, InfoScope>) (globalVars:ResizeArray<VarInfo>) =
+        let nextIsAboveFun = ((not isAboveFun) && nameInFun.IsSome && this.OriginalName = nameInFun.Value) || isAboveFun
+
         let nameFromMyVar =
-            if(not isAfter) then
-                FindInVars orgnName
-            else
-                null
-        if(nameFromMyVar = null) then
-            if(isAfter && originalName = orgnName) then
-                let nameFromMe = new VarInfo(originalName, newName, false, orgnVar.Type)
-                nameFromMe, new ResizeArray<_>() //так как вызов сразу после, то тоже только искомое имя и необходимые переменные не нужны
+            if not isAfter
+            then FindInVars orgnName
+            else None
+
+        if nameFromMyVar.IsNone then
+            if isAfter && this.OriginalName = orgnName then
+                let nameFromMe = new VarInfo(this.OriginalName, this.NewName, false, this.OriginalVar.Type)
+                Some nameFromMe, new ResizeArray<_>() //так как вызов сразу после, то тоже только искомое имя и необходимые переменные не нужны
             else
                 let nameFromListAfter, listNeed = FindInAfter orgnName
-                if(nameFromListAfter = null) then
-                    if(inLet <> null) then
-                        let (nameFromInLet:VarInfo), listNeedV = inLet.GetNameForVar orgnName false nextIsAboveFun allLets globalVars
-                        //возможно лучше список нужных варов возвраать
-                        if((not isAfter)) then
-                            if(nameInFun <> null) then
-                                let inFunction:InfoScope = allLets.[nameInFun]
-                                let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                                let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                                if(nameFromInLet.IsVar) then
-                                    if((not (needVarsFunList.Contains(nameFromInLet))) &&
-                                         (not (containsVars.Contains(nameFromInLet)))) then
-                                        needVarsFunList.Add(nameFromInLet)
-                                for need in listNeedV do
-                                    if((not (needVarsFunList.Contains(need))) &&
-                                        (not (containsVars.Contains(need)))) then
-                                        needVarsFunList.Add(need)
+                if nameFromListAfter.IsNone
+                then                   
+                    let nameFromInLet, listNeedV = 
+                        match this.InLet with 
+                        | Some inLet -> inLet.GetNameForVar orgnName false nextIsAboveFun allLets globalVars
+                        | None -> 
+                            globalVars |> ResizeArray.tryFind (fun v -> v.GetOriginalName = orgnName)
+                            , new ResizeArray<_>()
+                    //возможно лучше список нужных варов возвраать
+                    if (not isAfter)  && nameInFun.IsSome
+                    then
+                        let inFunction:InfoScope = allLets.[nameInFun.Value]
+                        let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
+                        let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
+                        match nameFromInLet with
+                        | Some x 
+                            when x.IsVar 
+                                 && (not (needVarsFunList.Contains x))
+                                 && not (containsVars.Contains x)
+                            -> needVarsFunList.Add x
+                        | _ -> ()
 
-                        nameFromInLet, listNeedV
-                    else
-                        let mutable var = null
-                        for v in globalVars do
-                            if(v.GetOriginalName = orgnName) then 
-                                if(var = null) then
-                                    var <- v
-                        if((nameInFun <> null) && (not isAfter)) then
-                            let inFunction:InfoScope = allLets.[nameInFun]
-                            let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                            let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                            if((not (needVarsFunList.Contains(var))) &&
-                                        (not (containsVars.Contains(var)))) then
-                                    needVarsFunList.Add(var)
-                        var, new ResizeArray<_>()
-                else
-                    if(not isAfter) then
-                        if(not (allLets.[nameFromListAfter.GetNewName].IsFun)) then
-                            let newNeedList = new ResizeArray<_>()
-                            if(isFun) then
-                                let inFunction:InfoScope = allLets.[nameInFun]
-                                let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                                let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                                if((not (needVarsFunList.Contains(nameFromListAfter))) &&
-                                    (not (containsVars.Contains(nameFromListAfter)))) then
-                                    needVarsFunList.Add(nameFromListAfter)
-                            newNeedList.Add(nameFromListAfter)
-                            nameFromListAfter, newNeedList
-                        else 
-                            if(nameInFun <> null) then
-                                let inFunction:InfoScope = allLets.[nameInFun]
-                                let needVarsFunList:ResizeArray<VarInfo> = inFunction.GetNeedVars
-                                let containsVars:ResizeArray<VarInfo> = inFunction.GetVars
-                                for need in listNeed do
-                                    if((not (needVarsFunList.Contains(need))) &&
-                                        (not (containsVars.Contains(need)))) then
-                                        needVarsFunList.Add(need)
-                            nameFromListAfter, listNeed
-                    else
-                        nameFromListAfter, new ResizeArray<_>()
-        else
-            nameFromMyVar, new ResizeArray<_>() //возврат искомой переменно и список нужных
+                        listNeedV
+                        |> ResizeArray.filter (fun need -> (not (needVarsFunList.Contains need)) && not (containsVars.Contains need))
+                        |> needVarsFunList.AddRange
 
-    member this.SetIsFun isF =
-        isFun <- isF
-    member this.IsFun =
-        isFun
-
-    member this.ChangeOrgnVar (newOrgnVar:Var) =
-        orgnVar <- newOrgnVar
-    member this.GetOrgnVar =
-        orgnVar
+                    nameFromInLet, listNeedV
+                    
+                elif not isAfter
+                then
+                    let x = nameFromListAfter.Value
+                    if not (allLets.[x.GetNewName].IsFun) then
+                        let newNeedList = new ResizeArray<_>()
+                        if this.IsFun
+                        then
+                            let inFunction = allLets.[nameInFun.Value]
+                            let needVarsFunList = inFunction.GetNeedVars
+                            let containsVars = inFunction.GetVars
+                            if (not (needVarsFunList.Contains x))
+                               && not (containsVars.Contains x)
+                            then needVarsFunList.Add x
+                        newNeedList.Add x
+                        nameFromListAfter, newNeedList
+                    else 
+                        if nameInFun.IsSome
+                        then
+                            let inFunction = allLets.[nameInFun.Value]
+                            let needVarsFunList = inFunction.GetNeedVars
+                            let containsVars = inFunction.GetVars
+                            listNeed 
+                            |> ResizeArray.filter (fun need -> (not (needVarsFunList.Contains need)) && not (containsVars.Contains need))
+                            |> needVarsFunList.AddRange
+                        nameFromListAfter, listNeed
+                  else nameFromListAfter, new ResizeArray<_>()
+        else nameFromMyVar, new ResizeArray<_>() //возврат искомой переменно и список нужных
 
     member this.AddVar oName nNane typeV =
         listVars.Add(new VarInfo(oName, nNane, true, typeV))
-    member this.GetVars =
-        listVars
-
+    
     member this.AddNeedVar oName nNane typeV =
-        if(oName = nameInFun) then
-            needVars.Add(new VarInfo(oName, nNane, true, typeV))
-    member this.GetNeedVars =
-        needVars
+        match nameInFun with
+        | Some s when s = oName -> needVars.Add(new VarInfo(oName, nNane, true, typeV))
+        | _ -> ()
 
-    member this.AddAfter afterScope =
-        after <- afterScope
-    member this.GetAfter =
-        after
+    member this.GetVars = listVars
+    member this.GetNeedVars = needVars
 
-    member this.AddInLet letInScope =
-        inLet <- letInScope
-    member this.GetInLet = 
-        inLet
-
-    member this.SetOriginalName orName = 
-        originalName <- orName
-    member this.GetOriginalName = 
-        originalName
-
-    member this.SetNewName nName =
-        newName <- nName
-    member this.GetNewName =
-        newName
+    member val OriginalVar:Var = originVar with get, set
+    member val IsFun = isFunc with get, set
+    member val After:Option<InfoScope> = None with get, set
+    member val InLet:Option<InfoScope> = None with get, set
+    member val OriginalName = orgnName with get, set
+    member val NewName = nName with get, set
 
     member this.GetNameForVar orgnName isAfter isAboveFun allLets (globalVars:ResizeArray<VarInfo>) =
         GetNameForCurVar orgnName isAfter isAboveFun allLets globalVars
-       
-        
 
 type LetScope() =
     let allLet = new Dictionary<_,_>()
@@ -329,102 +274,67 @@ type LetScope() =
     let lastInFunLet = new Stack<_>(10)
     let mutable isInLastLet = true
     let kernelVars = new ResizeArray<VarInfo>()
-//    let forVars = new Stack<_>(10)
 
-    let FindInVars (orName:string) =
-        let mutable var = null
-        //listVars.ForEach( fun (x:VarInfo) -> if(x.GetOriginalName = orName) then if(var = null) then var <- x)
-        for v in kernelVars do
-            if(v.GetOriginalName = orName) then 
-                if(var = null) then
-                    var <- v
-        var
+    let FindInVars orName =
+        kernelVars |> ResizeArray.tryFind (fun v -> v.GetOriginalName = orName)
 
     member this.SetIsInLastLet isIn = 
         isInLastLet <- isIn
-    member this.GetIsInLastLet = 
-        isInLastLet
+    member this.GetIsInLastLet = isInLastLet
 
     member private this.AddLetInfo (infoScope:InfoScope) = 
-        allLet.Add(infoScope.GetNewName, infoScope)
+        allLet.Add(infoScope.NewName, infoScope)
     member this.GetLetInfo name =
         allLet.[name]
     member this.ContainsInfo name =
-        allLet.ContainsKey(name)
+        allLet.ContainsKey name
 
     member this.LetIn name newName originVar isFun nameInFun = 
         let newInfoLet = new InfoScope(name, newName, originVar, isFun, nameInFun)
 
-        if(isInLastLet) then //если мы зашли в let после let
-            if(lastInLet.Count > 0) then
-                newInfoLet.AddInLet (allLet.[lastInLet.Peek()])
-        else 
-            if(lastInLet.Count > 0) then // если мы зашли лет после 
-                let after = (allLet.[lastInLet.Peek()])
-                newInfoLet.AddAfter after
-                newInfoLet.AddInLet after.GetInLet
+        if isInLastLet
+        then //если мы зашли в let после let
+            if lastInLet.Count > 0
+            then newInfoLet.InLet <- allLet.[lastInLet.Peek()] |> Some
+        elif lastInLet.Count > 0
+        then // если мы зашли лет после 
+            let after = allLet.[lastInLet.Peek()]
+            newInfoLet.After <- Some after
+            newInfoLet.InLet <- after.InLet
 
-        lastInLet.Push(newName)
-        if(newInfoLet.IsFun) then
-            lastInFunLet.Push(newName)
+        lastInLet.Push newName
+        if newInfoLet.IsFun
+        then lastInFunLet.Push newName
         this.AddLetInfo newInfoLet
 
-    member this.GetLastInLet =
-        if(lastInLet.Count = 0) then
-            null
-        else
-            lastInLet.Peek()
-    member this.GetLastInFunLet =
-        if(lastInFunLet.Count = 0) then
-            null
-        else
-            lastInFunLet.Peek()
-    member this.FunLetOut =
-        lastInFunLet.Pop()
+    member this.GetLastInLet () =
+        if lastInLet.Count = 0
+        then None
+        else lastInLet.Peek() |> Some
 
-    member this.LetOut =
-        lastInLet.Pop()
+    member this.GetLastInFunLet () =
+        if lastInFunLet.Count = 0
+        then None
+        else lastInFunLet.Peek() |> Some
+
+    member this.FunLetOut = lastInFunLet.Pop
+    member this.LetOut = lastInLet.Pop
 
     member this.GetNameForVarInLet name isAfter =
-        if(allLet.Count > 0) then
-            let infoLet = allLet.[this.GetLastInLet]
-            
-//            let forVar:VarInfo = (this.FindVarInForVars name)
-//            if(forVar = null) then
+        if allLet.Count > 0
+        then
+            let infoLet = allLet.[(this.GetLastInLet()).Value]
             let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
-            if(getingName = null) then 
-                let v = FindInVars(name)
-                infoLet.AddNeedVar (v.GetOriginalName) (v.GetNewName) (v.GetVarType)
+            match getingName with
+            | None -> 
+                let v = (FindInVars name).Value
+                infoLet.AddNeedVar v.GetOriginalName v.GetNewName v.GetVarType
                 v
-            else
-                getingName
-//            else
-//                infoLet.AddNeedVar (forVar.GetOriginalName) (forVar.GetNewName) (forVar.GetVarType)
-//                forVar
-
-//            let getingName, listNeed = infoLet.GetNameForVar name isAfter false allLet kernelVars
-//            if(getingName = null) then 
-//                let forVar:VarInfo = (this.FindVarInForVars name)
-//                if(forVar = null) then
-//                    let v = FindInVars(name)
-//                    infoLet.AddNeedVar (v.GetOriginalName) (v.GetNewName) (v.GetVarType)
-//                    v
-//                else
-//                    infoLet.AddNeedVar (forVar.GetOriginalName) (forVar.GetNewName) (forVar.GetVarType)
-//                    forVar
-//            else
-//                getingName
-        else
-            let mutable var = null
-            for v in kernelVars do
-                if(v.GetOriginalName = name) then 
-                    if(var = null) then
-                        var <- v
-            var
-
+            | Some x -> x
+        else kernelVars |> ResizeArray.find (fun v -> v.GetOriginalName = name)
 
     member this.AddVarInLastLet orgnName nName varType =
-        let last = allLet.[this.GetLastInLet]
+        let last = allLet.[(this.GetLastInLet()).Value]
         last.AddVar orgnName nName varType
 
     member this.AddKernelVars orgnName nName varType =
@@ -443,7 +353,7 @@ type LetScope() =
 
 
 type Method(var:Var, expr:Expr) = 
-    let mutable funVar = var
+    let funVar = var
     let funExpr = expr
 
     member this.FunVar:Var =

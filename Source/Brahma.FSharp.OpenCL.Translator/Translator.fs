@@ -171,8 +171,7 @@ type FSQuotationToOpenCLTranslator() =
         //let vars,(partialAst,context) = go qExpr []
         let listPartsASTVars = new ResizeArray<_>()
         let listPartsASTPartialAst = new ResizeArray<_>()
-        let listPartsASTContext = new ResizeArray<_>()
-        //let dictionaryFun = new Dictionary<_,_>()
+        let listPartsASTContext = new ResizeArray<_>()        
         Body.dictionaryFun.Clear()
         for partAST in  newAST do
             let vars,(partialAst,context) = go partAST.FunExpr [] 

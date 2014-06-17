@@ -543,21 +543,20 @@ type Translator() =
                         let column = r.GlobalID0
                         let row = r.GlobalID1
 
-                        if(row < scaleExp && column < scaleM) then 
-                            if(row < scaleVar) then
-                                if(column % scaleM = 0) then
-                                    devStore.[row*scaleM + column] <- 1
-                                else
-                                    devStore.[row*scaleM + column] <- -1
-                            else
-                                if(column = 0) then
-                                    devStore.[row*scaleM + column] <- 2
-                                else 
-                                    if(column = 1) then
-                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
-                                    else 
-                                        devStore.[row*scaleM + column] <- -1 
+                        if row < scaleExp && column < scaleM
+                        then 
+                            if row < scaleVar
+                            then
+                                if column % scaleM = 0
+                                then devStore.[row*scaleM + column] <- 1
+                                else devStore.[row*scaleM + column] <- -1
+                            elif column = 0
+                            then devStore.[row*scaleM + column] <- 2
+                            elif column = 1
+                            then devStore.[row*scaleM + column] <- row - scaleVar + 1
+                            else devStore.[row*scaleM + column] <- -1 
                 @>
+
         let initStore,check = checkResult command
         let intArr = Array.zeroCreate 45
         initStore (new _2D(5, 9)) intArr 9 5 6      
@@ -578,21 +577,15 @@ type Translator() =
                 <@ fun (r:_1D) (devStore:array<int>) -> 
                         let x y = 
                             devStore.[0] <- devStore.[0] + 1
-                            y - 8
+                            y + 2
                         devStore.[1] <- x 9
-                        
                 @>
 
-
         let kernel,kernelPrepareF, kernelRunF = provider.Compile command    
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)            
-        let intArr = Array.zeroCreate 3
-               
+        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)        
         let run,check = checkResult command
-        run _1d intInArr        
-        check intInArr [|1;11;0|]
-             
-            
+        run _1d intInArr
+        check intInArr [|1; 11; 2; 3|]
 
     [<Test>]
     member this.EigenCFA() = 
@@ -601,20 +594,18 @@ type Translator() =
                         let column = r.GlobalID0
                         let row = r.GlobalID1
 
-                        if(row < scaleExp && column < scaleM) then 
-                            if(row < scaleVar) then
-                                if(column % scaleM = 0) then
-                                    devStore.[row*scaleM + column] <- 1
-                                else
-                                    devStore.[row*scaleM + column] <- -1
-                            else
-                                if(column = 0) then
-                                    devStore.[row*scaleM + column] <- 2
-                                else 
-                                    if(column = 1) then
-                                        devStore.[row*scaleM + column] <- row - scaleVar + 1
-                                    else 
-                                        devStore.[row*scaleM + column] <- -1 
+                        if row < scaleExp && column < scaleM
+                        then 
+                            if row < scaleVar
+                            then
+                                if column % scaleM = 0
+                                then devStore.[row*scaleM + column] <- 1
+                                else devStore.[row*scaleM + column] <- -1
+                            elif column = 0
+                            then devStore.[row*scaleM + column] <- 2
+                            elif column = 1
+                            then devStore.[row*scaleM + column] <- row - scaleVar + 1
+                            else devStore.[row*scaleM + column] <- -1 
                 @>
 
         let qEigenCFA = 
@@ -629,27 +620,28 @@ type Translator() =
                     devScaleLam ->
                        let column = r.GlobalID0
                        let row = r.GlobalID1
-                       if(column < devScaleCall && row < 2) then
+                       if column < devScaleCall && row < 2
+                       then
                             let numCall = column
                             let Argi index =  
-                                if(index = 0) then devArg1.[numCall]
+                                if index = 0
+                                then devArg1.[numCall]
                                 else devArg2.[numCall]
                             let L index = devStore.[devFun.[numCall]*devScaleM + index]
                             let Li index = devStore.[(Argi row)*devScaleM + index]
                             let rowStore row column = devStore.[row*devScaleM + column]
                             let vL j =
-                                if(row = 0) then
-                                    (L j) - 1
-                                else
-                                    (L j) - 1 + devScaleLam
+                                if row = 0
+                                then (L j) - 1
+                                else (L j) - 1 + devScaleLam
                             for j in 1 .. ((L 0) - 1) do
                                 for k in 1 .. ((Li 0) - 1) do
                                     let mutable isAdd = 1
-                                    let addVar = (Li k)
-                                    for i in 1 .. ((rowStore (vL j) 0) - 1) do
-                                        if((rowStore (vL j) i) = addVar) then 
-                                            isAdd <- 0
-                                    if(isAdd > 0) then
+                                    let addVar = Li k
+                                    for i in 1 .. (rowStore (vL j) 0) - 1 do
+                                        if rowStore (vL j) i = addVar
+                                        then isAdd <- 0
+                                    if isAdd > 0 then
                                         devRep.[0] <- devRep.[0] + 1
                                         let tail = (rowStore (vL j) 0)
                                         devStore.[(vL j)*devScaleM] <- devStore.[(vL j)*devScaleM] + 1
@@ -734,15 +726,30 @@ type Translator() =
     member this.``Template Let Transformation Test 1``() =
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) ->                                        
+                fun (range:_1D) (buf:array<int>) -> 
+                    let x = 4                                       
                     let f = 
                         let x = 3
                         x
-                    buf.[0] <- f
+                    buf.[0] <- x + f
+            @>
+        let run,check = checkResult command
+        run _1d intInArr
+        check intInArr [|7;1;2;3|]
+
+    [<Test>]
+    member this.``Template Let Transformation Test 1.2``() =
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) ->
+                    let f y = 
+                        let x c b = b + c + 4 + y
+                        x 2 3
+                    buf.[0] <- f 1
             @>
         let run,check = checkResult command
         run _1d intInArr        
-        check intInArr [|3;1;2;3|]
+        check intInArr [|10;1;2;3|]
 
     [<Test>]
     member this.``Template Let Transformation Test 2``() =
@@ -844,15 +851,15 @@ type Translator() =
             <@ fun (range:_1D) (m:array<int>) -> 
                     let p = m.[0]
                     let x n = 
-                        let l = m.[3]//3
+                        let l = m.[3]
                         let g k = k + m.[0] + m.[1]
                         let r = 
                             let y a = 
-                                let x = 5 - n + (g 4) //5 - 7 + 5 = 3
-                                let z t = m.[2] + a - t//2 + 6 - 12 = - 4
+                                let x = 5 - n + (g 4)
+                                let z t = m.[2] + a - t
                                 z (a + x + l)
-                            y 6//2
-                        r + m.[3]//-4+3=-1
+                            y 6
+                        r + m.[3]
                     m.[0] <- x 7
             @>
 
