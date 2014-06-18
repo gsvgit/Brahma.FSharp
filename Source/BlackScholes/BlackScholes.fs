@@ -84,7 +84,7 @@ let main () =
     let BlackScholesPutOption = blackScholesPutOption.Compile()()
     
     let Main() =
-        let platformName = "*"
+        let platformName = "nvidia*"
         let iterations = 1
         let optionCount = 40000
         let localWorkSize = 32

@@ -137,9 +137,6 @@
       <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core, Version=1.8.37.0, Culture=neutral, PublicKeyToken=null">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharpx.Text.StructuredFormat">
       <HintPath>..\packages\FSharpx.Text.StructuredFormat.1.8.41\lib\40\FSharpx.Text.StructuredFormat.dll</HintPath>
       <Private>True</Private>
@@ -147,9 +144,6 @@
     <Reference Include="mscorlib" />
     <Reference Include="OpenCL.Net">
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="OpenCL.Net, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
