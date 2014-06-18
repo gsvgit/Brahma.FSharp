@@ -29,13 +29,13 @@ type Translator() =
     let _1d = new _1D(defaultInArrayLength, 1)
     let _2d = new _2D(defaultInArrayLength, 1)
     let deviceType = DeviceType.Default
-    let platformName = "nvidia*"
+    let platformName = "*"
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with
         | ex -> failwith ex.Message
-
+ 
     let checkResult command =
         let kernel,kernelPrepareF, kernelRunF = provider.Compile command    
         let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)            
@@ -974,7 +974,7 @@ type Translator() =
         let command = 
             <@ fun (range:_1D) (buf:array<int>) -> 
                     let f (y:int) =
-                        if(y = 0) 
+                        if y = 0
                         then 
                             let z (a:int) = a
                             z 9
