@@ -172,6 +172,23 @@ and letFunUp expr =
                 let newAfterExpr = Expr.IfThenElse(cond, thenExpr, afterExpr1)
                 Expr.Let(var1, inExpr1, recLet newAfterExpr)                
             | _ -> Expr.IfThenElse(cond, thenExpr,elseExpr)
+
+    | Patterns.ForIntegerRangeLoop(v, f, t, body) ->
+        let newBody = letFunUp body
+        match newBody with
+        | Patterns.Let (var2, inExpr2, afterExpr2) when isLetFun newBody ->
+            let newAfterExpr = Expr.ForIntegerRangeLoop(v, f, t, afterExpr2)
+            Expr.Let(var2, inExpr2, recLet newAfterExpr)
+        | _ -> Expr.ForIntegerRangeLoop(v, f, t, newBody)
+
+    | Patterns.WhileLoop(cond, body) ->
+        let newBody = letFunUp body
+        match newBody with
+        | Patterns.Let (var2, inExpr2, afterExpr2) when isLetFun newBody ->
+            let newAfterExpr = Expr.WhileLoop(cond, afterExpr2)
+            Expr.Let(var2, inExpr2, recLet newAfterExpr)
+        | _ -> Expr.WhileLoop(cond, newBody)
+
     | _ -> expr
 
 let rec transform expr = 
