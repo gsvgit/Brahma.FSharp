@@ -74,7 +74,6 @@ and printFunCall (fc:FunCall<_>) =
 and printBarrier (b:Barrier<_>) =
     wordL "barrier(CLK_LOCAL_MEM_FENCE)"   
 
-
 and printRetun (r:Return<_>) =
     wordL "return" ++ Expressions.Print r.Expression
 
@@ -95,5 +94,3 @@ and Print isToplevel (stmt:Statement<'lang>) =
     if isToplevel
     then res
     else res ++ wordL ";"
-
-
