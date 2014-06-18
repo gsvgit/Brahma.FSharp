@@ -873,7 +873,7 @@ type Translator() =
             <@ fun (range:_1D) (buf:array<int>) -> 
                     let p = 9
                     let x n b = 
-                        let mutable t = 0
+                        let t = 0
                         n + b + t
                     buf.[0] <- x 7 9
             @>
@@ -889,8 +889,7 @@ type Translator() =
             <@ fun (range:_1D) (buf:array<int>) -> 
                     let p = 1
                     let m = 
-                        let r (l:int) =
-                            l
+                        let r (l:int) = l
                         r 9
                     let z (k:int) = k
                     buf.[0] <- m
@@ -920,7 +919,7 @@ type Translator() =
     member this.``Template Let Transformation Test 13``() =
         let command = 
             <@ fun (range:_1D) (buf:array<int>) -> 
-                    let f (y:int) =
+                    let f y =
                         let y = y
                         let y = y
                         let g (m:int) = m
@@ -936,7 +935,7 @@ type Translator() =
     member this.``Template Let Transformation Test 14``() =
         let command = 
             <@ fun (range:_1D) (buf:array<int>) -> 
-                    let f (y:int) =
+                    let f y =
                         let y = y
                         let y = y
                         let g (m:int) = 
@@ -956,7 +955,7 @@ type Translator() =
     member this.``Template Let Transformation Test 15``() =
         let command = 
             <@ fun (range:_1D) (buf:array<int>) -> 
-                    let f (y:int) =
+                    let f y =
                         let Argi index =  
                             if index = 0
                             then buf.[1]
@@ -973,7 +972,7 @@ type Translator() =
     member this.``Template Let Transformation Test 16``() =
         let command = 
             <@ fun (range:_1D) (buf:array<int>) -> 
-                    let f (y:int) =
+                    let f y =
                         if y = 0
                         then 
                             let z (a:int) = a
@@ -985,6 +984,23 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|9;1;2;3|]
+
+//    [<Test>]
+//    member this.``Template Let Transformation Test 17``() =
+//        let command = 
+//            <@ fun (range:_1D) (buf:array<int>) -> 
+//                    let f (y:int) =
+//                        if y = 0
+//                        then 
+//                            let z (a:int) = a
+//                            z 9
+//                        else buf.[2]
+//                    buf.[0] <- f 0
+//            @>
+//
+//        let run,check = checkResult command
+//        run _1d intInArr        
+//        check intInArr [|9;1;2;3|]
 
 let x = 
     let d = ref 0
