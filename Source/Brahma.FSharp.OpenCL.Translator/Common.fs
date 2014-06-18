@@ -16,6 +16,8 @@
 [<AutoOpen>]
 module Brahma.FSharp.OpenCL.Translator.Common
 
+open Microsoft.FSharp.Quotations
+
 type Flags () =
     member val enableAtomic = false with get, set
     member val enableFP64 = false with get, set
@@ -43,4 +45,13 @@ type TargetContext<'lang,'vDecl>() =
     member this.Namer
         with get() = namer
         and set v = namer <- v
+
+type Method(var:Var, expr:Expr) = 
+    let funVar = var
+    let funExpr = expr
+
+    member this.FunVar:Var =
+        funVar
+    member this.FunExpr =
+        funExpr
 

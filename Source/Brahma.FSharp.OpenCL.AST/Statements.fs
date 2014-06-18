@@ -36,6 +36,17 @@ type StatementBlock<'lang> (statements:ResizeArray<Statement<'lang>>)=
     inherit Statement<'lang>()
     override this.Children = []
     member this.Statements = statements    
+    member this.Remove index =
+        statements.RemoveAt index
+    member this.Append statement =
+        statements.Add statement
+    //реализовать 2 метода remove конкретный
+    //append только в конец
+   
+type Return<'lang> (expression:Expression<'lang>) =
+    inherit Statement<'lang>()
+    override this.Children = []
+    member this.Expression = expression
 
 type IfThenElse<'lang> (cond:Expression<'lang>, thenBranch:StatementBlock<'lang>, elseBranch:Option<StatementBlock<'lang>>)=
     inherit Statement<'lang>()

@@ -17,10 +17,13 @@ module Brahma.FSharp.OpenCL.Translator.Type
 
 open Brahma.FSharp.OpenCL.AST
 open System.Reflection
+open Microsoft.FSharp.Collections
+open Microsoft.FSharp.Quotations
 
-let Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) : Type<Lang> =
+let rec Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
-        match str.ToLowerInvariant() with
+        let low = str.ToLowerInvariant()
+        match low with
         | "int"| "int32" -> PrimitiveType<Lang>(Int) :> Type<Lang>
         | "int16" -> PrimitiveType<Lang>(Short) :> Type<Lang>
         | "uint16" -> PrimitiveType<Lang>(UShort) :> Type<Lang>
@@ -33,6 +36,7 @@ let Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) 
         | "double" -> 
             context.Flags.enableFP64 <- true
             PrimitiveType<Lang>(Double) :> Type<Lang>        
+        | "unit" -> PrimitiveType<Lang>(Void) :> Type<Lang>
         | t when t.EndsWith "[]" ->
             let baseT = t.Substring(0,t.Length-2)
             if isKernelArg 
@@ -40,6 +44,9 @@ let Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) 
             else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
         | s when s.StartsWith "fsharpref" ->
             go (_type.GetGenericArguments().[0].Name)
+        | f when f.StartsWith "fsharpfunc" ->
+//            go (_type.GetGenericArguments().[1].Name)
+            Translate (_type.GetGenericArguments().[1]) isKernelArg collectedTypes size context
         | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)
             -> 
                 let decl =

@@ -29,7 +29,7 @@ namespace Brahma.OpenCL
             new Dictionary<string, ClNet.Event>();
         
         private bool _disposed = false;
-        private readonly ClNet.CommandQueue _queue;
+        private ClNet.CommandQueue _queue;
 
         internal ClNet.CommandQueue Queue
         {
@@ -37,6 +37,7 @@ namespace Brahma.OpenCL
             {
                 return _queue;
             }
+            set { _queue = value; }
         }
 
         public static void Cleanup()
@@ -114,6 +115,7 @@ namespace Brahma.OpenCL
             if (!_disposed)
             {
                 _queue.Dispose();
+                //Queue = null;
                 _disposed = true;
             }
         }

@@ -132,6 +132,7 @@ namespace Brahma.OpenCL
         {
             if (!_disposed)
             {
+                _context.Release();                
                 _context.Dispose();
                 _disposed = true;
             }

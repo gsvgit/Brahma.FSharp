@@ -14,6 +14,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -79,17 +80,26 @@
     <DocumentationFile>bin\Release\FsMatrixMultiply.XML</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="MatrixMultiply.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
-      <Name>Brahma.Helpers</Name>
-      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
-    </ProjectReference>
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="OpenCL.Net">
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
@@ -97,6 +107,14 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
+      <Name>Brahma.FSharp.OpenCL.AST</Name>
+      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">
       <Name>Brahma.FSharp.OpenCL.Core</Name>
       <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
@@ -105,6 +123,16 @@
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
       <Name>Brahma.FSharp.OpenCL.Extensions</Name>
       <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Printer</Name>
+      <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Tests\Brahma.FSharp.OpenCL.Tests.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Tests</Name>
+      <Project>{73882d44-0194-400a-bce4-f29d66417de0}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
@@ -122,7 +150,11 @@
       <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+      <Name>Brahma.Helpers</Name>
+      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />

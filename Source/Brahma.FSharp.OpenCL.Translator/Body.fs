@@ -18,6 +18,7 @@ module Brahma.FSharp.OpenCL.Translator.Body
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.AST
 open Microsoft.FSharp.Collections
+open System.Collections.Generic
 
 let private clearContext (targetContext:TargetContext<'a,'b>) =
     let c = new TargetContext<'a,'b>()
@@ -26,6 +27,10 @@ let private clearContext (targetContext:TargetContext<'a,'b>) =
     c.UserDefinedTypes.AddRange(targetContext.UserDefinedTypes)
     for kvp in targetContext.UserDefinedTypesOpenCLDeclaration do c.UserDefinedTypesOpenCLDeclaration.Add (kvp.Key,kvp.Value)
     c
+
+
+
+let mutable dictionaryFun = new System.Collections.Generic.Dictionary<string,StatementBlock<Lang>>()
 
 let rec private translateBinding (var:Var) newName (expr:Expr) (targetContext:TargetContext<_,_>) =    
     let body,tContext = (*TranslateAsExpr*) translateCond expr targetContext    
@@ -157,11 +162,15 @@ and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
 and getVar (clVarName:string) (targetContext:TargetContext<_,_>) =
     new Variable<_>(clVarName)
 
-and translateVar (var:Var) (targetContext:TargetContext<_,_>) =
+and translateVar (var:Var) (targetContext:TargetContext<_,_>) =    
+    //getVar var.Name targetContext
     let vName = targetContext.Namer.GetCLVarName var.Name
     match vName with
     | Some n -> getVar n targetContext
-    | None -> failwith "Seems, that you try to use variable, that declared out of quotation. Please, pass it as quoted function's parametaer."
+    | None ->         
+            sprintf "Seems, that you try to use variable with name %A, that declared out of quotation." var.Name
+          + "Please, pass it as quoted function's parametaer."
+          |> failwith 
 
 and translateValue (value:obj) (sType:System.Type) targetContext =
     let mutable _type = None
@@ -271,27 +280,59 @@ and translateSeq expr1 expr2 (targetContext:TargetContext<_,_>) =
     stmt, tContext
 
 and translateApplication expr1 expr2 targetContext =
+    let rec go expr _vals args  = 
+        match expr with
+        | Patterns.Lambda (v,e) ->
+            go e _vals (v::args) 
+        | Patterns.Application (e1,e2) ->
+            go e1 (e2::_vals) args
+        | e ->
+            if _vals.Length = args.Length then
+                let d =
+                    List.zip (List.rev args) _vals |> dict
+            
+                    //failwith "Partial evaluation is not supported in kernel function."
+                e.Substitute (fun v -> if d.ContainsKey v then Some d.[v] else None) ,true
+            else e, false
+    let body, doing = go expr1 [expr2] []
+    body, doing, targetContext
+    //if(body = null) then
+    //    translateApplicationFun expr1 expr2 targetContext
+    //else
+    
+                //else 
+                //let getStatementFun = dictionaryFun.[expr.
+                    //new FunCall<_>(expr.ToString(), _vals) :> Statement<_>,targetContext
+                    //failwith "-Partial evaluation is not supported in kernel function."
+
+and translateApplicationFun expr1 expr2 targetContext =
     let rec go expr _vals args = 
         match expr with
         | Patterns.Lambda (v,e) ->
             go e _vals (v::args)
         | Patterns.Application (e1,e2) ->
-            go e1 (e2::_vals) args
+            let exp, tc = (TranslateAsExpr (e2) targetContext)
+            go e1 (exp::_vals) args
         | e ->
-            let d =
-                if _vals.Length = args.Length
-                then List.zip (List.rev args) _vals |> dict
-                else failwith "Partial evaluation is not supported in kernel function."
-            e.Substitute (fun v -> if d.ContainsKey v then Some d.[v] else None)
-    let body = go expr1 [expr2] []
-    Translate body targetContext
+            let listArg = List.rev _vals
+            let funCall = new FunCall<_>(expr.ToString(), _vals) :> Statement<_>
+            funCall, targetContext
+                //failwith "-Partial evaluation is not supported in kernel function."
+    let exp, tc = (TranslateAsExpr (expr2) targetContext)
+    go expr1 [exp] []
 
 and Translate expr (targetContext:TargetContext<_,_>) =
     //printfn "%A" expr
     match expr with
     | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
     | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
-    | Patterns.Application (expr1,expr2) -> translateApplication expr1 expr2 targetContext
+    | Patterns.Application (expr1,expr2) -> 
+        let e, appling, targetContext = translateApplication expr1 expr2 targetContext
+        if(appling) then
+            Translate e targetContext
+        else
+            let r, tContext= translateApplicationFun expr1 expr2 targetContext
+            r :> Node<_>,tContext
     | Patterns.Call (exprOpt,mInfo,args) -> 
         let r,tContext = translateCall exprOpt mInfo args targetContext
         r :> Node<_>,tContext
@@ -306,7 +347,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         let r,tContext = translateIf cond thenExpr elseExpr targetContext
         r :> Node<_>, tContext
     | Patterns.Lambda (var,_expr) -> 
-        //translateLambda var expr targetContext
+       // translateLambda var expr targetContext
         "Lambda is not suported:" + string expr|> failwith
     | Patterns.Let (var, expr, inExpr) ->
         translateLet var expr inExpr targetContext
@@ -361,10 +402,10 @@ and private translateLet var expr inExpr (targetContext:TargetContext<_,_>) =
     targetContext.VarDecls.Add vDecl    
     targetContext.Namer.LetIn var.Name    
     let sb = new ResizeArray<_>(targetContext.VarDecls |> Seq.cast<Statement<_>>)
-    let res,tContext = clearContext targetContext |> Translate inExpr
+    let res,tContext = clearContext targetContext |> Translate inExpr //вот тут мб нужно проверять на call или application
     match res with
-    | :? StatementBlock<Lang> as s -> sb.AddRange s.Statements;
-    | _ -> sb.Add (res :?> Statement<_>)
+    | :? StatementBlock<Lang> as s -> sb.AddRange s.Statements; 
+    | _ -> sb.Add (res :?> Statement<_>)                       
      
    
     targetContext.Namer.LetOut()
