@@ -985,22 +985,50 @@ type Translator() =
         run _1d intInArr        
         check intInArr [|9;1;2;3|]
 
-//    [<Test>]
-//    member this.``Template Let Transformation Test 17``() =
-//        let command = 
-//            <@ fun (range:_1D) (buf:array<int>) -> 
-//                    let f (y:int) =
-//                        if y = 0
-//                        then 
-//                            let z (a:int) = a
-//                            z 9
-//                        else buf.[2]
-//                    buf.[0] <- f 0
-//            @>
-//
-//        let run,check = checkResult command
-//        run _1d intInArr        
-//        check intInArr [|9;1;2;3|]
+    [<Test>]
+    member this.``Template Let Transformation Test 17``() =
+        let command = 
+            <@ fun (range:_1D) (buf:array<int>) -> 
+                    let f y =
+                        let g = buf.[1] + 1
+                        y + g
+                    for i in 0..3 do
+                       buf.[i] <- f i
+            @>
+
+        let run,check = checkResult command
+        run _1d intInArr        
+        check intInArr [|2;3;6;7|]
+
+    [<Test>]
+    member this.``Template Let Transformation Test 18``() =
+        let command = 
+            <@ fun (range:_1D) (buf:array<int>) ->                    
+                    for i in 0..3 do
+                        let f =
+                            let g = buf.[1] + 1
+                            i + g
+                        buf.[i] <- f
+            @>
+
+        let run,check = checkResult command
+        run _1d intInArr        
+        check intInArr [|2;3;6;7|]
+
+    [<Test>]
+    member this.``Template Let Transformation Test 19``() =
+        let command = 
+            <@ fun (range:_1D) (buf:array<int>) ->                    
+                    for i in 0..3 do
+                        let f x =
+                            let g = buf.[1] + x
+                            i + g
+                        buf.[i] <- f 1
+            @>
+
+        let run,check = checkResult command
+        run _1d intInArr        
+        check intInArr [|2;3;6;7|]
 
 let x = 
     let d = ref 0
