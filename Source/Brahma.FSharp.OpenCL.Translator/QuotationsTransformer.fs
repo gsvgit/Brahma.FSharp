@@ -181,11 +181,11 @@ let rec transform expr =
     | _ -> letFunUp expr
 
 let renameTree expr = 
-    let renamer = new Renamer()
+    let renamer = new Namer()
     let rec renameRec expr =
         match expr with
         | Patterns.Lambda (param, body) ->
-            let newName = renamer.addName (param.Name)
+            let newName = renamer.GetUnicName param.Name
             let newVar = new Var (newName, param.Type, param.IsMutable)                        
             let newBody = 
                 body.Substitute (fun v -> if v = param then Some (Expr.Var newVar) else None)
@@ -193,7 +193,7 @@ let renameTree expr =
             Expr.Lambda(newVar,newBody)
 
         | Patterns.Let(var, expr1, expr2) ->
-            let newName = renamer.addName var.Name
+            let newName = renamer.GetUnicName var.Name
             let newVar = new Var(newName, var.Type, var.IsMutable)
             let exprIn = renameRec expr1
             let exprAfter = 
@@ -203,7 +203,7 @@ let renameTree expr =
             newLet
 
         | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
-            let newName = renamer.addName (i.Name)
+            let newName = renamer.GetUnicName (i.Name)
             let newVar = new Var(newName, i.Type, i.IsMutable)
             let newFrom = renameRec from
             let newTo = renameRec _to
@@ -220,7 +220,7 @@ let renameTree expr =
     let rec quontationRenamerLetRec expr =
         match expr with
         | ExprShape.ShapeLambda(lv, lb) ->
-            let newName = renamer.addName (lv.Name)
+            let newName = renamer.GetUnicName (lv.Name)
             let newVar = new Var(newName, lv.Type, lv.IsMutable)
             let newLambda = 
                 Expr.Lambda(newVar, quontationRenamerLetRec (lb.Substitute(fun v -> if v = lv then Some (Expr.Var newVar) else None)))
@@ -236,9 +236,7 @@ let addNeededLamAndAppicatins (expr:Expr) =
     let globalFree = new ResizeArray<_>()
     let globalBindings = new ResizeArray<_>()
     globalFree.AddRange <| expr.GetFreeVars()
-    printfn "GFR: %A" globalFree    
     let rec addNeededLam (expr:Expr) =
-        printfn "FREE:\n %A" <| expr.GetFreeVars()
         match expr with
         | ExprShape.ShapeVar var ->
             if letToExtend.ContainsKey var
@@ -246,13 +244,12 @@ let addNeededLamAndAppicatins (expr:Expr) =
                 let neededVars,newVar = letToExtend.[var]
                 if neededVars |> List.length > 0
                 then
-                    let ready =                         
+                    let ready =
                         neededVars
                         |> List.fold 
                             (fun ready (elem:Var) ->
                                  Expr.Application(ready, Expr.Var elem))
-                            (Expr.Var newVar)
-                    printfn "RRR:%A" ready
+                            (Expr.Var newVar)                    
                     ready
                 else expr 
              else  expr          
@@ -261,17 +258,15 @@ let addNeededLamAndAppicatins (expr:Expr) =
             lets.Add var |> ignore
             let neededVars =
                 expr1.GetFreeVars() |> List.ofSeq
-                |> List.filter (fun v -> not <| letToExtend.ContainsKey v (*&& globalFree.Contains v*) && not <| lets.Contains v)
+                |> List.filter (fun v -> not <| letToExtend.ContainsKey v && not <| lets.Contains v)
             if neededVars.Length > 0 && isLetFun expr
             then
                 let readyLet =
-                    let l = addNeededLam expr1
-                    printfn "LL: %A" l
                     neededVars 
                     |> List.rev
                     |> List.fold
                         (fun readyLet elem -> Expr.Lambda(elem, readyLet))
-                        l                        
+                        (addNeededLam expr1)
                 let newVar = new Var(var.Name, readyLet.Type)
                 letToExtend.Add(var, (neededVars, newVar))
                 Expr.Let(newVar, readyLet, addNeededLam expr2)
@@ -298,8 +293,6 @@ let addNeededLamAndAppicatins (expr:Expr) =
         match expr with
         | ExprShape.ShapeLambda(lv, lb) ->
             globalBindings.Add lv
-            //globalFree.re lv
-            //|> ignore
             Expr.Lambda(lv, run lb)
         | _ ->         
             addNeededLam expr
@@ -319,46 +312,29 @@ let getListLet expr =
         match expr with
         | Patterns.Lambda(lv, lb) -> Expr.Lambda(lv, firstLams lb)
         | _ -> addLetInList expr
-    
-    //let listExpr =
+        
     match expr with
     | Patterns.Lambda(lv, lb) ->
-        listExpr.Add(firstLams (Expr.Lambda(lv, lb)))
-    //    listExpr
-    | _ -> ()//listExpr
+        listExpr.Add(firstLams (Expr.Lambda(lv, lb)))    
+    | _ -> ()
     
     letToExtend.Clear()
     
-
-    listExpr
-  //  |> ResizeArray.rev
+    listExpr  
     |> ResizeArray.map
        (fun elem ->
             match elem with
             | Patterns.Let(v, e, b) ->
-                let l = 
-                    elem
-                    //addNeededLamAndAppicatins elem
-                match l with
-                | Patterns.Let(v, e, b) ->
-                    printfn "tata = %A" l
-                    new Method(v,e)       
-                | _ -> failwithf "Anexpected element 2: %A" l
+                new Method(v,e)
             | Patterns.Lambda(lv, lb) ->
                 let newVar = new Var("brahmaKernel", lv.Type, false)
-                let l = 
-                    elem
-                    //addNeededLamAndAppicatins elem
-                new Method(newVar, l)            
+                new Method(newVar, elem)            
             | x -> failwithf "Anexpected element: %A" x
        )
-    //|> ResizeArray.rev
 
-let quontationTransformer expr translatorOptions =    
-    let letScope = LetScope()
+let quontationTransformer expr translatorOptions =
     let renamedTree = renameTree expr
-    let qTransformed = transform renamedTree
-    printfn "Transformed: \n %A" qTransformed
+    let qTransformed = transform renamedTree    
     let addedLam =
         addNeededLamAndAppicatins qTransformed 
         |> (fun x ->
@@ -366,8 +342,5 @@ let quontationTransformer expr translatorOptions =
                 letToExtend.Clear()
                 addNeededLamAndAppicatins x)
 
-    let listExpr = getListLet addedLam        
-    printfn "----------------------"
-    listExpr |> ResizeArray.iter (fun x -> printfn "%A:  %A" x.FunVar.Name x.FunExpr)
-    printfn "----------------------"
+    let listExpr = getListLet addedLam
     listExpr

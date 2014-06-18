@@ -57,4 +57,6 @@ type Namer() =
 
     member this.GetCLVarName vName =
         let scope = scopes.ToArray() |> Array.tryFind (fun d -> d.ContainsKey vName) 
-        scope |> Option.map( fun s -> s.[vName])
+        scope |> Option.map(fun s -> s.[vName])
+
+    member this.GetUnicName name = newName name
