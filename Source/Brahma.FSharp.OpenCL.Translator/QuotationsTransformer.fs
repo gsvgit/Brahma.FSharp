@@ -19,6 +19,8 @@ open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Translator.Type
 open Microsoft.FSharp.Collections
 
+let mainKernelName = "brahmaKernel"
+
 let apply (expr:Expr) =
     let rec go expr = 
         match expr with    
@@ -83,8 +85,6 @@ let inlineLamdas (expr:Expr) =
             Expr.WhileLoop(go condExpr, go bodyExpr)            
         | other -> other
     go expr
-
-/////////////////////////////////////////
 
 let isLetFun expr =
     match expr with
@@ -232,9 +232,7 @@ let renameTree expr =
 let letToExtend = new System.Collections.Generic.Dictionary<_,_>()
 let lets = new System.Collections.Generic.HashSet<_>()
 let addNeededLamAndAppicatins (expr:Expr) =
-    
     let globalFree = new ResizeArray<_>()
-    let globalBindings = new ResizeArray<_>()
     globalFree.AddRange <| expr.GetFreeVars()
     let rec addNeededLam (expr:Expr) =
         match expr with
@@ -243,15 +241,13 @@ let addNeededLamAndAppicatins (expr:Expr) =
             then
                 let neededVars,newVar = letToExtend.[var]
                 if neededVars |> List.length > 0
-                then
-                    let ready =
-                        neededVars
-                        |> List.fold 
-                            (fun ready (elem:Var) ->
-                                 Expr.Application(ready, Expr.Var elem))
-                            (Expr.Var newVar)                    
-                    ready
-                else expr 
+                then                    
+                    neededVars
+                    |> List.fold 
+                        (fun ready (elem:Var) ->
+                                Expr.Application(ready, Expr.Var elem))
+                        (Expr.Var newVar)
+                else expr
              else  expr          
 
         | Patterns.Let(var, expr1, expr2) ->
@@ -292,7 +288,6 @@ let addNeededLamAndAppicatins (expr:Expr) =
     let rec run expr =
         match expr with
         | ExprShape.ShapeLambda(lv, lb) ->
-            globalBindings.Add lv
             Expr.Lambda(lv, run lb)
         | _ ->         
             addNeededLam expr
@@ -314,11 +309,8 @@ let getListLet expr =
         | _ -> addLetInList expr
         
     match expr with
-    | Patterns.Lambda(lv, lb) ->
-        listExpr.Add(firstLams (Expr.Lambda(lv, lb)))    
+    | Patterns.Lambda(lv, lb) -> listExpr.Add(firstLams (Expr.Lambda(lv, lb)))    
     | _ -> ()
-    
-    letToExtend.Clear()
     
     listExpr  
     |> ResizeArray.map
@@ -327,7 +319,7 @@ let getListLet expr =
             | Patterns.Let(v, e, b) ->
                 new Method(v,e)
             | Patterns.Lambda(lv, lb) ->
-                let newVar = new Var("brahmaKernel", lv.Type, false)
+                let newVar = new Var(mainKernelName, lv.Type, false)
                 new Method(newVar, elem)            
             | x -> failwithf "Anexpected element: %A" x
        )

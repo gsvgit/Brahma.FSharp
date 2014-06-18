@@ -29,7 +29,7 @@ type Translator() =
     let _1d = new _1D(defaultInArrayLength, 1)
     let _2d = new _2D(defaultInArrayLength, 1)
     let deviceType = DeviceType.Default
-    let platformName = "*"
+    let platformName = "nvidia*"
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
@@ -536,7 +536,7 @@ type Translator() =
         run _1d intInArr        
         check intInArr [|17;1;2;3|]
 
-    //[<Test>]
+    [<Test>]
     member this.``createStartStoreKernel``() = 
         let command = 
                 <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
@@ -587,7 +587,7 @@ type Translator() =
         run _1d intInArr
         check intInArr [|1; 11; 2; 3|]
 
-    //[<Test>]
+    [<Test>]
     member this.EigenCFA() = 
         let command = 
                 <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 

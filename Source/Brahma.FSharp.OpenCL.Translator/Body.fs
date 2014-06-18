@@ -322,7 +322,7 @@ and translateApplicationFun expr1 expr2 targetContext =
     go expr1 [exp] []
 
 and Translate expr (targetContext:TargetContext<_,_>) =
-    printfn "%A" expr
+    //printfn "%A" expr
     match expr with
     | Patterns.AddressOf expr -> "AdressOf is not suported:" + string expr|> failwith
     | Patterns.AddressSet expr -> "AdressSet is not suported:" + string expr|> failwith
