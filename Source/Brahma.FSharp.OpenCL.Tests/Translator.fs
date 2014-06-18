@@ -701,5 +701,7 @@ let f _ =
     //(new Translator()).``Nested functions``()
 //    (new Translator()).``Template Let Transformation Test 8``()    
     
-    (new Brahma.FSharp.OpenCL.Full.Translator()).``Template Let Transformation Test 8``()
+    (new Brahma.FSharp.OpenCL.Full.Translator()).
+        //``Binding in WHILE.``()
+        ``Template Let Transformation Test 14``()
     0

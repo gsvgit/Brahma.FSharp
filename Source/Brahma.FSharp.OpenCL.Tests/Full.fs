@@ -536,7 +536,7 @@ type Translator() =
         run _1d intInArr        
         check intInArr [|17;1;2;3|]
 
-    [<Test>]
+    //[<Test>]
     member this.``createStartStoreKernel``() = 
         let command = 
                 <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
@@ -587,7 +587,7 @@ type Translator() =
         run _1d intInArr
         check intInArr [|1; 11; 2; 3|]
 
-    [<Test>]
+    //[<Test>]
     member this.EigenCFA() = 
         let command = 
                 <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
@@ -958,7 +958,8 @@ type Translator() =
             <@ fun (range:_1D) (buf:array<int>) -> 
                     let f (y:int) =
                         let Argi index =  
-                            if(index = 0) then buf.[1]
+                            if index = 0
+                            then buf.[1]
                             else buf.[2]
                         Argi y
                     buf.[0] <- f 0

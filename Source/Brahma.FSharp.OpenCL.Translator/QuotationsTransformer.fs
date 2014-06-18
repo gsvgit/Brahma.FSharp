@@ -222,7 +222,8 @@ let renameTree expr =
         | ExprShape.ShapeLambda(lv, lb) ->
             let newName = renamer.addName (lv.Name)
             let newVar = new Var(newName, lv.Type, lv.IsMutable)
-            let newLambda = Expr.Lambda(newVar, quontationRenamerLetRec (lb.Substitute(fun v -> if v = lv then Some (Expr.Var newVar) else None)))
+            let newLambda = 
+                Expr.Lambda(newVar, quontationRenamerLetRec (lb.Substitute(fun v -> if v = lv then Some (Expr.Var newVar) else None)))
             newLambda            
         | _ ->
             renameRec expr
@@ -260,8 +261,8 @@ let addNeededLamAndAppicatins (expr:Expr) =
             lets.Add var |> ignore
             let neededVars =
                 expr1.GetFreeVars() |> List.ofSeq
-                |> List.filter (fun v -> not <| letToExtend.ContainsKey v && globalFree.Contains v && not <| lets.Contains v)
-            if neededVars.Length > 0
+                |> List.filter (fun v -> not <| letToExtend.ContainsKey v (*&& globalFree.Contains v*) && not <| lets.Contains v)
+            if neededVars.Length > 0 && isLetFun expr
             then
                 let readyLet =
                     let l = addNeededLam expr1
@@ -336,8 +337,8 @@ let getListLet expr =
             match elem with
             | Patterns.Let(v, e, b) ->
                 let l = 
-                    //elem
-                    addNeededLamAndAppicatins elem
+                    elem
+                    //addNeededLamAndAppicatins elem
                 match l with
                 | Patterns.Let(v, e, b) ->
                     printfn "tata = %A" l
@@ -346,8 +347,8 @@ let getListLet expr =
             | Patterns.Lambda(lv, lb) ->
                 let newVar = new Var("brahmaKernel", lv.Type, false)
                 let l = 
-                    //elem
-                    addNeededLamAndAppicatins elem
+                    elem
+                    //addNeededLamAndAppicatins elem
                 new Method(newVar, l)            
             | x -> failwithf "Anexpected element: %A" x
        )
@@ -356,10 +357,14 @@ let getListLet expr =
 let quontationTransformer expr translatorOptions =    
     let letScope = LetScope()
     let renamedTree = renameTree expr
-    //printfn "Renamed: \n %A" renamedTree
     let qTransformed = transform renamedTree
     printfn "Transformed: \n %A" qTransformed
-    let addedLam = addNeededLamAndAppicatins qTransformed
+    let addedLam =
+        addNeededLamAndAppicatins qTransformed 
+        |> (fun x ->
+                lets.Clear()
+                letToExtend.Clear()
+                addNeededLamAndAppicatins x)
 
     let listExpr = getListLet addedLam        
     printfn "----------------------"

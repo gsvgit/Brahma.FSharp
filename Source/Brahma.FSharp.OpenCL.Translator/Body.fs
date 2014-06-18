@@ -163,14 +163,14 @@ and getVar (clVarName:string) (targetContext:TargetContext<_,_>) =
     new Variable<_>(clVarName)
 
 and translateVar (var:Var) (targetContext:TargetContext<_,_>) =    
-    getVar var.Name targetContext
-//    let vName = targetContext.Namer.GetCLVarName var.Name
-//    match vName with
-//    | Some n -> getVar n targetContext
-//    | None ->         
-//            sprintf "Seems, that you try to use variable with name %A, that declared out of quotation." var.Name
-//          + "Please, pass it as quoted function's parametaer."
-//          |> failwith 
+    //getVar var.Name targetContext
+    let vName = targetContext.Namer.GetCLVarName var.Name
+    match vName with
+    | Some n -> getVar n targetContext
+    | None ->         
+            sprintf "Seems, that you try to use variable with name %A, that declared out of quotation." var.Name
+          + "Please, pass it as quoted function's parametaer."
+          |> failwith 
 
 and translateValue (value:obj) (sType:System.Type) targetContext =
     let mutable _type = None
