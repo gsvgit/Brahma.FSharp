@@ -657,7 +657,7 @@ type Translator() =
 let f _ =
     //(new Translator()).``Nested functions``()
     //(new Translator()).``Simple seq of struct.``()
-    (new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
+    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
     (new Brahma.FSharp.OpenCL.Full.Translator()).
         //``Binding in WHILE.``()
         ``Template Let Transformation Test 18``()

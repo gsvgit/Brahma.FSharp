@@ -2,13 +2,8 @@
 
 open NUnit.Framework
 open System.IO
-//open Brahma.Helpers
-//open OpenCL.Net
-//open Brahma.OpenCL
-//open Brahma.FSharp.OpenCL.Core
 open System
 open System.Reflection
-//open Microsoft.FSharp.Quotations
 
 
 open Brahma.Helpers
