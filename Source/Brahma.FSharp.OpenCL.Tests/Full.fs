@@ -452,7 +452,6 @@ type Translator() =
         commandQueue.Dispose()        
         provider.CloseAllBuffers()
 
-
     [<Test>]
     member this.``Buffers initialisation``() = 
         let command = 
@@ -473,8 +472,6 @@ type Translator() =
         Assert.AreEqual(expected, inArray)
         commandQueue.Dispose()        
         provider.CloseAllBuffers()
-
-
 
     [<Test>]
     member this.``While with preheader.``() = 
@@ -580,7 +577,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    b.[0] <- aMax buf.[0] 2
+                    b.[0] <- aMaxR buf.[0] 2
             @>
         let run,check = checkResult command
         let inByteArray = [|1|]
@@ -592,7 +589,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    b.[0] <- aMax buf.[0] 1
+                    b.[0] <- aMaxR buf.[0] 1
             @>
         let run,check = checkResult command
         let inByteArray = [|2|]
@@ -604,7 +601,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    b.[0] <- aMin buf.[0] 2
+                    b.[0] <- aMinR buf.[0] 2
             @>
         let run,check = checkResult command
         let inByteArray = [|1|]
@@ -616,7 +613,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    b.[0] <- aMin buf.[0] 1
+                    b.[0] <- aMinR buf.[0] 1
             @>
         let run,check = checkResult command
         let inByteArray = [|2|]
@@ -672,7 +669,7 @@ type Translator() =
         check inByteArray [|2|]
 
             
-     [<Test>]
+    [<Test>]
     member this.``Template Let Transformation Test 9``() = 
         let command = 
             <@ 
@@ -686,8 +683,7 @@ type Translator() =
 
         let run,check = checkResult command
         run _1d intInArr        
-        check intInArr [|17;1;2;3|]
-        check inByteArray [|new TestStruct(3, 4.0); new TestStruct(1, 2.0)|]
+        check intInArr [|17;1;2;3|]        
 
     [<Test>]
     member this.``createStartStoreKernel``() = 
@@ -875,7 +871,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|3;1;2;3|]
-        check inByteArray [|new TestStruct(5, 2.0)|]
 
     [<Test>]
     member this.``Template Let Transformation Test 1``() =
@@ -891,7 +886,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr
         check intInArr [|7;1;2;3|]
-        check inByteArray [|new TestStruct(4, 2.0); new TestStruct(3, 4.0)|]
 
     [<Test>]
     member this.``Template Let Transformation Test 1.2``() =
@@ -906,7 +900,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|10;1;2;3|]
-        check inByteArray [|2|]
 
     [<Test>]
     member this.``Template Let Transformation Test 2``() =
@@ -924,7 +917,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|3;1;2;3|]
-        check inByteArray [|2|]
 
     [<Test>]
     member this.``Template Let Transformation Test 3``() =
@@ -940,7 +932,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|5;1;2;3|]
-        check inByteArray [|1|]
 
     [<Test>]
     member this.``Template Let Transformation Test 4``() =
@@ -958,7 +949,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|5;1;2;3|]
-        check inByteArray [|1|]
 
     [<Test>]
     member this.``Template Let Transformation Test 5``() =
@@ -974,7 +964,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|8;1;2;3|]
-        check inByteArray [|2|]
 
     [<Test>]
     member this.``Template Let Transformation Test 6``() =
@@ -989,8 +978,7 @@ type Translator() =
 
         let run,check = checkResult command
         run _1d intInArr        
-        check intInArr [|15;1;2;3|]
-        check inByteArray [|2|]
+        check intInArr [|15;1;2;3|]        
 
     [<Test>]
     member this.``Template Let Transformation Test 7``() =
@@ -1006,7 +994,6 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr        
         check intInArr [|-1;1;2;3|]
-        check inByteArray [|0|]
 
     [<Test>]
     member this.``Template Let Transformation Test 8``() =

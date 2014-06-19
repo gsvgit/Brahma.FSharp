@@ -93,21 +93,20 @@ type FSQuotationToOpenCLTranslator() =
     let brahmaDimensionsTypes = ["_1d";"_2d";"_3d"]
     let brahmaDimensionsTypesPrefix = "brahma.opencl."
     let bdts = brahmaDimensionsTypes |> List.map (fun s -> brahmaDimensionsTypesPrefix + s)
-    let buildFullAst (varsList:ResizeArray<_>) (partialAstList:ResizeArray<_>) (contextList:ResizeArray<TargetContext<_,_>>) =
+    let buildFullAst (varsList:ResizeArray<_>) types (partialAstList:ResizeArray<_>) (contextList:ResizeArray<TargetContext<_,_>>) =
         let mutable listCLFun = []
         for i in 0..(varsList.Count-1) do
             let formalArgs = 
                 varsList.[i] |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
                 |> List.map 
                     (fun v -> 
-                        let t = Type.Translate v.Type true dummyTypes None (contextList.[i])
+                        let t = Type.Translate v.Type true None (contextList.[i])
                         new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
             let nameFun:Var = ((newAST.[i]).FunVar)
             let mutable retFunType = new PrimitiveType<_>(Void) :> Type<_>
             if i <> varsList.Count-1 then
-                let typeFun = newAST.[i].FunVar.Type
-                let collectType = new Dictionary<_,Struct<_>>()
-                retFunType <- Type.Translate typeFun  false collectType  None (contextList.[i])
+                let typeFun = newAST.[i].FunVar.Type                
+                retFunType <- Type.Translate typeFun  false  None (contextList.[i])
             let typeRet = retFunType :?> PrimitiveType<_>
             let partAST, isKernel = 
                 if typeRet.Type <> PTypes.Void

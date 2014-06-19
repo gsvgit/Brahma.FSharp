@@ -20,7 +20,7 @@ open System.Reflection
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Quotations
 
-let rec Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collections.Generic.Dictionary<_,_>) size (context:TargetContext<_,_>) : Type<Lang> =
+let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string) =
         let low = str.ToLowerInvariant()
         match low with
@@ -46,7 +46,7 @@ let rec Translate (_type:System.Type) isKernelArg (collectedTypes:System.Collect
             go (_type.GetGenericArguments().[0].Name)
         | f when f.StartsWith "fsharpfunc" ->
 //            go (_type.GetGenericArguments().[1].Name)
-            Translate (_type.GetGenericArguments().[1]) isKernelArg collectedTypes size context
+            Translate (_type.GetGenericArguments().[1]) isKernelArg size context
         | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)
             -> 
                 let decl =
