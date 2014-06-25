@@ -644,7 +644,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    ()//b.[0] <- aDecr buf.[0]
+                    b.[0] <- aDecr buf.[0]
             @>
         let run,check = checkResult command
         let inByteArray = [|1|]
@@ -656,7 +656,7 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<_>)  (b:array<_>) ->
-                    ()//b.[0] <- <!--> buf.[0]
+                    b.[0] <- aIncr buf.[0]
             @>
         let run,check = checkResult command
         let inByteArray = [|1|]

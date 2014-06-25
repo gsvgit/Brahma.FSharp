@@ -21,7 +21,6 @@ open System.Runtime.InteropServices
 open Brahma.FSharp.OpenCL.Extensions
 
 [<Struct>]
-[<StructLayout(LayoutKind.Sequential, Pack = 1)>]
 type TestStruct =
     val x: int 
     val y: float

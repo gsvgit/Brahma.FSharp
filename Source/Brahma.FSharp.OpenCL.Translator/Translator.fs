@@ -151,7 +151,7 @@ type FSQuotationToOpenCLTranslator() =
                     | :? StatementBlock<Lang> as sb -> sb
                     | :? Statement<Lang> as s -> new StatementBlock<_>(new ResizeArray<_>([s]))
                     | _ -> failwithf "Incorrect function body: %A" b
-                    ,context 
+                    ,context
                 vars, body
             | x -> "Incorrect OpenCL quotation: " + string x |> failwith
         
