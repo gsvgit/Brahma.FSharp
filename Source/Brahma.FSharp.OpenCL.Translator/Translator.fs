@@ -23,9 +23,11 @@ open Brahma.FSharp.OpenCL.Translator.Type
 type FSQuotationToOpenCLTranslator() =
    
     let CollectStructs e =
+        let escapeNames = [|"_1D";"_2D";"_3D"|]
         let structs = new System.Collections.Generic.Dictionary<System.Type, _> () 
         let  add (t:System.Type) =
-            if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum) (*|| t.Name.StartsWith "Tuple`"*)) && not (structs.ContainsKey(t))
+            if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum)) && not (structs.ContainsKey t) 
+               && not (Array.exists ((=)t.Name) escapeNames )
             then structs.Add(t, ())
         let rec go (e: Expr) = 
             add e.Type
@@ -141,12 +143,17 @@ type FSQuotationToOpenCLTranslator() =
             | e -> 
                 let body =
                     let b,context =
-                        context.Namer.LetIn()
-                        context.TranslatorOptions.AddRange translatorOptions
-                        vars |> List.iter (fun v -> context.Namer.AddVar v.Name)
+                        let c = new TargetContext<_,_>()
+                        c.UserDefinedTypes.AddRange context.UserDefinedTypes
+                        c.UserDefinedTypesOpenCLDeclaration.Clear()
+                        for x in context.UserDefinedTypesOpenCLDeclaration do c.UserDefinedTypesOpenCLDeclaration.Add (x.Key,x.Value)
+                        c.Flags.enableFP64 <- context.Flags.enableFP64
+                        c.Namer.LetIn()
+                        c.TranslatorOptions.AddRange translatorOptions
+                        vars |> List.iter (fun v -> c.Namer.AddVar v.Name)
                         let newE = e //|> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
 //                        printfn "%A" e
-                        Body.Translate newE context
+                        Body.Translate newE c
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb
                     | :? Statement<Lang> as s -> new StatementBlock<_>(new ResizeArray<_>([s]))

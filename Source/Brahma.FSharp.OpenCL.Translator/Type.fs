@@ -63,9 +63,13 @@ let TransleteStructDecls structs (targetContext:TargetContext<_,_>) =
     let translateStruct (t:System.Type) =
         let name = t.Name
         let fields = [ for f in 
-                            t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) -> 
-                            //t.GetFields(BindingFlags.Public ||| BindingFlags.Instance) -> //
-                        new StructField<_> (f.Name, Translate f. PropertyType true None targetContext)]
+                            t.GetProperties (BindingFlags.Public ||| BindingFlags.Instance) ->
+                        new StructField<_> (f.Name, Translate f.PropertyType true None targetContext)]
+                     @
+                     [ for f in 
+                            t.GetFields(BindingFlags.Public ||| BindingFlags.Instance) ->
+                        new StructField<_> (f.Name, Translate f.FieldType true None targetContext)]
+                                             
         new Struct<_>(name, fields)
 
     let translated = 
