@@ -74,6 +74,18 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "op_lessbang"           -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "amax"           -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_max",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "amin"           -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_min",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
+    | "aincr"           -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_inc",[new Pointer<_>(args.[0])]) :> Statement<_>,tContext 
+    | "adecr"           -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_dec",[new Pointer<_>(args.[0])]) :> Statement<_>,tContext 
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
     | "toint16"                -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
@@ -142,7 +154,12 @@ and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar targetContext
         new Item<_>(hVar,idx) :> Expression<_>, tContext
-    | x -> failwithf "Unsupported property in kernel: %A"  x
+    | x -> 
+        match exprOpt with
+        | Some expr -> 
+            let r,tContext = translateFIeldGet expr propInfo.Name targetContext
+            r :> Expression<_>, tContext
+        | None -> failwithf "Unsupported property in kernel: %A"  x
 
 and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) exprs newVal targetContext =    
     let hostVar = exprOpt |> Option.map(fun e -> TranslateAsExpr e targetContext)
@@ -153,7 +170,12 @@ and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) e
         let item = new Item<_>(hVar,idx)        
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),newVal) :> Statement<_>
         , tContext
-    | x -> failwithf "Unsupported property in kernel: %A"  x  
+    | x ->
+        match exprOpt with
+        | Some e -> 
+            let r,tContext = translateFieldSet e propInfo.Name exprs.[0] targetContext
+            r :> Statement<_>,tContext 
+        | None -> failwithf "Unsupported property in kernel: %A"  x  
 
 and TranslateAsExpr expr (targetContext:TargetContext<_,_>) =
     let (r:Node<_>),tc = Translate expr (targetContext:TargetContext<_,_>)
@@ -321,6 +343,19 @@ and translateApplicationFun expr1 expr2 targetContext =
     let exp, tc = (TranslateAsExpr (expr2) targetContext)
     go expr1 [exp] []
 
+and translateFieldSet host (*fldInfo:System.Reflection.FieldInfo*) name _val context =
+    let hostE, tc = TranslateAsExpr host context
+    let field = name//fldInfo.Name
+    let valE, tc = TranslateAsExpr _val tc
+    let res = new FieldSet<_>(hostE, field, valE)
+    res, tc
+
+and translateFIeldGet host (*fldInfo:System.Reflection.FieldInfo*)name context =
+    let hostE, tc = TranslateAsExpr host context
+    let field = name//fldInfo.Name
+    let res = new FieldGet<_>(hostE,field)
+    res, tc
+
 and Translate expr (targetContext:TargetContext<_,_>) =
     //printfn "%A" expr
     match expr with
@@ -338,8 +373,18 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         r :> Node<_>,tContext
     | Patterns.Coerce(expr,sType) -> "Coerce is not suported:" + string expr|> failwith
     | Patterns.DefaultValue sType -> "DefaulValue is not suported:" + string expr|> failwith
-    | Patterns.FieldGet (exprOpt,fldInfo) -> "FieldGet is not suported:" + string expr|> failwith
-    | Patterns.FieldSet (exprOpt,fldInfo,expr) -> "FieldSet is not suported:" + string expr|> failwith
+    | Patterns.FieldGet (exprOpt,fldInfo) -> 
+        match exprOpt with
+        | Some expr -> 
+            let r,tContext = translateFIeldGet expr fldInfo.Name targetContext
+            r :> Node<_>,tContext
+        | None -> failwithf "FieldGet for empty host is not suported. Field: " fldInfo.Name
+    | Patterns.FieldSet (exprOpt,fldInfo,expr) ->
+        match exprOpt with
+        | Some e -> 
+            let r,tContext = translateFieldSet e fldInfo.Name expr targetContext
+            r :> Node<_>,tContext
+        | None -> failwithf "Fileld set with empty host is not supported. Field: %A" fldInfo
     | Patterns.ForIntegerRangeLoop (i, from, _to, _do) ->
         let r,tContext = translateForIntegerRangeLoop i from _to _do targetContext
         r :> Node<_>, tContext
@@ -355,7 +400,16 @@ and Translate expr (targetContext:TargetContext<_,_>) =
     | Patterns.LetRecursive (bindings,expr) -> "LetRecursive is not suported:" + string expr|> failwith
     | Patterns.NewArray(sType,exprs) -> "NewArray is not suported:" + string expr|> failwith
     | Patterns.NewDelegate(sType,vars,expr) -> "NewDelegate is not suported:" + string expr|> failwith
-    | Patterns.NewObject(constrInfo,exprs) -> "NewObject is not suported:" + string expr|> failwith
+    | Patterns.NewObject(constrInfo,exprs) ->
+        let p = constrInfo.GetParameters()
+        let p2 = constrInfo.GetMethodBody()
+        if targetContext.UserDefinedTypes.Contains(constrInfo.DeclaringType)
+        then
+            let structInfo =  targetContext.UserDefinedTypesOpenCLDeclaration.[constrInfo.DeclaringType.Name.ToLowerInvariant()]
+            let cArgs = exprs |> List.map (fun x -> TranslateAsExpr x targetContext)
+            let res = new NewStruct<_>(structInfo,cArgs |> List.unzip |> fst)
+            res :> Node<_>,targetContext
+        else "NewObject is not suported:" + string expr|> failwith
     | Patterns.NewRecord(sType,exprs) -> "NewRecord is not suported:" + string expr|> failwith
     | Patterns.NewTuple(exprs) -> "NewTuple is not suported:" + string expr|> failwith
     | Patterns.NewUnionCase(unionCaseinfo,exprs) -> "NewUnionCase is not suported:" + string expr|> failwith
