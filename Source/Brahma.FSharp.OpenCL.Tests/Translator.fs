@@ -32,7 +32,7 @@ type Translator() =
     let basePath = "../../../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
 
     let deviceType = DeviceType.Gpu
-    let platformName = "*"
+    let platformName = "NVIDIA*"
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
@@ -659,5 +659,6 @@ let f _ =
     //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
     (new Brahma.FSharp.OpenCL.Full.Translator()).
         //``Binding in WHILE.``()
-        ``Template Let Transformation Test 18``()
+        //``Template Let Transformation Test 18``()
+        ``Atomic incr.``()
     0

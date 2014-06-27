@@ -34,11 +34,21 @@ let (<!>) (a:'a) (b:'a) =
 //let (<&&>) (a:int) b = 
 //    kFail ()
 //    a &&& b
-let aIncr a = 
+let aIncrR a = 
     kFail ()
     a + 1
 
+let aIncr a = 
+    kFail ()
+    a + 1
+    |> ignore
+
 let aDecr a = 
+    kFail ()
+    a - 1
+    |> ignore
+
+let aDecrR a = 
     kFail ()
     a - 1
 

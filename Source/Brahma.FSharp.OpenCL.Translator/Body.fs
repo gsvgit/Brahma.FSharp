@@ -74,18 +74,22 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "op_lessbang"           -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_xchg",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
-    | "amax"           -> 
+    | "amax" | "amaxr"        -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_max",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
-    | "amin"           -> 
+    | "amin" | "aminr"        -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_min",[new Pointer<_>(args.[0]);args.[1]]) :> Statement<_>,tContext 
-    | "aincr"           -> 
+    | "aincr" | "aincrr"      -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_inc",[new Pointer<_>(args.[0])]) :> Statement<_>,tContext 
-    | "adecr"           -> 
+    | "adecr" | "adecrr"      -> 
         tContext.Flags.enableAtomic <- true
         new FunCall<_>("atom_dec",[new Pointer<_>(args.[0])]) :> Statement<_>,tContext 
+    | "acompexch" | "acompexchr"      -> 
+        tContext.Flags.enableAtomic <- true
+        new FunCall<_>("atom_cmpxchg",[new Pointer<_>(args.[0]);args.[1];args.[2]]) :> Statement<_>,tContext 
+    
     | "todouble"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Float)):> Statement<_>,tContext
     | "toint"                  -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Int)):> Statement<_>,tContext
     | "toint16"                -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.Short)):> Statement<_>,tContext
@@ -157,7 +161,7 @@ and private transletaPropGet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     | x -> 
         match exprOpt with
         | Some expr -> 
-            let r,tContext = translateFIeldGet expr propInfo.Name targetContext
+            let r,tContext = translateFieldGet expr propInfo.Name targetContext
             r :> Expression<_>, tContext
         | None -> failwithf "Unsupported property in kernel: %A"  x
 
@@ -167,7 +171,7 @@ and private transletaPropSet exprOpt (propInfo:System.Reflection.PropertyInfo) e
     match propInfo.Name.ToLowerInvariant() with
     | "item" -> 
         let idx,tContext,hVar = itemHelper exprs hostVar tContext
-        let item = new Item<_>(hVar,idx)        
+        let item = new Item<_>(hVar,idx)
         new Assignment<_>(new Property<_>(PropertyType.Item(item)),newVal) :> Statement<_>
         , tContext
     | x ->
@@ -350,7 +354,7 @@ and translateFieldSet host (*fldInfo:System.Reflection.FieldInfo*) name _val con
     let res = new FieldSet<_>(hostE, field, valE)
     res, tc
 
-and translateFIeldGet host (*fldInfo:System.Reflection.FieldInfo*)name context =
+and translateFieldGet host (*fldInfo:System.Reflection.FieldInfo*)name context =
     let hostE, tc = TranslateAsExpr host context
     let field = name//fldInfo.Name
     let res = new FieldGet<_>(hostE,field)
@@ -376,7 +380,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
     | Patterns.FieldGet (exprOpt,fldInfo) -> 
         match exprOpt with
         | Some expr -> 
-            let r,tContext = translateFIeldGet expr fldInfo.Name targetContext
+            let r,tContext = translateFieldGet expr fldInfo.Name targetContext
             r :> Node<_>,tContext
         | None -> failwithf "FieldGet for empty host is not suported. Field: " fldInfo.Name
     | Patterns.FieldSet (exprOpt,fldInfo,expr) ->

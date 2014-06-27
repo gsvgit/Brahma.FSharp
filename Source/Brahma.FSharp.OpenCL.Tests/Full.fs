@@ -29,7 +29,7 @@ type Translator() =
     let _1d = new _1D(defaultInArrayLength, 1)
     let _2d = new _2D(defaultInArrayLength, 1)
     let deviceType = DeviceType.Default
-    let platformName = "*"
+    let platformName = "NVIDIA*"
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
@@ -531,7 +531,7 @@ type Translator() =
         run _1d inByteArray
         check inByteArray [|new TestStruct(3, 4.0); new TestStruct(1, 2.0)|]
 
-    [<Test>]
+    //[<Test>]
     member this.``Simple seq of struct changes.``() = 
         let command = 
             <@ 
@@ -640,30 +640,90 @@ type Translator() =
         check inByteArray [|2|]
 
     [<Test>]
+    member this.``Atomic decr return.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    buf.[1] <- aDecrR buf.[0]
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|0;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|-4;-3;0;0|]
+
+    [<Test>]
     member this.``Atomic decr.``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<_>) (b:array<_>) ->
-                    b.[0] <- aDecr buf.[0]
+                fun (range:_1D) (buf:array<_>) ->
+                    aDecr buf.[0]
             @>
         let run,check = checkResult command
-        let inByteArray = [|1|]
-        run _1d inByteArray [|0|]
-        check inByteArray [|0|]
+        let inByteArray = [|0;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|-4;0;0;0|]
+
+    [<Test>]
+    member this.``Atomic incr return.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    buf.[1] <- aIncrR buf.[0]
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1;2;0;0|]
+        run _1d inByteArray
+        check inByteArray [|5;4;0;0|]
 
     [<Test>]
     member this.``Atomic incr.``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<_>)  (b:array<_>) ->
-                    b.[0] <- aIncr buf.[0]
+                fun (range:_1D) (buf:array<_>) ->
+                    aIncr buf.[0]
             @>
         let run,check = checkResult command
-        let inByteArray = [|1|]
-        run _1d inByteArray [|0|]
-        check inByteArray [|2|]
+        let inByteArray = [|0;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|4;0;0;0|]
 
-            
+    [<Test>]
+    member this.``Atomic compare exchange return.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    buf.[1] <- aCompExchR buf.[0] 1 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|2;2;0;0|]
+
+    [<Test>]
+    member this.``Atomic compare exchange.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    aCompExch buf.[0] 1 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|1;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|2;0;0;0|]
+
+    [<Test>]
+    member this.``Atomic compare exchange 2.``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<_>) ->
+                    aCompExch buf.[0] 1 2
+            @>
+        let run,check = checkResult command
+        let inByteArray = [|3;0;0;0|]
+        run _1d inByteArray
+        check inByteArray [|3;0;0;0|]
+
+
     [<Test>]
     member this.``Template Let Transformation Test 9``() = 
         let command = 
