@@ -151,8 +151,7 @@ type FSQuotationToOpenCLTranslator() =
                         c.Namer.LetIn()
                         c.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> c.Namer.AddVar v.Name)
-                        let newE = e //|> QuotationsTransformer.inlineLamdas |> QuotationsTransformer.apply
-//                        printfn "%A" e
+                        //printfn "%A" e
                         Body.Translate newE c
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb
