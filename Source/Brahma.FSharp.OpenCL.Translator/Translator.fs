@@ -152,7 +152,7 @@ type FSQuotationToOpenCLTranslator() =
                         c.TranslatorOptions.AddRange translatorOptions
                         vars |> List.iter (fun v -> c.Namer.AddVar v.Name)
                         //printfn "%A" e
-                        Body.Translate newE c
+                        Body.Translate e c
                     match b  with
                     | :? StatementBlock<Lang> as sb -> sb
                     | :? Statement<Lang> as s -> new StatementBlock<_>(new ResizeArray<_>([s]))

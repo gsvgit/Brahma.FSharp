@@ -176,7 +176,7 @@ namespace Brahma.OpenCL
             var platformNameRegex = new Regex(WildcardToRegex(platformName), RegexOptions.IgnoreCase);
             Platform? currentPlatform = null;
             ErrorCode error;
-            foreach (Platform platform in Cl.GetPlatformIDs(out error))
+            foreach (var platform in Cl.GetPlatformIDs(out error))
                 if (platformNameRegex.Match(Cl.GetPlatformInfo(platform, PlatformInfo.Name, out error).ToString()).Success)
                 {
                     currentPlatform = platform;
