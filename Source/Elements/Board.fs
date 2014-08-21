@@ -2,14 +2,37 @@
 
 open NA.Elements
 open Microsoft.FSharp.Collections
+open System.Collections.Generic
 
 [<Class>]
-type Board<'a0,'a1,'a2,'a3,'a4,'a5,'a6,'a7,'a8,'a9>(edgesList:List<IBlock*IConnector*IBlock>) =
+type Board<'a0,'a1,'a2,'a3,'a4,'a5,'a6,'a7,'a8,'a9>(edgesList:list<IBlock*IConnector*IBlock>) =
     let blocks = new ResizeArray<IBlock>()
-    let run (stop) =        
+    
+    let toDot path =
+        let d = new Dictionary<_,_>()
+        let c = ref blocks.Count
+        blocks |> ResizeArray.iteri (fun i b -> d.Add(b,i))
+        let toplevel = [| for (b1,c,b2) in edgesList -> sprintf "%i -> %i[label=%i]" d.[b1] d.[b2] (c :?> Connector<int,int>).OutBuf |]
+        let blocksG =
+            [| for b in blocks do
+                for opb in (b :?> Block<int>).Blocks do
+                    let i = incr c; !c
+                    yield sprintf "%i [shape=rectangle; label=\"%s\"]" i (opb.ToStr 4)
+                    yield sprintf "%i -> %i" d.[b] i |]
+        let s =
+            "digraph g {\n"
+            + String.concat "\n" toplevel
+            + "\n"
+            + String.concat "\n" blocksG
+            + "\n}"
+        System.IO.File.WriteAllText(path,s)
+    
+    let run (stop) =
+        let s = ref 0
         while stop() do
             for b in blocks do
-                b.Step()        
+                b.Step()
+            toDot (sprintf "dot/%i.dot" (incr s; !s))                
 
     let go (c:Connector<'b0,'b1>) (b1:IBlock) (b2:IBlock) =
         if blocks.Contains b1 |> not then blocks.Add b1
@@ -18,8 +41,8 @@ type Board<'a0,'a1,'a2,'a3,'a4,'a5,'a6,'a7,'a8,'a9>(edgesList:List<IBlock*IConne
         | :? Block<'b0> as b1 ->
             match b2 with
             | :? Block<'b1> as b2 ->
-                b2.InConnectors <- [|fun _ -> c.OutBuf|]            
-                b1.OutConnectors <- [|c.Move|]
+                b2.InConnectors.Add(fun _ -> c.OutBuf)
+                b1.OutConnectors.Add(c.Move)
             | _ -> failwith "Incorrect type of block 2"
         | _ -> failwith "Incorrect type of block 1"
     do
@@ -129,4 +152,5 @@ type Board<'a0,'a1,'a2,'a3,'a4,'a5,'a6,'a7,'a8,'a9>(edgesList:List<IBlock*IConne
             
     member this.Blocks = blocks
     member this.Run stop = run stop
+    member this.ToDot path = toDot path
 

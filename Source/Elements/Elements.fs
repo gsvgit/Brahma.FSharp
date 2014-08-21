@@ -2,7 +2,7 @@
 
 open NA.IL
 
-let opBlockSuze = 256
+let opBlockSuze = 8
 
 type IConnector = interface end
 type IBlock = 
@@ -19,6 +19,10 @@ type OperationBlock<'a>(op: 'a -> 'a -> 'a) =
     member this.Move i v = data.[i] <- op data.[i] v
     member this.Set i v = data.[i] <- v
     member this.Get i = data.[i]
+    member this.ToStr lineLength = 
+        data 
+        |> Array.mapi(fun i d -> (sprintf "%9A; " d) + (if (i + 1) % lineLength = 0 then "\\n" else ""))
+        |> String.concat ""
 
 type Block<'bType>(ops:array<_>) =    
     let blocks = Array.init ops.Length (fun i -> new OperationBlock<'bType>(ops.[i]))
@@ -66,6 +70,6 @@ type Block<'bType>(ops:array<_>) =
     
     member this.GetVal(i, j) = blocks.[i].Get j
     member this.Blocks = blocks    
-    member val InConnectors:array<unit->'bType> = [||] with get,set
-    member val OutConnectors:array<'bType->unit> = [||] with get,set
+    member val InConnectors:ResizeArray<unit->'bType> = new ResizeArray<_>() with get,set
+    member val OutConnectors:ResizeArray<'bType->unit> = new ResizeArray<_>() with get,set
     
