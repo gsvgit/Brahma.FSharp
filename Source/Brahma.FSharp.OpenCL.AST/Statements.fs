@@ -34,23 +34,21 @@ type Assignment<'lang> (vName:Property<'lang>,value:Expression<'lang>)=
 
 type StatementBlock<'lang> (statements:ResizeArray<Statement<'lang>>)=
     inherit Statement<'lang>()
-    override this.Children = []
+    override this.Children = statements |> Seq.cast<Node<_>> |> List.ofSeq
     member this.Statements = statements    
     member this.Remove index =
         statements.RemoveAt index
     member this.Append statement =
         statements.Add statement
-    //реализовать 2 метода remove конкретный
-    //append только в конец
    
 type Return<'lang> (expression:Expression<'lang>) =
     inherit Statement<'lang>()
-    override this.Children = []
+    override this.Children = [expression]
     member this.Expression = expression
 
 type IfThenElse<'lang> (cond:Expression<'lang>, thenBranch:StatementBlock<'lang>, elseBranch:Option<StatementBlock<'lang>>)=
     inherit Statement<'lang>()
-    override this.Children = []
+    override this.Children = (cond:>Node<_>)::(thenBranch:>Node<_>)::(elseBranch|>Option.toList |> Seq.cast<Node<_>>|> List.ofSeq)
     member this.Condition = cond
     member this.Then = thenBranch
     member this.Else = elseBranch
