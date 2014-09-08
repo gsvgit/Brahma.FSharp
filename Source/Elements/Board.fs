@@ -25,7 +25,8 @@ type Board<'a0,'a1,'a2,'a3,'a4,'a5,'a6,'a7,'a8,'a9>(edgesList:list<IBlock*IConne
             + "\n"
             + String.concat "\n" blocksG
             + "\n}"
-        System.IO.File.WriteAllText(path,s)
+        ()
+        //System.IO.File.WriteAllText(path,s)
     
     let run (stop) =
         let s = ref 0

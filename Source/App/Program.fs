@@ -1,4 +1,6 @@
-﻿open NA.Elements
+﻿module main
+
+open NA.Elements
 open NA.IL
 open NA.Board
 open System.Collections.Generic
@@ -38,6 +40,9 @@ let run (commands:array<seq<_>>) =
     board.Run (fun () -> queues |> Array.forall (fun q -> q.Count > 0))    
     board.ToDot("dot/f.dot")
     (board.Blocks.[0] :?> Block<int>).GetVal(2,0)
+
+let getVal i j =
+    (board.Blocks.[0] :?> Block<int>).GetVal(j,i)
 
 let commands =
     [|
@@ -88,9 +93,9 @@ let commands =
         |] |> Seq.cast<IInstruction>
     |]
 
-do 
-    run commands
-    |> printfn "%A"
+//do 
+//    run commands
+//    |> printfn "%A"
 
 
 //type T = interface end
