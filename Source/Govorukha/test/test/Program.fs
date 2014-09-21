@@ -1,4 +1,6 @@
-﻿open arr
+﻿module UnitTest
+
+open Example.Asm
 open TTA.ASM
 open NUnit.Framework
 
@@ -8,9 +10,7 @@ type Test() =
      
      [<Test>]
      member this.``res``() =
-        Assert.AreEqual(1, func 10 2 3 4 1 20 7 ) 
+        Assert.AreEqual(1, example) 
 
 
-     //[<Test>]
-     //member this.``res2``() =
-      //  Assert.AreEqual(-14, func 1 3 4 -3 1 45 10 )
+    
