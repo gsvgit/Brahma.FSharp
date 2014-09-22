@@ -14,3 +14,5 @@ Brahman/OpenCL/packages/*
 Source/ArrayFunctions/packages/*
 Source/Fractals/FractalsGPU/packages/*
 !Source/Fractals/FractalsGPU/packages/*.config
+Source/Bulgakov/Example/packages/*
+!Source/Bulgakov/Example/packages/*.config
