@@ -1,22 +1,16 @@
-﻿open Cell
+﻿open Processor
+open NUnit.Framework
 
-let matrix : Cell[,] = Array2D.create 4 4 (Cell('*'))
+[<TestFixture>]
+type ProcessorTests() =
+    
+    let config = new GridConfig(2, 3, [|((fun x y -> x * y), 2); ((fun x y -> x + y), 3)|])
+    let processor = new Processor(config)
 
-matrix.[0, 3].Value |> printfn "%A"
-System.Console.ReadKey() |> ignore
+    [<Test>]
+    member this.``CellConstuctedByFunction``() = 
+        Assert.AreEqual(0, processor.ValueInCell 0 1)
 
-matrix.[0, 1].Value <- 5
-matrix.[0, 1].ExecuteOp 5 
-matrix.[0, 1].Value |> printfn "%A"
-System.Console.ReadKey() |> ignore
-
-let cell = Cell()
-cell.ExecuteOp 5
-cell.Value |> printfn "%A"
-System.Console.ReadKey() |> ignore
-
-cell.ExecuteOp 6
-cell.Value |> printfn "%A"
-System.Console.ReadKey() |> ignore
-
-let badCell = Cell('k')
+    [<Test>]
+    member this.``EmptyCell``() =
+        Assert.AreEqual(0, processor.ValueInCell 1 2)
