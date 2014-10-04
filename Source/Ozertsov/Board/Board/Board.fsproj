@@ -47,10 +47,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.fs" />
     <None Include="App.config" />
     <Compile Include="Cell.fs" />
-    <Compile Include="Operation.fs" />
+    <Compile Include="Board.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
