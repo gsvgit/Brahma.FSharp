@@ -42,7 +42,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cell.fs" />
     <Compile Include="Processor.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
