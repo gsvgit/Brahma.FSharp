@@ -81,12 +81,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FracSharpGPU\FracSharpGPU.fsproj">
-      <Project>{9b8efec6-6e1d-4ba7-bf86-1547b927a7fc}</Project>
-      <Name>FracSharpGPU</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\%24this.Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
