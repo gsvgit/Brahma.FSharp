@@ -170,7 +170,7 @@ type FSQuotationToOpenCLTranslator() =
             listPartsASTVars.Add(List.rev vars)
             listPartsASTPartialAst.Add((partialAst :> Statement<_>))
             listPartsASTContext.Add(context)
-            Body.dictionaryFun.Add(partAST.FunVar.Name, partialAst)
+            //Body.dictionaryFun.Add(partAST.FunVar.Name, partialAst)
 
         let AST = buildFullAst (listPartsASTVars) translatedStructs (listPartsASTPartialAst) listPartsASTContext
         AST, newAST        

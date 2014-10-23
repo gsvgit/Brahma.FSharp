@@ -311,6 +311,7 @@ let addNeededLamAndAppicatins (expr:Expr) =
     run expr
 
 let getListLet expr =
+    let namer = new Namer()
     let listExpr = new ResizeArray<_>()
     let rec addLetInList expr =
         match expr with
@@ -326,7 +327,7 @@ let getListLet expr =
         | _ -> addLetInList expr
         
     match expr with
-    | Patterns.Lambda(lv, lb) -> listExpr.Add(firstLams (Expr.Lambda(lv, lb)))    
+    | Patterns.Lambda(lv, lb) -> listExpr.Add(firstLams (Expr.Lambda(lv, lb)))
     | _ -> ()
     
     listExpr  

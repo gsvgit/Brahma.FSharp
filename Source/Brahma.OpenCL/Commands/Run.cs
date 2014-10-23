@@ -60,7 +60,7 @@ namespace Brahma.OpenCL.Commands
         {
 
             var x = arg.GetType();
-            Console.WriteLine(x);
+            //Console.WriteLine(x);
             var isIMem = arg is IMem;
             if (isIMem)
             {

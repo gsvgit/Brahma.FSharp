@@ -73,7 +73,7 @@ namespace Brahma.OpenCL
             }
         }
 
-        public CompileOptions DefaultOptions_p
+        public static CompileOptions DefaultOptions_p
         {
             get
             {

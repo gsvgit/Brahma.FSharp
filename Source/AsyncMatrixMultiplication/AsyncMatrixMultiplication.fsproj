@@ -97,38 +97,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Brahma">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.FSharp.OpenCL.AST">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.AST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.FSharp.OpenCL.Core">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.FSharp.OpenCL.Extensions">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Extensions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.FSharp.OpenCL.Printer">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Printer.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.FSharp.OpenCL.Translator">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.FSharp.OpenCL.Translator.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.Helpers">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.Helpers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Brahma.OpenCL">
-      <HintPath>..\packages\Brahma.FSharp.0.2.0.0\lib\net40\Brahma.OpenCL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -148,6 +116,53 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
+      <Name>Brahma.FSharp.OpenCL.AST</Name>
+      <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Core</Name>
+      <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Extensions</Name>
+      <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Printer</Name>
+      <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Tests\Brahma.FSharp.OpenCL.Tests.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Tests</Name>
+      <Project>{73882d44-0194-400a-bce4-f29d66417de0}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
+      <Name>Brahma.FSharp.OpenCL.Translator</Name>
+      <Project>{bbb08eb4-a2ae-430b-a29c-3b3446f69a6d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma.OpenCL\Brahma.OpenCL.csproj">
+      <Name>Brahma.OpenCL</Name>
+      <Project>{1f52ecb5-6cd2-4d76-a4b7-a23131c9d195}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Brahma\Brahma.csproj">
+      <Name>Brahma</Name>
+      <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+      <Name>Brahma.Helpers</Name>
+      <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />

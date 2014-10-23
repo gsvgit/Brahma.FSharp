@@ -97,8 +97,8 @@ let Main () =
 
     let platformName = "*"
 
-    let rows = 600
-    let columns = 600    
+    let rows = 10
+    let columns = 10    
     let iterations = 10
     let deviceType = DeviceType.Default
 

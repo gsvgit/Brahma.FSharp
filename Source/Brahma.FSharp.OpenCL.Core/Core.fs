@@ -56,8 +56,8 @@ type ComputeProvider with
 //        kernel , newLambda 
         kernel            
                     
-    member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?translatorOptions, ?_outCode:string ref) =
-        let options = defaultArg _options this.DefaultOptions_p
+    member this.Compile (query: Expr<'TRange ->'a> , ?_options:CompileOptions, ?translatorOptions, ?_outCode:string ref, ?kernelName:string) =
+        let options = defaultArg _options ComputeProvider.DefaultOptions_p
         let tOptions = defaultArg translatorOptions []
         this.SetCompileOptions options
 //        let kernel, newQuery = this.CompileQuery<Kernel<'TRange>>(query, tOptions)
