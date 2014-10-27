@@ -1,12 +1,17 @@
 ﻿module Cell
+type Cell<'a>(operation: 'a -> 'a -> 'a) =                      
+    let mutable value = Unchecked.defaultof<'a>
 
-type Cell(operation: int -> int -> int) =                        
-    let value = ref 0
-    let operation = operation
+    let mutable operation = operation
+    let mutable value = Unchecked.defaultof<'a>
       
     member this.Value 
-        with get() = !value
-        and set(num) = value := num  
-          
+        with get() = value
+        and set(argument) = value <- argument
+        
     member this.RunOp(operand) = 
-        value := operation !value operand
+        value <- operation value operand
+
+
+        
+        

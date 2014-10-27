@@ -1,13 +1,21 @@
 ﻿module Processor
 
 open Cell
+open System.Collections.Generic
 
-type Matrix(rows:int, cols:int) =
+type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
     do
-        if rows < 0 || cols < 0
-        then
-            raise (System.ArgumentException("One of the parameters is less of zero"))
-    let matrix : Cell[,] = Array2D.zeroCreate(rows)(cols)
+        if functions.Length < 1
+        then raise (System.ArgumentException("null matrix"))
+        
+    let matrix = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
 
-    member this.ValueInCell x y =
-        matrix.[x, y].Value
+    let addCellOnUserRequest key col = matrix.[col].Add (key, Cell(functions.[col]))
+
+    member this.ValueInCell row col =
+        let currentCol = matrix.[col]
+        if currentCol.ContainsKey row
+        then currentCol.[row].Value
+        else
+            addCellOnUserRequest row col
+            currentCol.[row].Value
