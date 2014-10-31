@@ -22,10 +22,12 @@ open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 open System
+open System.Threading
 
 let random = new System.Random()
         
 let MakeMatrix rows cols =
+    Thread.Sleep(1000)
     Array.init (rows * cols) (fun i -> float32 (random.NextDouble()))
 
 let GetOutputMatrixDimensions aRows aCols bRows bCols =
@@ -43,12 +45,12 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
             c.[i * cCols + j] <- c.[i * cCols + j] + buf
 
 let Main () =
-    let startTime = DateTime.Now.ToString()
-
+    let start = System.DateTime.Now
+    
     let platformName = "*"
 
-    let rows = 1000
-    let columns = 1000
+    let rows = 200
+    let columns = 200
     let localWorkSize = 10
     let iterations = 100
     let deviceType = DeviceType.Default
@@ -95,11 +97,10 @@ let Main () =
     for i in 0 .. iterations - 1 do
         aValues := (MakeMatrix rows columns)
         bValues := (MakeMatrix rows columns)
-        Timer<string>.Global.Start()
         kernelPrepare d columns !aValues !bValues cParallel
         let _ = commandQueue.Add(kernelRun()).Finish()            
-        Timer<string>.Global.Lap("OpenCL")
         let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
+        //provider.CloseAllBuffers()
         ()
     
     printfn "done."
@@ -114,15 +115,13 @@ let Main () =
             
     printfn "done."
 
-    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, C#: %A"
-    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"    
-
     commandQueue.Dispose()
     provider.Dispose()
     provider.CloseAllBuffers()
     
-    Console.WriteLine(sprintf "Start at %s. Work completed at %s time" (startTime) (DateTime.Now.ToString()))
-    Console.ReadLine()
+    let time = System.DateTime.Now - start
+    time |> printfn "time: %A"
+    Console.ReadLine() |> ignore
 
 
 do Main()

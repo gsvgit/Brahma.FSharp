@@ -44,24 +44,6 @@ let initArrayGpu (path:string) =
     let gpuArray = Array.init scaleCall (fun index -> arrayReading.[index])
     gpuArray
 
-//Static matrix
-//let Fun  = initArrayGpu pathToFun
-//let Arg1 = initArrayGpu pathToArg1
-//let Arg2 = initArrayGpu pathToArg2
-
-//initialization Store on CPU
-//let initStore = Array2D.init scaleExp scaleM (fun i j -> if i < scaleVar 
-//                                                            then (if j < 1 
-//                                                                  then 1.0 
-//                                                                  else -1.0) 
-//                                                            else (if j < 1 
-//                                                                  then 2.0 
-//                                                                  else (if j = 1 
-//                                                                        then ((float i) - (float scaleVar) + 1.0) 
-//                                                                        else -1.0)))
-//copy Store on GPGPU
-//let Store = initStore
-
 let dirs path = Directory.GetDirectories(path)
 
 let isFileContains dir pattern = Directory.GetFiles(dir, pattern).Length > 0
@@ -78,8 +60,3 @@ let writeResTestInFile pathFolder nameFile time numTerm  numE =
                                                                 use wr = StreamWriter(fullPath, true)
                                                                 wr.WriteLine((numTerm.ToString()) + " " + (time/1000.0).ToString().Replace(",","."))// + " " + numE.ToString())
                                                                 wr.Close
-
-                            
-
-
-

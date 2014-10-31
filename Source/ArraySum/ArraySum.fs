@@ -22,7 +22,7 @@ let Main gpuArr =
     let platformName = "*"
     
     let localWorkSize = 20   
-    let deviceType = DeviceType.Gpu
+    let deviceType = DeviceType.Default
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
@@ -63,6 +63,6 @@ let Main gpuArr =
     provider.Dispose()
     provider.CloseAllBuffers()
 
-    //ignore (System.Console.Read())
+    ignore (System.Console.Read())
 
 do Main gpuArr

@@ -18,8 +18,8 @@ module MatrixMultiply =
         then failwith "Cannot multiply these two matrices"
         aRows,bCols
     
-    let rows = 2000
-    let columns = 2000
+    let rows = 200
+    let columns = 200
 
     let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =    
         let cRows, cCols = GetOutputMatrixDimensions aRows aCols bRows bCols

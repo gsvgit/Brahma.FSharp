@@ -228,7 +228,7 @@ module AgentsBase =
                                 let results = collectResults this.commandQueue parameters additionalParams this.provider
                                 
                                 resultReceiver.Post(GpuTaskDone(results, this))
-                            
+                                this.provider.CloseAllBuffers()
                             | _ -> raise (NotSupportedMessageException(sprintf "NotSupportedMessageException from %s" agentId))
                     }
                 )
@@ -353,6 +353,8 @@ module AgentsBase =
 
             manager = MailboxProcessor.Start(fun inbox ->
                 async {
+                    let start = System.DateTime.Now
+
                     let hasWork = ref true
                     
                     let startTime = TimeHelper.GetCurrentDateTime()
@@ -383,8 +385,9 @@ module AgentsBase =
         
                     let startRead (reader: AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,'ReadingParameter, 'Data,'ManagerParams, 'OverallResult>) = 
                         async {
+                         let curReader = reader
                          freeDataReaders.Remove reader |> ignore
-                         return reader.Post(MessageDataReader<'ReadingParameter, 'Data>.DataNeeded(readingParam)) }
+                         return curReader.Post(MessageDataReader<'ReadingParameter, 'Data>.DataNeeded(readingParam)) }
                     
                     let hasFreeWorkers = not (freeGpuWorkers.Count.Equals(0) && freeCpuWorkers.Equals(0))
 
@@ -421,6 +424,7 @@ module AgentsBase =
                             freeCpuWorkers.Add worker
 //                            cpuTaskResults.Add taskRes
                             progressPresenter.FireProgress(progress)
+                            Console.WriteLine(TimeHelper.GetCurrentDateTime())
 
                         | GpuTaskDone(taskRes, worker) ->
                             logger.LogMessage(
@@ -428,6 +432,7 @@ module AgentsBase =
                             freeGpuWorkers.Add worker
 //                            gpuTaskResults.Add taskRes
                             progressPresenter.FireProgress(progress)
+                            Console.WriteLine(TimeHelper.GetCurrentDateTime())
 
                         | Completed ->
                             logger.LogMessage(sprintf "%s recieved Completed message at %s time" agentId (TimeHelper.GetCurrentDateTime()))
@@ -453,7 +458,9 @@ module AgentsBase =
                                 ()
                     
                     this.Logger.LogMessage(sprintf "Work completed at %s time" (TimeHelper.GetCurrentDateTime()))
-                    Console.WriteLine(sprintf "Start at %s. Work completed at %s time" (startTime) (TimeHelper.GetCurrentDateTime()))
+                    let time = System.DateTime.Now - start
+                    time |> printfn "time: %A"
+
                     Console.WriteLine(gpuTaskResults.Count)
                     Console.WriteLine(cpuTaskResults.Count)
                     ()

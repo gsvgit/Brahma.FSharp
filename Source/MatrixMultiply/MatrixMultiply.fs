@@ -43,8 +43,8 @@ let Multiply (a:array<_>) aRows aCols (b:array<_>) bRows bCols (c:array<_>) =
     
 let Main platformName (m1: array<_>) (m2: array<_>) =    
 
-    let rows = 2
-    let columns = 2
+    let rows = 200
+    let columns = 200
     let localWorkSize = 2
     //let iterations = 1
     let deviceType = DeviceType.Default
@@ -117,3 +117,4 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
 //Main "NVIDIA*" [|1.0f; 0.0f; 0.0f; 1.0f|] [|1.0f; 1.0f; 1.0f; 1.0f|] 
 //Main "AMD*"
 
+Main "*" (MakeMatrix 200 200) (MakeMatrix 200 200) |> ignore

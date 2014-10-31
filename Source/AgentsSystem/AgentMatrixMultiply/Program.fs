@@ -59,9 +59,9 @@ module Program =
             @>
         let overallConfig: AgentsOverallConfiguration = 
             {
-                AgentCpuWorkersCount = 10
-                AgentGpuWorkersCount = 10
-                AgentDataReadersCount = 20
+                AgentCpuWorkersCount = 3
+                AgentGpuWorkersCount = 3
+                AgentDataReadersCount = 5
             } 
         let gpuConfig: GpuConfiguration = 
             {

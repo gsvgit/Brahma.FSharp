@@ -660,5 +660,5 @@ let f _ =
     (new Brahma.FSharp.OpenCL.Full.Translator()).
         //``Binding in WHILE.``()
         //``Template Let Transformation Test 18``()
-        ``Atomic incr.``()
+        EigenCFA()
     0

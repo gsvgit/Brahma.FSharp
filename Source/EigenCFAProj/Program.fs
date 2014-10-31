@@ -22,32 +22,6 @@ let provider =
     with
     | ex -> failwith ex.Message
 
-//let provider =
-//    try  ComputeProvider.Create(platformName, deviceType)
-//    with
-//    | ex -> failwith ex.Message
-//
-//let initStore = 
-//        <@ fun (r:_2D) (devStore:array<_>) (scaleExp) (scaleM:int) (scaleVar:int) -> 
-//                let column = r.GlobalID0
-//                let row = r.GlobalID1
-//
-//                if(row < scaleExp && column < scaleM) then 
-//                    if(row < scaleVar) then
-//                        if(column % scaleM = 0) then
-//                            devStore.[row*scaleM + column] <- 1
-//                        else
-//                            devStore.[row*scaleM + column] <- -1
-//                    else
-//                        if(column = 0) then
-//                            devStore.[row*scaleM + column] <- 2
-//                        else 
-//                            if(column = 1) then
-//                                devStore.[row*scaleM + column] <- row - scaleVar + 1
-//                            else 
-//                                devStore.[row*scaleM + column] <- -1 
-//        @>
-
 let qEigenCFA = 
         <@ fun (r:_2D)
             (devFun:array<_>)
@@ -118,16 +92,8 @@ let initCPUStore scaleExp scaleM =
 
 let kernelRun (ArrayFun:int[]) (ArrayArg1:int[]) (ArrayArg2:int[]) =
             let n = scaleM*scaleExp
-           // let mutable dev_Store = Array.zeroCreate n
-//            let dev_Fun = Array.zeroCreate (ArrayFun.Length)
-//            let dev_Arg1 = Array.zeroCreate (ArrayArg1.Length)
-//            let dev_Arg2 = Array.zeroCreate (ArrayArg2.Length)
             let dev_rep = Array.zeroCreate 1
             let dev_outPut = Array.zeroCreate (scaleCall*2)
-
-//            Array.Copy(ArrayFun, dev_Fun, ArrayFun.Length)
-//            Array.Copy(ArrayArg1, dev_Arg1, ArrayArg1.Length)
-//            Array.Copy(ArrayArg2, dev_Arg2, ArrayArg2.Length)
 
             let dev_Store = initCPUStore scaleExp scaleM            
    
@@ -200,6 +166,7 @@ let Start maxMem path =
 
 [<EntryPoint>]
 let Main(args) =    
-    pathToResFile <- args.[1]
-    Start 900 args.[0]
+    pathToResFile <- "C:\\Res"
+    Start 900 "C:\\SimpleTests"
+    Console.ReadLine() |> ignore
     0
