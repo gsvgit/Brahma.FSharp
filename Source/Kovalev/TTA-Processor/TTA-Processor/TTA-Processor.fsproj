@@ -42,7 +42,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ASM.fs" />
+    <Compile Include="..\..\..\ASM\ASM.fs">
+      <Link>ASM.fs</Link>
+    </Compile>
     <Compile Include="Processor.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>

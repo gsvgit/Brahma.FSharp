@@ -56,7 +56,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="UnitTests.fs" />
+    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
