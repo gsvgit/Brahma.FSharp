@@ -43,7 +43,7 @@ type FindRes =
 type Matcher(?maxHostMem) =    
     let totalResult = new ResizeArray<_>()
     let mutable label = ""
-    let platformName = "*"
+    let platformName = "NVIDIA*"
     let deviceType = OpenCL.Net.DeviceType.Default    
 
     let provider =
@@ -79,7 +79,7 @@ type Matcher(?maxHostMem) =
         let availableMemory = (int) (min (maxGpuMemory - additionalArgs) (maxHostMemory - additionalArgs - additionalTempData))
         let lws,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxWorkGroupSize)
         let localWorkSize = int <| lws.CastTo<uint64>()
-        let chunkSize = 1024
+        let chunkSize = 256
         let groupSize = chunkSize * localWorkSize * (1 + 2)
         let groups = availableMemory / groupSize
         let length = chunkSize * localWorkSize * groups
@@ -131,7 +131,7 @@ type Matcher(?maxHostMem) =
         task.Wait()
         ignore (commandQueue.Add(c.ToHost provider).Finish())
         ignore (commandQueue.Add(c.ToGpu(provider, [|0|])).Finish())
-        ignore (commandQueue.Add(result.ToHost(provider,c.[0])).Finish())
+        ignore (commandQueue.Add(result.ToHost(provider)).Finish())
         buffersCreated <- true
         Timer<string>.Global.Lap(label)
         timer.Lap(label)
@@ -270,7 +270,7 @@ type Matcher(?maxHostMem) =
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
         kernelPrepare 
-            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes maxTemplateLength input templates.content result c
+            config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c
         run kernelRun readFun templates prefix label close
         timer.Lap(label)
         finalize()
