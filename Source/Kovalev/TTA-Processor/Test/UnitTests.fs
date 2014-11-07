@@ -1,7 +1,7 @@
 ﻿module Tests
 
 open Processor
-open ASM
+open TTA.ASM
 open NUnit.Framework
 
 [<TestFixture>]

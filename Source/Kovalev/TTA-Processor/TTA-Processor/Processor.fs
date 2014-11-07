@@ -1,6 +1,6 @@
 ﻿module Processor
 
-open ASM
+open TTA.ASM
 open System.Collections.Generic
 
 exception DoubleWriteIntoCell of int * int

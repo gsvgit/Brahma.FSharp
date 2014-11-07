@@ -1,7 +1,7 @@
 ﻿module Program
 
 open Processor
-open ASM
+open TTA.ASM
 
 let proc = new Processor<int>([|(fun x y -> x * y); (fun x y -> x + y)|])
 
