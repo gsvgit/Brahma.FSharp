@@ -1,16 +1,15 @@
-﻿open Processor
-open NUnit.Framework
+﻿module Program
 
-[<TestFixture>]
-type ProcessorTests() =
-    
-    let config = new GridConfig(2, 3, [|((fun x y -> x * y), 2); ((fun x y -> x + y), 3)|])
-    let processor = new Processor(config)
+open Processor
+open TTA.ASM
 
-    [<Test>]
-    member this.``CellConstuctedByFunction``() = 
-        Assert.AreEqual(0, processor.ValueInCell 0 1)
+let proc = new Processor<int>([|(fun x y -> x * y); (fun x y -> x + y)|])
 
-    [<Test>]
-    member this.``EmptyCell``() =
-        Assert.AreEqual(0, processor.ValueInCell 1 2)
+let prog: Program<int> = [| [|Set((0<ln>, 0<col>), 6); Set((1<ln>, 1<col>), 3); 
+                              Mvc((1<ln>, 1<col>), 4); Mov((0<ln>, 0<col>), (1<ln>, 1<col>))|] |]
+
+proc.Run prog
+
+printfn "%A" (proc.ValueInCell 0 0)
+
+System.Console.ReadKey() |> ignore

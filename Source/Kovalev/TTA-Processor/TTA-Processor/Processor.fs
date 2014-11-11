@@ -1,46 +1,119 @@
 ﻿module Processor
 
-open Cell
+open TTA.ASM
+open System.Collections.Generic
 
-type GridConfig(rows, col, functions: ((int -> int -> int) * int) array) =   //I don't know where the best place for handling these exceptions.
-    do                                                                       //Maybe "failwith" should be there or parameters must be checked  
-        if rows = 0 || col = 0                                               //after enter in GUI immediately
-        then raise (System.ArgumentException("One of the parameters is equal to zero"))  
-        if functions.Length > 20
-        then raise (System.ArgumentException("Maximum number of operations - 20"))
-        if functions.Length > rows * col
-        then raise (System.ArgumentException("The number of operation types is more than the total number of cells"))        
-        if Array.sumBy (fun i -> snd i) functions > rows * col
-        then raise (System.ArgumentException("The amount of requested cells is more than the total number of cells"))
+exception DoubleWriteIntoCell of int * int
 
-    member val Rows = rows with get
-    member val Col = col with get
-    member val Operations = functions with get
- 
- type Processor(config: GridConfig) =        
+type Cell<'a> (operation: 'a -> 'a -> 'a) =
     
-    let grid : Cell[,] = Array2D.zeroCreate config.Rows config.Col 
-    
-    do  
-        let mutable currentRow, currentCol = 0, 0        
-        for op in config.Operations do 
-            for j = 1 to snd op do
-                grid.[currentRow, currentCol] <- Cell(fst op)
-                currentRow <- currentRow + 1
-                if currentRow = config.Rows
-                then 
-                    currentRow <- 0
-                    currentCol <- currentCol + 1
-        while currentCol < config.Col do
-            grid.[currentRow, currentCol] <- Cell()  
-            currentRow <- currentRow + 1
-            if currentRow = config.Rows
-                then 
-                    currentRow <- 0
-                    currentCol <- currentCol + 1
-                                                           
-    member this.ValueInCell x y =
-        grid.[x, y].Value
-    
+    let mutable value = Unchecked.defaultof<'a>
+    let op = operation
 
-    //some methods...
+    member this.Value
+        with get() = value
+        and set (arg) = value <- arg
+    member this.ExecuteOp operand =
+        value <- op value operand
+
+type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
+    do
+        if functions.Length = 0
+        then raise (System.ArgumentException("Empty grid"))         
+
+    let grid = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
+
+    let addCellOnUserRequest key col = grid.[col].Add (key, Cell(functions.[col]))
+
+    let interpretASM command =
+        match command with
+        | Set ((fst, snd), arg) ->
+            let row, col = int fst, int snd
+            let currentCol = grid.[col]
+            
+            if currentCol.ContainsKey row
+            then currentCol.[row].Value <- arg
+            else 
+                addCellOnUserRequest row col
+                currentCol.[row].Value <- arg        
+        
+        | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
+            let rowTo, colTo, rowFrom, colFrom = int fstTo, int sndTo, int fstFrom, int sndFrom
+            let currentColTo = grid.[colTo]
+            let currentColFrom = grid.[colFrom]
+            
+            if not (currentColFrom.ContainsKey rowFrom)
+            then addCellOnUserRequest rowFrom colFrom
+            if not (currentColTo.ContainsKey rowTo)
+            then addCellOnUserRequest rowTo colTo
+            
+            currentColTo.[rowTo].ExecuteOp currentColFrom.[rowFrom].Value
+
+        | Mvc ((fst, snd), arg) ->
+            let row, col = int fst, int snd
+            let currentCol = grid.[col]
+
+            if currentCol.ContainsKey row
+            then currentCol.[row].ExecuteOp arg
+            else 
+                addCellOnUserRequest row col
+                currentCol.[row].ExecuteOp arg
+
+        | Eps -> ()
+
+    let executeLine (line: array<Asm<'a>>) =
+        let cellsForWrite = new HashSet<(int * int)>()
+        let priorityCommands = new List<int>()
+        let commandsForSecondCheck = new List<int>()
+                    
+        for i in 0..line.Length - 1 do
+            match line.[i] with
+            | Set ((fst, snd), arg)
+            | Mvc ((fst, snd), arg) ->
+                if cellsForWrite.Add (int fst, int snd) = false
+                then raise (DoubleWriteIntoCell (int fst, int snd))
+            | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
+                if cellsForWrite.Add (int fstTo, int sndTo) = false
+                then raise ((DoubleWriteIntoCell (int fstTo, int sndTo)))
+                else
+                    if cellsForWrite.Contains (int fstFrom, int sndFrom)
+                    then priorityCommands.Add i
+                    else commandsForSecondCheck.Add i
+            | Eps -> ()
+        
+        for i in commandsForSecondCheck do
+            match line.[i] with
+            | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
+                if cellsForWrite.Contains (int fstFrom, int sndFrom)
+                then priorityCommands.Add i
+                else ()
+            | _ -> ()
+         
+        let arrayForParallel = Array.mapi (fun i x -> if not (priorityCommands.Contains i) then x else Eps) line        
+        for index in priorityCommands do
+            interpretASM line.[index]
+        Array.Parallel.iter interpretASM arrayForParallel
+
+    member this.ValueInCell row col =
+        let currentCol = grid.[col]
+        if currentCol.ContainsKey row
+        then currentCol.[row].Value
+        else
+            addCellOnUserRequest row col
+            currentCol.[row].Value
+
+    member this.NumberOfCells =
+        Array.sumBy (fun (x: Dictionary<int, Cell<'a>>) -> x.Count) grid
+
+    member this.Run (program: Program<'a>) =
+        for col in grid do col.Clear()
+        if program.Length = 0
+        then ()
+        else
+            let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
+            if maxLength = 0
+            then ()
+            else 
+                for i in 0..maxLength - 1 do
+                    let line = Array.map (fun (x: array<Asm<'a>>) -> if i >= x.Length then Eps else x.[i]) program
+                    executeLine line
