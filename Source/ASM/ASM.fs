@@ -3,11 +3,10 @@
 [<Measure>] type ln
 [<Measure>] type col
 
-type Asm =
-    | Set of (int<ln>*int<col>)*int
+type Asm<'a> =
+    | Set of (int<ln>*int<col>)*'a
     | Mov of (int<ln>*int<col>)*(int<ln>*int<col>)
-    | Mvc of (int<ln>*int<col>)*int
+    | Mvc of (int<ln>*int<col>)*'a
     | Eps
 
-type Program = array<array<Asm>>
-
+type Program<'a> = array<array<Asm<'a>>>
