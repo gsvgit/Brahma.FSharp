@@ -58,6 +58,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
+      <Name>ASM</Name>
+      <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Board\Board.fsproj">
       <Name>Board</Name>
       <Project>{b4472a56-5f30-4e10-9520-498eaf43cd77}</Project>

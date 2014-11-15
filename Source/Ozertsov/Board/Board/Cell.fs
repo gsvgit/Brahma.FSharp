@@ -9,9 +9,13 @@ type Cell<'a>(operation: 'a -> 'a -> 'a) =
         with get() = value
         and set(argument) = value <- argument
         
-    member this.RunOp(operand) = 
-        value <- operation value operand
-
+    member this.RunOp(operand)=
+        try
+            value <- operation value operand
+        with
+        | ex  -> 
+            printf "%A" (ex.ToString())
+            raise (ex)
 
         
         
