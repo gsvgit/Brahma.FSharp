@@ -18,3 +18,7 @@ Source/Bulgakov/Example/packages/*
 !Source/Bulgakov/Example/packages/*.config
 Source/Kovalev/MyExample/packages/*
 Source/Kovalev/TTA-Processor/packages/*
+
+_ReSharper.*
+packages
+.nuget
