@@ -1,4 +1,4 @@
-﻿module ProcessorTests
+﻿namespace ProcessorTests
 
 open NUnit.Framework
 open TTA.ASM
