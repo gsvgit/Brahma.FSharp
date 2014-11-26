@@ -27,3 +27,9 @@ type CellState =
 type ReadOption<'T> =
     | Cell of int<ln> * int<col>
     | Value of 'T
+
+type GridCell<'T> = {
+    Row : int
+    Col : int
+    Value : 'T
+}

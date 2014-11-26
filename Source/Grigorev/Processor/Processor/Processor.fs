@@ -36,8 +36,8 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
             line
             |> Array.filter (fun x -> match x with | Eps -> false | _ -> true)
             |> Array.map (fun x -> match x with | Set (p, _) | Mov (p, _) | Mvc (p, _) -> p)
-        let seq = Seq.ofArray line
-        Seq.length seq = Array.length line
+        let set = Set.ofArray line
+        Set.count set = Array.length line
         
     let checkLineTotal line =
         let arr =
@@ -46,7 +46,7 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
             |> Array.filter (fun x -> x.IsSome)
             |> Array.map (fun x -> x.Value)
         if arr.Length = 0
-        then if checkLine line then [||] else [|IncorrectLine ("", 0)|]
+        then if checkLine line then [||] else [|IncorrectLine ("There are 2 or more writes in single cell", 0)|]
         else arr
 
     let checkProgram commands =
@@ -60,7 +60,7 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
                     match y with
                     | IncorrectCommand (m, _, p) -> IncorrectCommand (m, snd s, p)
                     | IncorrectLine (m, _) -> IncorrectLine (m, snd s))
-                |> Array.append (fst s)), snd s) ([||], 0) |> fst
+                |> Array.append (fst s)), 1 + snd s) ([||], 0) |> fst
 
     let eval command =
         match checkCommand command with
@@ -101,6 +101,8 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
     member this.ReadWithMeasure (r, c) = grid.GetValue (r, c)
 
     member this.Evaluate (command : Asm<'T>) = eval command
+
+    member this.Evaluate commands = evalRow commands
 
     member this.Evaluate (commands : Program<'T>) =
         let iter i e =

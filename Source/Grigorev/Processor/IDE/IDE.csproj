@@ -83,6 +83,14 @@
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
       <Name>ASM</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Compiler\Compiler.fsproj">
+      <Project>{4115a9c9-a4e8-45f1-be5d-fffbf33eba2e}</Project>
+      <Name>Compiler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Controller\Controller.fsproj">
+      <Project>{dafb18f4-6a6e-4d21-b4e7-bd6787901d4a}</Project>
+      <Name>Controller</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Processor\Processor.fsproj">
       <Project>{fc6d7600-732b-4bb8-be82-7561f9cce668}</Project>
       <Name>Processor</Name>

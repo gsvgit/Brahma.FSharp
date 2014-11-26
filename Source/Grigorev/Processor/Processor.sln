@@ -7,21 +7,19 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASM", "..\..\ASM\ASM.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "Tests\Tests.fsproj", "{B3D2702F-7748-4119-8B36-3BE0AD1801AA}"
 	ProjectSection(ProjectDependencies) = postProject
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8} = {E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}
 		{D22D7CC5-F143-412E-AACD-2E12B8E3B7A1} = {D22D7CC5-F143-412E-AACD-2E12B8E3B7A1}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDE", "IDE\IDE.csproj", "{D22D7CC5-F143-412E-AACD-2E12B8E3B7A1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8} = {E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}
-	EndProjectSection
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interpreter", "Interpreter\Interpreter.fsproj", "{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9F2BDB51-2BBD-48E2-A630-97CD253AD2F3}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Compiler", "Compiler\Compiler.fsproj", "{4115A9C9-A4E8-45F1-BE5D-FFFBF33EBA2E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Controller", "Controller\Controller.fsproj", "{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +43,14 @@ Global
 		{D22D7CC5-F143-412E-AACD-2E12B8E3B7A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D22D7CC5-F143-412E-AACD-2E12B8E3B7A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D22D7CC5-F143-412E-AACD-2E12B8E3B7A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E32E1D9D-316B-45A1-A6B3-72AF985B7AE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4115A9C9-A4E8-45F1-BE5D-FFFBF33EBA2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4115A9C9-A4E8-45F1-BE5D-FFFBF33EBA2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4115A9C9-A4E8-45F1-BE5D-FFFBF33EBA2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4115A9C9-A4E8-45F1-BE5D-FFFBF33EBA2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,6 +5,9 @@ open TTA.ASM
 
 type Grid<'T> (functions : array<'T -> 'T -> 'T>) =
     let grid = new Dictionary<int * int, 'T> ()
+    let mutable width = 0
+    let mutable height = 0
+    
     let getCellCoordinates (r : int<ln>) (c : int<col>) = int r, int c
         
     member this.Check (r, c) =
@@ -28,8 +31,24 @@ type Grid<'T> (functions : array<'T -> 'T -> 'T>) =
 
     member this.Move (r, c, v) =
         let rr, cc = getCellCoordinates r c
+        height <- max height (rr + 1)
+        width <- max width (cc + 1)
         grid.Item ((rr, cc)) <- functions.[cc] <| this.GetValue (r, c) <| v
 
-    member this.Clear () = grid.Clear ()
+    member this.GetAllValues () =
+        let l = grid.Count
+        let arr = Array.zeroCreate l
+        let mutable i = 0
+        for x in grid do
+            arr.[i] <- x
+            i <- i + 1
+        arr |> Array.map (fun x -> {Row = fst x.Key; Col = snd x.Key; Value = x.Value})
+
+    member this.Clear () =
+        width <- 0
+        height <- 0
+        grid.Clear ()
 
     member this.Size = functions.Length
+    member this.Width = width
+    member this.Height = height

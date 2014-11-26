@@ -39,7 +39,6 @@
     <Compile Include="HelpTypes.fs" />
     <Compile Include="Grid.fs" />
     <Compile Include="Processor.fs" />
-    <Compile Include="Compiler.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

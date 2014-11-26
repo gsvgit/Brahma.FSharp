@@ -5,15 +5,14 @@ open System.IO
 open System.CodeDom.Compiler
 open FSharp.Compiler.CodeDom
 
-type Compiler () =
+type FSharpCompiler () =
     let compile (str : string) =
         let comp = new FSharpCodeProvider ()
-        let arr = "namespace TestingCompiler\r\ntype TT () =\r\n    member this.mtd (x : int) = x * x"
         let par = new CompilerParameters (null, "out.dll")
         let res = comp.CompileAssemblyFromSource (par, str)
         if res.Errors.Count = 0
-        then res.CompiledAssembly
-        else failwith ""
+        then Success (res.CompiledAssembly)
+        else Error (res.Errors)
 
     member this.Compile (str : string) =
         compile str
