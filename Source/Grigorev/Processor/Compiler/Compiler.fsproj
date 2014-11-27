@@ -39,7 +39,7 @@
     <Compile Include="IFSharpCompiler.fs" />
     <Compile Include="FSharpCompiler.fs" />
     <Compile Include="IAsmCompiler.fs" />
-    <Compile Include="AsmCompiler.fs" />
+    <Compile Include="AsmRegexCompiler.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
