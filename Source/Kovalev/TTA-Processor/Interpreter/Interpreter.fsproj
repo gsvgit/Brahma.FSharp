@@ -80,9 +80,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Intepreter.yrd" />
+    <None Include="Interpreter.fsl" />
+    <Compile Include="AST.fs" />
+    <Compile Include="Intepreter.yrd.fs" />
+    <Compile Include="InterpreterLexer.fs" />
     <Compile Include="Library1.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

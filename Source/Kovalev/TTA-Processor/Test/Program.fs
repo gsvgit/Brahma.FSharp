@@ -1,6 +1,6 @@
 ﻿module Program
-
-open Processor
+open Interpreter.test
+(*open Processor
 open TTA.ASM
 
 let proc = new Processor<int>([|(fun x y -> x * y); (fun x y -> x + y)|])
@@ -12,4 +12,6 @@ proc.Run prog
 
 printfn "%A" (proc.ValueInCell 0 0)
 
-System.Console.ReadKey() |> ignore
+System.Console.ReadKey() |> ignore*)
+
+main @"..\..\input"
