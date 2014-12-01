@@ -30,41 +30,31 @@ type CreateProcessor() =
         Assert.AreEqual(null, processor.ValueAt 186 0)
 
 [<TestFixture>]
-type ExecuteLineTests() =
+type ExceptionTests() =
     [<Test>]
-    member this.``LineInt``() =
+    member this.``Parallel_Exception_In_Line``() =
         let processor = new Processor<int>([|(fun x y -> x+y); (fun x y-> x*x);|])
-        processor.executeLine [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 5)|]
-        Assert.AreEqual(6, processor.ValueAt 0 0)
-
+        let ex = Assert.Throws<ParallelException>(fun() -> processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 5)|] |] |> ignore)
+        Assert.AreEqual(ParallelException(0,0), ex)
 
 [<TestFixture>]
-type ProcessorRunTests() =
-    
+type ProcessorRunTests() =    
     [<Test>]
     member this.``EmptyArray``() =
         let processor = new Processor<_>([|(fun x y -> x); (fun x y -> y)|])        
         processor.executeArray [| [||]; [||] |]
         Assert.AreEqual (0, processor.ValueAt 1024 1)
+    
+    [<Test>]
+    member this.``OneArr``() =
+        let processor = new Processor<_>([|(fun x y -> x); (fun x y -> y)|])        
+        processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 1<col>), 5)|] |]
+        Assert.AreEqual (0, processor.ValueAt 1024 1)
+
     [<Test>]
     member this.``ParallelTest``() =
         let processor = new Processor<int>([|(fun x y -> x + y); (fun x y -> x + y)|])
-        processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 5)|]; 
-                         [|Set((0<ln>, 1<col>), 2); Mvc((0<ln>, 1<col>), 3)|] |]
-        Assert.AreEqual (6, processor.ValueAt 0 0)
-        Assert.AreEqual (5, processor.ValueAt 0 1) 
-    [<Test>]
-    member this.``HardParallelTest``() =
-        let processor = new Processor<int>([|(fun x y -> x + y); (fun x y -> x + y)|])
-        processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 5)|]; 
-                         [|Set((0<ln>, 1<col>), 2); Mvc((0<ln>, 1<col>), 3)|];
+        processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 1<col>), 5)|]; 
+                         [|Set((0<ln>, 0<col>), 2); Mvc((0<ln>, 1<col>), 3)|];
                          [|Mov((0<ln>, 0<col>), (0<ln>, 1<col>))|]  |]
-        Assert.AreEqual (11, processor.ValueAt 0 0)
-
-    [<Test>]
-    member this.``HardParallelTest2``() =
-        let processor = new Processor<int>([|(fun x y -> x + y); (fun x y -> x + y)|])
-        processor.executeArray [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 5)|]; 
-                         [|Set((0<ln>, 1<col>), 2); Mvc((0<ln>, 1<col>), 3)|];
-                         [|Mov((0<ln>, 0<col>), (0<ln>, 1<col>))|]  |]
-        Assert.AreEqual (11, processor.ValueAt 0 0)
+        Assert.AreEqual (10, processor.ValueAt 0 0)

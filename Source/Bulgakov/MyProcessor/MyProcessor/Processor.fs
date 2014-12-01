@@ -13,14 +13,11 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                  
     let grid = Array.init functions.Length (fun i -> ConcurrentDictionary<int, Cell<'a>>())
     let addCell row column = grid.[column].TryAdd(row, Cell(functions.[column]))
-    let usingCells = new HashSet<(int*int)>()
-    let WaitingList = new List<Asm<'a>>()
 
     let execute command = 
         match command with
         |Set ((row1, col1), arg) ->
             let row, col = int row1, int col1
-            
             if not(grid.[col].ContainsKey row)
             then
                 addCell row col
@@ -29,19 +26,15 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                 grid.[col].[row].Value <- arg
         |Mov((row2, col2), (row1, col1)) ->
             let toRow, toCol, fromRow, fromCol = int row2, int col2, int row1, int col1
-            
             if not(grid.[toCol].ContainsKey toRow)
             then
                 addCell toRow toCol
                 ()
-
             if not(grid.[fromCol].ContainsKey fromRow)
             then
                 addCell fromRow fromCol
                 ()
-
             grid.[toCol].[toRow].Execute grid.[fromCol].[fromRow].Value
-
         |Mvc((row1, col1), arg) ->
             let row, col = int row1, int col1
             if not(grid.[col].ContainsKey row)
@@ -58,30 +51,21 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             addCell row col
             grid.[col].[row].Value
         else grid.[col].[row].Value
-    
-    member this.executeLine(line : array<Asm<'a>>) =
-        for operation in line do
+        
+    member this.Check(arr : Asm<'a>[]) =
+        let CellsSet = new HashSet<(int*int)>()
+        for operation in arr do
             match operation with
             |Set((row, col), arg)
             |Mvc((row, col), arg) ->
-                if usingCells.Contains (int row, int col)
+                if CellsSet.Add (int row, int col) = false
                 then raise(ParallelException (int row, int col))
-                else
-                    usingCells.Add (int row, int col)
-                    execute operation
-                    usingCells.Remove(int row, int col)
             |Mov((row2, col2), (row1, col1)) ->
-                if usingCells.Contains (int row1, int col1)
+                if CellsSet.Add (int row1, int col1) = false
                 then raise(ParallelException (int row1, int col1))
-                elif usingCells.Contains (int row2, int col2)
+                if CellsSet.Add (int row2, int col2) = false
                 then raise(ParallelException (int row2, int col2))
-                else
-                    usingCells.Add (int row1, int col1)
-                    usingCells.Add (int row2, int col2)
-                    execute operation
-                    usingCells.Remove(int row1, int col1)
-                    usingCells.Remove(int row2, int col2)
-
+    
     member this.countCells =
         let mutable count = 0
         for i in grid do
@@ -89,5 +73,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             count <- count + 1
         count
 
-    member this.executeArray(arr : array<array<Asm<'a>>>) =
-        Array.Parallel.iter this.executeLine arr
+    member this.executeArray(arr : Program<'a>) =
+        for i in arr do
+            this.Check i
+            Array.Parallel.iter execute i
