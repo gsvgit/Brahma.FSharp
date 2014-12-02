@@ -22,7 +22,18 @@ type MatrixTests() =
     member this.``IntMatrix``() =
         let matrix = new Matrix<_>([|(fun x y -> x); (fun x y -> y)|])
         Assert.AreEqual (0, matrix.ValueInCell 0 1)
+    
+    [<Test>]
+        member this.``MatrixColumns``() =
+            let matrix = new Matrix<_>([|(fun x y -> x); (fun x y -> y)|])
+            Assert.AreEqual (2, matrix.NumColls)
 
+    [<Test>]
+    member this.``MatrixRows``() =
+        let matrix = new Matrix<_>([|(fun x y -> x); (fun x y -> y)|])
+        matrix.ValueInCell 100 0 |> ignore
+        Assert.AreEqual (101, matrix.NumRows)
+    
     [<Test>]
     member this.``BoolMatrix``() =
         let matrix = new Matrix<bool>([|(fun x y -> x); (fun x y -> y)|])
