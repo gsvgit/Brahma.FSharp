@@ -3,6 +3,7 @@
 open System
 open TTA.ASM
 
+[<AllowNullLiteral>]
 type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
     let grid = new Grid<'T> (functions)
     

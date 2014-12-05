@@ -4,11 +4,12 @@ open System
 open Processor
 open System.CodeDom.Compiler
 open FSharp.Compiler.CodeDom
+open System.Linq
 
 type IController<'T> =
     abstract member Save : string -> string -> unit
-    abstract member Load : string -> string
-    abstract member Init : string -> CompilerErrorCollection
+    abstract member Open : string -> unit
+    abstract member Init : string -> ErrorListItem array
     abstract member Compile : string array array -> unit
     abstract member ChangeLine : int -> string array -> unit
     abstract member Run : unit -> unit
@@ -19,5 +20,9 @@ type IController<'T> =
     abstract member ReadAll : unit -> GridCell<'T> array
     abstract member Check : string array array -> ErrorListItem array
     abstract member CheckLine : string array -> ErrorListItem array
+    abstract member Source : string array array
+    abstract member InitCode : string
+    abstract member ThreadNumber : int with get, set
+    abstract member ProjectName : string
     [<CLIEvent>]
-    abstract member Alert : IEvent<EventHandler, EventArgs>
+    abstract member Alert : IEvent<AlertEventArgs>

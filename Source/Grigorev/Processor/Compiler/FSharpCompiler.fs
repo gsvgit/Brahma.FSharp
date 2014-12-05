@@ -14,5 +14,9 @@ type FSharpCompiler () =
         then Success (res.CompiledAssembly)
         else Error (res.Errors)
 
+    interface IFSharpCompiler with
+        member this.Compile str =
+            compile str
+
     member this.Compile (str : string) =
         compile str
