@@ -8,7 +8,7 @@ open FSharp.Compiler.CodeDom
 type FSharpCompiler () =
     let compile (str : string) =
         let comp = new FSharpCodeProvider ()
-        let par = new CompilerParameters ()//(null, "out.dll")
+        let par = new CompilerParameters ()//([|"FSharp.Core"|])//(null, "out.dll")
         par.GenerateInMemory <- true
         let res = comp.CompileAssemblyFromSource (par, str)
         if res.Errors.Count = 0

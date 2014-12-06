@@ -18,6 +18,7 @@ namespace IDE
 	{
 		private IController<int> ctrl = new Controller<int>();
 
+		private IObservable<object> newClick;
 		private IObservable<object> openClick;
 		private IObservable<object> exitClick;
 		private IObservable<object> saveClick;
@@ -48,10 +49,19 @@ namespace IDE
 			SubscribeEvents();
 
 			InitEditor();
+
+			clearOnRunToolStripMenuItem.Checked = ctrl.ClearOnRun;
+			updateProcessorState();
+			UpdateGrid();
+
+			errorsDataGridView.Columns.Add("Row", "Row");
+			errorsDataGridView.Columns.Add("Col", "Col");
+			errorsDataGridView.Columns.Add("Message", "Message");
 		}
 
 		private void InitEvents()
 		{
+			newClick = Observable.FromEventPattern(h => newToolStripMenuItem.Click += h, h => newToolStripMenuItem.Click -= h);
 			openClick = Observable.FromEventPattern(h => loadToolStripMenuItem.Click += h, h => loadToolStripMenuItem.Click -= h);
 			exitClick = Observable.FromEventPattern(h => exitToolStripMenuItem.Click += h, h => exitToolStripMenuItem.Click -= h);
 			saveClick = Observable.FromEventPattern(h => saveToolStripMenuItem.Click += h, h => saveToolStripMenuItem.Click -= h);
@@ -77,23 +87,24 @@ namespace IDE
 
 		private void SubscribeEvents()
 		{
+			newClick.Subscribe(s => { ctrl.New(); InitEditor(); });
 			openClick.Subscribe(openHandler);
 			exitClick.Subscribe(s => Close());
 			saveClick.Subscribe(s => ctrl.Save());
 			saveAsClick.Subscribe(saveAsHandler);
 			initClick.Subscribe(initProcessorHandler);
-			clearClick.Subscribe();
-			clearOnRunClick.Subscribe();
+			clearClick.Subscribe(s => { ctrl.Clear(); UpdateGrid(); });
+			clearOnRunClick.Subscribe(s => { ctrl.ClearOnRun = !ctrl.ClearOnRun; clearOnRunToolStripMenuItem.Checked = ctrl.ClearOnRun; });
 			showGridClick.Subscribe();
-			compileClick.Subscribe();
+			compileClick.Subscribe(s => { ctrl.Compile(); UpdateErrors(); });
 			checkClick.Subscribe();
-			runClick.Subscribe();
+			runClick.Subscribe(s => { ctrl.Run(); UpdateGrid(); });
 			debugClick.Subscribe();
 			stepClick.Subscribe();
 			stopDebugClick.Subscribe();
 			threadsClick.Subscribe(threadsHandler);
 			multiThreadClick.Subscribe();
-			aboutClick.Subscribe();
+			aboutClick.Subscribe(s => MessageBox.Show((char)169 + " Sergey Grigorev, 2014", "About"));
 			formResized.Subscribe(s => InitEditor());
 			panel1Resized.Subscribe(s => InitEditor());
 			controlAdded.Subscribe(s => SubscribeOnTextBox(s.EventArgs.Control as TextBox));
@@ -114,14 +125,16 @@ namespace IDE
 
 		private void InitEditor()
 		{
+			Text = string.Format("TTA IDE - {0}", ctrl.ProjectName);
 			splitContainer2.Panel1.Controls.Clear();
 			var n = ctrl.ThreadNumber;
 			var w = splitContainer2.Panel1.Width;
 			var h = splitContainer2.Panel1.Height;
 			for (int i = 0; i < n; i++)
 			{
-				splitContainer2.Panel1.Controls.Add(new TextBox() { Multiline = true, Location = new Point(i * w / n, 0), Size = new Size(w / n, h), Lines = ctrl.Source[i] });
+				splitContainer2.Panel1.Controls.Add(new TextBox() { Multiline = true, Location = new Point(i * w / n, 0), Size = new Size(w / n, h), Lines = ctrl.Source[i], Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204))) });
 			}
+			updateProcessorState();
 		}
 
 		private void UpdateCode(object s = null, EventArgs e = null)
@@ -134,6 +147,43 @@ namespace IDE
 				arr[i] = l.Lines;
 			}
 			ctrl.Update(arr);
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = false;
+		}
+
+		private void UpdateGrid()
+		{
+			var w = ctrl.GridWidth;
+			var h = ctrl.GridHeight;
+			gridDataGridView.Rows.Clear();
+			gridDataGridView.Columns.Clear();
+			for (int i = 0; i < w; i++)
+				gridDataGridView.Columns.Add(i.ToString(), i.ToString());
+			for (int i = 0; i < h; i++)
+			{
+				var row = new DataGridViewRow();
+				row.HeaderCell.Value = i.ToString();
+				for (int j = 0; j < w; j++)
+					row.Cells.Add(new DataGridViewTextBoxCell());
+				gridDataGridView.Rows.Add(row);
+			}
+			var cells = ctrl.ReadAll();
+			foreach (GridCell<int> c in cells)
+				gridDataGridView.Rows[c.Row].Cells[c.Col].Value = c.Value;
+		}
+
+		private void UpdateErrors()
+		{
+			var err = ctrl.CompilationErrors;
+			errorsDataGridView.Rows.Clear();
+			foreach (ErrorListItem e in err)
+			{
+				var row = new DataGridViewRow();
+				row.Cells.Add(new DataGridViewTextBoxCell() { Value = e.Row });
+				row.Cells.Add(new DataGridViewTextBoxCell() { Value = e.Col });
+				row.Cells.Add(new DataGridViewTextBoxCell() { Value = e.Message });
+				errorsDataGridView.Rows.Add(row);
+			}
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = err.Length == 0;
 		}
 
 		private void AlertHandler(object s, AlertEventArgs e)
@@ -150,6 +200,7 @@ namespace IDE
 				ctrl.Open(d.FileName);
 				InitEditor();
 			}
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = false;
 		}
 
 		private void saveAsHandler(object s)
@@ -171,16 +222,26 @@ namespace IDE
 			{
 				var t = f.InitCode;
 				var err = ctrl.Init(t);
-				if (err == null)
-					return;
-				MessageBox.Show("Errors occured");
-				ctrl.ThreadNumber = 0;
+				if (err != null)
+				{
+					MessageBox.Show("Errors occured");
+					ctrl.ThreadNumber = 0;
+				}
 			}
+			updateProcessorState();
 		}
 
-		private void threadsHandler (object s)
+		private void updateProcessorState()
 		{
-			var f = new ThreadNumberForm() {Number = ctrl.ThreadNumber};
+			var ps = ctrl.FunctionsCount;
+			if (ps == 0)
+				processorStateToolStripMenuItem.Text = "Not ready";
+			else processorStateToolStripMenuItem.Text = string.Format("Ready - {0}", ps);
+		}
+
+		private void threadsHandler(object s)
+		{
+			var f = new ThreadNumberForm() { Number = ctrl.ThreadNumber };
 			var d = f.ShowDialog();
 			if (d == DialogResult.OK)
 				ctrl.ThreadNumber = f.Number;

@@ -100,6 +100,7 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
        
     member this.Read (r, c) = grid.GetValue (r*1<ln>, c*1<col>)
     member this.ReadWithMeasure (r, c) = grid.GetValue (r, c)
+    member this.ReadAll () = grid.GetAllValues ()
 
     member this.Evaluate (command : Asm<'T>) = eval command
 
@@ -128,3 +129,7 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
         match checkProgram commands with
         | [||] -> None
         | x -> Some (x)
+
+    member this.Size with get () = grid.Size;
+    member this.Width with get () = grid.Width;
+    member this.Height with get () = grid.Height;

@@ -27,7 +27,11 @@ type Grid<'T> (functions : array<'T -> 'T -> 'T>) =
         then grid.Item (r, c)
         else Unchecked.defaultof<'T>
 
-    member this.SetValue (r, c, v) = grid.Item (getCellCoordinates r c) <- v
+    member this.SetValue (r, c, v) =
+        let rr, cc = getCellCoordinates r c
+        height <- max height (rr + 1)
+        width <- max width (cc + 1)
+        grid.Item (getCellCoordinates r c) <- v
 
     member this.Move (r, c, v) =
         let rr, cc = getCellCoordinates r c

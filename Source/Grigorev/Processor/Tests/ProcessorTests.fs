@@ -110,3 +110,16 @@ type IntTests () =
             |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
         proc.Evaluate (comm)
         Assert.That (proc.Read (0, 0), Is.EqualTo (115))
+
+    [<Test>]
+    member this.Test2 () =
+        proc.Clear ()
+        let comm =
+            [|
+                [| PSet (0, 1, 7); PMov (0, 1, 1, 0) |];
+                [| PSet (1, 0, 100); PMov (1, 0, 0, 1) |]
+            |]
+            |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
+        proc.Evaluate (comm)
+        Assert.That (proc.Read (1, 0), Is.EqualTo (107))
+        Assert.That (proc.Read (0, 1), Is.EqualTo (-93))

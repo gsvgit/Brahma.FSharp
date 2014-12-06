@@ -1,0 +1,4 @@
+<Project xmlns="http://schemas.datacontract.org/2004/07/Controller" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><InitCode_x0040_>namespace DefaultNamespace&#xD;
+&#xD;
+type public FunctionsType () =&#xD;
+    member this.GetArray () = [| (+); (-); (*); (/); (%) |]</InitCode_x0040_><Name_x0040_>Sample.asmprj</Name_x0040_><SourceCode_x0040_ xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><a:ArrayOfstring><a:string>eps</a:string><a:string>mvc 0 0 11</a:string></a:ArrayOfstring><a:ArrayOfstring><a:string>set 0 1 0</a:string><a:string>eps</a:string></a:ArrayOfstring><a:ArrayOfstring><a:string>set 0 2 0</a:string><a:string>eps</a:string></a:ArrayOfstring></SourceCode_x0040_></Project>
