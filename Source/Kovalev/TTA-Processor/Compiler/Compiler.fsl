@@ -1,29 +1,26 @@
 ﻿{
-module Interpreter.Lexer
+module Compiler.Lexer
 open Microsoft.FSharp.Text.Lexing
-open Interpreter.Parser
+open Compiler.Parser
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString(lexbuf)
 }
 
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' '\r' '\n']
-let chars = ['a'-'z']
+let chars = ['a'-'z' 'A'-'Z']
 
 
 rule token = parse
 | whitespace { token lexbuf }
 | ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lexeme lexbuf)}
-| '-' { MINUS(lexeme lexbuf) }
 | '(' { LBRACE(lexeme lexbuf) }
 | ')' { RBRACE(lexeme lexbuf)  }
-| '/' { DIV(lexeme lexbuf) }
-| '+' { PLUS(lexeme lexbuf) }
-| "**" { POW(lexeme lexbuf) }
-| '*' { MULT(lexeme lexbuf) }
 | ';' { SEMI(lexeme lexbuf) }
-| '=' { EQ(lexeme lexbuf) }
-| chars+ { VAR(lexeme lexbuf) }
+| "Set" { SET(lexeme lexbuf) }
+| "Mvc" { MVC(lexeme lexbuf) }
+| "Mov" { MOV(lexeme lexbuf) }
+| "Eps" { EPS(lexeme lexbuf) }
 | eof { RNGLR_EOF ("")}
 | _ {  failwithf "unexpected input: %s" <| string lexeme }
 

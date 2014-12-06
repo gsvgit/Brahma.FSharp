@@ -1,5 +1,5 @@
 ﻿{
-open Interpreter.AST
+open TTA.ASM
 }
 
 tokens {
@@ -8,7 +8,7 @@ tokens {
 
 options {
     translate = true
-    module = "Interpreter.Parser"
+    module = "Compiler.Parser"
     infEpsPath = epsilons
     pos = uint64
 }
@@ -16,26 +16,14 @@ options {
 module Main
 
 [<Start>]
-program: (stmt SEMI)+
+program: (line SEMI)+
 
-stmt: v=VAR EQ e=expr {v, e}
+line: (expr)*
 
-binExpr<operand binOp>: h=operand tl=(binOp operand)* {List.fold (fun l (op,r) -> BinOp(op,l,r)) h tl}
-  
-expr: binExpr<term termOp> 
+expr:
+	SET c=coord n=NUMBER {Set (c, int n)}
+	| MVC c=coord n=NUMBER {Mvc (c, int n)}
+	| MOV fc=coord sc=coord {Mov (fc, sc)}
+	| EPS {Eps}
 
-termOp: PLUS {Plus} | MINUS {Minus}
-
-term: binExpr<factor factorOp>
-     
-factorOp: MULT {Mult} | DIV {Div}
-
-factor: binExpr<powExpr powOp>
-
-powOp: POW {Pow}
-
-powExpr:
-   n=NUMBER {Num (float n)}
-   | v=VAR {EVar(v)}
-   | LBRACE e=expr RBRACE {e}
-
+coord: LBRACE fst=NUMBER snd=NUMBER RBRACE {(int fst) * 1<ln>, (int snd) * 1<col>}

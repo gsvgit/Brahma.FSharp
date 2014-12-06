@@ -80,15 +80,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Intepreter.yrd" />
-    <None Include="Interpreter.fsl" />
-    <Compile Include="AST.fs" />
-    <Compile Include="Intepreter.yrd.fs" />
-    <Compile Include="InterpreterLexer.fs" />
-    <Compile Include="Library1.fs" />
+    <None Include="Compiler.fsl" />
+    <None Include="Compiler.yrd" />
+    <Compile Include="Compiler.yrd.fs" />
+    <Compile Include="CompilerLexer.fs" />
+    <Compile Include="ToASM.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
+      <Name>ASM</Name>
+      <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

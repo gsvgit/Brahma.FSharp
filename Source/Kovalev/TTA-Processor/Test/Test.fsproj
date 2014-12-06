@@ -67,8 +67,8 @@
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Interpreter\Interpreter.fsproj">
-      <Name>Interpreter</Name>
+    <ProjectReference Include="..\Compiler\Compiler.fsproj">
+      <Name>Compiler</Name>
       <Project>{58cb8a30-4e20-4042-a3b2-0cbfc5b27e42}</Project>
       <Private>True</Private>
     </ProjectReference>

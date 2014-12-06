@@ -1,17 +1,15 @@
 ﻿module Program
-open Interpreter.test
-(*open Processor
-open TTA.ASM
+open Compiler.test
+open Processor
 
-let proc = new Processor<int>([|(fun x y -> x * y); (fun x y -> x + y)|])
+let x = compile "Set (0 0) 1 Set (0 1) 2;
+                 Mvc (0 0) 3;
+                 Eps         Eps         Eps;"
 
-let prog: Program<int> = [| [|Set((0<ln>, 0<col>), 6); Set((1<ln>, 1<col>), 3); 
-                              Mvc((1<ln>, 1<col>), 4); Mov((0<ln>, 0<col>), (1<ln>, 1<col>))|] |]
+let proc = Processor<int> [|(fun x y -> x + y); (fun x y -> x * y)|]
+proc.Run x
 
-proc.Run prog
-
+printfn "%A" x
 printfn "%A" (proc.ValueInCell 0 0)
 
-System.Console.ReadKey() |> ignore*)
-
-main @"..\..\input"
+System.Console.ReadKey() |> ignore
