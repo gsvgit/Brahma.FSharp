@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace IDE
 {
     public delegate int Deleg (int x, int y);
-    partial class Form1
+    partial class MainScreen
     {
         /// <summary>
         /// Требуется переменная конструктора.

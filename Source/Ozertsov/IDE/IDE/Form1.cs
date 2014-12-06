@@ -1,19 +1,21 @@
-﻿using System;
+﻿﻿using System;
+using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
+using Microsoft.FSharp.Core;
 using System.Windows.Forms;
-
+//using Processor;
+using System.Reactive;
 
 namespace IDE
 {
-    public partial class Form1 : Form
+    public partial class MainScreen : Form
     {
-        public Form1()
+
+        public MainScreen()
         {
             InitializeComponent();
         }
