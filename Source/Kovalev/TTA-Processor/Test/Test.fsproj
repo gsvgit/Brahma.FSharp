@@ -51,9 +51,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="TTA_Processor">
-      <HintPath>..\TTA-Processor\bin\Debug\TTA_Processor.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="UnitTests.fs" />
@@ -70,6 +67,11 @@
     <ProjectReference Include="..\Compiler\Compiler.fsproj">
       <Name>Compiler</Name>
       <Project>{58cb8a30-4e20-4042-a3b2-0cbfc5b27e42}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TTA-Processor\TTA-Processor.fsproj">
+      <Name>TTA-Processor</Name>
+      <Project>{b7116886-54a2-409e-aea0-6a220bbfe497}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
