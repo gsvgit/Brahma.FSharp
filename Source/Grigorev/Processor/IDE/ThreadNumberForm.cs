@@ -12,18 +12,20 @@ namespace IDE
 {
 	public partial class ThreadNumberForm : Form
 	{
-		public int Number { get; set; }
+		public int Number
+		{
+			get { return (int)numeric.Value; }
+			set { numeric.Value = value; }
+		}
 
 		public ThreadNumberForm()
 		{
 			InitializeComponent();
-			numeric.Value = Number;
 		}
 
 		private void ok_Click(object sender, EventArgs e)
 		{
 			DialogResult = DialogResult.OK;
-			Number = (int) numeric.Value;
 			Close();
 		}
 

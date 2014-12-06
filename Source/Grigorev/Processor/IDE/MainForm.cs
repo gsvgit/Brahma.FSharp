@@ -37,6 +37,8 @@ namespace IDE
 		private IObservable<object> aboutClick;
 		private IObservable<object> formResized;
 		private IObservable<object> panel1Resized;
+		private IObservable<EventPattern<ControlEventArgs>> controlAdded;
+		private IObservable<EventPattern<ControlEventArgs>> controlRemoved;
 
 		public MainForm()
 		{
@@ -69,14 +71,16 @@ namespace IDE
 			aboutClick = Observable.FromEventPattern(h => aboutToolStripMenuItem.Click += h, h => aboutToolStripMenuItem.Click -= h);
 			formResized = Observable.FromEventPattern(h => this.ResizeEnd += h, h => this.ResizeEnd -= h);
 			panel1Resized = Observable.FromEventPattern(h => splitContainer2.Panel1.Resize += h, h => splitContainer2.Panel1.Resize -= h);
+			controlAdded = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlAdded += h, h => splitContainer2.Panel1.ControlAdded -= h).Where(p => p.EventArgs.Control is TextBox);
+			controlRemoved = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlRemoved += h, h => splitContainer2.Panel1.ControlRemoved -= h).Where(p => p.EventArgs.Control is TextBox);
 		}
 
 		private void SubscribeEvents()
 		{
 			openClick.Subscribe(openHandler);
 			exitClick.Subscribe(s => Close());
-			saveClick.Subscribe();
-			saveAsClick.Subscribe();
+			saveClick.Subscribe(s => ctrl.Save());
+			saveAsClick.Subscribe(saveAsHandler);
 			initClick.Subscribe(initProcessorHandler);
 			clearClick.Subscribe();
 			clearOnRunClick.Subscribe();
@@ -92,8 +96,20 @@ namespace IDE
 			aboutClick.Subscribe();
 			formResized.Subscribe(s => InitEditor());
 			panel1Resized.Subscribe(s => InitEditor());
+			controlAdded.Subscribe(s => SubscribeOnTextBox(s.EventArgs.Control as TextBox));
+			controlRemoved.Subscribe(s => UnsubscribeOnTextBox(s.EventArgs.Control as TextBox));
 
 			ctrl.Alert += AlertHandler;
+		}
+
+		private void UnsubscribeOnTextBox(TextBox tb)
+		{
+			tb.TextChanged -= UpdateCode;
+		}
+
+		private void SubscribeOnTextBox(TextBox tb)
+		{
+			tb.TextChanged += UpdateCode;
 		}
 
 		private void InitEditor()
@@ -106,6 +122,18 @@ namespace IDE
 			{
 				splitContainer2.Panel1.Controls.Add(new TextBox() { Multiline = true, Location = new Point(i * w / n, 0), Size = new Size(w / n, h), Lines = ctrl.Source[i] });
 			}
+		}
+
+		private void UpdateCode(object s = null, EventArgs e = null)
+		{
+			var n = ctrl.ThreadNumber;
+			var arr = new string[n][];
+			for (int i = 0; i < n; i++)
+			{
+				var l = splitContainer2.Panel1.Controls[i] as TextBox;
+				arr[i] = l.Lines;
+			}
+			ctrl.Update(arr);
 		}
 
 		private void AlertHandler(object s, AlertEventArgs e)
@@ -124,20 +152,30 @@ namespace IDE
 			}
 		}
 
+		private void saveAsHandler(object s)
+		{
+			SaveFileDialog d = new SaveFileDialog();
+			var dr = d.ShowDialog();
+			if (dr == DialogResult.OK)
+			{
+				ctrl.Save(d.FileName);
+			}
+		}
+
 		private void initProcessorHandler(object s)
 		{
 			InitProcessorForm f = new InitProcessorForm();
+			f.InitCode = ctrl.InitCode;
 			var d = f.ShowDialog();
 			if (d == DialogResult.OK)
 			{
-				var t = f.Text;
+				var t = f.InitCode;
 				var err = ctrl.Init(t);
 				if (err == null)
 					return;
 				MessageBox.Show("Errors occured");
 				ctrl.ThreadNumber = 0;
 			}
-
 		}
 
 		private void threadsHandler (object s)

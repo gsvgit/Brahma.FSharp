@@ -68,6 +68,8 @@
       <Project>{fc6d7600-732b-4bb8-be82-7561f9cce668}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

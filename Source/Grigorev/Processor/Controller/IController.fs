@@ -1,16 +1,19 @@
 ﻿namespace Controller
 
 open System
+open System.IO
 open Processor
 open System.CodeDom.Compiler
 open FSharp.Compiler.CodeDom
 open System.Linq
 
 type IController<'T> =
-    abstract member Save : string -> string -> unit
+    abstract member Save : string -> unit
+    abstract member Save : unit -> unit
     abstract member Open : string -> unit
     abstract member Init : string -> ErrorListItem array
-    abstract member Compile : string array array -> unit
+    abstract member Update : string array array -> unit
+    abstract member Compile : unit -> unit
     abstract member ChangeLine : int -> string array -> unit
     abstract member Run : unit -> unit
     abstract member Run : int -> unit

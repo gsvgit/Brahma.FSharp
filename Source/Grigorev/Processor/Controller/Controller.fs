@@ -1,6 +1,9 @@
 ﻿namespace Controller
 
 open System
+open System.IO
+open System.Xml.Serialization
+open System.Runtime.Serialization
 open System.Reflection
 open Processor
 open Compiler
@@ -10,7 +13,8 @@ open System.CodeDom.Compiler
 
 type Controller<'T> () =
     let alert = new Event<AlertEventArgs> ()
-    let project = {Name = "Default"; File = null; SourceCode = [| [|"Eps"|] |]; InitCode = "namespace DefaultNamespace\ntype public FunctionsType () =\n    static member GetArray () = [|(+); (-); (*); (/)|]"}
+    let mutable project = {Name = "Default"; SourceCode = [| [|"Eps"|] |]; InitCode = "namespace DefaultNamespace\r\ntype public FunctionsType () =\r\n    member this.GetArray () = [|(+); (-); (*); (/)|]"}
+    let mutable fileName = null
     let mutable processor = null
 
     let init data =
@@ -25,17 +29,47 @@ type Controller<'T> () =
             arr
         | Success (a) ->
             let tp = a.GetType "DefaultNamespace.FunctionsType"
+            let ins = tp.GetConstructors().First().Invoke(null)
             let arr = tp.GetMethod "GetArray"
-            processor <- new Processor<'T> (arr.Invoke(null, null) :?> (('T -> 'T -> 'T) array))
+            processor <- new Processor<'T> (arr.Invoke(ins, null) :?> (('T -> 'T -> 'T) array))
+            project.InitCode <- data
             null
+
+    let openFile (file : string) =
+        let reader = new FileStream (file, FileMode.Open) 
+        let ser = new DataContractSerializer (typeof<Project>)
+        project <- ser.ReadObject(reader) :?> Project
+        reader.Close()
+        fileName <- file
+        init project.InitCode |> ignore
+
+    let save (file : string) =
+        let writer = new FileStream (file, FileMode.Create) 
+        let ser = new DataContractSerializer (typeof<Project>)
+        ser.WriteObject (writer, project)
+        writer.Close()
+        fileName <- file
+
     do
         init project.InitCode |> ignore
 
     interface IController<'T> with
-        member this.Open file = ()
-        member this.Save data file = ()
-        member this.Init data = null
-        member this.Compile code = ()
+        member this.Open file =
+            try openFile file with
+            | _ -> alert.Trigger (new AlertEventArgs ("Error opening file"))
+
+        member this.Save file =
+            try save file with
+            | e -> alert.Trigger (new AlertEventArgs ("Error saving file"))
+
+        member this.Save () =
+            try save fileName with
+            | _ -> alert.Trigger (new AlertEventArgs ("Error saving file"))
+            
+        member this.Init data = init data
+        member this.Update code =
+            project.SourceCode <- code
+        member this.Compile () = ()
         member this.ChangeLine lineNumber data = ()
         member this.Run () = ()
         member this.Run tillLine = ()
@@ -50,7 +84,7 @@ type Controller<'T> () =
 
         member this.ThreadNumber with
             get () = Array.length project.SourceCode
-            and set (value) = Array.Resize (ref project.SourceCode, value)
+            and set (value) = Array.Resize (ref project.SourceCode, value) // тут лажа
 
         member this.ProjectName = project.Name
         

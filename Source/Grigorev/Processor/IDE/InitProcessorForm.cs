@@ -17,7 +17,11 @@ namespace IDE
 		private IObservable<EventPattern<object>> initEvent;
 		private IObservable<EventPattern<object>> exitEvent;
 
-		public string Text { get; set; }
+		public string InitCode
+		{
+			get { return editor.Text; }
+			set { editor.Text = value; }
+		}
 
 		public InitProcessorForm()
 		{
@@ -28,9 +32,8 @@ namespace IDE
 			initEvent.Subscribe(InitClickHandler);
 		}
 
-		private void InitClickHandler (object s)
+		private void InitClickHandler(object s)
 		{
-			Text = editor.Text;
 			DialogResult = DialogResult.OK;
 			Close();
 		}
