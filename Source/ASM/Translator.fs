@@ -20,5 +20,3 @@ let asmToIL (prog:TTA.ASM.Program<'a>) =
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)|]
-
-

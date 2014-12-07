@@ -15,8 +15,8 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
         then raise (System.ArgumentException("null matrix"))
 
     //int is row of matrix, cow is length of array functions    
-    let matrix = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
-
+    let mutable matrix = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
+    //let Error = HashSet<(string * int * int)>()
     let addCellOnUserRequest row col = matrix.[col].Add (row, Cell(functions.[col]))
 
     //x is row, y is column
@@ -25,7 +25,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
         | Set ((x, y), arg) ->
             let intx = (int) x
             let inty = (int) y
-            if matrix.Length < intx
+            if matrix.Length < inty
             then raise (System.ArgumentException("can't create cell " + intx.ToString() + " "+ inty.ToString() ))
             if matrix.[inty].ContainsKey intx
             then matrix.[inty].[intx].Value <- arg
@@ -36,44 +36,47 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
         | Mov ((fromx, fromy), (tox, toy)) ->
             let intfromx = (int) fromx
             let intfromy = (int) fromy
-            if matrix.Length < intfromx
+            if matrix.Length < intfromy
             then raise (System.ArgumentException("can't create cell " + intfromx.ToString() + " "+ intfromy.ToString() ))
             if matrix.[intfromy].ContainsKey intfromx
             then
                 let inttox = (int) tox
                 let inttoy = (int) toy                
-                if matrix.Length < inttox
+                if matrix.Length < inttoy
                 then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " "+ inttoy.ToString() ))
                 if matrix.[inttoy].ContainsKey inttox
                 then
                     matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
                 else
                     addCellOnUserRequest inttox inttoy
-                    matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
+                    matrix.[inttoy].[inttox].Value <- matrix.[intfromy].[intfromx].Value
             else
                 addCellOnUserRequest intfromx intfromy
                 let inttox = (int) tox
                 let inttoy = (int) toy                
-                if matrix.Length < inttox
+                if matrix.Length < inttoy
                 then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " "+ inttoy.ToString() ))
                 if matrix.[inttoy].ContainsKey inttox
                 then
-                    matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
+                    matrix.[inttoy].[inttox].Value <- matrix.[intfromy].[intfromx].Value
                 else
                     addCellOnUserRequest inttox inttoy
                     matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
         | Mvc ((x, y), arg) -> 
+            // todo correction exceptions
             let intx = (int) x
             let inty = (int) y
-            if matrix.Length < intx
+            if matrix.Length < inty
             then raise (System.ArgumentException("can't create cell " + intx.ToString() + " "+ inty.ToString() ))
             matrix.[inty].[intx].RunOp arg
         | Eps -> ()
+        
     let Check (line: array<Asm<'a>>) =
         let cellsForWrite = new HashSet<(int * int)>()
         let cellsForRead = new HashSet<(int * int)>()
         for i in 0 .. line.Length - 1 do
             match line.[i] with
+            | Eps -> ()
             | Set ((tox, toy), arg) ->
                 let todot = (int tox, int toy)
                 if cellsForWrite.Contains(todot)
@@ -101,7 +104,10 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                     raise (System.ArgumentException("can't write and read together in equal cells"))
                 else
                     cellsForRead.Add(int tox, int toy) |> ignore
-            | Eps -> ()
+    
+    member this.RunLine line =
+        Array.Parallel.iter intASM line
+
     member this.RunOp (program: Program<'a>) =
         if program.Length = 0
         then ()
@@ -111,7 +117,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                 if i <> p.Length
                 then raise(System.ArgumentException("workflows aren't compatible"))
             Array.Parallel.iter (fun i -> Check i ) program
-            Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program
+            Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program    
         
     member this.ValueInCell row col =
         let currentCol = matrix.[col]
@@ -120,10 +126,21 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
         else
             addCellOnUserRequest row col
             currentCol.[row].Value
-            
+    
+    member this.Dispose =
+        matrix = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
+
+    member this.getMatrix =
+        matrix
+                
     member this.NumColls =
         matrix.Length
+
     member this.NumRows =
         Array.max(Array.init matrix.Length (fun i -> if (matrix.[i].Count > 0) then (matrix.[i].Keys.Max()) else 0)) + 1
-        
-//let public static matrix = new Matrix<int>([|(fun x y -> x + y); (fun x y -> x - y); (fun x y -> x * y); (fun x y -> x / y)|])
+    
+    member this.CreateSetCells col =
+        let cellsForAdd = Dictionary<int, string>()
+        for kvp in matrix.[col] do
+            cellsForAdd.Add(kvp.Key, kvp.Value.Value.ToString())
+        cellsForAdd

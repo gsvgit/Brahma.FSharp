@@ -1,8 +1,5 @@
 ﻿module TTA.ASM
 
-[<Measure>] type ln
-[<Measure>] type col
-
 type Asm<'a> =
     | Set of (int*int)*'a
     | Mov of (int*int)*(int*int)
@@ -10,4 +7,3 @@ type Asm<'a> =
     | Eps
 
 type Program<'a> = array<array<Asm<'a>>>
-

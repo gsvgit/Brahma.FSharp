@@ -1,11 +1,11 @@
-﻿module Parser.AST
+﻿module MyParser.AST
 
 type Var = string
 
 type Op = 
-    | Set of (int*int)*int
+    | Set of (int*int)
     | Mov of (int*int)*(int*int)
-    | Mvc of (int*int)*int
+    | Mvc of (int*int)
     | Eps
 
 type Expr =
@@ -13,6 +13,6 @@ type Expr =
     | EVar of Var
     | BinOp of Op*Expr*Expr
 
-type Stmt = Op
+type Stmt = Var*Expr
 
-type program = Stmt
+type program = List<Stmt>

@@ -1,14 +1,18 @@
-﻿﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections;
+﻿using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Reactive.Linq;
-using Microsoft.FSharp.Core;
-using System.Windows.Forms;
-//using Processor;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections;
+//using Compilator;
 
 namespace IDE
 {
@@ -17,15 +21,96 @@ namespace IDE
 
         public MainScreen()
         {
+
             InitializeComponent();
+            var open = Observable.FromEventPattern(h => button1.Click += h, h =>  button1.Click -= h);
+            open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(button1));
+            var load = Observable.FromEventPattern(h => button2.Click += h, h => button2.Click -= h);
+            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(button2));
+            var start = Observable.FromEventPattern(h => button3.Click += h, h => button3.Click -= h);
+            start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(button3));
+            var debug = Observable.FromEventPattern(h => button4.Click += h, h => button4.Click -= h);
+            debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(button4));
+            var stop = Observable.FromEventPattern(h => button5.Click += h, h => button5.Click -= h);
+            stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(button5));
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public string CreateCode
+        {
+            get { return richTextBox1.Text; }
+        }
+        private void Stop(object sender)
+        {
+            MessageBox.Show("закончить debug");
+            button5.Visible = false;
+            DisposeDataGrid(data);
+            count = 0;
+        }
+        static int count = 0;
+        private void Debug(object sender)
+        {
+            MessageBox.Show("Передать строку в метод compile для debug");
+            Compilator.Compiler comp = new Compilator.Compiler();
+            if (count < richTextBox1.Lines.Length - 1)
+            {
+                button5.Visible = true;
+                comp.Compile(richTextBox1.Text);
+                comp.Step(count);
+                count++;
+                this.CreateDataGrid(comp, data);
+            }
+            else
+            {
+                button5.Visible = false;
+                comp.Compile(richTextBox1.Text);
+                comp.Step(count);
+                this.CreateDataGrid(comp, data);
+                count = 0;
+                comp.Stop();
+            }
+        }
+
+        private void Start(object sender)
         {
 
+            Compilator.Compiler comp = new Compilator.Compiler();
+            try
+            {
+                DisposeDataGrid(data);
+                MessageBox.Show("Передать строку в compile");comp.Compile(richTextBox1.Text);
+                comp.Run();
+                this.CreateDataGrid(comp, data);
+                comp.Stop();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);    
+            }
         }
-        
-        private void button2_Click(object sender, EventArgs e)
+
+        private void CreateDataGrid(Compilator.Compiler compiler, DataGridView data)
+        {
+            if (data.RowCount < compiler.NumRows()) { data.RowCount = compiler.NumRows(); }
+            for (int i = 0; i < compiler.NumCols(); i++)
+            {
+                //data[i]
+                Dictionary<int, string> cells = compiler.getGrid(i);
+                foreach (KeyValuePair<int, string> kvp in cells){
+                    data[i, kvp.Key].Value = kvp.Value;
+                }
+            }
+        }
+        private void DisposeDataGrid(DataGridView data)
+        {
+            for (int col = 0; col< data.ColumnCount; col++)
+            {
+                for (int row = 0; row < data.ColumnCount; row++)
+                {
+                    data[col, row].Value = null;
+                }
+            }
+        }
+        private void OpenFile(object sender)
         {
             try
             {
@@ -38,10 +123,9 @@ namespace IDE
                 string str = System.IO.File.ReadAllText(@filePath);
                 richTextBox1.Text = str;
             }
-            catch(Exception){};
+            catch (Exception) { };
         }
-
-        private void button1_Click_1(object sender, EventArgs e)
+        private void LoadFile(object sender)
         {
             string filePath = "";
             string str = richTextBox1.Text;
@@ -56,6 +140,5 @@ namespace IDE
                 sw.Close();
             }
         }
-
     }
 }

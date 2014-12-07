@@ -11,6 +11,8 @@
     <AssemblyName>IDE</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,11 +34,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AST.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\AST.Common.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\FSharp.Core.4.3.0.0.Microsoft.Signed.3.0.0.1\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="FsYacc">
       <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
+    </Reference>
+    <Reference Include="Generators.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\Generators.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,6 +71,24 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="YC.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Constraints.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Conversions.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.RNGLRAbstractParser">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRAbstractParser.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.RNGLRCommon">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="YC.RNGLRParser">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRParser.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Form1.cs">
@@ -105,12 +131,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Board\Board\Board.fsproj">
-      <Project>{b4472a56-5f30-4e10-9520-498eaf43cd77}</Project>
-      <Name>Board</Name>
+    <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
+      <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
+      <Name>ASM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Compiler\Compiler.fsproj">
+      <Project>{04b64178-ad5e-42b8-b435-c2c11fdfcce4}</Project>
+      <Name>Compiler</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
