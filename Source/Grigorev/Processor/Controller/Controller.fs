@@ -160,7 +160,7 @@ type Controller<'T> () =
         member this.Step count = ()
 
         member this.Read row col = processor.Read (row, col)
-        member this.ReadAll () = processor.ReadAll ()
+        member this.ReadAll () = if processor = null then [||] else processor.ReadAll ()
 
         member this.Clear () = if processor <> null then processor.Clear()
         member this.ClearOnRun with get () = clearOnRun and set (v) = clearOnRun <- v
