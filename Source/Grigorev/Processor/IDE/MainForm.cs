@@ -316,6 +316,8 @@ namespace IDE
 					MessageBox.Show("Errors occured");
 					ctrl.ThreadNumber = 0;
 				}
+				UpdateCode();
+				UpdateGrid();
 			}
 			updateProcessorState();
 		}
