@@ -102,9 +102,9 @@
       <Project>{58cb8a30-4e20-4042-a3b2-0cbfc5b27e42}</Project>
       <Name>Compiler</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Controller\Controller.fsproj">
+    <ProjectReference Include="..\ProcessorControl\ProcessorControl.fsproj">
       <Project>{020452b5-5667-474d-8cec-df3670dafb1e}</Project>
-      <Name>Controller</Name>
+      <Name>ProcessorControl</Name>
     </ProjectReference>
     <ProjectReference Include="..\TTA-Processor\TTA-Processor.fsproj">
       <Project>{b7116886-54a2-409e-aea0-6a220bbfe497}</Project>
