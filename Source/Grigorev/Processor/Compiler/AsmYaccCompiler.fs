@@ -27,7 +27,12 @@ type AsmYaccCompiler<'T> () =
             Some (List.head tmp)
         | Error (pos, errs, msg, dbg, _) -> None
 
-    interface IAsmCompiler<'T> with
-        member this.Compile code =
-            code |> Array.map (fun x -> x |> Array.map (fun y -> try translate y with | _ -> None))
+    let compile code =
+        code |> Array.map (fun x -> x |> Array.map (fun y -> try translate y with | _ -> None))
 
+    interface IAsmCompiler<'T> with
+        member this.Compile data =
+            compile data
+
+    member this.Compile data : Asm<'T> option array array =
+        compile data

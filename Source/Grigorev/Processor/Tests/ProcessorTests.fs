@@ -20,7 +20,7 @@ type Help () =
     static member ArrToAsm (comm : array<array<PseudoAsm<_>>>) = comm |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
 
 [<TestFixture>]
-type CheckTests () =
+type public CheckTests () =
     let functions = [|(+)|]
     let proc = new Processor<int> (functions)
 
@@ -74,7 +74,7 @@ type CheckTests () =
 
 
 [<TestFixture>]
-type IntTests () =
+type public IntTests () =
     let functions = [|
             (+);
             (-);
@@ -123,3 +123,77 @@ type IntTests () =
         proc.Evaluate (comm)
         Assert.That (proc.Read (1, 0), Is.EqualTo (107))
         Assert.That (proc.Read (0, 1), Is.EqualTo (-93))
+
+[<TestFixture>]
+type public BoolTests () =
+    let functions = [| (&&); (||); (fun x y -> x <> y); (fun x y -> y || not x) |]
+    let proc = new Processor<bool> (functions)
+
+    [<SetUp>]
+    member this.Setup () =
+        proc.Clear ()
+
+    [<Test>]
+    member this.Test0 () =
+        let comm = [|[| PSet (0, 0, false); PSet (0, 1, false); PMvc (0, 0, true); PMvc (0, 1, true) |]|] |> Help.ArrToAsm
+        proc.Evaluate comm
+        Assert.That (proc.Read (0, 0), Is.EqualTo (false))
+        Assert.That (proc.Read (0, 1), Is.EqualTo (true))
+
+    [<Test>]
+    member this.Test1 () =
+        let comm =
+            [|
+                [| PSet (0, 0, false); PSet (0, 1, false); PMvc (0, 0, true); PMvc (0, 1, true) |];
+                [| PSet (1, 2, false); PSet (1, 3, false); PMvc (1, 2, true); PMvc (1, 3, true) |]
+            |]
+            |> Help.ArrToAsm
+        proc.Evaluate comm
+        Assert.That (proc.Read (0, 0), Is.EqualTo (false))
+        Assert.That (proc.Read (0, 1), Is.EqualTo (true))
+        Assert.That (proc.Read (1, 2), Is.EqualTo (true))
+        Assert.That (proc.Read (1, 3), Is.EqualTo (true))
+
+[<TestFixture>]
+type ByteTests () =
+    let functions = [| (+); (-); (*); (/) |]
+    let proc = new Processor<byte> (functions)
+
+    [<SetUp>]
+    member this.Setup () =
+        proc.Clear ()
+
+    [<Test>]
+    member this.Test0 () =
+        let comm = [|[| PSet (0, 0, 0uy); PSet (0, 1, 17uy); PMvc (0, 0, 5uy); PMvc (0, 1, 7uy) |]|] |> Help.ArrToAsm
+        proc.Evaluate comm
+        Assert.That (proc.Read (0, 0), Is.EqualTo (5uy))
+        Assert.That (proc.Read (0, 1), Is.EqualTo (10uy))
+
+    [<Test>]
+    member this.Test1 () =
+        let comm =
+            [|
+                [| PSet (0, 1, 17uy); PMvc (0, 1, 2uy); PMov (0, 0, 0, 1); PMov (0, 0, 0, 2); PMov (0, 0, 1, 0) |];
+                [| PSet (1, 2, 11uy); PMvc (1, 2, 5uy); PMov (1, 0, 1, 2); PMov (1, 0, 0, 3) |];
+                [| PSet (0, 2, 4uy); PMvc (0, 2, 12uy) |];
+                [| PSet (0, 3, 9uy); PMvc (0, 3, 3uy) |]
+            |]
+            |> Help.ArrToAsm
+        proc.Evaluate comm
+        Assert.That (proc.Read (0, 0), Is.EqualTo (121))
+
+[<TestFixture>]
+type StringArrayTests () =
+    let functions = [| (fun (x : array<_>) (y : array<_>) -> if x.Length < y.Length then x else y); (fun x (y : array<string>) -> [| (Array.fold (fun s e -> s + String.length e) 0 y).ToString() |]) |]
+    let proc = new Processor<string array> (functions)
+
+    [<SetUp>]
+    member this.Setup () =
+        proc.Clear ()
+
+    [<Test>]
+    member this.Test0 () =
+        let comm = [|[| PSet (0, 1, [|"abc"|]); PMvc (0, 1, [|"asdf"; "12345"|]) |]|] |> Help.ArrToAsm
+        proc.Evaluate comm
+        Assert.That (proc.Read (0, 1), Is.EqualTo ([|"9"|]))

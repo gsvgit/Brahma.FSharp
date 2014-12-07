@@ -47,8 +47,8 @@
   <ItemGroup>
     <Compile Include="ProcessorTests.fs" />
     <Compile Include="ControllerTests.fs" />
+    <Compile Include="AsmCompilerTests.fs" />
     <None Include="packages.config" />
-    <Compile Include="AsmRegexCompilerTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\ASM\ASM.fsproj">

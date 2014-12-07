@@ -54,7 +54,7 @@ namespace IDE
 
 			clearOnRunToolStripMenuItem.Checked = ctrl.ClearOnRun;
 			updateProcessorState();
-			UpdateGrid();
+			//UpdateGrid();
 
 			errorsDataGridView.Columns.Add("Row", "Row");
 			errorsDataGridView.Columns.Add("Col", "Col");
@@ -283,6 +283,7 @@ namespace IDE
 		private void openHandler(object s)
 		{
 			OpenFileDialog d = new OpenFileDialog();
+			d.Filter = "Project files (*.asmprj)|*.asmprj|All files (*.*)|*.*";
 			var dr = d.ShowDialog();
 			if (dr == DialogResult.OK)
 			{
@@ -295,6 +296,7 @@ namespace IDE
 		private void saveAsHandler(object s)
 		{
 			SaveFileDialog d = new SaveFileDialog();
+			d.Filter = "Project files (*.asmprj)|*.asmprj|All files (*.*)|*.*";
 			var dr = d.ShowDialog();
 			if (dr == DialogResult.OK)
 			{
@@ -313,11 +315,15 @@ namespace IDE
 				var err = ctrl.Init(t);
 				if (err != null)
 				{
+					compileToolStripMenuItem.Enabled = false;
 					MessageBox.Show("Errors occured");
-					ctrl.ThreadNumber = 0;
 				}
-				UpdateCode();
-				UpdateGrid();
+				else
+				{
+					compileToolStripMenuItem.Enabled = true;
+					UpdateCode();
+					UpdateGrid();
+				}
 			}
 			updateProcessorState();
 		}

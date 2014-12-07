@@ -86,12 +86,6 @@
     <Compile Include="ThreadNumberForm.Designer.cs">
       <DependentUpon>ThreadNumberForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Watch.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Watch.Designer.cs">
-      <DependentUpon>Watch.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="EditorForm.resx">
       <DependentUpon>EditorForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -112,9 +106,6 @@
     </Compile>
     <EmbeddedResource Include="ThreadNumberForm.resx">
       <DependentUpon>ThreadNumberForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Watch.resx">
-      <DependentUpon>Watch.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

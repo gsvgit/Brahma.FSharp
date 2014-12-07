@@ -4,7 +4,7 @@ open NUnit.Framework
 open Controller
 
 [<TestFixture>]
-type ControllerTests () =
+type public ControllerTests () =
     [<Test>]
     member this.Test0 () =
         let c = new Controller<int> ()

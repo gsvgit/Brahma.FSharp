@@ -129,6 +129,8 @@ type Controller<'T> () =
         member this.Run tillLine = ()
 
         member this.StartDebug () =
+            if clearOnRun
+            then processor.Clear()
             if errors.Length = 0 && binary.IsSome
             then
                 inDebug <- true
