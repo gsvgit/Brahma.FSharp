@@ -21,6 +21,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Compiler", "Compiler\Compil
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Controller", "Controller\Controller.fsproj", "{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "YC-Parser", "YC-Parser\YC-Parser.fsproj", "{F75B1599-AAB6-4C35-96A6-BB97765A8912}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAFB18F4-6A6E-4D21-B4E7-BD6787901D4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F75B1599-AAB6-4C35-96A6-BB97765A8912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F75B1599-AAB6-4C35-96A6-BB97765A8912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F75B1599-AAB6-4C35-96A6-BB97765A8912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F75B1599-AAB6-4C35-96A6-BB97765A8912}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

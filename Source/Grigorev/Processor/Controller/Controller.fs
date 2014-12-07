@@ -22,7 +22,7 @@ type Controller<'T> () =
     let mutable clearOnRun = true
     let mutable errors = [||]
     let mutable binary = None
-    let comp = new AsmRegexCompiler<'T>() :> IAsmCompiler<'T>
+    let comp = new AsmYaccCompiler<'T>() :> IAsmCompiler<'T>
 
     let init (data : string) =
         processor <- null

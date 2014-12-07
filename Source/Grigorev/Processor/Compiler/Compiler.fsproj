@@ -40,11 +40,28 @@
     <Compile Include="FSharpCompiler.fs" />
     <Compile Include="IAsmCompiler.fs" />
     <Compile Include="AsmRegexCompiler.fs" />
+    <Compile Include="Calc.yrd.fs" />
+    <Compile Include="CalcLexer.fs" />
+    <Compile Include="AsmYaccCompiler.fs" />
     <None Include="packages.config" />
+    <None Include="Calc.fsl" />
+    <None Include="Calc.yrd" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AST.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\AST.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Compiler.CodeDom">
       <HintPath>..\packages\FSharp.Compiler.CodeDom.0.9.1\lib\net40\FSharp.Compiler.CodeDom.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FsYacc">
+      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Generators.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\Generators.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -54,6 +71,30 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="YC.Common">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Constraints">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Constraints.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.Conversions">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Conversions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.RNGLRAbstractParser">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRAbstractParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.RNGLRCommon">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRCommon.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="YC.RNGLRParser">
+      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRParser.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\ASM\ASM.fsproj">

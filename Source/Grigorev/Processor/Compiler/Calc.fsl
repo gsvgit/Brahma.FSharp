@@ -1,0 +1,30 @@
+﻿{
+module Lexer
+open Microsoft.FSharp.Text.Lexing
+open Parser
+
+let lexeme lexbuf = LexBuffer<_>.LexemeString(lexbuf)
+}
+
+let digit = ['0'-'9']
+let fstdigit = ['1'-'9']
+let setcommand = ['s''S']['e''E']['t''T']
+let movcommand = ['m''M']['o''O']['v''V']
+let mvccommand = ['m''M']['v''V']['c''C']
+let epscommand = ['e''E']['p''P']['s''S']
+let whitespace = [' ' '\t' '\r' '\n']
+let pnumber = fstdigit digit*
+let nnumber = '-' pnumber
+let zero = '0'
+let number = pnumber | zero | nnumber
+
+rule token = parse
+| whitespace { token lexbuf }
+| epscommand { EPS(lexeme lexbuf) }
+| setcommand { SET(lexeme lexbuf) }
+| mvccommand { MVC(lexeme lexbuf) }
+| movcommand { MOV(lexeme lexbuf) }
+| number { NUMBER(lexeme lexbuf) }
+| eof { RNGLR_EOF ("")}
+| _ {  failwithf "unexpected input: %s" <| string lexeme }
+
