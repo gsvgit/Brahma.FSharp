@@ -23,6 +23,8 @@ type Controller<'T> () =
     let mutable errors = [||]
     let mutable binary = None
     let comp = new AsmYaccCompiler<'T>() :> IAsmCompiler<'T>
+    let mutable inDebug = false
+    let mutable debugPosition = 0
 
     let init (data : string) =
         processor <- null
@@ -117,25 +119,52 @@ type Controller<'T> () =
             compile ()
             
         member this.ChangeLine lineNumber data = ()
+
         member this.Run () = 
             if clearOnRun
             then processor.Clear()
             if errors.Length = 0 && binary.IsSome
             then processor.Evaluate binary.Value
+
         member this.Run tillLine = ()
-        member this.Step () = ()
+
+        member this.StartDebug () =
+            if errors.Length = 0 && binary.IsSome
+            then
+                inDebug <- true
+                debugPosition <- 0
+        member this.StopDebug () = inDebug <- false
+        member this.InDebug with get () = inDebug
+
+        member this.Step () =
+            if not inDebug
+            then ()
+            let f = ref true
+            let mapper x =
+                if debugPosition < Array.length x
+                then
+                    f := false
+                    x.[debugPosition]
+                else Eps
+            let line = binary.Value |> Array.map (fun x -> mapper x)
+            if !f
+            then
+                inDebug <- false
+                ()
+            processor.Evaluate line
+            debugPosition <- debugPosition + 1
+            
+
         member this.Step count = ()
+
         member this.Read row col = processor.Read (row, col)
         member this.ReadAll () = processor.ReadAll ()
+
         member this.Clear () = if processor <> null then processor.Clear()
         member this.ClearOnRun with get () = clearOnRun and set (v) = clearOnRun <- v
 
         member this.CompilationErrors with get () = errors
             
-
-        //member this.Check code = [||]
-        //member this.CheckLine code = [||]
-
         member this.FunctionsCount with
             get () = if processor = null then 0 else processor.Size
 

@@ -78,19 +78,21 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
     let evalRow commands =
         if checkLineTotal commands |> Array.length <> 0
         then IncorrectLineException ("Incorrect line, cannot execute", 0) |> raise
+        let commands = commands |> Array.filter (fun x -> match x with | Eps -> false | _ -> true)
         let l = Array.length commands
         if l = 0
         then ()
         elif l = 1
         then eval commands.[0]
         else
-            let commands = commands |> Array.filter (fun x -> match x with | Eps -> false | _ -> true)
             let reads = commands |> Array.map (fun x -> match x with | Set (_, v) | Mvc (_, v) -> Value v | Mov (_, p) -> Cell p)
-            let readTask = seq { for x in reads -> async { return match x with | Value v -> v | Cell (r, c) -> grid.GetValue (r, c) } } |> Async.Parallel |> Async.StartAsTask
-            readTask.Wait ()
-            let readResult = readTask.Result
-            let writeTask = seq { for i in 0 .. commands.Length - 1 -> async { match commands.[i] with | Set ((r, c), _) -> grid.SetValue (r, c, readResult.[i]) | Mov ((r, c), _) | Mvc ((r, c), _) -> grid.Move (r, c, readResult.[i]) | _ -> () } } |> Async.Parallel |> Async.StartAsTask
-            writeTask.Wait ()
+            //let readTask = seq { for x in reads -> async { return match x with | Value v -> v | Cell (r, c) -> grid.GetValue (r, c) } } |> Async.Parallel |> Async.StartAsTask
+            let readResult = reads |> Array.Parallel.map (fun x -> match x with | Value v -> v | Cell (r, c) -> grid.GetValue (r, c))
+            //readTask.Wait ()
+            //let readResult = readTask.Result
+            commands |> Array.Parallel.iteri (fun i x ->  match x with | Set ((r, c), _) -> grid.SetValue (r, c, readResult.[i]) | Mov ((r, c), _) | Mvc ((r, c), _) -> grid.Move (r, c, readResult.[i]) | _ -> ())
+            //let writeTask = seq { for i in 0 .. commands.Length - 1 -> async { match commands.[i] with | Set ((r, c), _) -> grid.SetValue (r, c, readResult.[i]) | Mov ((r, c), _) | Mvc ((r, c), _) -> grid.Move (r, c, readResult.[i]) | _ -> () } } |> Async.Parallel |> Async.StartAsTask
+            //writeTask.Wait ()
     
     do
         match functions with

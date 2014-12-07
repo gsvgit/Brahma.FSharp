@@ -19,6 +19,9 @@ type IController<'T> =
     abstract member ChangeLine : int -> string array -> unit
     abstract member Run : unit -> unit
     abstract member Run : int -> unit
+    abstract member StartDebug : unit -> unit
+    abstract member StopDebug : unit -> unit
+    abstract member InDebug : bool with get
     abstract member Step : unit -> unit
     abstract member Step : int -> unit
     abstract member Read : int -> int -> 'T

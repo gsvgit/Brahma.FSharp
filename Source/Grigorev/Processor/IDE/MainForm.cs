@@ -40,6 +40,8 @@ namespace IDE
 		private IObservable<object> panel1Resized;
 		private IObservable<EventPattern<ControlEventArgs>> controlAdded;
 		private IObservable<EventPattern<ControlEventArgs>> controlRemoved;
+		private IObservable<EventPattern<DataGridViewCellEventArgs>> rowClicked;
+		private IObservable<EventPattern<KeyEventArgs>> keyPressed; 
 
 		public MainForm()
 		{
@@ -83,6 +85,8 @@ namespace IDE
 			panel1Resized = Observable.FromEventPattern(h => splitContainer2.Panel1.Resize += h, h => splitContainer2.Panel1.Resize -= h);
 			controlAdded = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlAdded += h, h => splitContainer2.Panel1.ControlAdded -= h).Where(p => p.EventArgs.Control is TextBox);
 			controlRemoved = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlRemoved += h, h => splitContainer2.Panel1.ControlRemoved -= h).Where(p => p.EventArgs.Control is TextBox);
+			rowClicked = Observable.FromEventPattern<DataGridViewCellEventHandler, DataGridViewCellEventArgs>(h => errorsDataGridView.CellDoubleClick += h, h => errorsDataGridView.CellDoubleClick -= h);
+			keyPressed = Observable.FromEventPattern<KeyEventHandler, KeyEventArgs>(h => this.KeyDown += h, h => this.KeyDown -= h);
 		}
 
 		private void SubscribeEvents()
@@ -96,12 +100,12 @@ namespace IDE
 			clearClick.Subscribe(s => { ctrl.Clear(); UpdateGrid(); });
 			clearOnRunClick.Subscribe(s => { ctrl.ClearOnRun = !ctrl.ClearOnRun; clearOnRunToolStripMenuItem.Checked = ctrl.ClearOnRun; });
 			showGridClick.Subscribe();
-			compileClick.Subscribe(s => { ctrl.Compile(); UpdateErrors(); });
+			compileClick.Subscribe(s => Compile());
 			checkClick.Subscribe();
-			runClick.Subscribe(s => { ctrl.Run(); UpdateGrid(); });
-			debugClick.Subscribe();
-			stepClick.Subscribe();
-			stopDebugClick.Subscribe();
+			runClick.Subscribe(s => Run());
+			debugClick.Subscribe(s => StartDebug());
+			stepClick.Subscribe(s => Step());
+			stopDebugClick.Subscribe(e => StopDebug());
 			threadsClick.Subscribe(threadsHandler);
 			multiThreadClick.Subscribe();
 			aboutClick.Subscribe(s => MessageBox.Show((char)169 + " Sergey Grigorev, 2014", "About"));
@@ -109,8 +113,92 @@ namespace IDE
 			panel1Resized.Subscribe(s => InitEditor());
 			controlAdded.Subscribe(s => SubscribeOnTextBox(s.EventArgs.Control as TextBox));
 			controlRemoved.Subscribe(s => UnsubscribeOnTextBox(s.EventArgs.Control as TextBox));
+			rowClicked.Subscribe(s => { var r = errorsDataGridView.Rows[s.EventArgs.RowIndex]; var i = (int) r.Cells[0].Value; var j = (int) r.Cells[1].Value; SetCursorTo(i, j); });
+
+			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && (p.EventArgs.Modifiers & Keys.Control) != 0).Subscribe(e => Run());
+			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && (p.EventArgs.Modifiers & Keys.Control) == 0).Subscribe(e => StartDebug());
+			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F10).Subscribe(e => Step());
+			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.B && (p.EventArgs.Modifiers & Keys.Control) != 0 && (p.EventArgs.Modifiers & Keys.Shift) != 0 ).Subscribe(e => Compile());
 
 			ctrl.Alert += AlertHandler;
+		}
+
+		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+		{
+			if (keyData == (Keys.B | Keys.Control | Keys.Shift))
+				Compile();
+			else if (keyData == Keys.F5)
+				StartDebug();
+			else if (keyData == (Keys.F5 | Keys.Control))
+				Run();
+			else if (keyData == Keys.F10)
+				Step();
+			return base.ProcessCmdKey(ref msg, keyData);
+		}
+
+		private void Run()
+		{
+			ctrl.Run();
+			UpdateGrid();
+		}
+
+		private void StartDebug()
+		{
+			ctrl.StartDebug();
+			stepToolStripMenuItem.Enabled = stopDebuggingToolStripMenuItem.Enabled = true;
+			debugToolStripMenuItem1.Enabled = false;
+			UpdateStatusBar();
+			DisableMenu();
+		}
+
+		private void DisableMenu()
+		{
+			fileToolStripMenuItem.Enabled = processorToolStripMenuItem.Enabled = buildToolStripMenuItem.Enabled = settingsToolStripMenuItem.Enabled = runWoDebugToolStripMenuItem.Enabled = false;
+		}
+
+		private void EnableMenu()
+		{
+			fileToolStripMenuItem.Enabled = processorToolStripMenuItem.Enabled = buildToolStripMenuItem.Enabled = settingsToolStripMenuItem.Enabled = runWoDebugToolStripMenuItem.Enabled = true;
+		}
+
+		private void Step()
+		{
+			ctrl.Step();
+			UpdateGrid();
+			if (!ctrl.InDebug)
+				StopDebug();
+		}
+
+		private void StopDebug()
+		{
+			ctrl.StopDebug();
+			stepToolStripMenuItem.Enabled = stopDebuggingToolStripMenuItem.Enabled = false;
+			debugToolStripMenuItem1.Enabled = true;
+			UpdateGrid();
+			UpdateStatusBar();
+			EnableMenu();
+		}
+
+		private void UpdateStatusBar()
+		{
+			statusStrip1.BackColor = ctrl.InDebug ? Color.DarkOrange : DefaultBackColor;
+		}
+
+		private void Compile()
+		{
+			ctrl.Compile();
+			UpdateErrors();
+		}
+
+		private void SetCursorTo(int row, int col)
+		{
+			var tb = splitContainer2.Panel1.Controls[col < 0 ? 0 : col] as TextBox;
+			int sum = 0;
+			int rl = tb.Lines[row].Length;
+			for (int i = 0; i < row; i++)
+				sum += tb.Lines[i].Length + 2;
+			tb.Select(sum, rl);
+			tb.Focus();
 		}
 
 		private void UnsubscribeOnTextBox(TextBox tb)
@@ -139,6 +227,7 @@ namespace IDE
 
 		private void UpdateCode(object s = null, EventArgs e = null)
 		{
+			StopDebug();
 			var n = ctrl.ThreadNumber;
 			var arr = new string[n][];
 			for (int i = 0; i < n; i++)
@@ -147,7 +236,7 @@ namespace IDE
 				arr[i] = l.Lines;
 			}
 			ctrl.Update(arr);
-			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = false;
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = false;
 		}
 
 		private void UpdateGrid()
@@ -183,7 +272,7 @@ namespace IDE
 				row.Cells.Add(new DataGridViewTextBoxCell() { Value = e.Message });
 				errorsDataGridView.Rows.Add(row);
 			}
-			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = err.Length == 0;
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = err.Length == 0;
 		}
 
 		private void AlertHandler(object s, AlertEventArgs e)
@@ -200,7 +289,7 @@ namespace IDE
 				ctrl.Open(d.FileName);
 				InitEditor();
 			}
-			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = stepToolStripMenuItem.Enabled = false;
+			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = false;
 		}
 
 		private void saveAsHandler(object s)
