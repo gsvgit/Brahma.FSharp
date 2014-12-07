@@ -1,10 +1,10 @@
-﻿module Compiler.test
+﻿module TTA.Compiler
 open Compiler.Lexer
 
 open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.Parser
 
-open TTA.ASM
+open ASM
 
 type line = list<Asm<int>>*string
 
@@ -32,6 +32,7 @@ let compile (inputString: string) =
     let tr = tree.[0]   
     let numOfCol = fst (List.maxBy (fun (ln: line) -> (fst ln).Length) tr) |> List.length
 
-    let program = Array.init numOfCol (fun i -> Array.init tr.Length (fun j -> if i > (fst tr.[j]).Length - 1 then Eps else (fst tr.[j]).[i])) 
-
+    let (program: Program<int>) = Array.init numOfCol (fun i -> Array.init tr.Length (fun j -> if i > (fst tr.[j]).Length - 1 
+                                                                                               then Eps 
+                                                                                               else (fst tr.[j]).[i])) 
     program

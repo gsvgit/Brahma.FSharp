@@ -1,6 +1,6 @@
 ﻿module Program
-open Compiler.test
-open Processor
+open TTA.Compiler
+open TTA.Processor
 
 let x = compile "Set (0 0) 1 Set (0 1) 2;
                  Mvc (0 0) 3;

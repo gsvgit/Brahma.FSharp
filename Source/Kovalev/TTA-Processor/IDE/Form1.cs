@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,22 +12,71 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using System.IO;
+using Controller;
+
 
 namespace IDE
 {
     public partial class Form1 : Form
     {
+        private readonly ProcessorController controller = new ProcessorController();
+
         public Form1()
         {
             InitializeComponent();
-            var newButton = Observable.FromEventPattern(h => newToolStripMenuItem.Click += h, h => newToolStripMenuItem.Click -= h);
-            newButton.Subscribe(x => newToolStripMenuItem.Text = newToolStripMenuItem.Text + "!");
+            var newClick = Observable.FromEventPattern(h => newToolStripMenuItem.Click += h,
+                h => newToolStripMenuItem.Click -= h);
+            newClick.Subscribe(x => editor.Text = "");
 
-            var openButton = Observable.FromEventPattern(h => openToolStripMenuItem.Click += h, h => openToolStripMenuItem.Click -= h);
-            openButton.Subscribe(x => openButtonPressed());
+            var openClick = Observable.FromEventPattern(h => openToolStripMenuItem.Click += h,
+                h => openToolStripMenuItem.Click -= h);
+            openClick.Subscribe(x => openButtonPressed());
 
-            var saveButton = Observable.FromEventPattern(h => saveToolStripMenuItem.Click += h, h => saveToolStripMenuItem.Click -= h);
-            saveButton.Subscribe(x => saveButtonPressed());
+            var saveClick = Observable.FromEventPattern(h => saveToolStripMenuItem.Click += h,
+                h => saveToolStripMenuItem.Click -= h);
+            saveClick.Subscribe(x => saveButtonPressed());
+
+            var buildClick = Observable.FromEventPattern(h => buildToolStripMenuItem.Click += h,
+                h => buildToolStripMenuItem.Click -= h);
+            buildClick.Subscribe(x => controller.Build(editor.Text));
+
+            var startClick = Observable.FromEventPattern(h => startToolStripMenuItem.Click += h,
+                h => startToolStripMenuItem.Click -= h);
+            startClick.Subscribe(x =>
+            {
+                controller.Run(editor.Text);
+                updateDataGrid();
+            });
+
+            var debugClick = Observable.FromEventPattern(h => startDebuggingToolStripMenuItem.Click += h,
+                h => startDebuggingToolStripMenuItem.Click -= h);
+            debugClick.Subscribe(x =>
+            {
+                controller.Build(editor.Text);
+                disableVisualElements();
+                clearDataGrid();
+                controller.StartDebugging();
+            });
+
+            var stepClick = Observable.FromEventPattern(h => nextStepToolStripMenuItem.Click += h,
+                h => nextStepToolStripMenuItem.Click -= h);
+            stepClick.Subscribe(x =>
+            {
+                nextStep();
+                updateDataGrid();
+            });
+
+            var stopClick = Observable.FromEventPattern(h => stopToolStripMenuItem.Click += h,
+                h => stopToolStripMenuItem.Click -= h);
+            stopClick.Subscribe(x =>
+            {
+                enableVisualElements();
+                controller.StopDebugging();
+            });
+
+            var aboutClick = Observable.FromEventPattern(h => aboutToolStripMenuItem.Click += h,
+                h => aboutToolStripMenuItem.Click -= h);
+            aboutClick.Subscribe(x => MessageBox.Show("   My Little IDE v1.0    \n      TTA is magic!", "About"));
         }
 
         private void openButtonPressed()
@@ -42,12 +92,12 @@ namespace IDE
                 try
                 {
                     var sr = new StreamReader(openFileDialog.FileName);
-                    textBox1.Text += sr.ReadToEnd();
+                    editor.Text += sr.ReadToEnd();
                     sr.Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message);
+                    MessageBox.Show("Can't open file: " + ex.Message);
                 }
             }
         }
@@ -65,14 +115,67 @@ namespace IDE
                 try
                 {
                     var sr = new StreamWriter(saveFileDialog.FileName);
-                    sr.Write(textBox1.Text);
+                    sr.Write(editor.Text);
                     sr.Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message);
+                    MessageBox.Show("Can't save file: " + ex.Message);
                 }
             }
+        }
+
+        private void clearDataGrid()
+        {
+            dataGridView.Rows.Clear();
+            dataGridView.Columns.Clear();
+        }
+
+        private void updateDataGrid()
+        {
+            clearDataGrid();
+
+            var width = controller.NumOfCols;
+            var height = controller.NumOfRows;
+
+            for (int i = 0; i < width; i++)
+                dataGridView.Columns.Add(i.ToString(), i.ToString());
+            for (int i = 0; i < height; i++)
+            {
+                var row = new DataGridViewRow {HeaderCell = {Value = i.ToString()}};
+                for (int j = 0; j < width; j++)
+                    row.Cells.Add(new DataGridViewTextBoxCell());
+                dataGridView.Rows.Add(row);
+            }
+
+            var allCells = controller.AllValues;
+            foreach (var c in allCells)
+                dataGridView.Rows[c.Item1].Cells[c.Item2].Value = c.Item3;
+        }
+
+        private void disableVisualElements()
+        {
+            foreach (ToolStripMenuItem item in menuStrip1.Items)
+                foreach (ToolStripMenuItem button in item.DropDownItems)
+                    if (button.Name != "nextStepToolStripMenuItem" && button.Name != "stopToolStripMenuItem")
+                        button.Enabled = false;
+            editor.ReadOnly = true;
+        }
+
+        private void enableVisualElements()
+        {
+            foreach (ToolStripMenuItem item in menuStrip1.Items)
+                foreach (ToolStripMenuItem button in item.DropDownItems)
+                    button.Enabled = true;
+            editor.ReadOnly = false;
+        }
+
+        private void nextStep()
+        {
+            //markDebuggingLine();
+            controller.NextStep();
+            if (!controller.DebugState)
+                enableVisualElements();
         }
     }
 }
