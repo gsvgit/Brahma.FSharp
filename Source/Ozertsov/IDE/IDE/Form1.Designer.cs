@@ -46,7 +46,7 @@ namespace IDE
             this.data = new System.Windows.Forms.DataGridView();
             this.plus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.minus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.delit = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.errorBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).BeginInit();
@@ -112,7 +112,7 @@ namespace IDE
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
             this.minus,
-            this.delit,
+            this.division,
             this.multiplication});
             this.data.Location = new System.Drawing.Point(905, 43);
             this.data.Name = "data";
@@ -131,10 +131,10 @@ namespace IDE
             this.minus.Name = "minus";
             this.minus.ReadOnly = true;
             // 
-            // delit
+            // division
             // 
-            this.delit.Name = "delit";
-            this.delit.ReadOnly = true;
+            this.division.Name = "division";
+            this.division.ReadOnly = true;
             // 
             // multiplication
             // 
@@ -186,7 +186,7 @@ namespace IDE
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private DataGridViewTextBoxColumn plus;
         private DataGridViewTextBoxColumn minus;
-        private DataGridViewTextBoxColumn delit;
+        private DataGridViewTextBoxColumn division;
         private DataGridViewTextBoxColumn multiplication;
         private RichTextBox errorBox;
     }

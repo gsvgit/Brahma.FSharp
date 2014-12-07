@@ -58,7 +58,9 @@ namespace IDE
                 {
                     if (count == 0)
                         DisposeDataGrid(data);
-                    button5.Visible = true; 
+                    button5.Visible = true;
+                    button3.Visible = false;
+                    richTextBox1.Enabled = false;
                     try
                     {
                         comp.Compile(richTextBox1.Text);
@@ -74,7 +76,9 @@ namespace IDE
                 }
                 else
                 {
-                    button5.Visible = false; try
+
+                    button5.Visible = false; 
+                    try
                     {
                         comp.Compile(richTextBox1.Text);
                     }
@@ -87,6 +91,9 @@ namespace IDE
                     this.CreateDataGrid(comp, data);
                     count = 0;
                     comp.Stop();
+                    button3.Visible = true;
+
+                    richTextBox1.Enabled = true;
                 }
             }
             catch (Exception e)

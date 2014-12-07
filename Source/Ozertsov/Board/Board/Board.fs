@@ -83,7 +83,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             | Eps -> ()
             | Set ((x, y), arg) ->
                 let dot = (int x, int y)
-                if matrix.Length < int y
+                if matrix.Length < int y || int x < 0 || int y < 0
                 then raise (System.ArgumentException("can't find cell " + (int x).ToString() + " "+ (int y).ToString() ))
                 if cellsForWrite.Contains(dot)
                 then
@@ -92,7 +92,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                     cellsForWrite.Add(dot) |> ignore
             | Mvc ((tox, toy), arg) -> 
                 let todot = (int tox, int toy)
-                if matrix.Length < int toy
+                if matrix.Length < int toy || int tox < 0 || int toy < 0
                 then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
                 if cellsForWrite.Contains(todot)
                 then
@@ -101,7 +101,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                     cellsForWrite.Add(int tox, int toy) |> ignore
             | Mov ((fromx, fromy), (tox, toy)) ->
                 let fromdot = (int fromx, int fromy)
-                if matrix.Length < int fromy
+                if matrix.Length < int fromy || int fromx < 0 || int fromy < 0
                 then raise (System.ArgumentException("can't find cell " + (int fromx).ToString() + " "+ (int fromy).ToString() ))
                 if cellsForWrite.Contains(fromdot)
                 then
@@ -109,7 +109,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                 else
                     cellsForRead.Add(fromdot) |> ignore                
                 let todot = (int tox, int toy)
-                if matrix.Length < int toy
+                if matrix.Length < int toy || int tox < 0 || int toy < 0
                 then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
                 if cellsForWrite.Contains(todot) || cellsForRead.Contains(todot)
                 then
