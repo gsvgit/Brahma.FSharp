@@ -247,7 +247,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     _rnglr_cycle_res := (
                       
 # 23 "MyParser.yrd"
-                                                            Set((int ln, int col), int arg)
+                                                            Set(((int ln)*1<ln>, (int col)*1<col>), int arg)
                         )::!_rnglr_cycle_res ) ) ) )
             !_rnglr_cycle_res
           )
@@ -273,7 +273,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                     _rnglr_cycle_res := (
                       
 # 24 "MyParser.yrd"
-                                                              Mvc((int ln, int col), int arg)
+                                                              Mvc(((int ln)*1<ln>, (int col)*1<col>), int arg)
                         )::!_rnglr_cycle_res ) ) ) )
             !_rnglr_cycle_res
           )
@@ -301,7 +301,7 @@ let _rnglr_extra_array, _rnglr_rule_, _rnglr_concats =
                       _rnglr_cycle_res := (
                         
 # 25 "MyParser.yrd"
-                                                                              Mov((int ln1, int col1), (int ln2, int col2))
+                                                                              Mov(((int ln1)*1<ln>, (int col1)*1<col>), ((int ln2)*1<ln>, (int col2)*1<col>))
                           )::!_rnglr_cycle_res ) ) ) ) )
             !_rnglr_cycle_res
           )

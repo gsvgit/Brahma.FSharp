@@ -33,7 +33,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                 addCellOnUserRequest intx inty
                 matrix.[inty].[intx].Value <- arg
 
-        | Mov ((fromx, fromy), (tox, toy)) ->
+        | Mov ((tox, toy), (fromx, fromy)) ->
             let intfromx = (int) fromx
             let intfromy = (int) fromy
             if matrix.Length < intfromy
