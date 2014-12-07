@@ -51,11 +51,11 @@ type MatrixTests() =
 
         
     [<Test>]
-    member this.``FunctionAnalisys``() =
+    member this.``BadFunctionAnalisys``() =
         let matrix = new Matrix<int>([|fun x y -> x / y|])
         matrix.RunOp [|
-                        [| Set ((0<ln>, 0<col>), 4)|]
-                        [| Mvc((0<ln>, 0<col>), 0)|]
+                        [| Set ((0, 0), 4)|]
+                        [| Mvc((0, 0), 0)|]
                         |]
         Assert.AreEqual (Unchecked.defaultof<array<string>>, matrix.ValueInCell 0 0)
 
@@ -79,20 +79,20 @@ type MatrixTests() =
     [<Test>]
     member this.``SimpleTest``() =
         let matrix = new Matrix<_>([|fun x y -> x + y|])
-        matrix.RunOp [| [| Set((1<ln>, 0<col>), 1) |];
-                        [| Mvc((1<ln>, 0<col>), 2)|]
-                        [| Mov((1<ln>, 0<col>), (0<ln>, 0<col>))|] 
+        matrix.RunOp [| [| Set((1, 0), 1) |];
+                        [| Mvc((1, 0), 2)|]
+                        [| Mov((1, 0), (0, 0))|] 
                         [| Eps |]
                         |]
 
         Assert.AreEqual(3, matrix.ValueInCell 0 0)
 
     [<Test>]
-    member this.``CorrectWorkFlowsTest``() =
+    member this.``BadCorrectWorkFlowsTest``() =
         let matrix = new Matrix<_>([|fun x y -> x + y|])
-        matrix.RunOp [| [| Set((1<ln>, 0<col>), 1); Eps |];
-                        [| Mvc((1<ln>, 0<col>), 2)|]
-                        [| Mov((1<ln>, 0<col>), (0<ln>, 0<col>))|] 
+        matrix.RunOp [| [| Set((1, 0), 1); Eps |];
+                        [| Mvc((1, 0), 2)|]
+                        [| Mov((1, 0), (0, 0))|] 
                         [| Eps |]
                         |]
 
@@ -101,9 +101,9 @@ type MatrixTests() =
     [<Test>]
     member this.``WorkFlowsTest``() =
         let matrix = new Matrix<_>([|fun x y -> x + y|])
-        matrix.RunOp [| [| Set((1<ln>, 0<col>), 1); Eps |];
-                        [| Mvc((1<ln>, 0<col>), 2); Eps|]
-                        [| Mov((1<ln>, 0<col>), (0<ln>, 0<col>)); Eps|] 
+        matrix.RunOp [| [| Set((1, 0), 1); Eps |];
+                        [| Mvc((1, 0), 2); Eps|]
+                        [| Mov((1, 0), (0, 0)); Eps|] 
                         [| Eps; Eps |]
                         |]
 
@@ -111,12 +111,12 @@ type MatrixTests() =
 
         
     [<Test>]
-    member this.``WorkFlowsTest()``() =
+    member this.``BadCreateCell``() =
         let matrix = new Matrix<_>([|fun x y -> x + y|])
         printf "fd"
-        matrix.RunOp [| [| Set((14<ln>, 0<col>), 1); Eps |];
-                        [| Mvc((1<ln>, 0<col>), 2); Eps|]
-                        [| Mov((1<ln>, 0<col>), (0<ln>, 0<col>)); Eps|] 
+        matrix.RunOp [| [| Set((14, 0), 1); Eps |];
+                        [| Mvc((1, 0), 2); Eps|]
+                        [| Mov((1, 0), (0, 0)); Eps|] 
                         [| Eps; Eps |]
                         |]
 
@@ -127,9 +127,9 @@ type MatrixTests() =
         let matrix = new Matrix<_>([|(fun x y -> x + y); (fun x y  -> x * y)|])
         // examle 3 + 2 * 15 + 1;
         //board |+|*|
-        matrix.RunOp [| [| Set((0<ln>, 0<col>), 3); Set((0<ln>, 1<col>), 2) |];
-                        [| Mvc((0<ln>, 1<col>), 15) ; Mvc((0<ln>, 0<col>), 1)|]
-                        [| Mov((0<ln>, 1<col>), (0<ln>, 0<col>)); Eps|] 
+        matrix.RunOp [| [| Set((0, 0), 3); Set((0, 1), 2) |];
+                        [| Mvc((0, 1), 15) ; Mvc((0, 0), 1)|]
+                        [| Mov((0, 1), (0, 0)); Eps|] 
                         [| Eps; Eps |]
                         |]
 

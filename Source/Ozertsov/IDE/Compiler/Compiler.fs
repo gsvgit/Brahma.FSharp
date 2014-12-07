@@ -7,7 +7,7 @@ open MyParser.MyParser
 exception CompileException
 
 type Compiler() =
-    let processor = new Matrix<int>([|(fun x y -> x + y); (fun x y -> x - y); (fun x y -> x * y); (fun x y -> x / y)|])
+    let processor = new Matrix<int>([|(fun x y -> x + y); (fun x y -> x - y); (fun x y -> x / y); (fun x y -> x * y)|])
     let parser = new MyParser()
     let mutable program: Program<int> = null
     
@@ -18,10 +18,13 @@ type Compiler() =
         program
     
     member this.Run() =
+        try
             processor.RunOp program
             program <- null
-            processor.Dispose
-        
+            //processor.Dispose
+        with
+        | :? System.Exception -> reraise()
+
     member this.Debug = 
         ignore
 

@@ -18,11 +18,13 @@ namespace IDE
 {
     public partial class MainScreen : Form
     {
-
+        Compilator.Compiler comp = new Compilator.Compiler();
+        static int count = 0;
         public MainScreen()
         {
 
             InitializeComponent();
+
             var open = Observable.FromEventPattern(h => button1.Click += h, h =>  button1.Click -= h);
             open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(button1));
             var load = Observable.FromEventPattern(h => button2.Click += h, h => button2.Click -= h);
@@ -41,50 +43,86 @@ namespace IDE
         }
         private void Stop(object sender)
         {
-            MessageBox.Show("закончить debug");
+            //MessageBox.Show("закончить debug");
             button5.Visible = false;
             DisposeDataGrid(data);
             count = 0;
         }
-        static int count = 0;
         private void Debug(object sender)
         {
-            MessageBox.Show("Передать строку в метод compile для debug");
-            Compilator.Compiler comp = new Compilator.Compiler();
-            if (count < richTextBox1.Lines.Length - 1)
+            errorBox.Text = "";
+            try
             {
-                button5.Visible = true;
-                comp.Compile(richTextBox1.Text);
-                comp.Step(count);
-                count++;
-                this.CreateDataGrid(comp, data);
+                //MessageBox.Show("Передать строку в метод compile для debug");
+                if (count < richTextBox1.Lines.Length - 1)
+                {
+                    if (count == 0)
+                        DisposeDataGrid(data);
+                    button5.Visible = true; 
+                    try
+                    {
+                        comp.Compile(richTextBox1.Text);
+                    }
+                    catch (Exception e)
+                    {
+                        Compilator.CompileException ex = new Compilator.CompileException();
+                        throw ex;
+                    }
+                    comp.Step(count);
+                    count++;
+                    this.CreateDataGrid(comp, data);
+                }
+                else
+                {
+                    button5.Visible = false; try
+                    {
+                        comp.Compile(richTextBox1.Text);
+                    }
+                    catch (Exception e)
+                    {
+                        Compilator.CompileException ex = new Compilator.CompileException();
+                        throw ex;
+                    } 
+                    comp.Step(count);
+                    this.CreateDataGrid(comp, data);
+                    count = 0;
+                    comp.Stop();
+                }
             }
-            else
+            catch (Exception e)
             {
-                button5.Visible = false;
-                comp.Compile(richTextBox1.Text);
-                comp.Step(count);
-                this.CreateDataGrid(comp, data);
-                count = 0;
-                comp.Stop();
+                errorBox.Text = e.Message;
+                //MessageBox.Show(e.Message);
             }
         }
 
         private void Start(object sender)
         {
 
-            Compilator.Compiler comp = new Compilator.Compiler();
+            //Compilator.Compiler comp = new Compilator.Compiler();
+            errorBox.Text = "";
+            DisposeDataGrid(data);
             try
             {
-                DisposeDataGrid(data);
-                MessageBox.Show("Передать строку в compile");comp.Compile(richTextBox1.Text);
+                //MessageBox.Show("Передать строку в compile");
+                try
+                {
+                    comp.Compile(richTextBox1.Text);
+                }
+                catch (Exception e)
+                {
+                    Compilator.CompileException ex = new Compilator.CompileException();
+                    throw ex;
+                }
+                    
                 comp.Run();
                 this.CreateDataGrid(comp, data);
                 comp.Stop();
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);    
+                errorBox.Text = e.Message;
+                //MessageBox.Show(e.Message);    
             }
         }
 

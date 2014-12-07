@@ -49,7 +49,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                     matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
                 else
                     addCellOnUserRequest inttox inttoy
-                    matrix.[inttoy].[inttox].Value <- matrix.[intfromy].[intfromx].Value
+                    matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
             else
                 addCellOnUserRequest intfromx intfromy
                 let inttox = (int) tox
@@ -58,7 +58,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
                 then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " "+ inttoy.ToString() ))
                 if matrix.[inttoy].ContainsKey inttox
                 then
-                    matrix.[inttoy].[inttox].Value <- matrix.[intfromy].[intfromx].Value
+                    matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
                 else
                     addCellOnUserRequest inttox inttoy
                     matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
@@ -68,56 +68,75 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             let inty = (int) y
             if matrix.Length < inty
             then raise (System.ArgumentException("can't create cell " + intx.ToString() + " "+ inty.ToString() ))
-            matrix.[inty].[intx].RunOp arg
+            if matrix.[inty].ContainsKey intx
+                then matrix.[inty].[intx].RunOp arg
+            else
+                addCellOnUserRequest intx inty
+                matrix.[inty].[intx].RunOp arg    
         | Eps -> ()
         
     let Check (line: array<Asm<'a>>) =
-        let cellsForWrite = new HashSet<(int * int)>()
-        let cellsForRead = new HashSet<(int * int)>()
         for i in 0 .. line.Length - 1 do
+            let cellsForWrite = new HashSet<(int * int)>()
+            let cellsForRead = new HashSet<(int * int)>()
             match line.[i] with
             | Eps -> ()
-            | Set ((tox, toy), arg) ->
-                let todot = (int tox, int toy)
-                if cellsForWrite.Contains(todot)
+            | Set ((x, y), arg) ->
+                let dot = (int x, int y)
+                if matrix.Length < int y
+                then raise (System.ArgumentException("can't find cell " + (int x).ToString() + " "+ (int y).ToString() ))
+                if cellsForWrite.Contains(dot)
                 then
                     raise (System.ArgumentException("can't write and read together in equal cells"))
                 else
-                    cellsForWrite.Add(int tox, int toy) |> ignore
+                    cellsForWrite.Add(dot) |> ignore
             | Mvc ((tox, toy), arg) -> 
                 let todot = (int tox, int toy)
+                if matrix.Length < int toy
+                then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
                 if cellsForWrite.Contains(todot)
                 then
                     raise (System.ArgumentException("can't write and read together in equal cells"))
                 else
                     cellsForWrite.Add(int tox, int toy) |> ignore
             | Mov ((fromx, fromy), (tox, toy)) ->
-                let todot = (int tox, int toy)
-                if cellsForWrite.Contains(todot) || cellsForRead.Contains(todot)
-                then
-                    raise (System.ArgumentException("can't write and read together in equal cells"))
-                else
-                    cellsForWrite.Add(int tox, int toy) |> ignore
                 let fromdot = (int fromx, int fromy)
+                if matrix.Length < int fromy
+                then raise (System.ArgumentException("can't find cell " + (int fromx).ToString() + " "+ (int fromy).ToString() ))
                 if cellsForWrite.Contains(fromdot)
                 then
                     raise (System.ArgumentException("can't write and read together in equal cells"))
                 else
-                    cellsForRead.Add(int tox, int toy) |> ignore
-    
+                    cellsForRead.Add(fromdot) |> ignore                
+                let todot = (int tox, int toy)
+                if matrix.Length < int toy
+                then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
+                if cellsForWrite.Contains(todot) || cellsForRead.Contains(todot)
+                then
+                    raise (System.ArgumentException("can't write and read together in equal cells"))
+                else
+                    cellsForWrite.Add(todot) |> ignore
+
     member this.RunLine line =
+        try
+            Check line
+        with
+        | :? System.Exception -> reraise()
         Array.Parallel.iter intASM line
 
     member this.RunOp (program: Program<'a>) =
-        if program.Length = 0
-        then ()
-        else
-            let i = program.[0].Length
-            for p in program do
-                if i <> p.Length
-                then raise(System.ArgumentException("workflows aren't compatible"))
-            Array.Parallel.iter (fun i -> Check i ) program
-            Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program    
+        try
+            if program.Length = 0
+            then ()
+            else
+                let i = program.[0].Length
+                for p in program do
+                    if i <> p.Length
+                    then raise(System.ArgumentException("workflows aren't compatible"))
+                Array.iter (fun i -> Check i ) program
+        with
+        | :? System.Exception -> reraise()
+        Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program    
         
     member this.ValueInCell row col =
         let currentCol = matrix.[col]
@@ -128,7 +147,7 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             currentCol.[row].Value
     
     member this.Dispose =
-        matrix = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
+        matrix <- Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
 
     member this.getMatrix =
         matrix

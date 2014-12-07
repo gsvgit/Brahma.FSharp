@@ -48,7 +48,7 @@ namespace IDE
             this.minus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.delit = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.errorsListBox = new System.Windows.Forms.ListBox();
+            this.errorBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.data)).BeginInit();
             this.SuspendLayout();
@@ -141,21 +141,20 @@ namespace IDE
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
             // 
-            // errorsListBox
+            // richTextBox2
             // 
-            this.errorsListBox.FormattingEnabled = true;
-            this.errorsListBox.ItemHeight = 16;
-            this.errorsListBox.Location = new System.Drawing.Point(12, 566);
-            this.errorsListBox.Name = "errorsListBox";
-            this.errorsListBox.Size = new System.Drawing.Size(887, 148);
-            this.errorsListBox.TabIndex = 9;
+            this.errorBox.Location = new System.Drawing.Point(12, 557);
+            this.errorBox.Name = "richTextBox2";
+            this.errorBox.Size = new System.Drawing.Size(887, 165);
+            this.errorBox.TabIndex = 9;
+            this.errorBox.Text = "";
             // 
             // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1381, 734);
-            this.Controls.Add(this.errorsListBox);
+            this.Controls.Add(this.errorBox);
             this.Controls.Add(this.data);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -189,7 +188,7 @@ namespace IDE
         private DataGridViewTextBoxColumn minus;
         private DataGridViewTextBoxColumn delit;
         private DataGridViewTextBoxColumn multiplication;
-        private ListBox errorsListBox;
+        private RichTextBox errorBox;
     }
 }
 
