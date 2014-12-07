@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>YC.FsYARD</id>
+    <version>0.2.8.10-dev</version>
+    <title>YC.FsYARD</title>
+    <authors>YaccConstructor Software Foundation</authors>
+    <owners>YaccConstructor Software Foundation</owners>
+    <licenseUrl>https://code.google.com/p/recursive-ascent/source/browse/LICENSE</licenseUrl>
+    <projectUrl>https://code.google.com/p/recursive-ascent/wiki/FsYard</projectUrl>
+    <iconUrl>https://recursive-ascent.googlecode.com/git/logo/YC_big.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</description>
+    <summary>FsYARD is a parsers generator for F#. It is  based on RNGLR algorithm.</summary>
+    <releaseNotes>Execution from command line is fixed.</releaseNotes>
+    <copyright>Copyright 2013, 2014</copyright>
+    <tags>YaccConstructor F# FSharp .NET Parsing parsergenerator grammarware reengineering RNGLR GLR EBNF</tags>
+    <references>
+      <reference file="YC.Common.dll" />
+      <reference file="YC.Constraints.dll" />
+      <reference file="YC.Conversions.dll" />
+      <reference file="YC.RNGLRCommon.dll" />
+      <reference file="YC.RNGLRParser.dll" />
+      <reference file="YC.RNGLRAbstractParser.dll" />
+      <reference file="AST.Common.dll" />
+      <reference file="Generators.Common.dll" />
+    </references>
+  </metadata>
+</package>
