@@ -12,9 +12,6 @@ NuGet/*.nupkg
 Source/packages/*
 Brahman/OpenCL/packages/*
 Source/ArrayFunctions/packages/*
-Source/Ozertsov/Board/packages/*
-Source/Ozertsov/Example/packages/*
-Source/Ozertsov/IDE/packages/*
 Source/Fractals/FractalsGPU/packages/*
 !Source/Fractals/FractalsGPU/packages/*.config
 Source/Bulgakov/Example/packages/*
