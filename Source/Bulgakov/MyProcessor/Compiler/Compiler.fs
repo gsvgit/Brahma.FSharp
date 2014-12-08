@@ -13,7 +13,7 @@ type Compiler() =
     let parser = new MyParser()
     let mutable program: Program<int> = null
     let Errors = new HashSet<(string*int*int)>()
-    
+
 //Late
     member this.getErrorsList  = 
         let CellsSet = new HashSet<(int*int)>()
@@ -24,12 +24,12 @@ type Compiler() =
                 match operation with
                 |Set((row, col), arg)
                 |Mvc((row, col), arg) ->
-                    if not (col < grid.Length)
+                    if not (col < grid.Length && row >= 0 && col >= 0)
                     then Errors.Add("Index out of bound", i, j) |> ignore
                     if CellsSet.Add (int row, int col) = false
                     then Errors.Add ("Parrallel Exception",i,j) |> ignore
                 |Mov((row2, col2), (row1, col1)) ->
-                    if not (col1 < grid.Length)
+                    if not (col1 < grid.Length  && row1 >= 0 && col1 >= 0 && row2>=0 && col2 >= 0)
                     then Errors.Add("Index out of bound", i, j) |> ignore
                     if not (col2 < grid.Length)
                     then Errors.Add("Index out of bound", i, j) |> ignore
@@ -77,3 +77,4 @@ type Compiler() =
     
     member this.CountCols() =
         processor.getGrid.Length
+

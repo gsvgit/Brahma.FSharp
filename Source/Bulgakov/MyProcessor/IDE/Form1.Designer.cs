@@ -1,10 +1,10 @@
-﻿//using Processor;
+﻿﻿//using Processor;
 //using Matrix;
 using System.Windows.Forms;
 
 namespace IDE
 {
-    public delegate int Deleg (int x, int y);
+    public delegate int Deleg(int x, int y);
     partial class MainScreen
     {
         /// <summary>
@@ -45,8 +45,8 @@ namespace IDE
             this.stopButton = new System.Windows.Forms.Button();
             this.data = new System.Windows.Forms.DataGridView();
             this.plus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.minus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.delit = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.subtraction = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.errorsListBox = new System.Windows.Forms.ListBox();
             this.stepButton = new System.Windows.Forms.Button();
@@ -118,9 +118,9 @@ namespace IDE
             // 
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
-            this.minus,
-            this.delit,
-            this.multiplication});
+            this.subtraction,            
+            this.multiplication,
+            this.division,});
             this.data.Location = new System.Drawing.Point(582, 35);
             this.data.Margin = new System.Windows.Forms.Padding(2);
             this.data.Name = "data";
@@ -133,15 +133,15 @@ namespace IDE
             this.plus.Name = "plus";
             this.plus.ReadOnly = true;
             // 
-            // minus
+            // subtraction
             // 
-            this.minus.Name = "minus";
-            this.minus.ReadOnly = true;
+            this.subtraction.Name = "subtraction";
+            this.subtraction.ReadOnly = true;
             // 
-            // delit
+            // division
             // 
-            this.delit.Name = "delit";
-            this.delit.ReadOnly = true;
+            this.division.Name = "division";
+            this.division.ReadOnly = true;
             // 
             // multiplication
             // 
@@ -205,12 +205,11 @@ namespace IDE
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private DataGridViewTextBoxColumn plus;
-        private DataGridViewTextBoxColumn minus;
-        private DataGridViewTextBoxColumn delit;
+        private DataGridViewTextBoxColumn subtraction;
+        private DataGridViewTextBoxColumn division;
         private DataGridViewTextBoxColumn multiplication;
         private ListBox errorsListBox;
         private Button stepButton;
 
     }
 }
-

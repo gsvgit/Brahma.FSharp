@@ -33,13 +33,15 @@ namespace IDE
             step.ObserveOn(SynchronizationContext.Current).Subscribe(x => NextStep(stopButton));
             var stop = Observable.FromEventPattern(h => stopButton.Click += h, h => stopButton.Click -= h);
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(stopButton));
+
         }
+        
         private Compiler.Compiler comp = new Compiler.Compiler();
         public string CreateCode
         {
             get { return richTextBox1.Text; }
         }
-        static int count = 0;
+        int count = 0;
 
         private void Debug(object sender)
         {
@@ -66,6 +68,7 @@ namespace IDE
         {
             if (count < richTextBox1.Lines.Length)
             {
+                Highlight();
                 comp.Step(count);
                 count++;
                 this.CreateDataGrid(comp, data);
@@ -74,6 +77,19 @@ namespace IDE
             {
                 Stop(sender);
             }
+        }
+        private void Highlight()
+        {
+            //Select Color
+            richTextBox1.SelectionColor = System.Drawing.Color.White;
+            richTextBox1.SelectionBackColor = System.Drawing.Color.Blue;
+   
+            //Char position
+            int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
+            int ln = richTextBox1.Lines[count].Length;
+            //Select
+            richTextBox1.Select(firstCharPosition, ln);
+            richTextBox1.Select();
         }
         private void Stop(object sender)
         {

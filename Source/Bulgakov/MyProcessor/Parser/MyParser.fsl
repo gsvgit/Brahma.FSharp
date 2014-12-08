@@ -13,7 +13,7 @@ let chars = ['a'-'z']
 
 rule token = parse
 | whitespace { token lexbuf }
-| ['-']? digit+ ('.'digit+)? (['e' 'E'] digit+)? { NUMBER(lexeme lexbuf)}
+| ['-']? digit+ { NUMBER(lexeme lexbuf)}
 | "Eps" {EPS(lexeme lexbuf)}
 | "Set" {SET(lexeme lexbuf)}
 | "Mvc" {MVC(lexeme lexbuf)}

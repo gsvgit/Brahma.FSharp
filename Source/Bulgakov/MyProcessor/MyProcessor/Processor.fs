@@ -16,7 +16,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
     let mutable grid = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
 //Create a Cell with function
     let addCell row column = 
-        if  column<grid.Length
+        if  column<grid.Length || row>=0 || column>=0  
         then grid.[column].Add(row, Cell(functions.[column]))
         else raise(IndexOutOfBounds(row, column))
 //Error set    
@@ -67,12 +67,12 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             match operation with
             |Set((row, col), arg)
             |Mvc((row, col), arg) ->
-                if not (col<grid.Length)
+                if not (col < grid.Length && row >= 0 && col >= 0)
                 then raise(IndexOutOfBounds(row, col))
                 if CellsSet.Add (int row, int col) = false
                 then raise(ParallelException (int row, int col))
             |Mov((row2, col2), (row1, col1)) ->
-                if not (col1<grid.Length)
+                if not (col1 < grid.Length  && row1 >= 0 && col1 >= 0 && row2>=0 && col2 >= 0)
                 then raise(IndexOutOfBounds(row1, col1))
                 if not (col2<grid.Length)
                 then raise(IndexOutOfBounds(row2, col2))
