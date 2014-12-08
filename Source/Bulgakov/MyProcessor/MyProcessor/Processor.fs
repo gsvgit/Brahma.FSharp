@@ -65,13 +65,15 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
         let CellsSet = new HashSet<(int*int)>()
         for operation in arr do
             match operation with
-            |Set((row, col), arg)
-            |Mvc((row, col), arg) ->
+            |Set((row1, col1), arg)
+            |Mvc((row1, col1), arg) ->
+                let row, col = int row1, int col1
                 if not (col < grid.Length && row >= 0 && col >= 0)
                 then raise(IndexOutOfBounds(row, col))
                 if CellsSet.Add (int row, int col) = false
                 then raise(ParallelException (int row, int col))
-            |Mov((row2, col2), (row1, col1)) ->
+            |Mov((toRow, toCol), (fromRow, fromCol)) ->
+                let row2, col2, row1, col1 = int toRow, int toCol, int fromRow, int fromCol
                 if not (col1 < grid.Length  && row1 >= 0 && col1 >= 0 && row2>=0 && col2 >= 0)
                 then raise(IndexOutOfBounds(row1, col1))
                 if not (col2<grid.Length)

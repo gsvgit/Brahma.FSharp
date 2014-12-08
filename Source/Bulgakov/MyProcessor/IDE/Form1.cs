@@ -54,6 +54,7 @@ namespace IDE
                     debugButton.Visible = false;
                     stepButton.Visible = true;
                     stopButton.Visible = true;
+                    richTextBox1.Enabled = false;
                 }
             }
             catch(Compiler.CompileException e)
@@ -69,6 +70,7 @@ namespace IDE
             if (count < richTextBox1.Lines.Length)
             {
                 Highlight();
+                richTextBox1.Show();
                 comp.Step(count);
                 count++;
                 this.CreateDataGrid(comp, data);
@@ -80,23 +82,29 @@ namespace IDE
         }
         private void Highlight()
         {
+            //Char position
+            int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
+            int ln = richTextBox1.Lines[count].Length;
+            
+            //Select
+            richTextBox1.Select(firstCharPosition, ln);
+            richTextBox1.Select();
+
             //Select Color
             richTextBox1.SelectionColor = System.Drawing.Color.White;
             richTextBox1.SelectionBackColor = System.Drawing.Color.Blue;
    
-            //Char position
-            int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
-            int ln = richTextBox1.Lines[count].Length;
-            //Select
-            richTextBox1.Select(firstCharPosition, ln);
-            richTextBox1.Select();
         }
         private void Stop(object sender)
         {
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionBackColor = System.Drawing.Color.White;
+            richTextBox1.SelectionColor = Color.Black;
             startButton.Visible = true;
             debugButton.Visible = true;
             stepButton.Visible = false;
             stopButton.Visible = false;
+            richTextBox1.Enabled = true;
             comp.Stop();
             data.Rows.Clear();
             count = 0;
