@@ -2,8 +2,8 @@
 bin/
 obj/
 *.orig
-*.suo
 *.user
+*.suo
 /Source/Substrings/random.txt
 
 *.obj
@@ -28,3 +28,4 @@ Source/Kovalev/TTA-Processor/packages/*
 Source/Bulgakov/MyProcessor/packages/*
 !Source/Bulgakov/MyProcessor/packages/*.config
 !Source/Bulgakov/MyProcessor/.nuget/*
+!Source/Bulgakov/MyProcessor/MyProcessor.v12.suo
