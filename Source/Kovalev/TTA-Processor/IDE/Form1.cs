@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -26,7 +27,7 @@ namespace IDE
             InitializeComponent();
             var newClick = Observable.FromEventPattern(h => newToolStripMenuItem.Click += h,
                 h => newToolStripMenuItem.Click -= h);
-            newClick.Subscribe(x => editor.Text = "");
+            newClick.Subscribe(x => { editor.Text = ""; clearDataGrid(); });
 
             var openClick = Observable.FromEventPattern(h => openToolStripMenuItem.Click += h,
                 h => openToolStripMenuItem.Click -= h);
@@ -38,7 +39,11 @@ namespace IDE
 
             var buildClick = Observable.FromEventPattern(h => buildToolStripMenuItem.Click += h,
                 h => buildToolStripMenuItem.Click -= h);
-            buildClick.Subscribe(x => controller.Build(editor.Text));
+            buildClick.Subscribe(x =>
+            {
+                controller.Build(editor.Text);
+                writeError();
+            });
 
             var startClick = Observable.FromEventPattern(h => startToolStripMenuItem.Click += h,
                 h => startToolStripMenuItem.Click -= h);
@@ -46,16 +51,17 @@ namespace IDE
             {
                 controller.Run(editor.Text);
                 updateDataGrid();
+                writeError();
             });
 
             var debugClick = Observable.FromEventPattern(h => startDebuggingToolStripMenuItem.Click += h,
                 h => startDebuggingToolStripMenuItem.Click -= h);
             debugClick.Subscribe(x =>
             {
-                controller.Build(editor.Text);
+                controller.StartDebugging(editor.Text);
                 disableVisualElements();
                 clearDataGrid();
-                controller.StartDebugging();
+                writeError();
             });
 
             var stepClick = Observable.FromEventPattern(h => nextStepToolStripMenuItem.Click += h,
@@ -64,6 +70,7 @@ namespace IDE
             {
                 nextStep();
                 updateDataGrid();
+                writeError();
             });
 
             var stopClick = Observable.FromEventPattern(h => stopToolStripMenuItem.Click += h,
@@ -76,7 +83,7 @@ namespace IDE
 
             var aboutClick = Observable.FromEventPattern(h => aboutToolStripMenuItem.Click += h,
                 h => aboutToolStripMenuItem.Click -= h);
-            aboutClick.Subscribe(x => MessageBox.Show("   My Little IDE v1.0    \n      TTA is magic!", "About"));
+            aboutClick.Subscribe(x => MessageBox.Show("       My Little IDE v1.0    \n          TTA is magic!", "About"));
         }
 
         private void openButtonPressed()
@@ -150,16 +157,19 @@ namespace IDE
 
             var allCells = controller.AllValues;
             foreach (var c in allCells)
-                dataGridView.Rows[c.Item1].Cells[c.Item2].Value = c.Item3;
+                dataGridView[c.Item2, c.Item1].Value = c.Item3;
         }
 
         private void disableVisualElements()
         {
-            foreach (ToolStripMenuItem item in menuStrip1.Items)
-                foreach (ToolStripMenuItem button in item.DropDownItems)
-                    if (button.Name != "nextStepToolStripMenuItem" && button.Name != "stopToolStripMenuItem")
-                        button.Enabled = false;
-            editor.ReadOnly = true;
+            if (controller.DebugState)            
+            {   
+                foreach (ToolStripMenuItem item in menuStrip1.Items)
+                   foreach (ToolStripMenuItem button in item.DropDownItems)
+                       if (button.Name != "nextStepToolStripMenuItem" && button.Name != "stopToolStripMenuItem")
+                           button.Enabled = false;
+                editor.ReadOnly = true;
+            }            
         }
 
         private void enableVisualElements()
@@ -171,11 +181,15 @@ namespace IDE
         }
 
         private void nextStep()
-        {
-            //markDebuggingLine();
+        {            
             controller.NextStep();
             if (!controller.DebugState)
                 enableVisualElements();
+        }
+
+        private void writeError()
+        {            
+            output.Text = controller.GetError;
         }
     }
 }

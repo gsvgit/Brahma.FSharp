@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fILEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +43,7 @@
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hELPToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.output = new System.Windows.Forms.TextBox();
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.editor = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
@@ -75,19 +76,19 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newToolStripMenuItem.Text = "New";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openToolStripMenuItem.Text = "Open";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveToolStripMenuItem.Text = "Save As";
             // 
             // rUNToolStripMenuItem
@@ -101,7 +102,7 @@
             // buildToolStripMenuItem
             // 
             this.buildToolStripMenuItem.Name = "buildToolStripMenuItem";
-            this.buildToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.buildToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.buildToolStripMenuItem.Text = "Build Project";
             // 
             // hELPToolStripMenuItem
@@ -150,18 +151,18 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             // 
-            // textBox2
+            // output
             // 
-            this.textBox2.Enabled = false;
-            this.textBox2.Location = new System.Drawing.Point(13, 444);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(574, 72);
-            this.textBox2.TabIndex = 2;
+            this.output.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.output.Location = new System.Drawing.Point(13, 444);
+            this.output.Multiline = true;
+            this.output.Name = "output";
+            this.output.ReadOnly = true;
+            this.output.Size = new System.Drawing.Size(574, 72);
+            this.output.TabIndex = 2;
             // 
             // dataGridView
             // 
@@ -174,6 +175,8 @@
             // 
             // editor
             // 
+            this.editor.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.editor.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.editor.Location = new System.Drawing.Point(13, 28);
             this.editor.Name = "editor";
             this.editor.Size = new System.Drawing.Size(574, 410);
@@ -188,9 +191,10 @@
             this.ClientSize = new System.Drawing.Size(1056, 528);
             this.Controls.Add(this.editor);
             this.Controls.Add(this.dataGridView);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.output);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "My Little IDE";
@@ -213,7 +217,7 @@
         private System.Windows.Forms.ToolStripMenuItem buildToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hELPToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox output;
         private System.Windows.Forms.DataGridView dataGridView;
         private System.Windows.Forms.ToolStripMenuItem startDebuggingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hELPToolStripMenuItem1;

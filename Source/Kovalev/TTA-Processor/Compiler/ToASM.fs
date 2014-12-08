@@ -6,10 +6,11 @@ open Yard.Generators.RNGLR.Parser
 
 open ASM
 
-type line = list<Asm<int>>*string
+exception ParserError of int * string
+type line = list<Asm<int>> * string
 
 let compile (inputString: string) =     
-    
+        
     let lexbuf = Microsoft.FSharp.Text.Lexing.LexBuffer<_>.FromString inputString
     let allTokens = 
         seq
@@ -22,12 +23,12 @@ let compile (inputString: string) =
         zeroPosition = 0UL
         clearAST = false
         filterEpsilons = true
-    }
+    }        
     
     let (tree: #list<list<line>>) =
         match Compiler.Parser.buildAst allTokens with
         | Success (sppf, t, d) -> Compiler.Parser.translate translateArgs sppf d 
-        | Error (pos,errs,msg,dbg,_) -> failwithf "Error: %A    %A \n %A"  pos errs msg
+        | Error (pos,errs,msg,dbg,_) -> raise (ParserError(pos, msg))
     
     let tr = tree.[0]   
     let numOfCol = fst (List.maxBy (fun (ln: line) -> (fst ln).Length) tr) |> List.length

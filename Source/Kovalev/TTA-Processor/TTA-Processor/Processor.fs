@@ -4,6 +4,8 @@ open ASM
 open System.Collections.Generic
 
 exception DoubleWriteIntoCell of int * int
+exception CellOutOfRange of int * int
+exception IncorrectLine of int * string
 
 type Cell<'a> (operation: 'a -> 'a -> 'a) =
     
@@ -19,7 +21,7 @@ type Cell<'a> (operation: 'a -> 'a -> 'a) =
 type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
     do
         if functions.Length = 0
-        then raise (System.ArgumentException("Empty grid"))         
+        then raise (System.ArgumentException("Empty grid"))
 
     let grid = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
     let mutable gridHeight = 0
@@ -39,7 +41,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             then currentCol.[row].Value <- arg
             else 
                 addCellOnUserRequest row col
-                currentCol.[row].Value <- arg        
+                currentCol.[row].Value <- arg
         
         | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
             let rowTo, colTo, rowFrom, colFrom = int fstTo, int sndTo, int fstFrom, int sndFrom
@@ -74,15 +76,25 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             match line.[i] with
             | Set ((fst, snd), arg)
             | Mvc ((fst, snd), arg) ->
+                if int snd > functions.Length - 1
+                then raise (CellOutOfRange (int fst, int snd))
+                
                 if cellsForWrite.Add (int fst, int snd) = false
                 then raise (DoubleWriteIntoCell (int fst, int snd))
+            
             | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
+                if int sndTo > functions.Length - 1
+                then raise (CellOutOfRange (int fstTo, int sndTo))
+                elif int sndFrom > functions.Length - 1
+                then raise (CellOutOfRange (int fstFrom, int sndFrom))
+                
                 if cellsForWrite.Add (int fstTo, int sndTo) = false
                 then raise ((DoubleWriteIntoCell (int fstTo, int sndTo)))
                 else
                     if cellsForWrite.Contains (int fstFrom, int sndFrom)
                     then priorityCommands.Add i
                     else commandsForSecondCheck.Add i
+            
             | Eps -> ()
         
         for i in commandsForSecondCheck do
@@ -93,7 +105,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                 else ()
             | _ -> ()
          
-        let arrayForParallel = Array.mapi (fun i x -> if not (priorityCommands.Contains i) then x else Eps) line        
+        let arrayForParallel = Array.mapi (fun i x -> if not (priorityCommands.Contains i) then x else Eps) line
         for index in priorityCommands do
             interpretASM line.[index]
         Array.Parallel.iter interpretASM arrayForParallel
@@ -124,14 +136,23 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
 
     member this.Clear = for col in grid do col.Clear()
 
-    member this.Run (program: Program<'a>) =        
-        if program.Length = 0
-        then ()
-        else
-            let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
-            if maxLength = 0
+    member this.Run (program: Program<'a>) =
+        try
+            if program.Length = 0
             then ()
-            else 
-                for i in 0..maxLength - 1 do
-                    let line = Array.map (fun (x: array<Asm<'a>>) -> if i >= x.Length then Eps else x.[i]) program
-                    executeLine line      
+            else
+                let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
+                if maxLength = 0
+                then ()
+                else
+                    for i in 0..maxLength - 1 do
+                        try
+                            let line = Array.map (fun (x: array<Asm<'a>>) -> if i >= x.Length then Eps else x.[i]) program
+                            executeLine line
+                        with
+                        | DoubleWriteIntoCell (fst, snd) -> raise (IncorrectLine (i, "Double write into cell" + " " + 
+                                                                                  fst.ToString() + " " + snd.ToString()))
+                        | CellOutOfRange (fst, snd) -> raise (IncorrectLine (i, "Can't create cell" +  " " +
+                                                                             fst.ToString() + " " + snd.ToString()))
+        with
+        | IncorrectLine (i, msg) -> reraise ()
