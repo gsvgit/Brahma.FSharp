@@ -69,20 +69,32 @@ type ProcessorRunTests() =
         let processor = new Processor<int>([|(fun x y -> x + y); (fun x y -> x - y); (fun x y -> x * y); (fun x y -> x / y)|])
         processor.executeProgram [| [|Set((100<ln>, 2<col>), 1);|] |]
         Assert.AreEqual(1, processor.ValueAt 100 2)
-
-// 
-// [<Test>]
-// member this.``InVarTest``() =
-// let Processor = new Processor<MyType>([|(fun x y -> x); (fun x y -> y)|])
-// let Processor1 = new Processor<MyType1>([|(fun x y -> x); (fun x y -> y)|])
-// let func (m:Processor<MyType>) =
-// (m.ValueInCell 0 0).sout
-// Assert.AreEqual(Unchecked.defaultof<MyType>, func ((Processor<MyType>) Processor1))
+    
+//type MyType(p: int) = 
+//    class
+//        let i = p
+//        member this.sout =
+//            printfn "%A" i
+//    end
 //
-// [<Test>]
-// member this.``ContrVarTest``() =
-// let Processor = new Processor<MyType>([|(fun x y -> x); (fun x y -> y)|])
-// let Processor1 = new Processor<MyType1>([|(fun x y -> x); (fun x y -> y)|])
-// let func (m:Processor<MyType1>) =
-// (m.ValueInCell 0 0).sout
-// Assert.AreEqual(Unchecked.defaultof<MyType1>, func (Processor))
+//type MyType1(p: int) =
+//    class 
+//        inherit MyType(p)
+//    end
+//[<TestFixture>]
+//type Variant() = 
+//     [<Test>]
+//     member this.``InVarTest``() =
+//        let Processor = new Processor<MyType>([|(fun x y -> x); (fun x y -> y)|])
+//        let Processor1 = new Processor<MyType1>([|(fun x y -> x); (fun x y -> y)|])
+//        let func (m:Processor<MyType>) =
+//            (m.ValueAt 0 0).sout
+//        Assert.AreEqual(Unchecked.defaultof<MyType>, func((Processor<MyType>) Processor1))
+//
+//     [<Test>]
+//     member this.``ContrVarTest``() =
+//        let Processor = new Processor<MyType>([|(fun x y -> x); (fun x y -> y)|])
+//        let Processor1 = new Processor<MyType1>([|(fun x y -> x); (fun x y -> y)|])
+//        let func (m:Processor<MyType1>) =
+//            (m.ValueAt 0 0).sout
+//        Assert.AreEqual(Unchecked.defaultof<MyType1>, func (Processor))
