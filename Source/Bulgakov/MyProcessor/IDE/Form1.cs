@@ -129,7 +129,7 @@ namespace IDE
                 errorsListBox.DataSource = list;
                 comp.Stop();
             }
-            catch (Compiler.OperationException e)
+            catch (Compiler.RuntimeException e)
             {
                 List<String> list = new List<String>();
                 list.Add(e.Message);

@@ -6,7 +6,7 @@ open System.Collections.Generic
 open MyParser.MyParser
 open System.Linq
 exception CompileException
-exception OperationException
+exception RuntimeException
 
 
 type Compiler() =
@@ -54,7 +54,7 @@ type Compiler() =
         try
         processor.executeProgram program
         with
-        | :? System.Exception -> raise OperationException
+        | :? System.Exception -> raise RuntimeException
         program <- null
 
     member this.Step(count:int) =
