@@ -189,9 +189,15 @@ namespace IDE
 
 		private void SetCursorTo(int row, int col)
 		{
-			if (row < 0)
+			if (row < 0 && col < 0)
 				return;
 			var tb = splitContainer2.Panel1.Controls[col < 0 ? 0 : col] as TextBox;
+			if (row < 0)
+			{
+				tb.SelectAll();
+				tb.Focus();
+				return;
+			}
 			int sum = 0;
 			int rl = tb.Lines[row].Length;
 			for (int i = 0; i < row; i++)

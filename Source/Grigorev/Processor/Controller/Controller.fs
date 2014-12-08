@@ -89,7 +89,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
             errors <- arr.ToArray()
             if errors.Length = 0
             then binary <- Some (p)
-        | AsmCompilationResult.Error arr -> errors <- arr |> Array.map (fun x -> {Row = -1; Col = -1; Message = x})
+        | AsmCompilationResult.Error arr -> errors <- arr |> Array.map (fun x -> {Row = -1; Col = snd x; Message = fst x})
 
     do
         if Array.isEmpty initArray

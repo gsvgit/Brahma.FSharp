@@ -42,10 +42,10 @@ type AsmYaccCompiler<'T> () =
 
     let compile code =
         let res = code |> Array.map (fun x -> try translate x with | e -> E (e.Message))
-        let err, suc = Array.partition (fun x -> match x with | E _ -> true | S _ -> false) res
+        let err, suc = res |> Array.mapi (fun i x -> x, i) |> Array.partition (fun x -> match x with | E _, _ -> true | S _, _ -> false)
         if err.Length = 0
-        then AsmCompilationResult.Success (suc |> Array.map (fun x -> x.GetAsm))
-        else AsmCompilationResult.Error (err |> Array.map (fun x -> x.GetErr))
+        then AsmCompilationResult.Success (suc |> Array.map (fun x -> (fst x).GetAsm))
+        else AsmCompilationResult.Error (err |> Array.map (fun x -> ((fst x).GetErr, snd x)))
 
     interface IAsmCompiler<'T> with
         member this.Compile data =
