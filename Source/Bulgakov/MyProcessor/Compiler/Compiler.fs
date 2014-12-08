@@ -52,14 +52,12 @@ type Compiler() =
     member this.Run() = 
         processor.executeProgram program
         program <- null
-        processor.Dispose
-
-    member this.Debug() = ignore
 
     member this.Step(count:int) =
         processor.executeLine program.[count]
 
-    member this.Stop() = 
+    member this.Stop() =
+        Errors.Clear()
         program <- null 
         processor.Dispose
     

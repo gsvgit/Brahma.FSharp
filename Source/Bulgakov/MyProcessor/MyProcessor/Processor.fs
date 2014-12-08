@@ -103,4 +103,4 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
         grid
 
     member this.Dispose = 
-        grid = Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())
+        grid <- Array.init functions.Length (fun i -> Dictionary<int, Cell<'a>>())

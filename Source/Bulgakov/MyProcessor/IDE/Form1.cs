@@ -45,6 +45,8 @@ namespace IDE
 
         private void Debug(object sender)
         {
+            data.Rows.Clear();
+            comp.Stop();
             try
             {
                 comp.Compile(richTextBox1.Text);
@@ -55,6 +57,7 @@ namespace IDE
                     stepButton.Visible = true;
                     stopButton.Visible = true;
                     richTextBox1.Enabled = false;
+                    errorsListBox.DataSource = new List<string>();
                 }
             }
             catch(Compiler.CompileException e)
@@ -113,18 +116,19 @@ namespace IDE
         {
             try
             {
+                errorsListBox.DataSource = new List<string>();
                 data.Rows.Clear();
+                comp.Stop();
                 comp.Compile(richTextBox1.Text);
                 comp.Run();
                 this.CreateDataGrid(comp, data);
-                comp.Stop();
-                errorsListBox.DataSource = new List<string>();
             }
             catch (Compiler.CompileException e)
             {
                 List<String> list = new List<String>();
                 list.Add(e.Message);
                 errorsListBox.DataSource = list;
+                comp.Stop();
             }
             catch (Exception e)
             {
