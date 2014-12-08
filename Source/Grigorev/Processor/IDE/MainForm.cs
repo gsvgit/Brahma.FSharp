@@ -16,7 +16,7 @@ namespace IDE
 {
 	public partial class MainForm : Form
 	{
-		private IController<int> ctrl = new Controller<int>();
+		private IController<int> ctrl = new Controller<int>(Controller<int>.IntPresetArray);
 
 		private IObservable<object> newClick;
 		private IObservable<object> openClick;

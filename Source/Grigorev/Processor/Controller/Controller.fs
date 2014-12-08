@@ -13,7 +13,7 @@ open System.CodeDom.Compiler
 open Compiler
 open TTA.ASM
 
-type Controller<'T> () =
+type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
     let alert = new Event<AlertEventArgs> ()
     let defProject = {Name = "Default"; SourceCode = [| [|"Eps"|] |]; InitCode = "namespace DefaultNamespace\r\n\r\ntype public FunctionsType () =\r\n    let f (x : 'T) (y : 'T) = Unchecked.defaultof<'T>\r\n    member this.GetArray () = [| f |]"}
     let mutable project = defProject
@@ -27,30 +27,33 @@ type Controller<'T> () =
     let mutable debugPosition = 0
 
     let init (data : string) =
-        processor <- new Processor<'T> ([| (fun x y -> x); (fun x y -> y) |])
-        null
-//        processor <- null
-//        let data = data.Replace("'T", typeof<'T>.ToString())
-//        project.InitCode <- data
-//        let comp = new FSharpCompiler ()
-//        let res = comp.Compile data
-//        match res with
-//        | Error (c) ->
-//            let arr = Array.zeroCreate c.Count
-//            for i in 0 .. c.Count - 1 do
-//                let x = c.[i]
-//                arr.[i] <- {Row = x.Line; Col = x.Column; Message = x.ErrorText}
-//            arr
-//        | Success (a) ->
-//            let tp = a.GetType "DefaultNamespace.FunctionsType"
-//            let ins = tp.GetConstructors().First().Invoke(null)
-//            let arr = tp.GetMethod "GetArray"
-//            let arr =
-//                if arr.IsGenericMethod
-//                then arr.MakeGenericMethod(typeof<'T>)
-//                else arr
-//            processor <- new Processor<'T> (arr.Invoke(ins, null) :?> (('T -> 'T -> 'T) array))
-//            null
+        //processor <- new Processor<'T> ([| (fun x y -> x); (fun x y -> y) |])
+        //null
+        if not (Array.isEmpty initArray)
+        then null
+        else
+            processor <- null
+            let data = data.Replace("'T", typeof<'T>.ToString())
+            project.InitCode <- data
+            let comp = new FSharpCompiler ()
+            let res = comp.Compile data
+            match res with
+            | Error (c) ->
+                let arr = Array.zeroCreate c.Count
+                for i in 0 .. c.Count - 1 do
+                    let x = c.[i]
+                    arr.[i] <- {Row = x.Line; Col = x.Column; Message = x.ErrorText}
+                arr
+            | Success (a) ->
+                let tp = a.GetType "DefaultNamespace.FunctionsType"
+                let ins = tp.GetConstructors().First().Invoke(null)
+                let arr = tp.GetMethod "GetArray"
+                let arr =
+                    if arr.IsGenericMethod
+                    then arr.MakeGenericMethod(typeof<'T>)
+                    else arr
+                processor <- new Processor<'T> (arr.Invoke(ins, null) :?> (('T -> 'T -> 'T) array))
+                null
 
     let openFile (file : string) =
         let reader = new FileStream (file, FileMode.Open) 
@@ -91,7 +94,11 @@ type Controller<'T> () =
         then binary <- Some (result)
 
     do
-        try init project.InitCode |> ignore with | _ -> ()
+        if Array.isEmpty initArray
+        then try init project.InitCode |> ignore with | _ -> ()
+        else processor <- new Processor<'T> (initArray)
+
+    new () = Controller<'T> ([||])
 
     interface IController<'T> with
         member this.New () = project <- defProject
@@ -191,3 +198,5 @@ type Controller<'T> () =
         
         [<CLIEvent>]
         member this.Alert = alert.Publish
+
+    static member IntPresetArray with get () = [| (+); (-); (*); (/) |]
