@@ -41,6 +41,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\..\Source\agents_new\Agents\Agents\Agents.fsproj">
+      <Name>Agents</Name>
+      <Project>{127cdb95-8e2b-4de3-9738-a3ddfe68197b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Brahman.Substrings\Brahman.Substrings.fsproj">
       <Name>Brahman.Substrings</Name>
       <Project>{ef36e48c-a9d2-464e-8efd-cbd050e0a2dc}</Project>

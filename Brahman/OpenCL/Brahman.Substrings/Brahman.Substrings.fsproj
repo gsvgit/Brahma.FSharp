@@ -108,9 +108,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\AgentsSystem\Agents\Brahma.Agents.fsproj">
-      <Name>Brahma.Agents</Name>
-      <Project>{dfd428f8-3698-4ed4-9d08-09d4ead512d6}</Project>
+    <ProjectReference Include="..\..\..\Source\agents_new\Agents\Agents\Agents.fsproj">
+      <Name>Agents</Name>
+      <Project>{127cdb95-8e2b-4de3-9738-a3ddfe68197b}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">

@@ -23,12 +23,8 @@ type msg<'data,'res> =
     | InitBuffers of array<'data>*AsyncReplyChannel<array<'data>>
     | Get of AsyncReplyChannel<'data>
     | Enq of 'data
-    
 
-
-type Reader (isDataEnd, fillF) (*as this*) =
-    //let isDataEnd = ref false
-    let count = ref 1000
+type Reader (isDataEnd, fillF) =    
     let inner =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
@@ -36,24 +32,20 @@ type Reader (isDataEnd, fillF) (*as this*) =
                         match msg with
                         | Die -> return ()
                         | Fill (x,cont) ->
+                            let filled = fillF x
                             //printfn "FILL"
-                            if !count > 0
-                            then
-                                fillF x
-                                decr count
+                            if filled |> Option.isSome
+                            then 
                                 cont x 
                                 return! loop n
                             else isDataEnd := true
-                            //else
-                              //  this.Die()
                         | x -> 
                             printfn "unexpected message for reader: %A" x
                             return! loop n }
             loop 0)
     
     member this.Read(a, cont) = inner.Post(Fill(a, cont))
-    member this.Die() = inner.Post Die
-    member this.IsDataEnd() = !count = 0
+    member this.Die() = inner.Post Die    
 
 type Worker(f) =
 
@@ -85,7 +77,7 @@ type DataManager(readers:array<Reader>) =
             let rec loop n =
                 async { 
                         //printfn "Data to fill: %A" dataToFill.Count
-                        if dataToFill.Count > 0 //&& not <| readers.[0].IsDataEnd()
+                        if dataToFill.Count > 0
                         then
                             let b = dataToFill.Dequeue()
                             readers.[0].Read(b, fun a -> dataToProcess.Enqueue a)                        
@@ -94,8 +86,7 @@ type DataManager(readers:array<Reader>) =
                             let! msg = inbox.Receive()
                             match msg with
                             | Die -> return ()
-                            | InitBuffers (bufs,ch) -> 
-                                //let bufs = Array.init count (fun i -> [|0..10000|])
+                            | InitBuffers (bufs,ch) ->
                                 ch.Reply bufs
                                 bufs |> Array.iter dataToFill.Enqueue                                
                                 return! loop n
@@ -108,7 +99,6 @@ type DataManager(readers:array<Reader>) =
                             | Enq b -> 
                                 dataToFill.Enqueue b
                                 return! loop n
-                            //| None -> return! loop n
                             | x ->  
                                 printfn "Unexpected message for Worker: %A" x
                                 return! loop n
@@ -120,91 +110,17 @@ type DataManager(readers:array<Reader>) =
     member this.Enq(b) = inner.Post(Enq b)
     member this.Die() = inner.Post(Die)
 
-type Master((*config:MasterConfig,*) f) =
-    
-    let random = new System.Random()    
+let rows = 1100
+let columns = 1100
 
-    let rows = 1100
-    let columns = 1100
-    let localWorkSize = 10
-
-    let fill (x,y) =
-        Array.fill x 0 (rows * columns) (float32 (random.NextDouble()))
-        Array.fill y 0 (rows * columns) (float32 (random.NextDouble()))
-
-    
-    let workerF i =
-        let platformName = 
-            "NVIDIA*"
-            //"*96*"
-            //if i = 0 then "NVIDIA*" else "*"
-
-        let deviceType = DeviceType.Gpu
-
-        let provider =
-            try  ComputeProvider.Create(platformName, deviceType)
-            with 
-            | ex -> failwith ex.Message
-
-        //printfn "Using %A" provider
-
-        let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.nth i)    
-
-        let cParallel = Array.zeroCreate(rows * columns)
-        let aValues = Array.zeroCreate(rows * columns)
-        let bValues = Array.zeroCreate(rows * columns)
-        let command = 
-            let rows = 1100
-            let columns = 1100
-            <@
-                fun (r:_2D) (a:array<_>) (b:array<_>) (c:array<_>) -> 
-                    let tx = r.GlobalID0
-                    let ty = r.GlobalID1
-                    let mutable buf = c.[ty * columns + tx]
-                    for k in 0 .. columns - 1 do
-                        buf <- buf + (a.[ty * columns + k] * b.[k * columns + tx])
-                    c.[ty * columns + tx] <- buf
-            @>
-
-        let kernel, kernelPrepare, kernelRun = provider.Compile command
-        let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
-        do kernelPrepare d aValues bValues cParallel
-
-        let f = fun (x,y) ->
-            let _ = commandQueue.Add(aValues.ToGpu(provider, x))
-            let _ = commandQueue.Add(bValues.ToGpu(provider, y))
-            let _ = commandQueue.Add(kernelRun())
-            //let _ = commandQueue.Add(kernelRun())
-            //let _ = commandQueue.Add(kernelRun())
-            let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
-            [|cParallel.Length|]
-        f, aValues, bValues
+type Master((*config:MasterConfig,*) workers:array<Worker>, fill, bufs:ResizeArray<_>) =        
     
     let isDataEnd = ref false
     let reader = new Reader(isDataEnd, fill)
     let instancesCount = 4
     let mutable isEnd = false
-    let bufs = new ResizeArray<_>()
-    let workers = 
-        Array.init instancesCount 
-            (fun i -> 
-                let f,a,b = workerF(i%2)
-                bufs.Add(a,b)
-                new Worker(f))
+            
     let dataManager = new DataManager([|reader|])
-
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-//    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-//    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-//    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-//    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
-//    do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
 
     let bufers = dataManager.InitBuffers(bufs.ToArray())
     let freeWorkers = new System.Collections.Concurrent.ConcurrentQueue<_>(workers)
@@ -212,7 +128,6 @@ type Master((*config:MasterConfig,*) f) =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
                 async {
-                        //printfn "Free workers: %A" freeWorkers.Count
                         if not freeWorkers.IsEmpty
                         then 
                             let success,w = freeWorkers.TryDequeue()
@@ -229,7 +144,6 @@ type Master((*config:MasterConfig,*) f) =
                                 reader.Die()
                                 dataManager.Die()
                                 return ()
-                            //| None -> return! loop n
                             | x ->
                                 printfn "unexpected message for Worker: %A" x
                                 return! loop n 
@@ -239,9 +153,75 @@ type Master((*config:MasterConfig,*) f) =
     member this.Die() = inner.Post(Die)
     member this.IsDataEnd() = !isDataEnd
 
+
+let workerF platformName deviceType localWorkSize i =        
+
+    let provider =
+        try  ComputeProvider.Create(platformName, deviceType)
+        with 
+        | ex -> failwith ex.Message
+
+    //printfn "Using %A" provider
+
+    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.nth i)    
+
+    let cParallel = Array.zeroCreate(rows * columns)
+    let aValues = Array.zeroCreate(rows * columns)
+    let bValues = Array.zeroCreate(rows * columns)    
+
+    let command rows columns = 
+        <@
+            fun (r:_2D) (a:array<_>) (b:array<_>) (c:array<_>) -> 
+                let tx = r.GlobalID0
+                let ty = r.GlobalID1
+                let mutable buf = c.[ty * columns + tx]
+                for k in 0 .. columns - 1 do
+                    buf <- buf + (a.[ty * columns + k] * b.[k * columns + tx])
+                c.[ty * columns + tx] <- buf
+        @>
+
+    let kernel, kernelPrepare, kernelRun = provider.Compile <| command rows columns
+    let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
+    do kernelPrepare d aValues bValues cParallel
+
+    let f = fun (x,y) ->
+        let _ = commandQueue.Add(aValues.ToGpu(provider, x))
+        let _ = commandQueue.Add(bValues.ToGpu(provider, y))
+        let _ = commandQueue.Add(kernelRun())
+        let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
+        [|cParallel.Length|]
+    f, aValues, bValues
+
+
+let platformName = "NVIDIA*"
+
+let deviceType = DeviceType.Gpu    
+
+let bufs = new ResizeArray<_>()
+for i in 0 ..5 do bufs.Add(Array.zeroCreate(rows * columns),Array.zeroCreate(rows * columns))
+let workers platformName deviceType localWorkSize = 
+    Array.init 4 
+        (fun i -> 
+            let f,a,b = workerF platformName deviceType localWorkSize (i%2)
+            bufs.Add(a,b)
+            new Worker(f))
+
+
+let random = new System.Random()    
+
+let count = ref 1000
+
+let fill (x,y) =
+    if !count > 0
+    then
+        Array.fill x 0 (rows * columns) (float32 (random.NextDouble()))
+        Array.fill y 0 (rows * columns) (float32 (random.NextDouble()))
+        decr count
+        Some (x,y)
+    else None
+
 let start = System.DateTime.Now
-let master = new Master(fun a -> 
-        [|Array.fold(fun x z -> x+z) 1 a|])
+let master = new Master(workers platformName deviceType 10, fill, bufs)
 while not <| master.IsDataEnd() do ()
 master.Die()
 printfn "Time = %A" <| System.DateTime.Now - start

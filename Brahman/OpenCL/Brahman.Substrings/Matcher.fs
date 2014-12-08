@@ -2,7 +2,6 @@
 
 open Brahma.Helpers
 open Brahma.OpenCL
-//open OpenCL.Net
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
@@ -43,32 +42,22 @@ type FindRes =
 type Matcher(?maxHostMem) =    
     let totalResult = new ResizeArray<_>()
     let mutable label = ""
-    let platformName = "NVIDIA*"
-    let deviceType = OpenCL.Net.DeviceType.Default    
-
-    let provider =
-        try  ComputeProvider.Create(platformName, deviceType)
-        with 
-        | ex -> failwith ex.Message
-
-    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
-
+    
     let timer = new Timer<string>()
 
     let maxTemplateLength = 32       
     
-    let mutable buffersCreated = false
     let mutable result = [||]
     let mutable input = [||]
     let c = [|0|]
     let mutable ready = true
 
-    let memory,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxMemAllocSize)
-    let maxGpuMemory = memory.CastTo<uint64>()
-
     let maxHostMemory = match maxHostMem with Some x -> x | _ -> 256UL * 1024UL * 1024UL
 
-    let configure (templates:array<_>) =
+    let configure (templates:array<_>) (provider:ComputeProvider) =
+        let memory,ex = OpenCL.Net.Cl.GetDeviceInfo(provider.Devices |> Seq.head, OpenCL.Net.DeviceInfo.MaxMemAllocSize)
+        let maxGpuMemory = memory.CastTo<uint64>()
+
         let tLenghth = templates |> Array.length |> uint64
         let additionalArgs = 2UL * (256UL + 2UL) * (uint64) maxTemplateLength * tLenghth + tLenghth +
                              tLenghth + 13UL + 1000UL
@@ -93,64 +82,11 @@ type Matcher(?maxHostMem) =
             bufLength = length
         }
 
-    let printConfiguration config =
-        printfn
-            "Maximum memory on GPU is %A, additional args size is %A, temp data size is %A"
-            maxGpuMemory config.additionalArgs config.additionalTempData
-
-        printfn 
-            "Running %A groups with %A items in each, %A in total."
-            config.groups config.localWorkSize (config.localWorkSize * config.groups)
-        printfn "Each item will process %A bytes of input, %A total on each iteration." config.chunkSize config.bufLength
-        printfn ""
-    
-    let initialize config templates command =
-        totalResult.Clear()
-        timer.Reset()
-        timer.Start()
-        printConfiguration config 
-        result <- Array.zeroCreate config.bufLength
-        input <- Array.zeroCreate config.bufLength
-        let kernel, kernelPrepare, kernelRun = provider.Compile(query=command, translatorOptions=[BoolAsBit])                
-        let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
-        let d = new _1D(l,config.localWorkSize)
-        timer.Lap(label)
-        kernel, (kernelPrepare d), kernelRun
-
     let readingTimer = new Timer<string>()
     let countingTimer = new Timer<string>()   
 
-    let close () =     
-        provider.CloseAllBuffers()
-        buffersCreated <- false
-
-    let downloader label (task:Task<unit>) =
-        if ready then failwith "Not running, can't download!"
-        ready <- true
-
-        task.Wait()
-        ignore (commandQueue.Add(c.ToHost provider).Finish())
-        ignore (commandQueue.Add(c.ToGpu(provider, [|0|])).Finish())
-        ignore (commandQueue.Add(result.ToHost(provider)).Finish())
-        buffersCreated <- true
-        Timer<string>.Global.Lap(label)
-        timer.Lap(label)
-
-        result
-
-    let uploader (kernelRun:_ -> Commands.Run<_>) =
-        if not ready then failwith "Already running, can't upload!"
-        ready <- false
-
-        timer.Start()
-        Timer<string>.Global.Start()
-        if buffersCreated || (provider.AutoconfiguredBuffers <> null && provider.AutoconfiguredBuffers.ContainsKey(input)) then
-            ignore (commandQueue.Add(input.ToGpu provider).Finish())
-            async { ignore (commandQueue.Add(kernelRun()).Finish())}
-            |> Async.StartAsTask
-        else
-            ignore (commandQueue.Add(kernelRun()).Finish())
-            async {()} |> Async.StartAsTask
+    let close (provider:ComputeProvider) = 
+        provider.CloseAllBuffers()        
 
     let countMatchesDetailed index (result:array<uint16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
         let mutable matches = 0
@@ -215,7 +151,7 @@ type Matcher(?maxHostMem) =
                     + countMatchesDetailed (totalIndex-1) result maxTemplateLength countingBound matchBound templates.sizes prefix matches (current - (int64) matchBound + 512L)
                 countingTimer.Lap(label)
 
-            if (read > 0) then
+            if read > 0 then
                 index <- index + 1
                 totalIndex <- totalIndex + 1
                 current <- current + (int64) read
@@ -229,7 +165,7 @@ type Matcher(?maxHostMem) =
                 task <- uploader command
 
         printResult templates matches !counter
-        readingTimer.Lap(label)
+        readingTimer.Lap label
         close()
 
     let prepareTemplates array = 
@@ -239,8 +175,8 @@ type Matcher(?maxHostMem) =
         let readyTemplates = { number = sorted.Length; sizes = lengths; content = templateBytes;}
         readyTemplates
 
-    let finalize () =
-        close ()
+    let finalize provider =
+        close provider
         printfn "Computation time with preparations:"
         Helpers.printTime timer label
 
@@ -262,62 +198,72 @@ type Matcher(?maxHostMem) =
             yield pattern
         |]
 
-    let rk readFun templateArr  = 
+    let fill readFun = 
+
+    let initialize config templates =
+        totalResult.Clear()
+        timer.Reset()
+        timer.Start()
+        printConfiguration config 
+        result <- Array.zeroCreate config.bufLength
+        input <- Array.zeroCreate config.bufLength            
+        timer.Lap label
+
+    let rk readFun templateArr = 
+        let counter = ref 0
+        readingTimer.Start()
+        
+        let matches = Array.zeroCreate 512
+                
+        let mutable countingBound,matchBound = 0,0
+        let mutable index,totalIndex,current = 0,0,0L        
+        let isLastChunk = ref false
+                        
         label <- RabinKarp.label
+        initialize config templateArr
+
         let config = configure templateArr
         let templates = prepareTemplates templateArr
-        let kernel, kernelPrepare, kernelRun = initialize config templateArr RabinKarp.command        
+        let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
+        let d = new _1D(l,config.localWorkSize)
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
-        kernelPrepare 
-            config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c
+
+        let platformName = "NVIDIA*"
+        let deviceType = OpenCL.Net.DeviceType.Default        
+
+        let workerF () = 
+            let provider =
+                try  ComputeProvider.Create(platformName, deviceType)
+                with 
+                | ex -> failwith ex.Message
+
+            let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+            let kernel, kernelPrepare, kernelRun = provider.Compile(query=RabinKarp.command, translatorOptions=[BoolAsBit])                
+            kernelPrepare
+                d config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c    
+            let f = fun data ->
+                ignore <| commandQueue.Add(c.ToHost provider).Finish()
+                ignore <| commandQueue.Add(c.ToGpu(provider, [|0|]))
+                ignore <| commandQueue.Add(result.ToHost(provider)).Finish()
+                ignore <| commandQueue.Add(input.ToGpu(provider, data)).Finish()
+                ignore <| commandQueue.Add(kernelRun()).Finish()
+                counter := 
+                    !counter 
+                    + countMatchesDetailed (totalIndex-1) result maxTemplateLength countingBound matchBound templates.sizes prefix matches (current - int64 matchBound + 512L)
+            f   
+        
+        
         run kernelRun readFun templates prefix label close
+        let master = new Program.Master(workerF)
+        while not <| master.IsDataEnd() do ()
+        master.Die()
         timer.Lap(label)
         finalize()
         c.[0] <- 0
         new FindRes(totalResult.ToArray(), sorted templates, input.Length)
 
     new () = Matcher (256UL * 1024UL * 1024UL)
-
-    (*member this.NaiveSearch (hdId, templateArr)  = 
-        label <- NaiveSearch.label
-        let config = configure templateArr
-        let templates = prepareTemplates templateArr
-        let kernel, kernelPrepare, kernelRun = initialize config templateArr NaiveSearch.command
-        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
-        kernelPrepare config.bufLength config.chunkSize templates.number templates.sizes input templates.content result
-        run kernelRun hdId templates prefix label close
-        timer.Lap(label)
-        finalize()
-        new FindRes(totalResult.ToArray(), sorted templates, input.Length)
-        *)
-//    member this.AhoCorasik (hdId, templateArr)  =        
-//        label <- AhoCorasick.label
-//        let config = configure templateArr
-//        let templates = prepareTemplates templateArr
-//        let kernel, kernelPrepare, kernelRun = initialize config templateArr AhoCorasick.command        
-//        let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content
-//        let go, _, exit = AhoCorasick.buildStateMachine templates.number maxTemplateLength next leaf
-//        kernelPrepare config.bufLength config.chunkSize templates.number templates.sizes  go exit leaf maxTemplateLength input templates.content result
-//        run kernelRun hdId templates config prefix label close
-//        timer.Lap(label)
-//        finalize()
-
-   (* member this.Hashtable (hdId, templateArr)  = 
-        label <- Hashtables.label
-        let config = configure templateArr
-        let templates = prepareTemplates templateArr
-        let kernel, kernelPrepare, kernelRun = initialize config templateArr Hashtables.command        
-        let prefix, _, _, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
-        let starts = Hashtables.computeTemplateStarts templates.number templates.sizes
-        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
-        let table, next = Hashtables.createHashTable templates.number templates.sizes templateHashes
-        kernelPrepare 
-            config.bufLength config.chunkSize templates.number templates.sizes  templateHashes table next starts maxTemplateLength input templates.content result
-        run kernelRun hdId templates prefix label close
-        timer.Lap(label)
-        finalize()
-        new FindRes(totalResult.ToArray(), sorted templates, input.Length)*)
 
     member this.RabinKarp (readFun, templateArr) = 
         rk readFun templateArr
