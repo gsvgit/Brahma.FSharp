@@ -35,11 +35,23 @@ namespace IDE
             debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(button4));
             var stop = Observable.FromEventPattern(h => button5.Click += h, h => button5.Click -= h);
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(button5));
+            var close = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
+            close.Subscribe(x => Closing());
         }
-
         public string CreateCode
         {
             get { return richTextBox1.Text; }
+        }
+        private void Closing()
+        {
+            if (richTextBox1.Text != "")
+            {
+                if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
+                   MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    this.LoadFile(button1);
+                }
+            }
         }
         private void Stop(object sender)
         {
@@ -178,5 +190,6 @@ namespace IDE
                 sw.Close();
             }
         }
+
     }
 }

@@ -4,7 +4,6 @@ using System.Windows.Forms;
 
 namespace IDE
 {
-    public delegate int Deleg (int x, int y);
     partial class MainScreen
     {
         /// <summary>
@@ -141,10 +140,10 @@ namespace IDE
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
             // 
-            // richTextBox2
+            // errorBox
             // 
             this.errorBox.Location = new System.Drawing.Point(12, 557);
-            this.errorBox.Name = "richTextBox2";
+            this.errorBox.Name = "errorBox";
             this.errorBox.Size = new System.Drawing.Size(887, 165);
             this.errorBox.TabIndex = 9;
             this.errorBox.Text = "";
@@ -162,6 +161,7 @@ namespace IDE
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.richTextBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).EndInit();
