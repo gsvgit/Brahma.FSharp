@@ -67,7 +67,6 @@ namespace IDE
                 errorsListBox.DataSource = list;
             }
         }
-
         private void NextStep(object sender)
         {
             if (count < richTextBox1.Lines.Length)
@@ -124,6 +123,13 @@ namespace IDE
                 this.CreateDataGrid(comp, data);
             }
             catch (Compiler.CompileException e)
+            {
+                List<String> list = new List<String>();
+                list.Add(e.Message);
+                errorsListBox.DataSource = list;
+                comp.Stop();
+            }
+            catch (Compiler.OperationException e)
             {
                 List<String> list = new List<String>();
                 list.Add(e.Message);
