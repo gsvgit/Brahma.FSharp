@@ -14,3 +14,6 @@ Brahman/OpenCL/packages/*
 Source/ArrayFunctions/packages/*
 Source/Fractals/FractalsGPU/packages/*
 !Source/Fractals/FractalsGPU/packages/*.config
+RXExample/packages/*
+Source/agents_new/Agents/packages/*
+*.vspx
