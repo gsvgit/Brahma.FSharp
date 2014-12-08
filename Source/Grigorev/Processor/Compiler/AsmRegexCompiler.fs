@@ -88,9 +88,9 @@ type AsmRegexCompiler<'T> () =
     let compile data =
         data |> Array.map (fun e -> e |> Array.map (fun el -> parseCommand el))
 
-    interface IAsmCompiler<'T> with
-        member this.Compile data =
-            compile data
+//    interface IAsmCompiler<'T> with
+//        member this.Compile data =
+//            compile data
 
     member this.Compile data =
         compile data

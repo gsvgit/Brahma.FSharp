@@ -51,8 +51,8 @@ type public RegexTests () =
 type public YaccTests () =
     [<Test>]
     member this.Test0 () =
-        let code = 
-            [|[|
+        let thr = 
+            [|
                 "ePs";
                 "Set 5 3 7 ";
                 "mvc 0 8    -34   ";
@@ -68,7 +68,8 @@ type public YaccTests () =
                 "set 0 0 df";
                 "set 0 0 ";
                 "mvc 8 6     56-7"
-            |]|]
+            |] |> String.concat "\r\n"
+        let code = [| thr |]
         let exRes =
             [|[|
                 Some (Asm.Eps);

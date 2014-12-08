@@ -11,6 +11,7 @@ using Processor;
 using Controller;
 using TTA;
 using System.Reactive;
+using System.Runtime.CompilerServices;
 
 namespace IDE
 {
@@ -41,7 +42,7 @@ namespace IDE
 		private IObservable<EventPattern<ControlEventArgs>> controlAdded;
 		private IObservable<EventPattern<ControlEventArgs>> controlRemoved;
 		private IObservable<EventPattern<DataGridViewCellEventArgs>> rowClicked;
-		private IObservable<EventPattern<KeyEventArgs>> keyPressed; 
+		private IObservable<EventPattern<FormClosingEventArgs>> formClosing; 
 
 		public MainForm()
 		{
@@ -86,12 +87,12 @@ namespace IDE
 			controlAdded = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlAdded += h, h => splitContainer2.Panel1.ControlAdded -= h).Where(p => p.EventArgs.Control is TextBox);
 			controlRemoved = Observable.FromEventPattern<ControlEventHandler, ControlEventArgs>(h => splitContainer2.Panel1.ControlRemoved += h, h => splitContainer2.Panel1.ControlRemoved -= h).Where(p => p.EventArgs.Control is TextBox);
 			rowClicked = Observable.FromEventPattern<DataGridViewCellEventHandler, DataGridViewCellEventArgs>(h => errorsDataGridView.CellDoubleClick += h, h => errorsDataGridView.CellDoubleClick -= h);
-			keyPressed = Observable.FromEventPattern<KeyEventHandler, KeyEventArgs>(h => this.KeyDown += h, h => this.KeyDown -= h);
+			formClosing = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
 		}
 
 		private void SubscribeEvents()
 		{
-			newClick.Subscribe(s => { ctrl.New(); InitEditor(); });
+			newClick.Subscribe(s => { if (savePrompt()) return; ctrl.New(); InitEditor(); });
 			openClick.Subscribe(openHandler);
 			exitClick.Subscribe(s => Close());
 			saveClick.Subscribe(s => ctrl.Save());
@@ -114,11 +115,7 @@ namespace IDE
 			controlAdded.Subscribe(s => SubscribeOnTextBox(s.EventArgs.Control as TextBox));
 			controlRemoved.Subscribe(s => UnsubscribeOnTextBox(s.EventArgs.Control as TextBox));
 			rowClicked.Subscribe(s => { var r = errorsDataGridView.Rows[s.EventArgs.RowIndex]; var i = (int) r.Cells[0].Value; var j = (int) r.Cells[1].Value; SetCursorTo(i, j); });
-
-			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && (p.EventArgs.Modifiers & Keys.Control) != 0).Subscribe(e => Run());
-			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && (p.EventArgs.Modifiers & Keys.Control) == 0).Subscribe(e => StartDebug());
-			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F10).Subscribe(e => Step());
-			keyPressed.Where(p => p.EventArgs.KeyCode == Keys.B && (p.EventArgs.Modifiers & Keys.Control) != 0 && (p.EventArgs.Modifiers & Keys.Shift) != 0 ).Subscribe(e => Compile());
+			formClosing.Subscribe(s => closingHandler(s.EventArgs));
 
 			ctrl.Alert += AlertHandler;
 		}
@@ -141,7 +138,7 @@ namespace IDE
 			ctrl.Run();
 			UpdateGrid();
 		}
-
+		
 		private void StartDebug()
 		{
 			ctrl.StartDebug();
@@ -192,6 +189,8 @@ namespace IDE
 
 		private void SetCursorTo(int row, int col)
 		{
+			if (row < 0)
+				return;
 			var tb = splitContainer2.Panel1.Controls[col < 0 ? 0 : col] as TextBox;
 			int sum = 0;
 			int rl = tb.Lines[row].Length;
@@ -220,7 +219,7 @@ namespace IDE
 			var h = splitContainer2.Panel1.Height;
 			for (int i = 0; i < n; i++)
 			{
-				splitContainer2.Panel1.Controls.Add(new TextBox() { Multiline = true, Location = new Point(i * w / n, 0), Size = new Size(w / n, h), Lines = ctrl.Source[i], Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204))) });
+				splitContainer2.Panel1.Controls.Add(new TextBox() { Multiline = true, Location = new Point(i * w / n, 0), Size = new Size(w / n, h), Text = ctrl.Source[i], Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204))) });
 			}
 			updateProcessorState();
 		}
@@ -229,11 +228,11 @@ namespace IDE
 		{
 			StopDebug();
 			var n = ctrl.ThreadNumber;
-			var arr = new string[n][];
+			var arr = new string[n];
 			for (int i = 0; i < n; i++)
 			{
 				var l = splitContainer2.Panel1.Controls[i] as TextBox;
-				arr[i] = l.Lines;
+				arr[i] = l.Text;
 			}
 			ctrl.Update(arr);
 			runWoDebugToolStripMenuItem.Enabled = debugToolStripMenuItem1.Enabled = false;
@@ -282,6 +281,8 @@ namespace IDE
 
 		private void openHandler(object s)
 		{
+			if (savePrompt())
+				return;
 			OpenFileDialog d = new OpenFileDialog();
 			d.Filter = "Project files (*.asmprj)|*.asmprj|All files (*.*)|*.*";
 			var dr = d.ShowDialog();
@@ -343,6 +344,28 @@ namespace IDE
 			if (d == DialogResult.OK)
 				ctrl.ThreadNumber = f.Number;
 			InitEditor();
+		}
+
+		private bool savePrompt()
+		{
+			if (ctrl.IsSaved)
+				return false;
+			var dr = MessageBox.Show("Save project before exit?", "Alert", MessageBoxButtons.YesNoCancel);
+			if (dr == DialogResult.Yes)
+			{
+				if (ctrl.HasFilename)
+					ctrl.Save();
+				else saveAsHandler(null);
+				return false;
+			}
+			if (dr == DialogResult.No)
+				return false;
+			return true;
+		}
+
+		private void closingHandler(FormClosingEventArgs e)
+		{
+			e.Cancel = savePrompt();
 		}
 	}
 }

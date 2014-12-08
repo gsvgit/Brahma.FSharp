@@ -9,5 +9,5 @@ type Project = {
     [<field : DataMember>]
     mutable InitCode : string
     [<field : DataMember>]
-    mutable SourceCode : string array array
+    mutable SourceCode : string array
 }

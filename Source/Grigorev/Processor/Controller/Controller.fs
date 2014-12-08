@@ -15,8 +15,8 @@ open TTA.ASM
 
 type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
     let alert = new Event<AlertEventArgs> ()
-    let defProject = {Name = "Default"; SourceCode = [| [|"Eps"|] |]; InitCode = "namespace DefaultNamespace\r\n\r\ntype public FunctionsType () =\r\n    let f (x : 'T) (y : 'T) = Unchecked.defaultof<'T>\r\n    member this.GetArray () = [| f |]"}
-    let mutable project = defProject
+    let defProject = {Name = "Default"; SourceCode = [| "Eps" |]; InitCode = "namespace DefaultNamespace\r\n\r\ntype public FunctionsType () =\r\n    let f (x : 'T) (y : 'T) = Unchecked.defaultof<'T>\r\n    member this.GetArray () = [| f |]"}
+    let mutable project = {defProject with Name = "Default"}
     let mutable fileName = null
     let mutable processor = null
     let mutable clearOnRun = true
@@ -25,6 +25,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
     let comp = new AsmYaccCompiler<'T>() :> IAsmCompiler<'T>
     let mutable inDebug = false
     let mutable debugPosition = 0
+    let mutable saved = true
 
     let init (data : string) =
         //processor <- new Processor<'T> ([| (fun x y -> x); (fun x y -> y) |])
@@ -38,13 +39,13 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
             let comp = new FSharpCompiler ()
             let res = comp.Compile data
             match res with
-            | Error (c) ->
+            | CompilationResult.Error (c) ->
                 let arr = Array.zeroCreate c.Count
                 for i in 0 .. c.Count - 1 do
                     let x = c.[i]
                     arr.[i] <- {Row = x.Line; Col = x.Column; Message = x.ErrorText}
                 arr
-            | Success (a) ->
+            | CompilationResult.Success (a) ->
                 let tp = a.GetType "DefaultNamespace.FunctionsType"
                 let ins = tp.GetConstructors().First().Invoke(null)
                 let arr = tp.GetMethod "GetArray"
@@ -62,6 +63,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
         reader.Close()
         fileName <- file
         init project.InitCode |> ignore
+        saved <- true
 
     let save (file : string) =
         project.Name <- file.Substring(file.LastIndexOf('\\') + 1)
@@ -70,28 +72,24 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
         ser.WriteObject (writer, project)
         writer.Close()
         fileName <- file
+        saved <- true
 
     let compile () =
         binary <- None
-        let result = project.SourceCode |> comp.Compile
-        let arr = new List<ErrorListItem>()
-        let help (x : option<Asm<'T>>) i j =
-            if x.IsSome
-            then x.Value
-            else
-                arr.Add({Row = i; Col = j; Message = "Parsing error"})
-                Asm.Eps
-        let result = result |> Array.mapi (fun j x -> x |> Array.mapi (fun i y -> help y i j))
-        let res = result |> processor.CheckProgram
-        let help2 x =
-            match x with
-            | IncorrectLine (s, i) -> {Row = i; Col = -1; Message = s}
-            | IncorrectCommand (s, i, j) -> {Row = i; Col = j; Message = s}
-        if res.IsSome
-        then arr.AddRange(res.Value |> Array.map (fun x -> help2 x))
-        errors <- arr.ToArray()
-        if errors.Length = 0
-        then binary <- Some (result)
+        match project.SourceCode |> comp.Compile with
+        | AsmCompilationResult.Success p ->
+            let arr = new List<ErrorListItem>()
+            let res = p |> processor.CheckProgram
+            let help2 x =
+                match x with
+                | IncorrectLine (s, i) -> {Row = i; Col = -1; Message = s}
+                | IncorrectCommand (s, i, j) -> {Row = i; Col = j; Message = s}
+            if res.IsSome
+            then arr.AddRange(res.Value |> Array.map (fun x -> help2 x))
+            errors <- arr.ToArray()
+            if errors.Length = 0
+            then binary <- Some (p)
+        | AsmCompilationResult.Error arr -> errors <- arr |> Array.map (fun x -> {Row = -1; Col = -1; Message = x})
 
     do
         if Array.isEmpty initArray
@@ -101,7 +99,11 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
     new () = Controller<'T> ([||])
 
     interface IController<'T> with
-        member this.New () = project <- defProject
+        member this.New () =
+            project <- {defProject with Name = "Default"}
+            fileName <- null
+            binary <- None
+            saved <- true
 
         member this.Open file =
             try openFile file with
@@ -123,6 +125,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
             
         member this.Update code =
             project.SourceCode <- code
+            saved <- false
 
         member this.Compile () =
             compile ()
@@ -192,10 +195,14 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
             get () = Array.length project.SourceCode
             and set (value) =
                 let n = project.SourceCode.Length
-                project.SourceCode <- Array.init value (fun i -> if i < n then project.SourceCode.[i] else [||])
+                project.SourceCode <- Array.init value (fun i -> if i < n then project.SourceCode.[i] else "")
 
         member this.ProjectName = project.Name
         
+        member this.IsSaved with get () = saved
+
+        member this.HasFilename with get () = fileName <> null
+
         [<CLIEvent>]
         member this.Alert = alert.Publish
 

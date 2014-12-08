@@ -40,12 +40,12 @@
     <Compile Include="FSharpCompiler.fs" />
     <Compile Include="IAsmCompiler.fs" />
     <Compile Include="AsmRegexCompiler.fs" />
-    <Compile Include="Calc.yrd.fs" />
-    <Compile Include="CalcLexer.fs" />
+    <Compile Include="Asm.yrd.fs" />
+    <Compile Include="AsmLexer.fs" />
     <Compile Include="AsmYaccCompiler.fs" />
     <None Include="packages.config" />
-    <None Include="Calc.fsl" />
-    <None Include="Calc.yrd" />
+    <None Include="Asm.fsl" />
+    <None Include="Asm.yrd" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AST.Common">

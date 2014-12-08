@@ -16,7 +16,7 @@ options {
 module Main
 
 [<Start>]
-program: stmt
+program: stmt*
 
 stmt: eps | set | mvc | mov
 

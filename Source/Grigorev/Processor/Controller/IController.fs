@@ -13,7 +13,7 @@ type IController<'T> =
     abstract member Save : unit -> unit
     abstract member Open : string -> unit
     abstract member Init : string -> ErrorListItem array
-    abstract member Update : string array array -> unit
+    abstract member Update : string array -> unit
     abstract member Compile : unit -> unit
     abstract member CompilationErrors : ErrorListItem array with get
     abstract member ChangeLine : int -> string array -> unit
@@ -28,12 +28,14 @@ type IController<'T> =
     abstract member ReadAll : unit -> GridCell<'T> array
     abstract member Clear : unit -> unit
     abstract member ClearOnRun : bool with get, set
-    abstract member Source : string array array
+    abstract member Source : string array
     abstract member InitCode : string
     abstract member ThreadNumber : int with get, set
     abstract member ProjectName : string
     abstract member FunctionsCount : int with get
     abstract member GridWidth : int with get
     abstract member GridHeight : int with get
+    abstract member IsSaved : bool with get
+    abstract member HasFilename : bool with get
     [<CLIEvent>]
     abstract member Alert : IEvent<AlertEventArgs>

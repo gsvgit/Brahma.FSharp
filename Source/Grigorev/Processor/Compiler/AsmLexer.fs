@@ -1,4 +1,4 @@
-# 1 "Calc.fsl"
+# 1 "Asm.fsl"
  
 module Lexer
 open Microsoft.FSharp.Text.Lexing
@@ -6,7 +6,7 @@ open Parser
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString(lexbuf)
 
-# 9 "CalcLexer.fs"
+# 9 "AsmLexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -61,45 +61,45 @@ and token  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_token  
 and _fslex_token  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 22 "Calc.fsl"
+# 22 "Asm.fsl"
                               token lexbuf 
-# 66 "CalcLexer.fs"
+# 66 "AsmLexer.fs"
           )
   | 1 -> ( 
-# 23 "Calc.fsl"
+# 23 "Asm.fsl"
                               EPS(lexeme lexbuf) 
-# 71 "CalcLexer.fs"
+# 71 "AsmLexer.fs"
           )
   | 2 -> ( 
-# 24 "Calc.fsl"
+# 24 "Asm.fsl"
                               SET(lexeme lexbuf) 
-# 76 "CalcLexer.fs"
+# 76 "AsmLexer.fs"
           )
   | 3 -> ( 
-# 25 "Calc.fsl"
+# 25 "Asm.fsl"
                               MVC(lexeme lexbuf) 
-# 81 "CalcLexer.fs"
+# 81 "AsmLexer.fs"
           )
   | 4 -> ( 
-# 26 "Calc.fsl"
+# 26 "Asm.fsl"
                               MOV(lexeme lexbuf) 
-# 86 "CalcLexer.fs"
+# 86 "AsmLexer.fs"
           )
   | 5 -> ( 
-# 27 "Calc.fsl"
+# 27 "Asm.fsl"
                           NUMBER(lexeme lexbuf) 
-# 91 "CalcLexer.fs"
+# 91 "AsmLexer.fs"
           )
   | 6 -> ( 
-# 28 "Calc.fsl"
+# 28 "Asm.fsl"
                        RNGLR_EOF ("")
-# 96 "CalcLexer.fs"
+# 96 "AsmLexer.fs"
           )
   | 7 -> ( 
-# 29 "Calc.fsl"
+# 29 "Asm.fsl"
                       failwithf "unexpected input: %s" <| string lexeme 
-# 101 "CalcLexer.fs"
+# 101 "AsmLexer.fs"
           )
   | _ -> failwith "token"
 
-# 3000000 "CalcLexer.fs"
+# 3000000 "AsmLexer.fs"
