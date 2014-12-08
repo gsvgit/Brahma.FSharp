@@ -204,6 +204,8 @@ namespace IDE
 			int rl = tb.Lines[row].Length;
 			for (int i = 0; i < row; i++)
 				sum += tb.Lines[i].Length + 2;
+			if (sum + rl > tb.Text.Length)
+				return;
 			tb.Select(sum, rl);
 			tb.Focus();
 		}
