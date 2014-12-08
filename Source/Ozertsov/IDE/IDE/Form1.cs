@@ -43,8 +43,9 @@ namespace IDE
         }
         private void Stop(object sender)
         {
-            //MessageBox.Show("закончить debug");
             button5.Visible = false;
+            button3.Visible = true;
+            richTextBox1.Enabled = true;
             DisposeDataGrid(data);
             count = 0;
         }
@@ -53,7 +54,6 @@ namespace IDE
             errorBox.Text = "";
             try
             {
-                //MessageBox.Show("Передать строку в метод compile для debug");
                 if (count < richTextBox1.Lines.Length - 1)
                 {
                     if (count == 0)
@@ -99,19 +99,20 @@ namespace IDE
             catch (Exception e)
             {
                 errorBox.Text = e.Message;
-                //MessageBox.Show(e.Message);
+                DisposeDataGrid(data);
+                button5.Visible = false;
+                button3.Visible = true;
+                richTextBox1.Enabled = true;
+                count = 0;
             }
         }
 
         private void Start(object sender)
         {
-
-            //Compilator.Compiler comp = new Compilator.Compiler();
             errorBox.Text = "";
             DisposeDataGrid(data);
             try
             {
-                //MessageBox.Show("Передать строку в compile");
                 try
                 {
                     comp.Compile(richTextBox1.Text);
@@ -120,16 +121,14 @@ namespace IDE
                 {
                     Compilator.CompileException ex = new Compilator.CompileException();
                     throw ex;
-                }
-                    
+                }    
                 comp.Run();
                 this.CreateDataGrid(comp, data);
                 comp.Stop();
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;
-                //MessageBox.Show(e.Message);    
+                errorBox.Text = e.Message;    
             }
         }
 
@@ -138,7 +137,6 @@ namespace IDE
             if (data.RowCount < compiler.NumRows()) { data.RowCount = compiler.NumRows(); }
             for (int i = 0; i < compiler.NumCols(); i++)
             {
-                //data[i]
                 Dictionary<int, string> cells = compiler.getGrid(i);
                 foreach (KeyValuePair<int, string> kvp in cells){
                     data[i, kvp.Key].Value = kvp.Value;
@@ -147,13 +145,8 @@ namespace IDE
         }
         private void DisposeDataGrid(DataGridView data)
         {
-            for (int col = 0; col< data.ColumnCount; col++)
-            {
-                for (int row = 0; row < data.ColumnCount; row++)
-                {
-                    data[col, row].Value = null;
-                }
-            }
+            data.Rows.Clear();
+            data.RowCount = 420;
         }
         private void OpenFile(object sender)
         {

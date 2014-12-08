@@ -19,9 +19,9 @@ type Compiler() =
     
     member this.Run() =
         try
+            processor.WorkFlows program
             processor.RunOp program
             program <- null
-            //processor.Dispose
         with
         | :? System.Exception -> reraise()
 
@@ -29,6 +29,8 @@ type Compiler() =
         ignore
 
     member this.Step(count:int) =
+        if count = 0
+        then processor.WorkFlows program
         processor.RunLine program.[count]
 
     member this.Stop() = 

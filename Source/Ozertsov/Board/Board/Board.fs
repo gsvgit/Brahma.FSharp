@@ -5,7 +5,8 @@ open TTA.ASM
 open System.Collections.Generic
 open System.Linq;
 
-exception ParametrException of int * int
+exception OperationException of string
+exception ArgException of string
 
 type Para = int * int
 
@@ -84,59 +85,68 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             | Set ((x, y), arg) ->
                 let dot = (int x, int y)
                 if matrix.Length < int y || int x < 0 || int y < 0
-                then raise (System.ArgumentException("can't find cell " + (int x).ToString() + " "+ (int y).ToString() ))
+                then raise (OperationException(" can't find cell " + (int x).ToString() + " "+ (int y).ToString() ))
                 if cellsForWrite.Contains(dot)
                 then
-                    raise (System.ArgumentException("can't write and read together in equal cells"))
+                    raise (ArgException("can't write and read together in equal cells"))
                 else
                     cellsForWrite.Add(dot) |> ignore
             | Mvc ((tox, toy), arg) -> 
                 let todot = (int tox, int toy)
                 if matrix.Length < int toy || int tox < 0 || int toy < 0
-                then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
+                then raise (OperationException(" can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
                 if cellsForWrite.Contains(todot)
                 then
-                    raise (System.ArgumentException("can't write and read together in equal cells"))
+                    raise (ArgException("can't write and read together in equal cells"))
                 else
                     cellsForWrite.Add(int tox, int toy) |> ignore
             | Mov ((fromx, fromy), (tox, toy)) ->
                 let fromdot = (int fromx, int fromy)
                 if matrix.Length < int fromy || int fromx < 0 || int fromy < 0
-                then raise (System.ArgumentException("can't find cell " + (int fromx).ToString() + " "+ (int fromy).ToString() ))
+                then raise (OperationException(" can't find cell " + (int fromx).ToString() + " "+ (int fromy).ToString() ))
                 if cellsForWrite.Contains(fromdot)
                 then
-                    raise (System.ArgumentException("can't write and read together in equal cells"))
+                    raise (ArgException(" can't write and read together in equal cells"))
                 else
                     cellsForRead.Add(fromdot) |> ignore                
                 let todot = (int tox, int toy)
                 if matrix.Length < int toy || int tox < 0 || int toy < 0
-                then raise (System.ArgumentException("can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
+                then raise (OperationException(" can't find cell " + (int tox).ToString() + " "+ (int toy).ToString() ))
                 if cellsForWrite.Contains(todot) || cellsForRead.Contains(todot)
                 then
-                    raise (System.ArgumentException("can't write and read together in equal cells"))
+                    raise (ArgException("can't write and read together in equal cells"))
                 else
                     cellsForWrite.Add(todot) |> ignore
 
-    member this.RunLine line =
-        try
-            Check line
-        with
-        | :? System.Exception -> reraise()
-        Array.Parallel.iter intASM line
+    member this.RunLine (line: array<Asm<'a>>) =
+        let nline = [|line|]
+        this.RunOp nline
 
-    member this.RunOp (program: Program<'a>) =
+    member this.WorkFlows (program: Program<'a>) = 
         try
             if program.Length = 0
-            then ()
-            else
-                let i = program.[0].Length
-                for p in program do
-                    if i <> p.Length
-                    then raise(System.ArgumentException("workflows aren't compatible"))
-                Array.iter (fun i -> Check i ) program
+                then ()
+                else
+                    let num = program.[0].Length
+                    for i in 0 .. program.Length - 1 do
+                        if num <> program.[i].Length
+                        then raise(System.ArgumentException("in line " + (i + 1).ToString() + " workflows aren't compatible"))
         with
         | :? System.Exception -> reraise()
-        Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program    
+//          
+    member this.RunOp (program: Program<'a>) = 
+        for i in 0 .. program.Length - 1 do//Array.iter (fun i -> 
+            try
+                Check program.[i] 
+            with
+            | OperationException(str) -> raise(System.IndexOutOfRangeException("in line" + (i + 1).ToString() + str))
+            | ArgException(str) -> raise(System.ArgumentException("in line" + (i + 1).ToString() + str))
+        
+        try
+        //to do with usage "for" to know line of exception
+            Array.iter (fun i -> (Array.Parallel.iter (fun p -> intASM p) i)) program   
+        with
+        | :?  System.Exception -> raise(System.ArgumentException("Can't do operation"))
         
     member this.ValueInCell row col =
         let currentCol = matrix.[col]
