@@ -130,6 +130,8 @@ namespace IDE
 				Run();
 			else if (keyData == Keys.F10)
 				Step();
+			else if (keyData == (Keys.Shift | Keys.F5))
+				StopDebug();
 			return base.ProcessCmdKey(ref msg, keyData);
 		}
 
