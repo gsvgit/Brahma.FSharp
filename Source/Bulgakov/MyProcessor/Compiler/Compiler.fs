@@ -6,6 +6,7 @@ open System.Collections.Generic
 open MyParser.MyParser
 open System.Linq
 exception CompileException
+exception RuntimeException
 
 
 type Compiler() =
@@ -22,13 +23,15 @@ type Compiler() =
             for j in 0..program.[i].Length-1 do
                 let operation = program.[i].[j]
                 match operation with
-                |Set((row, col), arg)
-                |Mvc((row, col), arg) ->
+                |Set((row1, col1), arg)
+                |Mvc((row1, col1), arg) ->
+                    let row, col = int row1, int col1
                     if not (col < grid.Length && row >= 0 && col >= 0)
                     then Errors.Add("Index out of bound", i, j) |> ignore
                     if CellsSet.Add (int row, int col) = false
                     then Errors.Add ("Parrallel Exception",i,j) |> ignore
-                |Mov((row2, col2), (row1, col1)) ->
+                |Mov((toRow, toCol), (fromRow, fromCol)) ->
+                    let row2, col2, row1, col1 = int toRow, int toCol, int fromRow, int fromCol
                     if not (col1 < grid.Length  && row1 >= 0 && col1 >= 0 && row2>=0 && col2 >= 0)
                     then Errors.Add("Index out of bound", i, j) |> ignore
                     if not (col2 < grid.Length)
@@ -48,16 +51,17 @@ type Compiler() =
         | :? System.Exception -> raise CompileException
 
     member this.Run() = 
+        try
         processor.executeProgram program
+        with
+        | :? System.Exception -> raise RuntimeException
         program <- null
-        processor.Dispose
-
-    member this.Debug() = ignore
 
     member this.Step(count:int) =
         processor.executeLine program.[count]
 
-    member this.Stop() = 
+    member this.Stop() =
+        Errors.Clear()
         program <- null 
         processor.Dispose
     

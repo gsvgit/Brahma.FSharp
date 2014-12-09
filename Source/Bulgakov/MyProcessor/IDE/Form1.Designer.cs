@@ -46,8 +46,8 @@ namespace IDE
             this.data = new System.Windows.Forms.DataGridView();
             this.plus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.subtraction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.errorsListBox = new System.Windows.Forms.ListBox();
             this.stepButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).BeginInit();
@@ -118,9 +118,9 @@ namespace IDE
             // 
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
-            this.subtraction,            
+            this.subtraction,
             this.multiplication,
-            this.division,});
+            this.division});
             this.data.Location = new System.Drawing.Point(582, 35);
             this.data.Margin = new System.Windows.Forms.Padding(2);
             this.data.Name = "data";
@@ -138,15 +138,15 @@ namespace IDE
             this.subtraction.Name = "subtraction";
             this.subtraction.ReadOnly = true;
             // 
-            // division
-            // 
-            this.division.Name = "division";
-            this.division.ReadOnly = true;
-            // 
             // multiplication
             // 
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
+            // 
+            // division
+            // 
+            this.division.Name = "division";
+            this.division.ReadOnly = true;
             // 
             // errorsListBox
             // 
@@ -181,6 +181,7 @@ namespace IDE
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.openButton);
             this.Controls.Add(this.richTextBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainScreen";
             this.Text = "TTA IDE";

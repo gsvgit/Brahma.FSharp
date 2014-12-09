@@ -1,15 +1,13 @@
 
 bin/
 obj/
-*.suo
-*.user
 *.orig
+*.user
+*.suo
 /Source/Substrings/random.txt
 
 *.obj
 *.exe
-*.user
-*.aps
 *.cache
 *.log
 *.lib
@@ -28,3 +26,6 @@ Source/Bulgakov/Example/packages/*
 Source/Kovalev/MyExample/packages/*
 Source/Kovalev/TTA-Processor/packages/*
 Source/Bulgakov/MyProcessor/packages/*
+!Source/Bulgakov/MyProcessor/packages/*.config
+!Source/Bulgakov/MyProcessor/.nuget/*
+!Source/Bulgakov/MyProcessor/MyProcessor.v12.suo

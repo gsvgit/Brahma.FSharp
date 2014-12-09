@@ -23,8 +23,8 @@ namespace IDE
             InitializeComponent();
             var open = Observable.FromEventPattern(h => openButton.Click += h, h =>  openButton.Click -= h);
             open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(openButton));
-            var load = Observable.FromEventPattern(h => saveButton.Click += h, h => saveButton.Click -= h);
-            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(saveButton));
+            var save = Observable.FromEventPattern(h => saveButton.Click += h, h => saveButton.Click -= h);
+            save.ObserveOn(SynchronizationContext.Current).Subscribe(x => SaveFile(saveButton));
             var start = Observable.FromEventPattern(h => startButton.Click += h, h => startButton.Click -= h);
             start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(startButton));
             var debug = Observable.FromEventPattern(h => debugButton.Click += h, h => debugButton.Click -= h);
@@ -33,7 +33,8 @@ namespace IDE
             step.ObserveOn(SynchronizationContext.Current).Subscribe(x => NextStep(stopButton));
             var stop = Observable.FromEventPattern(h => stopButton.Click += h, h => stopButton.Click -= h);
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(stopButton));
-
+            var formClosing = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
+            formClosing.Subscribe(x => closing(x.EventArgs));
         }
         
         private Compiler.Compiler comp = new Compiler.Compiler();
@@ -45,6 +46,8 @@ namespace IDE
 
         private void Debug(object sender)
         {
+            data.Rows.Clear();
+            comp.Stop();
             try
             {
                 comp.Compile(richTextBox1.Text);
@@ -54,6 +57,8 @@ namespace IDE
                     debugButton.Visible = false;
                     stepButton.Visible = true;
                     stopButton.Visible = true;
+                    richTextBox1.Enabled = false;
+                    errorsListBox.DataSource = new List<string>();
                 }
             }
             catch(Compiler.CompileException e)
@@ -63,12 +68,12 @@ namespace IDE
                 errorsListBox.DataSource = list;
             }
         }
-
         private void NextStep(object sender)
         {
             if (count < richTextBox1.Lines.Length)
             {
                 Highlight();
+                richTextBox1.Show();
                 comp.Step(count);
                 count++;
                 this.CreateDataGrid(comp, data);
@@ -80,23 +85,29 @@ namespace IDE
         }
         private void Highlight()
         {
+            //Char position
+            int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
+            int ln = richTextBox1.Lines[count].Length;
+            
+            //Select
+            richTextBox1.Select(firstCharPosition, ln);
+            richTextBox1.Select();
+
             //Select Color
             richTextBox1.SelectionColor = System.Drawing.Color.White;
             richTextBox1.SelectionBackColor = System.Drawing.Color.Blue;
    
-            //Char position
-            int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
-            int ln = richTextBox1.Lines[count].Length;
-            //Select
-            richTextBox1.Select(firstCharPosition, ln);
-            richTextBox1.Select();
         }
         private void Stop(object sender)
         {
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionBackColor = System.Drawing.Color.White;
+            richTextBox1.SelectionColor = Color.Black;
             startButton.Visible = true;
             debugButton.Visible = true;
             stepButton.Visible = false;
             stopButton.Visible = false;
+            richTextBox1.Enabled = true;
             comp.Stop();
             data.Rows.Clear();
             count = 0;
@@ -105,18 +116,26 @@ namespace IDE
         {
             try
             {
+                errorsListBox.DataSource = new List<string>();
                 data.Rows.Clear();
+                comp.Stop();
                 comp.Compile(richTextBox1.Text);
                 comp.Run();
                 this.CreateDataGrid(comp, data);
-                comp.Stop();
-                errorsListBox.DataSource = new List<string>();
             }
             catch (Compiler.CompileException e)
             {
                 List<String> list = new List<String>();
                 list.Add(e.Message);
                 errorsListBox.DataSource = list;
+                comp.Stop();
+            }
+            catch (Compiler.RuntimeException e)
+            {
+                List<String> list = new List<String>();
+                list.Add(e.Message);
+                errorsListBox.DataSource = list;
+                comp.Stop();
             }
             catch (Exception e)
             {
@@ -162,7 +181,7 @@ namespace IDE
             }
             catch (Exception) { };
         }
-        private void LoadFile(object sender)
+        private void SaveFile(object sender)
         {
             string filePath = "";
             string str = richTextBox1.Text;
@@ -176,6 +195,25 @@ namespace IDE
                 sw.Write(richTextBox1.Text);
                 sw.Close();
             }
+        }
+        private void closing(FormClosingEventArgs e)
+        {
+            e.Cancel = saveOnClose(); ;
+        }
+
+        private bool saveOnClose()
+        {
+            var dr = MessageBox.Show("Save program before exit?", "Alert", MessageBoxButtons.YesNoCancel);
+            if (dr == DialogResult.Yes)
+            {
+                SaveFile(saveButton);
+                return false;
+            }
+            if (dr == DialogResult.No)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
