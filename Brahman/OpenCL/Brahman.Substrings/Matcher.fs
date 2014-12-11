@@ -7,6 +7,7 @@ open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
 open Brahma.FSharp.OpenCL.Translator.Common
 open System.Threading.Tasks
+open Microsoft.FSharp.Collections
 
 type Config =
     {
@@ -47,9 +48,6 @@ type Matcher(?maxHostMem) =
 
     let maxTemplateLength = 32       
     
-    let mutable result = [||]
-    let mutable input = [||]
-    let c = [|0|]
     let mutable ready = true
 
     let maxHostMemory = match maxHostMem with Some x -> x | _ -> 256UL * 1024UL * 1024UL
@@ -90,9 +88,9 @@ type Matcher(?maxHostMem) =
 
     let countMatchesDetailed index (result:array<uint16>) maxTemplateLength bound length (templateLengths:array<byte>) (prefix:array<int16>) (matchesArray:array<uint64>) offset =
         let mutable matches = 0
-        let clearBound = min (bound - 1) (length - (int) maxTemplateLength)        
+        let clearBound = min (!bound - 1) (length - (int) maxTemplateLength)        
         let mutable resultOffset = 0
-        while resultOffset <= c.[0] - 3  do
+        while resultOffset <= offset - 3  do
             let i = int ((uint32 result.[resultOffset] <<< 16) ||| uint32 result.[resultOffset+1])
             let mutable matchIndex = result.[resultOffset+2]                            
             if 0 < i && i < clearBound
@@ -121,52 +119,6 @@ type Matcher(?maxHostMem) =
         printfn ""
 
         printfn "Total found by %A: %A" label counter
-
-    let run command (readFun: byte[] -> Option<byte[]>) templates prefix label close =
-        let counter = ref 0
-        readingTimer.Start()
-        
-        let matches = Array.zeroCreate 512
-                
-        let mutable countingBound = 0
-        let mutable matchBound = 0
-
-        let mutable task = Unchecked.defaultof<Task<unit>>
-
-        let mutable index = 0
-        let mutable totalIndex = 0
-        let mutable current = 0L
-
-        let isLastChunk = ref false
-
-        while not !isLastChunk do
-            let last = readFun input
-            isLastChunk := last.IsNone
-            let read = match last with Some x -> x.Length | _ -> -1
-            if current > 0L then
-                let result = downloader label task
-                countingTimer.Start()
-                counter := 
-                    !counter 
-                    + countMatchesDetailed (totalIndex-1) result maxTemplateLength countingBound matchBound templates.sizes prefix matches (current - (int64) matchBound + 512L)
-                countingTimer.Lap(label)
-
-            if read > 0 then
-                index <- index + 1
-                totalIndex <- totalIndex + 1
-                current <- current + (int64) read
-
-                if index = 50 then
-                    printfn "I am %A and I've already read %A bytes!" label current
-                    index <- 0
-
-                countingBound <- read
-                matchBound <- read
-                task <- uploader command
-
-        printResult templates matches !counter
-        readingTimer.Lap label
-        close()
 
     let prepareTemplates array = 
         let sorted = Array.sortBy (fun (a:byte[]) -> a.Length) array
@@ -198,16 +150,7 @@ type Matcher(?maxHostMem) =
             yield pattern
         |]
 
-    let fill readFun = 
-
-    let initialize config templates =
-        totalResult.Clear()
-        timer.Reset()
-        timer.Start()
-        printConfiguration config 
-        result <- Array.zeroCreate config.bufLength
-        input <- Array.zeroCreate config.bufLength            
-        timer.Lap label
+    let chankSize = ref 0
 
     let rk readFun templateArr = 
         let counter = ref 0
@@ -215,53 +158,105 @@ type Matcher(?maxHostMem) =
         
         let matches = Array.zeroCreate 512
                 
-        let mutable countingBound,matchBound = 0,0
-        let mutable index,totalIndex,current = 0,0,0L        
+        let  countingBound,matchBound = ref 0, ref 0
+        let  index,totalIndex,current = ref 0, ref 0, ref 0L
         let isLastChunk = ref false
-                        
-        label <- RabinKarp.label
-        initialize config templateArr
+        
 
-        let config = configure templateArr
+        label <- RabinKarp.label
+        
         let templates = prepareTemplates templateArr
-        let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
-        let d = new _1D(l,config.localWorkSize)
+        
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
         let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
 
         let platformName = "NVIDIA*"
         let deviceType = OpenCL.Net.DeviceType.Default        
 
-        let workerF () = 
+        totalResult.Clear()
+
+        let providers = new ResizeArray<_>()
+
+        let bufs = new ResizeArray<_>()        
+
+        let postprocess = fun (result,c) ->
+            countingBound := !chankSize
+            matchBound := !chankSize
+            incr index
+            incr totalIndex
+            current := !current + (int64) !chankSize
+            counter := 
+                !counter 
+                + countMatchesDetailed (!totalIndex-1) result maxTemplateLength countingBound !matchBound templates.sizes prefix matches c
+            
+            if !index = 50 then
+                printfn "I am %A and I've already read %A bytes!" label !current
+                index := 0
+
+        let workerF (i) =
+            
+            let c = [|0|]             
+
             let provider =
                 try  ComputeProvider.Create(platformName, deviceType)
                 with 
                 | ex -> failwith ex.Message
 
-            let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
+            providers.Add provider
+
+            let config = configure templateArr provider
+
+            let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
+            let d = new _1D(l,config.localWorkSize)
+
+            let result = Array.zeroCreate config.bufLength
+            let input = Array.zeroCreate config.bufLength 
+
+            chankSize := config.bufLength
+
+            bufs.Add input
+            bufs.Add <| Array.zeroCreate config.bufLength
+            bufs.Add <| Array.zeroCreate config.bufLength
+//            bufs.Add <| Array.zeroCreate config.bufLength
+//            bufs.Add <| Array.zeroCreate config.bufLength
+//            bufs.Add <| Array.zeroCreate config.bufLength
+//            bufs.Add <| Array.zeroCreate config.bufLength
+
+            provider |> printfn "%A"
+
+            let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.nth 0)
             let kernel, kernelPrepare, kernelRun = provider.Compile(query=RabinKarp.command, translatorOptions=[BoolAsBit])                
             kernelPrepare
-                d config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c    
+                d config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c                
+
             let f = fun data ->
-                ignore <| commandQueue.Add(c.ToHost provider).Finish()
                 ignore <| commandQueue.Add(c.ToGpu(provider, [|0|]))
-                ignore <| commandQueue.Add(result.ToHost(provider)).Finish()
-                ignore <| commandQueue.Add(input.ToGpu(provider, data)).Finish()
-                ignore <| commandQueue.Add(kernelRun()).Finish()
-                counter := 
-                    !counter 
-                    + countMatchesDetailed (totalIndex-1) result maxTemplateLength countingBound matchBound templates.sizes prefix matches (current - int64 matchBound + 512L)
+                ignore <| commandQueue.Add(input.ToGpu(provider, data))
+                ignore <| commandQueue.Add(kernelRun())
+                ignore <| commandQueue.Add(result.ToHost(provider)).Finish()                
+                ignore <| commandQueue.Add(c.ToHost provider).Finish()
+                result,c.[0]
+                
             f   
+
+
+        let workers () = 
+            Array.init 2 
+                (fun i -> 
+                    let f = workerF (i%2)
+                    new XXX.Worker<_,_>(f))
         
-        
-        run kernelRun readFun templates prefix label close
-        let master = new Program.Master(workerF)
-        while not <| master.IsDataEnd() do ()
+        let start = System.DateTime.Now
+        let ws = workers ()
+        let master = new XXX.Master<_,_,_>(ws, readFun, bufs, Some postprocess)
+        while (not <| master.IsDataEnd()) (*|| true*) do ()
+        //System.Threading.Thread.Sleep(8000)
         master.Die()
-        timer.Lap(label)
-        finalize()
-        c.[0] <- 0
-        new FindRes(totalResult.ToArray(), sorted templates, input.Length)
+        printfn "!!!!!!!Time = %A " (System.DateTime.Now - start)
+        //timer.Lap(label)
+        //providers |> ResizeArray.iter finalize 
+        
+        new FindRes(totalResult.ToArray(), sorted templates, !chankSize )
 
     new () = Matcher (256UL * 1024UL * 1024UL)
 
@@ -291,4 +286,4 @@ type Matcher(?maxHostMem) =
 
         rk readF templateArr
 
-    member this.InBufSize with get () = input.Length
+    member this.InBufSize with get () = !chankSize
