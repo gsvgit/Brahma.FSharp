@@ -22,17 +22,17 @@ type msg<'data,'res> =
     | Die of AsyncReplyChannel<unit>
     | Process of 'data*('res -> unit)
     | PostProcess of 'res
-    | Fill of 'data*('data -> unit)
+    | Fill of 'data*(Option<'data> -> unit)
     | InitBuffers of array<'data>*AsyncReplyChannel<array<'data>>
     | Get of AsyncReplyChannel<Option<'data>>
     | Enq of 'data
 
-type Reader<'d> (isDataEnd, fillF:'d -> Option<'d>) =
+type Reader<'d> (fillF:'d -> Option<'d>) as this =
     let isTurnedOff = ref false    
     let inner =
         MailboxProcessor.Start(fun inbox ->
             let rec loopR n =
-                async { printfn "reader q %A" inbox.CurrentQueueLength
+                async {
                         let! msg = inbox.Receive()
                         match msg with
                         | Die ch ->
@@ -40,24 +40,17 @@ type Reader<'d> (isDataEnd, fillF:'d -> Option<'d>) =
                             return ()
                         | Fill (x,cont) ->
                             let filled = fillF x
-                            //printfn "FILL"
-                            if filled |> Option.isSome
-                            then 
-                                cont x 
-                                return! loopR n
-                            else
-                                isDataEnd := true
-                                isTurnedOff := true
-                                printfn "Reader finished"
-                                return! loopR n
+                            cont filled
+                            if filled.IsNone
+                            then this.Die()
+                            else return! loopR n
                         | x -> 
                             printfn "unexpected message for reader: %A" x
                             return! loopR n }
             loopR 0)
     
     member this.Read(a, cont) = inner.Post(Fill(a, cont))
-    member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
-    member this.IsTurnedOff () = !isTurnedOff
+    member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)    
 
 type Worker<'d,'r>(f: 'd -> 'r) =
     let inner =
@@ -82,7 +75,7 @@ type Worker<'d,'r>(f: 'd -> 'r) =
     member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
 
 type DataManager<'d>(readers:array<Reader<'d>>) =
-    let dataToProcess = new System.Collections.Concurrent.ConcurrentQueue<_>()
+    let dataToProcess = new System.Collections.Concurrent.ConcurrentQueue<Option<'d>>()
     let dataToFill = new System.Collections.Generic.Queue<_>()
     let dataIsEnd = ref false
     let chForReplyToDie = ref None
@@ -92,14 +85,17 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
                 async { 
                         //printfn "Data to fill: %A" dataToFill.Count
                         let cnt = ref 3
-                        printfn "to process %A" dataToProcess.Count
-                        printfn "to fill %A" dataToFill.Count
+                        //printfn "to process %A" dataToProcess.Count
+                        //printfn "to fill %A" dataToFill.Count
                         while dataToFill.Count > 0 && !cnt > 0 do
                             decr cnt
-                            printfn "go"
+                            //printfn "go"
                             let b = dataToFill.Dequeue()
-                            if not <| readers.[0].IsTurnedOff()
-                            then readers.[0].Read(b, fun a -> dataToProcess.Enqueue a)
+                            if not <| !dataIsEnd //readers.[0].IsTurnedOff()
+                            then readers.[0].Read(b
+                                , fun a ->                                     
+                                    dataToProcess.Enqueue a
+                                    dataIsEnd := Option.isNone a)
                         if inbox.CurrentQueueLength > 0
                         then
                             let! msg = inbox.Receive()
@@ -119,27 +115,19 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
                                 //printfn "GET"
                                 let b =
                                     let s,r = dataToProcess.TryDequeue()
-                                    if s then Some r
-                                    elif not <| readers.[0].IsTurnedOff ()
+                                    if s then 
+                                        if r.IsNone then dataIsEnd := true
+                                        r
+                                    elif not !dataIsEnd
                                     then
                                         let rec go _ =
-                                            let s,r = dataToProcess.TryDequeue() 
-                                            //System.Threading.Thread.Sleep(100)
+                                            let s,r = dataToProcess.TryDequeue()                                     
                                             if s 
                                             then r
-                                            else go ()
-                                        go () |> Some
+                                            elif  not !dataIsEnd then go () else None
+                                        go () //|> Some
                                     else None
-//                                    if dataToProcess.Count > 0
-//                                    then dataToProcess.Dequeue() |> Some
-//                                    elif not <| readers.[0].IsTurnedOff ()
-//                                    then
-//                                        while dataToProcess.Count = 0 do 
-//                                            System.Threading.Thread.Sleep(100)
-//                                            ((*printf "!"*))
-//                                        //printfn ""
-//                                        dataToProcess.Dequeue() |> Some
-//                                    else None
+                                if b.IsNone then dataIsEnd := true
                                 ch.Reply b
                                 if b.IsSome
                                 then 
@@ -151,8 +139,11 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
                                 else
                                     dataIsEnd := true
                                     return! loop n
-                            | Enq b ->
+                            | Enq b -> 
                                 dataToFill.Enqueue b
+                                //match b with
+                                //| Some b -> dataToFill.Enqueue b
+                                //| None -> ()
                                 return! loop n
                             | x ->  
                                 printfn "Unexpected message for Worker: %A" x
@@ -162,19 +153,18 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
  
     member this.InitBuffers(bufs) = inner.PostAndReply((fun reply -> InitBuffers(bufs,reply)), timeout = 20000)
     member this.GetData() = 
-        if !dataIsEnd
-        then None
-        else inner.PostAndReply((fun reply -> Get reply), timeout = 20000)
+        inner.PostAndReply((fun reply -> Get reply), timeout = 20000)
     member this.Enq(b) = inner.Post(Enq b)
     member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
 
 let rows = 1100
 let columns = 1100
 
-type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) =        
+type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) 
+    as this =        
     
     let isDataEnd = ref false
-    let reader = new Reader<_>(isDataEnd, fill)
+    let reader = new Reader<_>(fill)
     let mutable isEnd = false
             
     let dataManager = new DataManager<'d>([|reader|])
@@ -204,13 +194,15 @@ type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fi
                                             match postprocessor with Some p -> p.Process(a,fun _ -> ()) | None -> ()
                                             freeWorkers.Enqueue w
                                             dataManager.Enq b.Value)
+                                else 
+                                    isDataEnd := true
+                                    //this.Die()
                         if inbox.CurrentQueueLength > 0
                         then
                             let! msg = inbox.Receive()
                             match msg with
                             | Die ch ->
-                                //System.Threading.Thread.Sleep(5000)//while freeWorkers.Count < workers.Length do ()
-                                reader.Die()
+                                //reader.Die()
                                 dataManager.Die()                                
                                 workers |> Array.iter (fun w -> w.Die())
                                 match postprocessor with Some p -> p.Die() | None -> ()
