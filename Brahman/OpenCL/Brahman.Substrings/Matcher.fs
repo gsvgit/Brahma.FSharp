@@ -216,10 +216,6 @@ type Matcher(?maxHostMem) =
 
             bufs.Add input
             bufs.Add <| Array.zeroCreate config.bufLength
-            bufs.Add <| Array.zeroCreate config.bufLength
-//            bufs.Add <| Array.zeroCreate config.bufLength
-//            bufs.Add <| Array.zeroCreate config.bufLength
-//            bufs.Add <| Array.zeroCreate config.bufLength
 //            bufs.Add <| Array.zeroCreate config.bufLength
 
             provider |> printfn "%A"
@@ -249,8 +245,7 @@ type Matcher(?maxHostMem) =
         let start = System.DateTime.Now
         let ws = workers ()
         let master = new XXX.Master<_,_,_>(ws, readFun, bufs, Some postprocess)
-        while (not <| master.IsDataEnd()) (*|| true*) do ()
-        //System.Threading.Thread.Sleep(8000)
+        while (not <| master.IsDataEnd()) do ()        
         master.Die()
         printfn "!!!!!!!Time = %A " (System.DateTime.Now - start)
         //timer.Lap(label)
