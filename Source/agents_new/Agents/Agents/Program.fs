@@ -62,9 +62,10 @@ type Worker<'d,'r>(f: 'd -> 'r) =
                             ch.Reply()
                             return ()                            
                         | Process (x,continuation) -> 
-                            //printfn "PROCESS"
+                            //printfn "PROCESS start"
                             let r = f x
                             continuation r
+                            //printfn "Process End"
                             return! loopW n
                         | x -> 
                             printfn "unexpected message for Worker: %A" x
@@ -78,20 +79,15 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
     let dataToProcess = new System.Collections.Concurrent.ConcurrentQueue<Option<'d>>()
     let dataToFill = new System.Collections.Generic.Queue<_>()
     let dataIsEnd = ref false
-    let chForReplyToDie = ref None
     let inner =
         MailboxProcessor.Start(fun inbox ->
             let rec loop n =
                 async { 
-                        //printfn "Data to fill: %A" dataToFill.Count
                         let cnt = ref 3
-                        //printfn "to process %A" dataToProcess.Count
-                        //printfn "to fill %A" dataToFill.Count
                         while dataToFill.Count > 0 && !cnt > 0 do
-                            decr cnt
-                            //printfn "go"
+                            decr cnt                            
                             let b = dataToFill.Dequeue()
-                            if not <| !dataIsEnd //readers.[0].IsTurnedOff()
+                            if not <| !dataIsEnd
                             then readers.[0].Read(b
                                 , fun a ->                                     
                                     dataToProcess.Enqueue a
@@ -101,49 +97,30 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
                             let! msg = inbox.Receive()
                             match msg with
                             | Die ch ->
-                                chForReplyToDie := Some ch
                                 if !dataIsEnd 
-                                    then
-                                        ch.Reply()
-                                        return ()
-                                return! loop n
+                                then
+                                    ch.Reply()
+                                    return ()
+                                else 
+                                    inbox.Post(Die ch)
+                                    return! loop n
                             | InitBuffers (bufs,ch) ->
                                 ch.Reply bufs
                                 bufs |> Array.iter dataToFill.Enqueue                                
                                 return! loop n
                             | Get(ch) -> 
                                 //printfn "GET"
-                                let b =
-                                    let s,r = dataToProcess.TryDequeue()
-                                    if s then 
-                                        if r.IsNone then dataIsEnd := true
-                                        r
-                                    elif not !dataIsEnd
-                                    then
-                                        let rec go _ =
-                                            let s,r = dataToProcess.TryDequeue()                                     
-                                            if s 
-                                            then r
-                                            elif  not !dataIsEnd then go () else None
-                                        go () //|> Some
-                                    else None
-                                if b.IsNone then dataIsEnd := true
-                                ch.Reply b
-                                if b.IsSome
+                                let s,r = dataToProcess.TryDequeue()
+                                if s
                                 then 
-                                    return! loop n
-                                elif chForReplyToDie.Value.IsSome
-                                then                                     
-                                    chForReplyToDie.Value.Value.Reply()
-                                    return ()
-                                else
-                                    dataIsEnd := true
-                                    return! loop n
+                                    if r.IsNone then dataIsEnd := true
+                                    ch.Reply r
+                                elif not !dataIsEnd
+                                then inbox.Post(Get ch)
+                                else ch.Reply None
+                                return! loop n
                             | Enq b -> 
                                 dataToFill.Enqueue b
-                                //match b with
-                                //| Some b -> dataToFill.Enqueue b
-                                //| None -> ()
                                 return! loop n
                             | x ->  
                                 printfn "Unexpected message for Worker: %A" x
@@ -160,8 +137,7 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
 let rows = 1100
 let columns = 1100
 
-type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) 
-    as this =        
+type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) =        
     
     let isDataEnd = ref false
     let reader = new Reader<_>(fill)
@@ -196,13 +172,11 @@ type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fi
                                             dataManager.Enq b.Value)
                                 else 
                                     isDataEnd := true
-                                    //this.Die()
                         if inbox.CurrentQueueLength > 0
                         then
                             let! msg = inbox.Receive()
                             match msg with
                             | Die ch ->
-                                //reader.Die()
                                 dataManager.Die()                                
                                 workers |> Array.iter (fun w -> w.Die())
                                 match postprocessor with Some p -> p.Die() | None -> ()
