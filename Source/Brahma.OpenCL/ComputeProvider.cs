@@ -192,7 +192,7 @@ namespace Brahma.OpenCL
                 throw new PlatformNotSupportedException(string.Format("Could not find a device with type {0} on platform {1}",
                     deviceType, Cl.GetPlatformInfo(currentPlatform.Value, PlatformInfo.Name, out error)));
 
-            return new ComputeProvider(compatibleDevices.ToArray().First());
+            return new ComputeProvider(compatibleDevices.ToArray());
         }
     }
 }
