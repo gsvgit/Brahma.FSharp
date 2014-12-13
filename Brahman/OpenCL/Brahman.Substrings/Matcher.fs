@@ -2,6 +2,7 @@
 
 open Brahma.Helpers
 open Brahma.OpenCL
+open Brahma.FSharp
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
@@ -40,6 +41,11 @@ type FindRes =
     val ChunkSize: int
     new (data,templates,chunkSize) = {Data = data; Templates = templates; ChunkSize = chunkSize }
 
+//GPGPU provider
+let platformName = "NVIDIA*"
+let deviceType = OpenCL.Net.DeviceType.Default        
+
+// Main
 type Matcher(?maxHostMem) =    
     let totalResult = new ResizeArray<_>()
     let mutable label = ""
@@ -129,18 +135,6 @@ type Matcher(?maxHostMem) =
 
     let finalize provider =
         close provider
-        printfn "Computation time with preparations:"
-        Helpers.printTime timer label
-
-        printfn ""
-
-        printfn "Total time with reading:"
-        Helpers.printTime readingTimer label
-
-        printfn ""
-
-        printfn "Counting time:"
-        Helpers.printTime countingTimer label
 
     let sorted (templates:Templates) = 
         let start = ref 0
@@ -168,10 +162,7 @@ type Matcher(?maxHostMem) =
         let templates = prepareTemplates templateArr
         
         let prefix, next, leaf, _ = Helpers.buildSyntaxTree templates.number (int maxTemplateLength) templates.sizes templates.content        
-        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content
-
-        let platformName = "NVIDIA*"
-        let deviceType = OpenCL.Net.DeviceType.Default        
+        let templateHashes = Helpers.computeTemplateHashes templates.number templates.content.Length templates.sizes templates.content                
 
         totalResult.Clear()
 
@@ -193,18 +184,10 @@ type Matcher(?maxHostMem) =
                 printfn "I am %A and I've already read %A bytes!" label !current
                 index := 0
 
-        let workerF (i) =
+        let createWorkerFun (wConfig:Agents.WorkerConfig) =
             
-            let c = [|0|]             
-
-            let provider =
-                try  ComputeProvider.Create(platformName, deviceType)
-                with 
-                | ex -> failwith ex.Message
-
-            providers.Add provider
-
-            let config = configure templateArr provider
+            let c = [|0|]            
+            let config = configure templateArr wConfig.GPUProvider
 
             let l = (config.bufLength + (config.chunkSize-1))/config.chunkSize 
             let d = new _1D(l,config.localWorkSize)
@@ -215,41 +198,43 @@ type Matcher(?maxHostMem) =
             chankSize := config.bufLength
 
             bufs.Add input
-            bufs.Add <| Array.zeroCreate config.bufLength
-//            bufs.Add <| Array.zeroCreate config.bufLength
-
-            provider |> printfn "%A"
-
-            let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.nth 0)
-            let kernel, kernelPrepare, kernelRun = provider.Compile(query=RabinKarp.command, translatorOptions=[BoolAsBit])                
+            for _ in 0 .. int wConfig.AdditionalBuffsNum do
+                bufs.Add <| Array.zeroCreate config.bufLength
+                        
+            let kernel, kernelPrepare, kernelRun = wConfig.GPUProvider.Compile(query=RabinKarp.command, translatorOptions=[BoolAsBit])                
             kernelPrepare
                 d config.bufLength config.chunkSize templates.number templates.sizes templateHashes maxTemplateLength input templates.content result c                
 
             let f = fun data ->
-                ignore <| commandQueue.Add(c.ToGpu(provider, [|0|]))
-                ignore <| commandQueue.Add(input.ToGpu(provider, data))
-                ignore <| commandQueue.Add(kernelRun())
-                ignore <| commandQueue.Add(result.ToHost(provider)).Finish()                
-                ignore <| commandQueue.Add(c.ToHost provider).Finish()
+                ignore <| wConfig.GpuCommandQueue.Add(c.ToGpu(wConfig.GPUProvider, [|0|]))
+                ignore <| wConfig.GpuCommandQueue.Add(input.ToGpu(wConfig.GPUProvider, data))
+                ignore <| wConfig.GpuCommandQueue.Add(kernelRun())
+                ignore <| wConfig.GpuCommandQueue.Add(result.ToHost wConfig.GPUProvider).Finish()                
+                ignore <| wConfig.GpuCommandQueue.Add(c.ToHost wConfig.GPUProvider).Finish()
                 result,c.[0]
                 
             f   
-
-
-        let workers () = 
-            Array.init 2 
-                (fun i -> 
-                    let f = workerF (i%2)
-                    new XXX.Worker<_,_>(f))
         
+        let workers () =             
+            Array.init 2 
+                (fun i ->
+                    let provider =
+                        try  ComputeProvider.Create(platformName, deviceType)
+                        with 
+                        | ex -> failwith ex.Message
+                    provider |> printfn "%A"
+                    providers.Add provider
+                    let commandQueue = new CommandQueue(provider, provider.Devices |> Seq.nth 0) 
+                    let f = new Agents.WorkerConfig(1u,commandQueue,provider) |> createWorkerFun
+                    new Agents.Worker<_,_>(f))
+
         let start = System.DateTime.Now
         let ws = workers ()
-        let master = new XXX.Master<_,_,_>(ws, readFun, bufs, Some postprocess)
-        while (not <| master.IsDataEnd()) do ()        
+        let master = new Agents.Master<_,_,_>(ws, readFun, bufs, Some postprocess)
+        while not <| master.IsDataEnd() do ()        
         master.Die()
-        printfn "!!!!!!!Time = %A " (System.DateTime.Now - start)
-        //timer.Lap(label)
-        //providers |> ResizeArray.iter finalize 
+        printfn "Total time = %A " (System.DateTime.Now - start)
+        providers |> ResizeArray.iter finalize         
         
         new FindRes(totalResult.ToArray(), sorted templates, !chankSize )
 

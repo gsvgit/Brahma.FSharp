@@ -70,8 +70,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Runner", "..\Brahma
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Brahman.Test", "..\Brahman\OpenCL\Brahman.Test\Brahman.Test.fsproj", "{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Agents", "agents_new\Agents\Agents\Agents.fsproj", "{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -426,18 +424,6 @@ Global
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x64.ActiveCfg = Release|Any CPU
 		{4E3137B9-DD0A-426A-A0D3-90C21EC1811E}.Release|x86.ActiveCfg = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|x64.ActiveCfg = Release|Any CPU
-		{127CDB95-8E2B-4DE3-9738-A3DDFE68197B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

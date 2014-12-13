@@ -1,5 +1,7 @@
 ﻿module Brahman.Runner
 
+open Microsoft.FSharp.Text
+
 let first = [|
     [|0x00uy; 0x00uy; 0x00uy; 0x14uy; 0x66uy; 0x74uy; 0x79uy; 0x70uy; 0x69uy; 0x73uy; 0x6Fuy; 0x6Duy|];//MP4
     [|0x00uy; 0x00uy; 0x00uy; 0x18uy; 0x66uy; 0x74uy; 0x79uy; 0x70uy; 0x33uy; 0x67uy; 0x70uy; 0x35uy|];//MP4
@@ -73,10 +75,21 @@ let demoSeqGenerator size =
 
 let matcher = new Brahman.Substrings.Matcher.Matcher()
 
-//do matcher.AhoCorasik(0, (Array.append first templates))
 do 
-    let res = matcher.RabinKarp (0, (Array.append(Array.append first templates) additional))
+
+    // RUN IT!!!   
+    let dId = ref 0
+    let commandLineSpecs =
+        ["-drc", ArgType.Int (fun i -> dId := i), "Disk id to process. You can get it by using \"list disk\" command of DiskPart tool."
+        ] |> List.map (fun (shortcut, argtype, description) -> ArgInfo(shortcut, argtype, description))
+    ArgParser.Parse commandLineSpecs
+
+    let res =
+        matcher.RabinKarp (!dId, (Array.append(Array.append first templates) additional))
     printfn "Add Total: %A" res.Data.Length
+
+
+
 //do matcher.RabinKarp (demoSeqGenerator (512*1024), (Array.append first templates)) |> ignore
 //do matcher.Hashtable (0, (Array.append first templates))
 //do matcher.NaiveSearch(0, (Array.append first templates))

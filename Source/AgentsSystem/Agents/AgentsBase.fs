@@ -1,517 +1,186 @@
-﻿namespace BrahmaAgents
+﻿namespace Brahma.FSharp.Agents
 
-module AgentsBase =
+open Brahma.Helpers
+open OpenCL.Net
+open Brahma.OpenCL
+open Brahma.FSharp.OpenCL.Core
+open Microsoft.FSharp.Quotations
+open Brahma.FSharp.OpenCL.Extensions
 
-    open System
-    open System.Collections.Generic
-    open System.Linq
-    open Microsoft.FSharp.Quotations
 
-    open Utils
-    open Brahma.OpenCL
-    open Brahma.FSharp.OpenCL.Core;
-    open Brahma.FSharp.OpenCL.Translator.Common
-    open OpenCL.Net
+type GpuConfig =
+    val Name: string
+    val Workers: int
+    new (n,w) = {Name=n; Workers=w}
 
-    exception NotSupportedMessageException of string
+type WorkerConfig =
+    val AdditionalBuffsNum: uint32
+    val GpuCommandQueue: CommandQueue
+    val GPUProvider: ComputeProvider
+    new (bNum,queue,provider) = {AdditionalBuffsNum = bNum; GpuCommandQueue = queue; GPUProvider = provider}
 
-    type AgentType = 
-        | CpuWorker
-        | GpuWorker
-        | DataReader
-        | Manager
+type msg<'data,'res> =
+    | Die of AsyncReplyChannel<unit>
+    | Process of 'data*('res -> unit)
+    | PostProcess of 'res
+    | Fill of 'data*(Option<'data> -> unit)
+    | InitBuffers of array<'data>*AsyncReplyChannel<array<'data>>
+    | Get of AsyncReplyChannel<Option<'data>>
+    | Enq of 'data
 
-    type AgentsOverallConfiguration =
-        {
-            AgentCpuWorkersCount: int
-            
-            AgentGpuWorkersCount: int
-            AgentDataReadersCount: int
-        }
-
-    type AgentCpuWorkerConfiguration =
-        {
-            Empty: unit
-        }
-
-    type AgentGpuWorkerConfiguration =
-        {
-            Empty: unit
-        }
-
-    type AgentDataReaderConfiguration<'ReadingParameter> =
-        {
-            ReadingParameter: 'ReadingParameter
-        }
-
-    type GpuConfiguration =
-        {
-            DeviceType: DeviceType
-            PlatformName: string
-//            CompileOptions: CompileOptions
-//            TrasnlatorOptions: TranslatorOption list
-//            OutCode: string ref
-        }
-
-    type IDataSource<'Data> =
-        abstract member IsEnd: bool with get
-        abstract member GetData: unit -> 'Data
-
-    type IMessage = interface end
-
-    [<AbstractClass>]
-    type Agent<'MessageType>(agentId: string, logger: ILogger) as this =
-        interface IDisposable with
-            member disposable.Dispose() = this.Dispose()
-
-        member this.AgentId = agentId
-        member this.Logger = logger
-        
-        abstract member Dispose: unit -> unit
-
-        abstract member AgentType: AgentType with get
-
-        abstract member Post: 'MessageType -> unit
-        abstract member PostAndAsyncReply: 
-            (AsyncReplyChannel<'Reply> -> 'MessageType) -> Async<'Reply>
-
-    and MessageCpuWorker<'CpuTaskParameter, 'CpuTaskResult> =
-        | DoCpuTask of 'CpuTaskParameter
-        
-        interface IMessage
-
-    and MessageGpuWorker<'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult> =
-        
-        | DoGpuTask of 'GpuTaskNecessaryParameter * 'GpuTaskAdditionalParameter
-        
-        interface IMessage
-
-    and MessageDataReader<'ReadingParameter, 'Data> =
-        | DataNeeded of 'ReadingParameter
-
-        interface IMessage
-
-    and MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                        'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                        'ReadingParameter, 'Data,
-                        'ManagerParams, 'OverallResult
-                            when 'GpuTaskNecessaryParameter: (new: unit -> 'GpuTaskNecessaryParameter) and
-                                    'GpuTaskNecessaryParameter: struct and
-                                    'GpuTaskNecessaryParameter:> ValueType and
-                                    'GpuTaskNecessaryParameter:> INDRangeDimension> =
-
-        | Start of 'ManagerParams
-
-        | CpuTaskDone of 'CpuTaskResult * 
-            AgentCpuWorker<'CpuTaskParameter, 'CpuTaskResult,
-                            'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                            'ReadingParameter, 'Data,
-                            'ManagerParams, 'OverallResult>
-
-        | GpuTaskDone of 'GpuTaskResult * 
-            AgentGpuWorker<'CpuTaskParameter, 'CpuTaskResult,
-                            'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                            'ReadingParameter, 'Data,
-                            'ManagerParams, 'OverallResult>
-
-        | DataFromReader of 'Data * 
-            AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,
-                            'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                            'ReadingParameter, 'Data,
-                            'ManagerParams, 'OverallResult>
-
-        | Completed
-
-        interface IMessage
-
-    and AgentCpuWorker<'CpuTaskParameter, 'CpuTaskResult,
-                        'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                        'ReadingParameter, 'Data,
-                        'ManagerParams, 'OverallResult
-                            when 'GpuTaskNecessaryParameter: (new: unit -> 'GpuTaskNecessaryParameter) and
-                                'GpuTaskNecessaryParameter: struct and
-                                'GpuTaskNecessaryParameter:> ValueType and
-                                'GpuTaskNecessaryParameter:> INDRangeDimension> =
-        
-        inherit Agent<MessageCpuWorker<'CpuTaskParameter, 'CpuTaskResult>>
-        
-        val worker: MailboxProcessor<MessageCpuWorker<'CpuTaskParameter, 'CpuTaskResult>>
-        
-        new (
-            agentId, 
-            logger, 
-            task: 'CpuTaskParameter -> 'CpuTaskResult, 
-            resultReceiver: Agent<MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                                                     'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                                                     'ReadingParameter, 'Data,
-                                                     'ManagerParams, 'OverallResult>>) as this = {
-            
-            inherit Agent<MessageCpuWorker<'CpuTaskParameter, 'CpuTaskResult>>(agentId, logger)
-           
-            worker = MailboxProcessor.Start(fun inbox ->
+type Reader<'d> (fillF:'d -> Option<'d>) as this =
+    let isTurnedOff = ref false    
+    let inner =
+        MailboxProcessor.Start(fun inbox ->
+            let rec loop n =
                 async {
-                    logger.LogMessage(sprintf "%s initialized at %s time" agentId ((TimeHelper.GetCurrentDateTime())))
-                    
-                    while true do
                         let! msg = inbox.Receive()
-                        
                         match msg with
-                        | DoCpuTask(parameters) -> 
-                            logger.LogMessage(sprintf "%s recieved DoTask message at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                            resultReceiver.Post(CpuTaskDone((task parameters), this))
-                            logger.LogMessage(sprintf "%s answered at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                            
-                        | _ -> 
-                            raise (NotSupportedMessageException(sprintf "NotSupportedMessageException from %s" agentId))
-                }
-            )
-        }
-        
-        override this.AgentType with get() = AgentType.CpuWorker
-        
-        override this.Post(msg) = this.worker.Post msg
-        override this.PostAndAsyncReply(buildMessage: AsyncReplyChannel<'Reply> -> MessageCpuWorker<'CpuTaskParameter, 'CpuTaskResult>) = 
-            this.worker.PostAndAsyncReply buildMessage
-        
-        override this.Dispose() = (this.worker:> IDisposable).Dispose()
+                        | Die ch ->
+                            ch.Reply()
+                            return ()
+                        | Fill (x,cont) ->
+                            let filled = fillF x
+                            cont filled
+                            if filled.IsNone
+                            then this.Die()
+                            else return! loop n
+                        | x -> 
+                            printfn "unexpected message for reader: %A" x
+                            return! loop n }
+            loop 0)
+    
+    member this.Read(a, cont) = inner.Post(Fill(a, cont))
+    member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)    
 
-    and AgentGpuWorker<'CpuTaskParameter, 'CpuTaskResult,
-                        'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                        'ReadingParameter, 'Data,
-                        'ManagerParams, 'OverallResult
-                            when 'GpuTaskNecessaryParameter: (new: unit -> 'GpuTaskNecessaryParameter) and
-                                'GpuTaskNecessaryParameter: struct and
-                                'GpuTaskNecessaryParameter:> ValueType and
-                                'GpuTaskNecessaryParameter:> INDRangeDimension> =
-        
-        inherit Agent<MessageGpuWorker<'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult>>
-        
-        val worker: MailboxProcessor<MessageGpuWorker<'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult>>
-        val provider: ComputeProvider
-        val commandQueue: Brahma.OpenCL.CommandQueue
-        
-        new (
-            agentId, 
-            logger, 
-            task: (Expr<'GpuTaskNecessaryParameter -> array<float32> -> array<float32> -> array<float32> -> unit>), 
-            prePreparation: 
-                ('GpuTaskNecessaryParameter * 'GpuTaskAdditionalParameter -> unit) -> 
-                    'GpuTaskNecessaryParameter * 'GpuTaskAdditionalParameter -> unit, 
-            argsPreparation,
-            collectResults, 
-            gpuConfiguration,
-            resultReceiver: Agent<MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                                                     'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                                                     'ReadingParameter, 'Data,
-                                                     'ManagerParams, 'OverallResult>>) as this = 
+type Worker<'d,'r>(f: 'd -> 'r) =
+    let inner =
+        MailboxProcessor.Start(fun inbox ->
+            let rec loop n =
+                async { let! msg = inbox.Receive()
+                        match msg with
+                        | Die ch ->
+                            ch.Reply()
+                            return ()                            
+                        | Process (x,continuation) ->
+                            let r = f x
+                            continuation r
+                            return! loop n
+                        | x -> 
+                            printfn "unexpected message for Worker: %A" x
+                            return! loop n }
+            loop 0)
+ 
+    member this.Process(a, continuation) = inner.Post(Process(a,continuation))
+    member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
 
-            let initializedProvider = ComputeProvider.Create(gpuConfiguration.PlatformName, gpuConfiguration.DeviceType)
-            {
-                inherit Agent<MessageGpuWorker<'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult>>(agentId, logger)
-
-                provider = initializedProvider
-
-                commandQueue = new Brahma.OpenCL.CommandQueue(initializedProvider, initializedProvider.Devices |> Seq.head)
-        
-                worker = MailboxProcessor.Start(fun inbox ->
-                    async {
-                        logger.LogMessage(sprintf "%s initialized at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-        
-                        let kernel, kernelPrepare, kernelRun = this.provider.Compile(task)
-                    
-                        while true do
+type DataManager<'d>(readers:array<Reader<'d>>) =
+    let dataToProcess = new System.Collections.Concurrent.ConcurrentQueue<Option<'d>>()
+    let dataToFill = new System.Collections.Generic.Queue<_>()
+    let dataIsEnd = ref false
+    let inner =
+        MailboxProcessor.Start(fun inbox ->
+            let rec loop n =
+                async { 
+                        let cnt = ref 3
+                        while dataToFill.Count > 0 && !cnt > 0 do
+                            decr cnt                            
+                            let b = dataToFill.Dequeue()
+                            if not <| !dataIsEnd
+                            then readers.[0].Read(b
+                                , fun a ->                                     
+                                    dataToProcess.Enqueue a
+                                    dataIsEnd := Option.isNone a)
+                        if inbox.CurrentQueueLength > 0
+                        then
                             let! msg = inbox.Receive()
                             match msg with
-                            | DoGpuTask(parameters, additionalParams) ->
-                                argsPreparation (kernelPrepare, parameters, additionalParams)
-                                this.commandQueue.Add(kernelRun()).Finish() |> ignore
-                                let results = collectResults this.commandQueue parameters additionalParams this.provider
-                                
-                                resultReceiver.Post(GpuTaskDone(results, this))
-                                this.provider.CloseAllBuffers()
-                            | _ -> raise (NotSupportedMessageException(sprintf "NotSupportedMessageException from %s" agentId))
-                    }
-                )
-            }
+                            | Die ch ->
+                                if !dataIsEnd 
+                                then
+                                    ch.Reply()
+                                    return ()
+                                else 
+                                    inbox.Post(Die ch)
+                                    return! loop n
+                            | InitBuffers (bufs,ch) ->
+                                ch.Reply bufs
+                                bufs |> Array.iter dataToFill.Enqueue                                
+                                return! loop n
+                            | Get(ch) -> 
+                                let s,r = dataToProcess.TryDequeue()
+                                if s
+                                then 
+                                    if r.IsNone then dataIsEnd := true
+                                    ch.Reply r
+                                elif not !dataIsEnd
+                                then inbox.Post(Get ch)
+                                else ch.Reply None
+                                return! loop n
+                            | Enq b -> 
+                                dataToFill.Enqueue b
+                                return! loop n
+                            | x ->  
+                                printfn "Unexpected message for Worker: %A" x
+                                return! loop n
+                            else return! loop n }
+            loop 0)
+ 
+    member this.InitBuffers(bufs) = inner.PostAndReply((fun reply -> InitBuffers(bufs,reply)), timeout = 20000)
+    member this.GetData() = 
+        inner.PostAndReply((fun reply -> Get reply), timeout = 20000)
+    member this.Enq(b) = inner.Post(Enq b)
+    member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
 
-        override this.AgentType with get() = AgentType.GpuWorker
-        
-        override this.Post(msg) = this.worker.Post msg
-        override this.PostAndAsyncReply(buildMessage: AsyncReplyChannel<'Reply> -> MessageGpuWorker<'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult>) = 
-            this.worker.PostAndAsyncReply buildMessage
-        
-        override this.Dispose() =
-            this.commandQueue.Dispose()
-            this.provider.CloseAllBuffers()
-            (this.worker:> IDisposable).Dispose()
-
-    and AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,
-                         'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                         'ReadingParameter, 'Data,
-                         'ManagerParams, 'OverallResult
-                             when 'GpuTaskNecessaryParameter: (new: unit -> 'GpuTaskNecessaryParameter) and
-                                 'GpuTaskNecessaryParameter: struct and
-                                 'GpuTaskNecessaryParameter:> ValueType and
-                                 'GpuTaskNecessaryParameter:> INDRangeDimension> =
-
-        inherit Agent<MessageDataReader<'ReadingParameter, 'Data>>
-        
-        val dataReader: MailboxProcessor<MessageDataReader<'ReadingParameter, 'Data>>
-        
-        new (
-            agentId, 
-            logger, 
-            readFunction, 
-            parameters: 'ReadingParameter, 
-            dataSource: IDataSource<'Data>,
-            dataReceiver: Agent<MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                                                     'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                                                     'ReadingParameter, 'Data,
-                                                     'ManagerParams, 'OverallResult>>) as this = {
-            
-            inherit Agent<MessageDataReader<'ReadingParameter, 'Data>>(agentId, logger)
-            
-            dataReader = MailboxProcessor.Start(fun inbox ->
-                async {
-                    logger.LogMessage(sprintf "%s initialized at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                    
-                    while true do
-                        let! msg = inbox.Receive()
-        
-                        match msg with
-                        | DataNeeded(param) ->                            
-                            if dataSource.IsEnd 
-                            then
-                                dataReceiver.Post(Completed)
-                            else
-//                                logger.LogMessage(sprintf "%s recieved DataNeeded message at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                                dataReceiver.Post(DataFromReader((readFunction parameters dataSource), this))
-        
-                        | _ -> 
-                            raise (NotSupportedMessageException(sprintf "NotSupportedMessageException from %s" agentId))
-                }
-            )
-        }
-        
-        override this.AgentType with get() = AgentType.DataReader
-        
-        override this.Post(msg) = this.dataReader.Post msg
-        override this.PostAndAsyncReply(buildMessage: AsyncReplyChannel<'Reply> -> MessageDataReader<'ReadingParameter, 'Data>) = 
-            this.dataReader.PostAndAsyncReply buildMessage
-        
-        override this.Dispose() = (this.dataReader:> IDisposable).Dispose()
-
-    and AgentManager<'CpuTaskParameter, 'CpuTaskResult,
-                        'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                        'ReadingParameter, 'Data,
-                        'ManagerParams, 'OverallResult
-                            when 'GpuTaskNecessaryParameter: (new: unit -> 'GpuTaskNecessaryParameter) and
-                                'GpuTaskNecessaryParameter: struct and
-                                'GpuTaskNecessaryParameter:> ValueType and
-                                'GpuTaskNecessaryParameter:> INDRangeDimension> =
-        
-        inherit Agent<MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                                     'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                                     'ReadingParameter, 'Data,
-                                     'ManagerParams, 'OverallResult>>
-        
-        val manager: MailboxProcessor<MessageManager<'CpuTaskParameter, 'CpuTaskResult,
-                                                     'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,
-                                                     'ReadingParameter, 'Data,
-                                                     'ManagerParams, 'OverallResult>>
-        
-        val dataPool: DataPool<'Data>
-
-        val mutable cpuWorkersCount: int
-        val mutable gpuWorkersCount: int
-        val mutable dataReadersCount: int
-        
-        new (
-            agentId, 
-            logger,
-            progressPresenter : IProgressPresenter, 
-            overallConfigs: AgentsOverallConfiguration,
-            cpuTask: 'CpuTaskParameter -> 'CpuTaskResult,
-            gpuTask, 
-            prePreparation,
-            collectResults,
-            argsPreparation,
-            gpuConfiguration,
-            readFunction,
-            readingParam,
-            dataToCpuTaskParams: 'Data -> 'CpuTaskParameter,
-            dataToGpuTaskParams: 'Data -> 'GpuTaskNecessaryParameter * 'GpuTaskAdditionalParameter,
-            managerParams,
-            dataSource: IDataSource<'Data>) as this = {
-            
-            inherit Agent<MessageManager<'CpuTaskParameter, 'CpuTaskResult, 'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>>(agentId, logger)
-        
-            cpuWorkersCount = 0
-            gpuWorkersCount = 0
-            dataReadersCount = 0
-            dataPool = new DataPool<'Data>()
-
-            manager = MailboxProcessor.Start(fun inbox ->
-                async {
-                    let start = System.DateTime.Now
-
-                    let hasWork = ref true
-                    
-                    let startTime = TimeHelper.GetCurrentDateTime()
-
-                    logger.LogMessage(sprintf "%s initialized at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-        
-                    let cpuTaskResults = new List<'CpuTaskResult>()
-                    let gpuTaskResults = new List<'GpuTaskResult>()
-
-                    let freeCpuWorkers: List<AgentCpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,'ReadingParameter, 'Data,'ManagerParams, 'OverallResult>> = 
-                        this.CreateCpuWorkers(overallConfigs.AgentCpuWorkersCount, cpuTask)
-                    
-                    let freeGpuWorkers: List<AgentGpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,'ReadingParameter, 'Data,'ManagerParams, 'OverallResult>> = 
-                        this.CreateGpuWorkers(
-                            overallConfigs.AgentGpuWorkersCount,     
-                            gpuTask, 
-                            prePreparation,
-                            argsPreparation, 
-                            collectResults,
-                            gpuConfiguration)
-                    
-                    let freeDataReaders: List<AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,'ReadingParameter, 'Data,'ManagerParams, 'OverallResult>> = 
-                        this.CreateDataReaders(
-                            overallConfigs.AgentDataReadersCount, 
-                            readFunction, 
-                            readingParam, 
-                            dataSource)
-        
-                    let startRead (reader: AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult,'ReadingParameter, 'Data,'ManagerParams, 'OverallResult>) = 
-                        async {
-                         let curReader = reader
-                         freeDataReaders.Remove reader |> ignore
-                         return curReader.Post(MessageDataReader<'ReadingParameter, 'Data>.DataNeeded(readingParam)) }
-                    
-                    let hasFreeWorkers = not (freeGpuWorkers.Count.Equals(0) && freeCpuWorkers.Equals(0))
-
-                    let progress: float32 = float32(1) / float32(100)
-
-                    let readingInProccess = ref false;
-                    while !hasWork || not ((freeCpuWorkers.Count.Equals(overallConfigs.AgentCpuWorkersCount)) && (freeGpuWorkers.Count.Equals(overallConfigs.AgentGpuWorkersCount)) && not this.dataPool.HasData) do
-                        let! msg = inbox.Receive()
-        
-                        match msg with
-                        | Start(managerParams) ->  
-                            logger.LogMessage(sprintf "%s recieved Start message at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                            logger.LogMessage "Starting Readers"
-                          
-                            let! startAllReaders = async { freeDataReaders |> Seq.map startRead |> Async.Parallel |> Async.RunSynchronously |> ignore }
-
-                            readingInProccess := true
-                            
-                            logger.LogMessage "Readers started"
-
-                        | DataFromReader(data, reader) -> 
-                            //logger.LogMessage(
-                              //  sprintf "%s recieved DataReaded message from %s at %s time" agentId reader.AgentId (TimeHelper.GetCurrentDateTime()))
+type Master<'d,'r,'fr>(workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) =        
     
-                            freeDataReaders.Add reader
-                            this.dataPool.AddData(data)
-
-                            if freeDataReaders.Count.Equals(overallConfigs.AgentDataReadersCount) then
-                                readingInProccess := false
-                                
-                        | CpuTaskDone(taskRes, worker) ->
-                            logger.LogMessage(
-                                sprintf "%s recieved CpuTaskDone message from %s at %s time" agentId worker.AgentId (TimeHelper.GetCurrentDateTime()))
-                            freeCpuWorkers.Add worker
-//                            cpuTaskResults.Add taskRes
-                            progressPresenter.FireProgress(progress)
-                            Console.WriteLine(TimeHelper.GetCurrentDateTime())
-
-                        | GpuTaskDone(taskRes, worker) ->
-                            logger.LogMessage(
-                                sprintf "%s recieved GpuTaskDone message from %s at %s time" agentId worker.AgentId (TimeHelper.GetCurrentDateTime()))
-                            freeGpuWorkers.Add worker
-//                            gpuTaskResults.Add taskRes
-                            progressPresenter.FireProgress(progress)
-                            Console.WriteLine(TimeHelper.GetCurrentDateTime())
-
-                        | Completed ->
-                            logger.LogMessage(sprintf "%s recieved Completed message at %s time" agentId (TimeHelper.GetCurrentDateTime()))
-                            hasWork := false
-
-                        if hasFreeWorkers then 
-                            let i = ref 0
-                            while !i < freeGpuWorkers.Count && this.dataPool.HasData do
-                                let gpuWorker = freeGpuWorkers.ElementAt(!i)
-                                freeGpuWorkers.Remove(gpuWorker) |> ignore
-                                gpuWorker.Post(DoGpuTask((dataToGpuTaskParams (this.dataPool.GetData()))))
-                                i := !i + 1
-
-                            i := 0
-                            while !i < freeCpuWorkers.Count && this.dataPool.HasData do
-                                let cpuWorker = freeCpuWorkers.ElementAt(!i)
-                                freeCpuWorkers.Remove(cpuWorker) |> ignore
-                                cpuWorker.Post(DoCpuTask((dataToCpuTaskParams (this.dataPool.GetData()))))
-                                i := !i + 1
-                                           
-                            if not this.dataPool.HasData && freeDataReaders.Count > overallConfigs.AgentDataReadersCount / 2 && not !readingInProccess then
-                                let! startAllReaders = async { freeDataReaders |> Seq.map startRead |> Async.Parallel |> Async.RunSynchronously |> ignore }
-                                ()
-                    
-                    this.Logger.LogMessage(sprintf "Work completed at %s time" (TimeHelper.GetCurrentDateTime()))
-                    let time = System.DateTime.Now - start
-                    time |> printfn "time: %A"
-
-                    Console.WriteLine(gpuTaskResults.Count)
-                    Console.WriteLine(cpuTaskResults.Count)
-                    ()
-                }
-            )
-        }
-        
-        override this.AgentType with get() = AgentType.Manager
-        
-        override this.Post(msg) = this.manager.Post msg
-        override this.PostAndAsyncReply(buildMessage: AsyncReplyChannel<'Reply> -> MessageManager<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>) = 
-            this.manager.PostAndAsyncReply buildMessage
-        
-        override this.Dispose() = (this.manager:> IDisposable).Dispose()
-        
-        member private this.CreateCpuWorkers(agentsCount, task) =
-            let workers = new List<AgentCpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>>()
+    let isDataEnd = ref false
+    let reader = new Reader<_>(fill)
+    let mutable isEnd = false
             
-            let mutable i = 0
-            while i < agentsCount do
-                workers.Add(new AgentCpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>(this.CreateAgentId(CpuWorker), this.Logger, task, this))
-                this.cpuWorkersCount <- this.cpuWorkersCount + 1
-                i <- i + 1
-        
-            workers
-        
-        member private this.CreateGpuWorkers(agentsCount, task, prePreparation, argsPreparation, collectResults, configs) =
-            let workers = new List<AgentGpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>>()
-            
-            let mutable i = 0
-            while i < agentsCount do
-                workers.Add(new AgentGpuWorker<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>(this.CreateAgentId(GpuWorker), this.Logger, task, prePreparation, argsPreparation, collectResults, configs, this))
-                this.gpuWorkersCount <- this.gpuWorkersCount + 1
-                i <- i + 1
-        
-            workers
-        
-        member private this.CreateDataReaders(agentsCount, readFunction, parameters, dataSource) =
-            let dataReaders = new List<AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>>()
-            
-            let mutable i = 0
-            while i < agentsCount do
-                dataReaders.Add(new AgentDataReader<'CpuTaskParameter, 'CpuTaskResult,'GpuTaskNecessaryParameter, 'GpuTaskAdditionalParameter, 'GpuTaskResult, 'ReadingParameter, 'Data, 'ManagerParams, 'OverallResult>(this.CreateAgentId(DataReader), this.Logger, readFunction, parameters, dataSource, this))
-                this.dataReadersCount <- this.dataReadersCount + 1
-                i <- i + 1
-        
-            dataReaders
-        
-        member private this.CreateAgentId(agentType: AgentType) =
-            match agentType with
-                | CpuWorker -> sprintf "%dCpuWorker" this.cpuWorkersCount
-                | GpuWorker -> sprintf "%dGpuWorker" this.gpuWorkersCount
-                | DataReader -> sprintf "%dDataReader" this.dataReadersCount
-                | _ -> raise (NotSupportedMessageException(String.Empty))
+    let dataManager = new DataManager<'d>([|reader|])
+
+    let postprocessor =
+        postProcessF |> Option.map(fun f ->new Worker<'r,'fr>(f))        
+
+    let bufers = dataManager.InitBuffers(bufs.ToArray())
+    let freeWorkers = new System.Collections.Concurrent.ConcurrentQueue<_>(workers)
+    let inner =
+        MailboxProcessor.Start(fun inbox ->
+            let rec loop n =
+                async {
+                        if not freeWorkers.IsEmpty
+                        then 
+                            let success,w = freeWorkers.TryDequeue()
+                            if success
+                            then
+                                let b = dataManager.GetData()
+                                if b.IsSome
+                                then
+                                    w.Process
+                                        (b.Value
+                                        , fun a -> 
+                                            postprocessor |> Option.iter (fun p -> p.Process(a,fun _ -> ()))
+                                            freeWorkers.Enqueue w
+                                            dataManager.Enq b.Value)
+                                else 
+                                    isDataEnd := true
+                        if inbox.CurrentQueueLength > 0
+                        then
+                            let! msg = inbox.Receive()
+                            match msg with
+                            | Die ch ->
+                                dataManager.Die()                                
+                                workers |> Array.iter (fun w -> w.Die())
+                                match postprocessor with Some p -> p.Die() | None -> ()
+                                isEnd <- true
+                                ch.Reply()
+                                return ()
+                            | x ->
+                                printfn "unexpected message for Worker: %A" x
+                                return! loop n 
+                        else return! loop n}
+            loop 0)
+
+    member this.Die() = inner.PostAndReply(fun reply -> Die reply)
+    member this.IsDataEnd() = !isDataEnd

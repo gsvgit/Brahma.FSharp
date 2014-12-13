@@ -31,7 +31,7 @@ type Reader<'d> (fillF:'d -> Option<'d>) as this =
     let isTurnedOff = ref false    
     let inner =
         MailboxProcessor.Start(fun inbox ->
-            let rec loopR n =
+            let rec loop n =
                 async {
                         let! msg = inbox.Receive()
                         match msg with
@@ -43,11 +43,11 @@ type Reader<'d> (fillF:'d -> Option<'d>) as this =
                             cont filled
                             if filled.IsNone
                             then this.Die()
-                            else return! loopR n
+                            else return! loop n
                         | x -> 
                             printfn "unexpected message for reader: %A" x
-                            return! loopR n }
-            loopR 0)
+                            return! loop n }
+            loop 0)
     
     member this.Read(a, cont) = inner.Post(Fill(a, cont))
     member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)    
@@ -55,22 +55,20 @@ type Reader<'d> (fillF:'d -> Option<'d>) as this =
 type Worker<'d,'r>(f: 'd -> 'r) =
     let inner =
         MailboxProcessor.Start(fun inbox ->
-            let rec loopW n =
+            let rec loop n =
                 async { let! msg = inbox.Receive()
                         match msg with
                         | Die ch ->
                             ch.Reply()
                             return ()                            
-                        | Process (x,continuation) -> 
-                            //printfn "PROCESS start"
+                        | Process (x,continuation) ->
                             let r = f x
                             continuation r
-                            //printfn "Process End"
-                            return! loopW n
+                            return! loop n
                         | x -> 
                             printfn "unexpected message for Worker: %A" x
-                            return! loopW n }
-            loopW 0)
+                            return! loop n }
+            loop 0)
  
     member this.Process(a, continuation) = inner.Post(Process(a,continuation))
     member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
@@ -109,7 +107,6 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
                                 bufs |> Array.iter dataToFill.Enqueue                                
                                 return! loop n
                             | Get(ch) -> 
-                                //printfn "GET"
                                 let s,r = dataToProcess.TryDequeue()
                                 if s
                                 then 
@@ -133,9 +130,6 @@ type DataManager<'d>(readers:array<Reader<'d>>) =
         inner.PostAndReply((fun reply -> Get reply), timeout = 20000)
     member this.Enq(b) = inner.Post(Enq b)
     member this.Die() = inner.PostAndReply((fun reply -> Die reply), timeout = 20000)
-
-let rows = 1100
-let columns = 1100
 
 type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fill: 'd -> Option<'d>, bufs:ResizeArray<'d>, postProcessF:Option<'r->'fr>) =        
     
@@ -189,7 +183,7 @@ type Master<'d,'r,'fr>((*config:MasterConfig,*) workers:array<Worker<'d,'r>>, fi
                         else return! loop n}
             loop 0)
 
-    member this.Die() = inner.PostAndReply((fun reply -> Die reply))
+    member this.Die() = inner.PostAndReply(fun reply -> Die reply)
     member this.IsDataEnd() = !isDataEnd
 
 
