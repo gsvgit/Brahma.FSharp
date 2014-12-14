@@ -9,6 +9,15 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASM", "..\..\ASM\ASM.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test", "Test\Test.fsproj", "{742C4BC4-5FDB-48AB-B57D-7043780414A3}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "Parser\Parser.fsproj", "{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{14C6D402-27C7-43DB-AA4F-5FEB9E847A0D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +36,10 @@ Global
 		{742C4BC4-5FDB-48AB-B57D-7043780414A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{742C4BC4-5FDB-48AB-B57D-7043780414A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{742C4BC4-5FDB-48AB-B57D-7043780414A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
