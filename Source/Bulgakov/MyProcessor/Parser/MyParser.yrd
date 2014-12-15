@@ -1,0 +1,26 @@
+{
+open TTA.ASM
+}
+
+tokens {
+    _ of string
+}
+
+options {
+    translate = true
+    module = "MyParser.Parser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+module Main
+
+[<Start>]
+
+stmt: (operation SEMI)*
+
+operation: 
+	SET ln=NUMBER col=NUMBER arg=NUMBER {Set(((int ln)*1<ln>, (int col)*1<col>), int arg)}
+	| MVC ln=NUMBER col=NUMBER arg=NUMBER {Mvc(((int ln)*1<ln>, (int col)*1<col>), int arg)}
+	| MOV ln1=NUMBER col1=NUMBER ln2=NUMBER col2=NUMBER {Mov(((int ln1)*1<ln>, (int col1)*1<col>), ((int ln2)*1<ln>, (int col2)*1<col>))}
+	| EPS {Eps}

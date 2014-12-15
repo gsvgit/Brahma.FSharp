@@ -1,6 +1,6 @@
 ﻿module Tests
 
-open Processor
+open TTA.Processor
 open TTA.ASM
 open NUnit.Framework
 
