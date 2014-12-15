@@ -20,11 +20,7 @@ type private Res<'T> =
 type AsmYaccCompiler<'T> () =
     let translate command : Res<'T> =
         let lexbuf = Microsoft.FSharp.Text.Lexing.LexBuffer<_>.FromString command
-        let allTokens = 
-            seq
-                {
-                    while not lexbuf.IsPastEndOfStream do yield token lexbuf
-                }
+        let allTokens = seq { while not lexbuf.IsPastEndOfStream do yield token lexbuf }
 
         let translateArgs = {
             tokenToRange = fun x -> 0UL, 0UL
@@ -34,11 +30,11 @@ type AsmYaccCompiler<'T> () =
         }
     
         match Parser.buildAst allTokens with
-        | Success (sppf, t, d) ->
+        | Success (sppf, _, d) ->
             let tmp = Parser.translate translateArgs sppf d
             let (h : #list<list<Asm<'T>>>) = tmp
             S ( h.Head |> List.toArray )
-        | Error (pos, errs, msg, dbg, _) -> E (msg)
+        | Error (_, _, msg, _, _) -> E (msg)
 
     let compile code =
         let res = code |> Array.map (fun x -> try translate x with | e -> E (e.Message))

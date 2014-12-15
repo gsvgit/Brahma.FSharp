@@ -60,12 +60,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EditorForm.Designer.cs">
-      <DependentUpon>EditorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="InitProcessorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,9 +80,6 @@
     <Compile Include="ThreadNumberForm.Designer.cs">
       <DependentUpon>ThreadNumberForm.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="EditorForm.resx">
-      <DependentUpon>EditorForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="InitProcessorForm.resx">
       <DependentUpon>InitProcessorForm.cs</DependentUpon>
     </EmbeddedResource>

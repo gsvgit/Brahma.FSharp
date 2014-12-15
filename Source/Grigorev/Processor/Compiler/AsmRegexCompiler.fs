@@ -16,9 +16,9 @@ type RegexType =
 type AsmRegexCompiler<'T> () =
     let regexs =
         [|
-            Eps (new Regex ("^[ \t]*eps[ \t]*$", RegexOptions.IgnoreCase));
-            Set (new Regex ("^[ \t]*set[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(.+)$", RegexOptions.IgnoreCase));
-            Mvc (new Regex ("^[ \t]*mvc[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(.+)$", RegexOptions.IgnoreCase));
+            Eps (new Regex ("^[ \t]*eps[ \t]*$", RegexOptions.IgnoreCase))
+            Set (new Regex ("^[ \t]*set[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(.+)$", RegexOptions.IgnoreCase))
+            Mvc (new Regex ("^[ \t]*mvc[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(.+)$", RegexOptions.IgnoreCase))
             Mov (new Regex ("^[ \t]*mov[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]+(0|[1-9][0-9]*)[ \t]*$", RegexOptions.IgnoreCase))
         |]
 
@@ -91,6 +91,7 @@ type AsmRegexCompiler<'T> () =
 //    interface IAsmCompiler<'T> with
 //        member this.Compile data =
 //            compile data
+// Commented in order not to implement this interface in this class now, but to do it later
 
     member this.Compile data =
         compile data

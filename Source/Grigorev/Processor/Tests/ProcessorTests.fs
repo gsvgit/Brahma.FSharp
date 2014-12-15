@@ -35,7 +35,7 @@ type public CheckTests () =
         proc.Clear ()
         let comm = 
             [|
-                [|PSet (0, 0, 1)|];
+                [|PSet (0, 0, 1)|]
                 [|PSet (0, 0, 1)|]
             |]
         Assert.Throws<IncorrectLineException> (fun () -> proc.Evaluate (Help.ArrToAsm (comm))) |> ignore
@@ -45,7 +45,7 @@ type public CheckTests () =
         proc.Clear ()
         let comm = 
             [|
-                [|PMov (0, 1, 1, 1)|];
+                [|PMov (0, 1, 1, 1)|]
                 [|PSet (0, 0, 1)|]
             |]
         Assert.Throws<IncorrectLineException> (fun () -> proc.Evaluate (Help.ArrToAsm (comm))) |> ignore
@@ -55,7 +55,7 @@ type public CheckTests () =
         proc.Clear ()
         let comm = 
             [|
-                [|Nop; PSet (1, 0, 1)|];
+                [|Nop; PSet (1, 0, 1)|]
                 [|Nop; PMov (0, 0, 1, 1)|]
             |]
         let res = proc.CheckProgram (Help.ArrToAsm comm)
@@ -66,7 +66,7 @@ type public CheckTests () =
         proc.Clear ()
         let comm = 
             [|
-                [|Nop; PMov (0, 0, 1, 0)|];
+                [|Nop; PMov (0, 0, 1, 0)|]
                 [|Nop; PSet (0, 0, 1)|]
             |]
         let res = proc.CheckProgram (Help.ArrToAsm comm)
@@ -76,10 +76,10 @@ type public CheckTests () =
 [<TestFixture>]
 type public IntTests () =
     let functions = [|
-            (+);
-            (-);
-            (*);
-            (/);
+            (+)
+            (-)
+            (*)
+            (/)
             fun x y -> -y
         |]
     let proc = new Processor<int> (functions)
@@ -89,8 +89,8 @@ type public IntTests () =
         proc.Clear ()
         let comm =
             [|
-                [| PSet (0, 0, 1); PMvc (0, 0, 4); PMvc (0, 0, 4) |];
-                [| PSet (0, 1, 1); PMvc (0, 1, 4); PMvc (0, 1, 4) |];
+                [| PSet (0, 0, 1); PMvc (0, 0, 4); PMvc (0, 0, 4) |]
+                [| PSet (0, 1, 1); PMvc (0, 1, 4); PMvc (0, 1, 4) |]
                 [| PSet (1, 0, 0); PMov (1, 0, 0, 1); PMov (1, 0, 0, 1); PMov (1, 0, 0, 1) |]
             |]
             |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
@@ -102,9 +102,9 @@ type public IntTests () =
         proc.Clear ()
         let comm =
             [|
-                [| PSet (0, 1, 17); PMvc (0, 1, 2); PMov (0, 0, 0, 1); PMov (0, 0, 0, 2); PMov (0, 0, 1, 0) |];
-                [| PSet (1, 2, 11); PMvc (1, 2, 5); PMov (1, 0, 1, 2); PMov (1, 0, 0, 3) |];
-                [| PSet (0, 2, 4); PMvc (0, 2, 12) |];
+                [| PSet (0, 1, 17); PMvc (0, 1, 2); PMov (0, 0, 0, 1); PMov (0, 0, 0, 2); PMov (0, 0, 1, 0) |]
+                [| PSet (1, 2, 11); PMvc (1, 2, 5); PMov (1, 0, 1, 2); PMov (1, 0, 0, 3) |]
+                [| PSet (0, 2, 4); PMvc (0, 2, 12) |]
                 [| PSet (0, 3, -9); PMvc (0, 3, 3) |]
             |]
             |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
@@ -116,7 +116,7 @@ type public IntTests () =
         proc.Clear ()
         let comm =
             [|
-                [| PSet (0, 1, 7); PMov (0, 1, 1, 0) |];
+                [| PSet (0, 1, 7); PMov (0, 1, 1, 0) |]
                 [| PSet (1, 0, 100); PMov (1, 0, 0, 1) |]
             |]
             |> Array.map (fun x -> x |> Array.map (fun y -> y.ToAsm ()))
@@ -144,7 +144,7 @@ type public BoolTests () =
     member this.Test1 () =
         let comm =
             [|
-                [| PSet (0, 0, false); PSet (0, 1, false); PMvc (0, 0, true); PMvc (0, 1, true) |];
+                [| PSet (0, 0, false); PSet (0, 1, false); PMvc (0, 0, true); PMvc (0, 1, true) |]
                 [| PSet (1, 2, false); PSet (1, 3, false); PMvc (1, 2, true); PMvc (1, 3, true) |]
             |]
             |> Help.ArrToAsm
@@ -174,14 +174,14 @@ type ByteTests () =
     member this.Test1 () =
         let comm =
             [|
-                [| PSet (0, 1, 17uy); PMvc (0, 1, 2uy); PMov (0, 0, 0, 1); PMov (0, 0, 0, 2); PMov (0, 0, 1, 0) |];
-                [| PSet (1, 2, 11uy); PMvc (1, 2, 5uy); PMov (1, 0, 1, 2); PMov (1, 0, 0, 3) |];
-                [| PSet (0, 2, 4uy); PMvc (0, 2, 12uy) |];
+                [| PSet (0, 1, 17uy); PMvc (0, 1, 2uy); PMov (0, 0, 0, 1); PMov (0, 0, 0, 2); PMov (0, 0, 1, 0) |]
+                [| PSet (1, 2, 11uy); PMvc (1, 2, 5uy); PMov (1, 0, 1, 2); PMov (1, 0, 0, 3) |]
+                [| PSet (0, 2, 4uy); PMvc (0, 2, 12uy) |]
                 [| PSet (0, 3, 9uy); PMvc (0, 3, 3uy) |]
             |]
             |> Help.ArrToAsm
         proc.Evaluate comm
-        Assert.That (proc.Read (0, 0), Is.EqualTo (121))
+        Assert.That (proc.Read (0, 0), Is.EqualTo (121));
 
 [<TestFixture>]
 type StringArrayTests () =

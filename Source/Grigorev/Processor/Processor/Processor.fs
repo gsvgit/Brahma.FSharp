@@ -65,7 +65,7 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
 
     let eval command =
         match checkCommand command with
-        | Some (IncorrectCommand(m, r, c)) -> IncorrectCommandException (m, r, c) |> raise
+        | Some (IncorrectCommand (m, r, c)) -> IncorrectCommandException (m, r, c) |> raise
         | _ ->
             match command with
             | Asm.Set ((r, c), v) -> grid.SetValue (r, c, v)
@@ -132,6 +132,6 @@ type Processor<'T> (functions : array<'T -> 'T -> 'T>) =
         | [||] -> None
         | x -> Some (x)
 
-    member this.Size with get () = grid.Size;
-    member this.Width with get () = grid.Width;
-    member this.Height with get () = grid.Height;
+    member this.Size with get () = grid.Size
+    member this.Width with get () = grid.Width
+    member this.Height with get () = grid.Height
