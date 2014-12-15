@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>b4472a56-5f30-4e10-9520-498eaf43cd77</ProjectGuid>
+    <ProjectGuid>04b64178-ad5e-42b8-b435-c2c11fdfcce4</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Board</RootNamespace>
-    <AssemblyName>Board</AssemblyName>
+    <RootNamespace>Compiler</RootNamespace>
+    <AssemblyName>Compiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
-    <Name>Board</Name>
+    <Name>Compiler</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\Board.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Compiler.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -34,7 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\Board.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Compiler.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
@@ -47,14 +47,23 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler.fs" />
     <None Include="App.config" />
-    <Compile Include="Cell.fs" />
-    <Compile Include="Board.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
       <Name>ASM</Name>
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Board\Board\Board.fsproj">
+      <Name>Board</Name>
+      <Project>{b4472a56-5f30-4e10-9520-498eaf43cd77}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Parser\Parser.fsproj">
+      <Name>Parser</Name>
+      <Project>{d6e198e2-4bfd-49b8-9bb8-4965869f399c}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿module TTA.Translator
 
-let asmToIL (prog:TTA.ASM.Program<_>) =
+let asmToIL (prog:TTA.ASM.Program<'a>) =
     if prog |> Array.length > 1
     then failwith "Please, use sequential asm. Parallel asm is not supported."
     elif prog.Length = 0
@@ -20,5 +20,3 @@ let asmToIL (prog:TTA.ASM.Program<_>) =
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)
             Seq.init x.Length (fun _ -> NA.IL.Eps :> NA.IL.Instruction<int> :> NA.IL.IInstruction)|]
-
-
