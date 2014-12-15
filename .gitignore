@@ -29,4 +29,8 @@ RXExample/packages/*
 Source/Bulgakov/MyProcessor/packages/*
 !Source/Bulgakov/MyProcessor/packages/*.config
 !Source/Bulgakov/MyProcessor/.nuget/*
+
+_ReSharper.*
+packages
+.nuget
 !Source/Bulgakov/MyProcessor/MyProcessor.v12.suo
