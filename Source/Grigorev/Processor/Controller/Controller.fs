@@ -22,14 +22,12 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
     let mutable clearOnRun = true
     let mutable errors = [||]
     let mutable binary = None
-    let comp = new AsmYaccCompiler<'T>() :> IAsmCompiler<'T>
+    let comp = new AsmYaccCompiler<'T> () :> IAsmCompiler<'T>
     let mutable inDebug = false
     let mutable debugPosition = 0
     let mutable saved = true
 
     let init (data : string) =
-        //processor <- new Processor<'T> ([| (fun x y -> x); (fun x y -> y) |])
-        //null
         if not (Array.isEmpty initArray)
         then null
         else
@@ -53,24 +51,24 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
                     if arr.IsGenericMethod
                     then arr.MakeGenericMethod(typeof<'T>)
                     else arr
-                processor <- new Processor<'T> (arr.Invoke(ins, null) :?> (('T -> 'T -> 'T) array))
+                processor <- new Processor<'T> (arr.Invoke (ins, null) :?> (('T -> 'T -> 'T) array))
                 null
 
     let openFile (file : string) =
         let reader = new FileStream (file, FileMode.Open) 
         let ser = new DataContractSerializer (typeof<Project>)
-        project <- ser.ReadObject(reader) :?> Project
-        reader.Close()
+        project <- ser.ReadObject (reader) :?> Project
+        reader.Close ()
         fileName <- file
         init project.InitCode |> ignore
         saved <- true
 
     let save (file : string) =
-        project.Name <- file.Substring(file.LastIndexOf('\\') + 1)
+        project.Name <- file.Substring (file.LastIndexOf('\\') + 1)
         let writer = new FileStream (file, FileMode.Create) 
         let ser = new DataContractSerializer (typeof<Project>)
         ser.WriteObject (writer, project)
-        writer.Close()
+        writer.Close ()
         fileName <- file
         saved <- true
 
@@ -78,15 +76,15 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
         binary <- None
         match project.SourceCode |> comp.Compile with
         | AsmCompilationResult.Success p ->
-            let arr = new List<ErrorListItem>()
+            let arr = new List<ErrorListItem> ()
             let res = p |> processor.CheckProgram
             let help2 x =
                 match x with
                 | IncorrectLine (s, i) -> {Row = i; Col = -1; Message = s}
                 | IncorrectCommand (s, i, j) -> {Row = i; Col = j; Message = s}
             if res.IsSome
-            then arr.AddRange(res.Value |> Array.map (fun x -> help2 x))
-            errors <- arr.ToArray()
+            then arr.AddRange (res.Value |> Array.map (fun x -> help2 x))
+            errors <- arr.ToArray ()
             if errors.Length = 0
             then binary <- Some (p)
         | AsmCompilationResult.Error arr -> errors <- arr |> Array.map (fun x -> {Row = -1; Col = snd x; Message = fst x})
@@ -134,7 +132,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
 
         member this.Run () = 
             if clearOnRun
-            then processor.Clear()
+            then processor.Clear ()
             if errors.Length = 0 && binary.IsSome
             then processor.Evaluate binary.Value
 
@@ -142,7 +140,7 @@ type Controller<'T> (initArray : ('T -> 'T -> 'T) array) =
 
         member this.StartDebug () =
             if clearOnRun
-            then processor.Clear()
+            then processor.Clear ()
             if errors.Length = 0 && binary.IsSome
             then
                 inDebug <- true

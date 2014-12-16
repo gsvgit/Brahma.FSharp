@@ -123,16 +123,41 @@ namespace IDE
 		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
 		{
 			if (keyData == (Keys.B | Keys.Control | Keys.Shift))
+			{
 				Compile();
+				return true;
+			}
 			else if (keyData == Keys.F5)
+			{
 				StartDebug();
+				return true;
+			}
 			else if (keyData == (Keys.F5 | Keys.Control))
+			{
 				Run();
+				return true;
+			}
 			else if (keyData == Keys.F10)
+			{
 				Step();
+				return true;
+			}
 			else if (keyData == (Keys.Shift | Keys.F5))
+			{
 				StopDebug();
-			return base.ProcessCmdKey(ref msg, keyData);
+				return true;
+			}
+			else if (keyData == (Keys.Shift | Keys.Tab))
+			{
+				SwithTextBox(false);
+				return true;
+			}
+			else if (keyData == Keys.Tab)
+			{
+				SwithTextBox(true);
+				return true;
+			}
+			else return base.ProcessCmdKey(ref msg, keyData);
 		}
 
 		private void Run()
@@ -140,7 +165,46 @@ namespace IDE
 			ctrl.Run();
 			UpdateGrid();
 		}
-		
+
+		private void SwithTextBox(bool forward = true)
+		{
+			var coll = splitContainer2.Panel1.Controls;
+			int i;
+			for (i = 0; i < coll.Count; i++)
+			{
+				var c = coll[i] as TextBox;
+				if (c == null)
+					return;
+				if (c.Focused)
+					break;
+			}
+			if (i == coll.Count)
+				return;
+			var old = coll[i] as TextBox;
+			var p = old.SelectionStart;
+			for (int j = 0; j < old.Lines.Length; j++)
+			{
+				p -= old.Lines[j].Length + 2;
+				if (p < 0)
+				{
+					p = j;
+					break;
+				}
+			}
+			if (i == 0 && !forward)
+				i = coll.Count - 1;
+			else if (i == coll.Count - 1 && forward)
+				i = 0;
+			else i = forward ? i + 1 : i - 1;
+			var cc = coll[i] as TextBox;
+			if (cc == null)
+				return;
+			if (p >= cc.Lines.Length)
+				p = cc.Lines.Length - 1;
+			SetCursorTo(p, i, false);
+			cc.Focus();
+		}
+
 		private void StartDebug()
 		{
 			ctrl.StartDebug();
@@ -148,6 +212,7 @@ namespace IDE
 			debugToolStripMenuItem1.Enabled = false;
 			UpdateStatusBar();
 			DisableMenu();
+			ToggleEditor(false);
 		}
 
 		private void DisableMenu()
@@ -176,6 +241,17 @@ namespace IDE
 			UpdateGrid();
 			UpdateStatusBar();
 			EnableMenu();
+			ToggleEditor(true);
+		}
+
+		private void ToggleEditor(bool on)
+		{
+			foreach (var c in splitContainer2.Panel1.Controls)
+			{
+				var cc = c as TextBox;
+				if (cc != null)
+					cc.Enabled = on;
+			}
 		}
 
 		private void UpdateStatusBar()
@@ -189,7 +265,7 @@ namespace IDE
 			UpdateErrors();
 		}
 
-		private void SetCursorTo(int row, int col)
+		private void SetCursorTo(int row, int col, bool select = true)
 		{
 			if (row < 0 && col < 0)
 				return;
@@ -206,7 +282,7 @@ namespace IDE
 				sum += tb.Lines[i].Length + 2;
 			if (sum + rl > tb.Text.Length)
 				return;
-			tb.Select(sum, rl);
+			tb.Select(select ? sum : sum + rl, select ? rl : 0);
 			tb.Focus();
 		}
 

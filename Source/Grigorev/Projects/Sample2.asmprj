@@ -1,0 +1,11 @@
+<Project xmlns="http://schemas.datacontract.org/2004/07/Controller" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><InitCode_x0040_>namespace DefaultNamespace&#xD;
+&#xD;
+type public FunctionsType () =&#xD;
+    let f (x : 'T) (y : 'T) = Unchecked.defaultof&lt;'T&gt;&#xD;
+    member this.GetArray () = [| f |]</InitCode_x0040_><Name_x0040_>azaza.asmprj</Name_x0040_><SourceCode_x0040_ xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><a:string>Eps&#xD;
+asdf&#xD;
+adf</a:string><a:string>asdf&#xD;
+adsf&#xD;
+adsf&#xD;
+asdf</a:string><a:string>asdf&#xD;
+adfs</a:string></SourceCode_x0040_></Project>
