@@ -36,6 +36,7 @@
 			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.processorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.processorStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.configureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.showGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.clearOnRunToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,11 +57,10 @@
 			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-			this.dataGridView2 = new System.Windows.Forms.DataGridView();
-			this.dataGridView1 = new System.Windows.Forms.DataGridView();
-			this.processorStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.gridDataGridView = new System.Windows.Forms.DataGridView();
+			this.dataGridView2 = new System.Windows.Forms.DataGridView();
 			this.errorsDataGridView = new System.Windows.Forms.DataGridView();
+			this.dataGridView1 = new System.Windows.Forms.DataGridView();
 			this.menuStrip.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -69,10 +69,10 @@
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
 			this.splitContainer2.Panel2.SuspendLayout();
 			this.splitContainer2.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.gridDataGridView)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.errorsDataGridView)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// menuStrip
@@ -144,6 +144,13 @@
 			this.processorToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
 			this.processorToolStripMenuItem.Text = "Processor";
 			// 
+			// processorStateToolStripMenuItem
+			// 
+			this.processorStateToolStripMenuItem.Enabled = false;
+			this.processorStateToolStripMenuItem.Name = "processorStateToolStripMenuItem";
+			this.processorStateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.processorStateToolStripMenuItem.Text = "Not ready";
+			// 
 			// configureToolStripMenuItem
 			// 
 			this.configureToolStripMenuItem.Name = "configureToolStripMenuItem";
@@ -183,14 +190,14 @@
 			// compileToolStripMenuItem
 			// 
 			this.compileToolStripMenuItem.Name = "compileToolStripMenuItem";
-			this.compileToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
-			this.compileToolStripMenuItem.Text = "Compile";
+			this.compileToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+			this.compileToolStripMenuItem.Text = "Compile (Ctrl+Shift+B)";
 			// 
 			// checkToolStripMenuItem
 			// 
 			this.checkToolStripMenuItem.Enabled = false;
 			this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
-			this.checkToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.checkToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
 			this.checkToolStripMenuItem.Text = "Check";
 			// 
 			// debugToolStripMenuItem
@@ -208,29 +215,29 @@
 			// 
 			this.runWoDebugToolStripMenuItem.Enabled = false;
 			this.runWoDebugToolStripMenuItem.Name = "runWoDebugToolStripMenuItem";
-			this.runWoDebugToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-			this.runWoDebugToolStripMenuItem.Text = "Run w/o debug";
+			this.runWoDebugToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+			this.runWoDebugToolStripMenuItem.Text = "Run w/o debug (Ctrl+F5)";
 			// 
 			// debugToolStripMenuItem1
 			// 
 			this.debugToolStripMenuItem1.Enabled = false;
 			this.debugToolStripMenuItem1.Name = "debugToolStripMenuItem1";
-			this.debugToolStripMenuItem1.Size = new System.Drawing.Size(159, 22);
-			this.debugToolStripMenuItem1.Text = "Debug";
+			this.debugToolStripMenuItem1.Size = new System.Drawing.Size(214, 22);
+			this.debugToolStripMenuItem1.Text = "Debug (F5)";
 			// 
 			// stepToolStripMenuItem
 			// 
 			this.stepToolStripMenuItem.Enabled = false;
 			this.stepToolStripMenuItem.Name = "stepToolStripMenuItem";
-			this.stepToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-			this.stepToolStripMenuItem.Text = "Step";
+			this.stepToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+			this.stepToolStripMenuItem.Text = "Step (F10)";
 			// 
 			// stopDebuggingToolStripMenuItem
 			// 
 			this.stopDebuggingToolStripMenuItem.Enabled = false;
 			this.stopDebuggingToolStripMenuItem.Name = "stopDebuggingToolStripMenuItem";
-			this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-			this.stopDebuggingToolStripMenuItem.Text = "Stop debugging";
+			this.stopDebuggingToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+			this.stopDebuggingToolStripMenuItem.Text = "Stop debugging (Shift+F5)";
 			// 
 			// settingsToolStripMenuItem
 			// 
@@ -251,7 +258,7 @@
 			// 
 			this.multiThreadToolStripMenuItem.Enabled = false;
 			this.multiThreadToolStripMenuItem.Name = "multiThreadToolStripMenuItem";
-			this.multiThreadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.multiThreadToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
 			this.multiThreadToolStripMenuItem.Text = "MultiThread";
 			// 
 			// helpToolStripMenuItem
@@ -309,31 +316,6 @@
 			this.splitContainer2.SplitterDistance = 854;
 			this.splitContainer2.TabIndex = 0;
 			// 
-			// dataGridView2
-			// 
-			this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView2.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridView2.Location = new System.Drawing.Point(0, 0);
-			this.dataGridView2.Name = "dataGridView2";
-			this.dataGridView2.Size = new System.Drawing.Size(255, 364);
-			this.dataGridView2.TabIndex = 0;
-			// 
-			// dataGridView1
-			// 
-			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridView1.Location = new System.Drawing.Point(0, 0);
-			this.dataGridView1.Name = "dataGridView1";
-			this.dataGridView1.Size = new System.Drawing.Size(1113, 165);
-			this.dataGridView1.TabIndex = 0;
-			// 
-			// processorStateToolStripMenuItem
-			// 
-			this.processorStateToolStripMenuItem.Enabled = false;
-			this.processorStateToolStripMenuItem.Name = "processorStateToolStripMenuItem";
-			this.processorStateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.processorStateToolStripMenuItem.Text = "Not ready";
-			// 
 			// gridDataGridView
 			// 
 			this.gridDataGridView.AllowUserToAddRows = false;
@@ -346,6 +328,15 @@
 			this.gridDataGridView.Size = new System.Drawing.Size(255, 364);
 			this.gridDataGridView.TabIndex = 1;
 			// 
+			// dataGridView2
+			// 
+			this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView2.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridView2.Location = new System.Drawing.Point(0, 0);
+			this.dataGridView2.Name = "dataGridView2";
+			this.dataGridView2.Size = new System.Drawing.Size(255, 364);
+			this.dataGridView2.TabIndex = 0;
+			// 
 			// errorsDataGridView
 			// 
 			this.errorsDataGridView.AllowUserToAddRows = false;
@@ -357,6 +348,15 @@
 			this.errorsDataGridView.ReadOnly = true;
 			this.errorsDataGridView.Size = new System.Drawing.Size(1113, 165);
 			this.errorsDataGridView.TabIndex = 1;
+			// 
+			// dataGridView1
+			// 
+			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridView1.Location = new System.Drawing.Point(0, 0);
+			this.dataGridView1.Name = "dataGridView1";
+			this.dataGridView1.Size = new System.Drawing.Size(1113, 165);
+			this.dataGridView1.TabIndex = 0;
 			// 
 			// MainForm
 			// 
@@ -378,10 +378,10 @@
 			this.splitContainer2.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
 			this.splitContainer2.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.gridDataGridView)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.errorsDataGridView)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
