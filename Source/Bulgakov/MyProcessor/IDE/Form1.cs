@@ -35,6 +35,8 @@ namespace IDE
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(stopButton));
             var formClosing = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
             formClosing.Subscribe(x => closing(x.EventArgs));
+            var renum = Observable.FromEventPattern<DataGridViewRowsAddedEventHandler, DataGridViewRowsAddedEventArgs>(h => data.RowsAdded += h, h => data.RowsAdded -= h);
+            renum.ObserveOn(SynchronizationContext.Current).Subscribe(x => NumerateDataGrid(x.EventArgs));
         }
         
         private Compiler.Compiler comp = new Compiler.Compiler();
@@ -240,6 +242,14 @@ namespace IDE
                 return false;
             }
             return true;
+        }
+        private void NumerateDataGrid(DataGridViewRowsAddedEventArgs e)
+        {
+            for (int i = 0; i < data.Rows.Count; i++)
+            {
+                data.Rows[i].HeaderCell.Value = String.Format("{0}", data.Rows[i].Index + 1);
+            }
+            data.AutoResizeRowHeadersWidth(0, DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
         }
     }
 }

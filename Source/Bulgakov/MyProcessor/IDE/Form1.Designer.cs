@@ -141,6 +141,7 @@ namespace IDE
             // 
             this.plus.Name = "plus";
             this.plus.ReadOnly = true;
+            this.plus.Width = 101;
             // 
             // subtraction
             // 
@@ -151,6 +152,7 @@ namespace IDE
             // 
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
+            this.multiplication.Width = 101;
             // 
             // division
             // 
