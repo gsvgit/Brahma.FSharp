@@ -24,7 +24,7 @@ namespace IDE
         {
 
             InitializeComponent();
-
+            NumerateDataGrid(data);
             var open = Observable.FromEventPattern(h => button1.Click += h, h =>  button1.Click -= h);
             open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(button1));
             var load = Observable.FromEventPattern(h => button2.Click += h, h => button2.Click -= h);
@@ -36,13 +36,13 @@ namespace IDE
             var stop = Observable.FromEventPattern(h => button5.Click += h, h => button5.Click -= h);
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(button5));
             var close = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
-            close.Subscribe(x => Closing());
+            close.Subscribe(x => CloseTable());
         }
         public string CreateCode
         {
             get { return richTextBox1.Text; }
         }
-        private void Closing()
+        private void CloseTable()
         {
             if (richTextBox1.Text != "")
             {
@@ -79,8 +79,8 @@ namespace IDE
                     }
                     catch (Exception e)
                     {
-                        Compilator.CompileException ex = new Compilator.CompileException();
-                        throw ex;
+                        //Compilator.CompileException ex = new Compilator.CompileException();
+                        throw e;
                     }
                     comp.Step(count);
                     count++;
@@ -96,8 +96,8 @@ namespace IDE
                     }
                     catch (Exception e)
                     {
-                        Compilator.CompileException ex = new Compilator.CompileException();
-                        throw ex;
+                        //Compilator.CompileException ex = new Compilator.CompileException();
+                        throw e;
                     } 
                     comp.Step(count);
                     this.CreateDataGrid(comp, data);
@@ -118,7 +118,6 @@ namespace IDE
                 count = 0;
             }
         }
-
         private void Start(object sender)
         {
             errorBox.Text = "";
@@ -131,8 +130,7 @@ namespace IDE
                 }
                 catch (Exception e)
                 {
-                    Compilator.CompileException ex = new Compilator.CompileException();
-                    throw ex;
+                    throw e;
                 }    
                 comp.Run();
                 this.CreateDataGrid(comp, data);
@@ -143,7 +141,6 @@ namespace IDE
                 errorBox.Text = e.Message;    
             }
         }
-
         private void CreateDataGrid(Compilator.Compiler compiler, DataGridView data)
         {
             if (data.RowCount < compiler.NumRows()) { data.RowCount = compiler.NumRows(); }
@@ -154,6 +151,15 @@ namespace IDE
                     data[i, kvp.Key].Value = kvp.Value;
                 }
             }
+            NumerateDataGrid(data);
+        }
+        private void NumerateDataGrid(DataGridView data)
+        {
+            for (int i = 0; i < data.Rows.Count; i++)
+            {
+                data.Rows[i].HeaderCell.Value
+                    = i.ToString();
+            }
         }
         private void DisposeDataGrid(DataGridView data)
         {
@@ -162,10 +168,19 @@ namespace IDE
         }
         private void OpenFile(object sender)
         {
+            if (richTextBox1.Text != "")
+            {
+                if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
+                   MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    this.LoadFile(button1);
+                }
+            }
             try
             {
                 string filePath = "";
-                OpenFileDialog Fd = new OpenFileDialog();
+                OpenFileDialog Fd = new OpenFileDialog(); 
+                Fd.Filter = "txt files (*.txt)|*.txt";
                 if (Fd.ShowDialog() == DialogResult.OK)
                 {
                     filePath = Fd.FileName;
@@ -181,7 +196,7 @@ namespace IDE
             string str = richTextBox1.Text;
 
             SaveFileDialog Sd = new SaveFileDialog();
-            Sd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            Sd.Filter = "txt files (*.txt)|*.txt";
             if (Sd.ShowDialog() == DialogResult.OK)
             {
                 filePath = Sd.FileName;

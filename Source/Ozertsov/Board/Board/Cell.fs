@@ -1,7 +1,6 @@
 ﻿module Cell
-type Cell<'a>(operation: 'a -> 'a -> 'a) =                      
-    let mutable value = Unchecked.defaultof<'a>
 
+type Cell<'a>(operation: 'a -> 'a -> 'a) =                      
     let mutable operation = operation
     let mutable value = Unchecked.defaultof<'a>
       
@@ -9,12 +8,11 @@ type Cell<'a>(operation: 'a -> 'a -> 'a) =
         with get() = value
         and set(argument) = value <- argument
         
-    member this.RunOp(operand)=
+    member this.RunOp(operand) =
         try
             value <- operation value operand
         with
         | ex  -> 
-            printf "%A" (ex.ToString())
             raise (ex)
 
         

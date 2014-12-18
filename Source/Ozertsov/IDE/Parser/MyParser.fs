@@ -1,10 +1,12 @@
 ﻿module MyParser.MyParser
-open MyParser.Lexer
 
+open MyParser.Lexer
 open Yard.Generators.Common.AST
 open Yard.Generators.RNGLR.Parser
-
 open TTA.ASM
+
+exception ParseException of string
+exception EmptyLine of string
 
 type MyParser() =
     let lex (input: string) = 
@@ -15,8 +17,7 @@ type MyParser() =
                     while not lexbuf.IsPastEndOfStream do 
                         yield token lexbuf
                 }
-        //printfn "%A" allTokens
-    
+
         let translateArgs = {
             tokenToRange = fun x -> 0UL,0UL
             zeroPosition = 0UL
@@ -27,12 +28,8 @@ type MyParser() =
         let tree =
             match MyParser.Parser.buildAst allTokens with
             | Success (sppf, t, d) -> MyParser.Parser.translate translateArgs sppf d
-            | Error (pos,errs,msg,dbg,_) -> failwithf "Error: %A    %A \n %A"  pos errs msg
-    
-        //printfn "TREE: %A" tree
+            | Error (pos,errs,msg,dbg,_) -> raise (System.FormatException("can't parse this code, mismatch some elements"))//(ParseException("can't parse this code"))//failwithf "Error: %A    %A \n %A"  pos errs msg    
         tree
-
-    //type line = list<list<list<Asm<int>*string>*string>*list<Asm<int>*string>>
 
     let compileArr tree = 
         let (list: list<list<Asm<int>*string>>) = tree
@@ -41,19 +38,13 @@ type MyParser() =
         arr
     
     member this.Parse (input: string) =
-        //let array = input.Split('\n', '\r')
         let result = seq{
             let strarr = input.Replace("\r","").Split('\n')
-            for s in strarr do
+            for s in strarr do        
+                if (s = "")
+                then raise (System.ArgumentException("code content empty line"))//(EmptyLine("code content empty line"))
                 yield compileArr(lex s)
         }
-//        
-//        let result = seq { 
-//            use reader = new System.IO.StringReader(input)
-//            while (reader.Read()) do
-//                let s = reader.ReadLine();
-//                yield compileArr(lex s)
-//        }
         Array.ofSeq result
 
     

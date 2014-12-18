@@ -54,6 +54,9 @@ namespace IDE
             // 
             // richTextBox1
             // 
+            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.Location = new System.Drawing.Point(12, 43);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.Size = new System.Drawing.Size(887, 508);
@@ -108,6 +111,11 @@ namespace IDE
             // 
             // data
             // 
+            this.data.AllowUserToDeleteRows = false;
+            this.data.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.data.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.data.BackgroundColor = System.Drawing.SystemColors.Info;
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
             this.minus,
@@ -142,6 +150,8 @@ namespace IDE
             // 
             // errorBox
             // 
+            this.errorBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.errorBox.Location = new System.Drawing.Point(12, 557);
             this.errorBox.Name = "errorBox";
             this.errorBox.Size = new System.Drawing.Size(887, 165);
@@ -161,7 +171,6 @@ namespace IDE
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.richTextBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).EndInit();
