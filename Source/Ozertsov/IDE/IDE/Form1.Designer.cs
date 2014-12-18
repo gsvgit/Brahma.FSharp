@@ -36,32 +36,32 @@ namespace IDE
         {
             this.components = new System.ComponentModel.Container();
             this.parametrExceptionBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.CodeText = new System.Windows.Forms.RichTextBox();
             this.Open = new System.Windows.Forms.Button();
             this.Save = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.Starting = new System.Windows.Forms.Button();
+            this.Debagging = new System.Windows.Forms.Button();
+            this.StopDebagging = new System.Windows.Forms.Button();
             this.data = new System.Windows.Forms.DataGridView();
             this.plus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.minus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.errorBox = new System.Windows.Forms.RichTextBox();
+            this.ErrorBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.data)).BeginInit();
             this.SuspendLayout();
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.CodeText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBox1.Location = new System.Drawing.Point(12, 43);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(887, 508);
-            this.richTextBox1.TabIndex = 2;
-            this.richTextBox1.Text = "";
+            this.CodeText.Location = new System.Drawing.Point(12, 43);
+            this.CodeText.Name = "richTextBox1";
+            this.CodeText.Size = new System.Drawing.Size(887, 508);
+            this.CodeText.TabIndex = 2;
+            this.CodeText.Text = "";
             // 
             // Open
             // 
@@ -81,33 +81,33 @@ namespace IDE
             this.Save.Text = "Save";
             this.Save.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // Starting
             // 
-            this.button3.Location = new System.Drawing.Point(174, 12);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 5;
-            this.button3.Text = "Start";
-            this.button3.UseVisualStyleBackColor = true;
+            this.Starting.Location = new System.Drawing.Point(174, 12);
+            this.Starting.Name = "Start";
+            this.Starting.Size = new System.Drawing.Size(75, 23);
+            this.Starting.TabIndex = 5;
+            this.Starting.Text = "Start";
+            this.Starting.UseVisualStyleBackColor = true;
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(255, 12);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 6;
-            this.button4.Text = "Debug";
-            this.button4.UseVisualStyleBackColor = true;
+            this.Debagging.Location = new System.Drawing.Point(255, 12);
+            this.Debagging.Name = "button4";
+            this.Debagging.Size = new System.Drawing.Size(75, 23);
+            this.Debagging.TabIndex = 6;
+            this.Debagging.Text = "Debug";
+            this.Debagging.UseVisualStyleBackColor = true;
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(336, 12);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 7;
-            this.button5.Text = "Stop";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Visible = false;
+            this.StopDebagging.Location = new System.Drawing.Point(336, 12);
+            this.StopDebagging.Name = "button5";
+            this.StopDebagging.Size = new System.Drawing.Size(75, 23);
+            this.StopDebagging.TabIndex = 7;
+            this.StopDebagging.Text = "Stop";
+            this.StopDebagging.UseVisualStyleBackColor = true;
+            this.StopDebagging.Visible = false;
             // 
             // data
             // 
@@ -150,27 +150,27 @@ namespace IDE
             // 
             // errorBox
             // 
-            this.errorBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.ErrorBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.errorBox.Location = new System.Drawing.Point(12, 557);
-            this.errorBox.Name = "errorBox";
-            this.errorBox.Size = new System.Drawing.Size(887, 165);
-            this.errorBox.TabIndex = 9;
-            this.errorBox.Text = "";
+            this.ErrorBox.Location = new System.Drawing.Point(12, 557);
+            this.ErrorBox.Name = "errorBox";
+            this.ErrorBox.Size = new System.Drawing.Size(887, 165);
+            this.ErrorBox.TabIndex = 9;
+            this.ErrorBox.Text = "";
             // 
             // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1381, 734);
-            this.Controls.Add(this.errorBox);
+            this.Controls.Add(this.ErrorBox);
             this.Controls.Add(this.data);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.StopDebagging);
+            this.Controls.Add(this.Debagging);
+            this.Controls.Add(this.Starting);
             this.Controls.Add(this.Save);
             this.Controls.Add(this.Open);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.CodeText);
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).EndInit();
@@ -182,12 +182,12 @@ namespace IDE
         #endregion
 
         private System.Windows.Forms.BindingSource parametrExceptionBindingSource;
-        private RichTextBox richTextBox1;
+        private RichTextBox CodeText;
         private Button Open;
         private Button Save;
-        private Button button3;
-        private Button button4;
-        private Button button5;
+        private Button Starting;
+        private Button Debagging;
+        private Button StopDebagging;
         private DataGridView data;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
@@ -197,7 +197,7 @@ namespace IDE
         private DataGridViewTextBoxColumn minus;
         private DataGridViewTextBoxColumn division;
         private DataGridViewTextBoxColumn multiplication;
-        private RichTextBox errorBox;
+        private RichTextBox ErrorBox;
     }
 }
 

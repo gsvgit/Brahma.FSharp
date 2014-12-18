@@ -29,22 +29,22 @@ namespace IDE
             open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(Open));
             var load = Observable.FromEventPattern(h => Save.Click += h, h => Save.Click -= h);
             load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(Save));
-            var start = Observable.FromEventPattern(h => button3.Click += h, h => button3.Click -= h);
-            start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(button3));
-            var debug = Observable.FromEventPattern(h => button4.Click += h, h => button4.Click -= h);
-            debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(button4));
-            var stop = Observable.FromEventPattern(h => button5.Click += h, h => button5.Click -= h);
-            stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(button5));
+            var start = Observable.FromEventPattern(h => Starting.Click += h, h => Starting.Click -= h);
+            start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(Starting));
+            var debug = Observable.FromEventPattern(h => Debagging.Click += h, h => Debagging.Click -= h);
+            debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(Debagging));
+            var stop = Observable.FromEventPattern(h => StopDebagging.Click += h, h => StopDebagging.Click -= h);
+            stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(StopDebagging));
             var close = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
             close.Subscribe(x => CloseTable());
         }
         public string CreateCode
         {
-            get { return richTextBox1.Text; }
+            get { return CodeText.Text; }
         }
         private void CloseTable()
         {
-            if (richTextBox1.Text != "")
+            if (CodeText.Text != "")
             {
                 if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
                    MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -55,27 +55,28 @@ namespace IDE
         }
         private void Stop(object sender)
         {
-            button5.Visible = false;
-            button3.Visible = true;
-            richTextBox1.Enabled = true;
+            StopDebagging.Visible = false;
+            Starting.Visible = true;
+            CodeText.Enabled = true;
             DisposeDataGrid(data);
             count = 0;
+            NumerateDataGrid(data);
         }
         private void Debug(object sender)
         {
-            errorBox.Text = "";
+            ErrorBox.Text = "";
             try
             {
-                if (count < richTextBox1.Lines.Length - 1)
+                if (count < CodeText.Lines.Length - 1)
                 {
                     if (count == 0)
                         DisposeDataGrid(data);
-                    button5.Visible = true;
-                    button3.Visible = false;
-                    richTextBox1.Enabled = false;
+                    StopDebagging.Visible = true;
+                    Starting.Visible = false;
+                    CodeText.Enabled = false;
                     try
                     {
-                        comp.Compile(richTextBox1.Text);
+                        comp.Compile(CodeText.Text);
                     }
                     catch (Exception e)
                     {
@@ -89,10 +90,10 @@ namespace IDE
                 else
                 {
 
-                    button5.Visible = false; 
+                    StopDebagging.Visible = false; 
                     try
                     {
-                        comp.Compile(richTextBox1.Text);
+                        comp.Compile(CodeText.Text);
                     }
                     catch (Exception e)
                     {
@@ -103,31 +104,31 @@ namespace IDE
                     this.CreateDataGrid(comp, data);
                     count = 0;
                     comp.Stop();
-                    button3.Visible = true;
+                    Starting.Visible = true;
 
-                    richTextBox1.Enabled = true;
+                    CodeText.Enabled = true;
                 }
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;
+                ErrorBox.Text = e.Message;
                 DisposeDataGrid(data);
-                button5.Visible = false;
-                button3.Visible = true;
-                richTextBox1.Enabled = true;
+                StopDebagging.Visible = false;
+                Starting.Visible = true;
+                CodeText.Enabled = true;
                 count = 0;
                 NumerateDataGrid(data);
             }
         }
         private void Start(object sender)
         {
-            errorBox.Text = "";
+            ErrorBox.Text = "";
             DisposeDataGrid(data);
             try
             {
                 try
                 {
-                    comp.Compile(richTextBox1.Text);
+                    comp.Compile(CodeText.Text);
                 }
                 catch (Exception e)
                 {
@@ -139,7 +140,7 @@ namespace IDE
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;
+                ErrorBox.Text = e.Message;
                 NumerateDataGrid(data);
             }
         }
@@ -170,7 +171,7 @@ namespace IDE
         }
         private void OpenFile(object sender)
         {
-            if (richTextBox1.Text != "")
+            if (CodeText.Text != "")
             {
                 if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
                    MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -188,14 +189,14 @@ namespace IDE
                     filePath = Fd.FileName;
                 }
                 string str = System.IO.File.ReadAllText(@filePath);
-                richTextBox1.Text = str;
+                CodeText.Text = str;
             }
             catch (Exception) { };
         }
         private void LoadFile(object sender)
         {
             string filePath = "";
-            string str = richTextBox1.Text;
+            string str = CodeText.Text;
 
             SaveFileDialog Sd = new SaveFileDialog();
             Sd.Filter = "txt files (*.txt)|*.txt";
@@ -203,7 +204,7 @@ namespace IDE
             {
                 filePath = Sd.FileName;
                 System.IO.StreamWriter sw = new System.IO.StreamWriter(filePath);
-                sw.Write(richTextBox1.Text);
+                sw.Write(CodeText.Text);
                 sw.Close();
             }
         }
