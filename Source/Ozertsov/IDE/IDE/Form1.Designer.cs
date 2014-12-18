@@ -37,8 +37,8 @@ namespace IDE
             this.components = new System.ComponentModel.Container();
             this.parametrExceptionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.Open = new System.Windows.Forms.Button();
+            this.Save = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
@@ -63,23 +63,23 @@ namespace IDE
             this.richTextBox1.TabIndex = 2;
             this.richTextBox1.Text = "";
             // 
-            // button1
+            // Open
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Open";
-            this.button1.UseVisualStyleBackColor = true;
+            this.Open.Location = new System.Drawing.Point(12, 12);
+            this.Open.Name = "Open";
+            this.Open.Size = new System.Drawing.Size(75, 23);
+            this.Open.TabIndex = 3;
+            this.Open.Text = "Open";
+            this.Open.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // Save
             // 
-            this.button2.Location = new System.Drawing.Point(93, 12);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Save";
-            this.button2.UseVisualStyleBackColor = true;
+            this.Save.Location = new System.Drawing.Point(93, 12);
+            this.Save.Name = "Save";
+            this.Save.Size = new System.Drawing.Size(75, 23);
+            this.Save.TabIndex = 4;
+            this.Save.Text = "Save";
+            this.Save.UseVisualStyleBackColor = true;
             // 
             // button3
             // 
@@ -168,8 +168,8 @@ namespace IDE
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.Save);
+            this.Controls.Add(this.Open);
             this.Controls.Add(this.richTextBox1);
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
@@ -183,8 +183,8 @@ namespace IDE
 
         private System.Windows.Forms.BindingSource parametrExceptionBindingSource;
         private RichTextBox richTextBox1;
-        private Button button1;
-        private Button button2;
+        private Button Open;
+        private Button Save;
         private Button button3;
         private Button button4;
         private Button button5;

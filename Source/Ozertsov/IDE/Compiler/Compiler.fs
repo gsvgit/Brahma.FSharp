@@ -12,7 +12,10 @@ type Compiler() =
     let mutable program: Program<int> = null
     
     member this.Compile(str : string) =
-        program <- parser.Parse str
+        try
+            program <- parser.Parse str
+        with
+        | :? System.ArgumentException -> reraise()
 
     member this.GetProgram() =
         program
@@ -23,6 +26,8 @@ type Compiler() =
             processor.RunOp program
             program <- null
         with
+        | :? System.ArgumentException -> reraise()
+        | :? System.IndexOutOfRangeException -> reraise()
         | :? System.Exception -> reraise()
 
     member this.Debug = 
@@ -30,8 +35,16 @@ type Compiler() =
 
     member this.Step(count:int) =
         if count = 0
-        then processor.WorkFlows program
-        processor.RunLine program.[count]
+        then
+            try 
+                processor.WorkFlows program
+            with
+            | :? System.ArgumentException -> reraise()
+        try
+            processor.RunLine program.[count]
+        with
+        | :? System.IndexOutOfRangeException -> reraise()
+        | :? System.ArgumentException -> reraise()
 
     member this.Stop() = 
         program <- null

@@ -25,10 +25,10 @@ namespace IDE
 
             InitializeComponent();
             NumerateDataGrid(data);
-            var open = Observable.FromEventPattern(h => button1.Click += h, h =>  button1.Click -= h);
-            open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(button1));
-            var load = Observable.FromEventPattern(h => button2.Click += h, h => button2.Click -= h);
-            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(button2));
+            var open = Observable.FromEventPattern(h => Open.Click += h, h =>  Open.Click -= h);
+            open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(Open));
+            var load = Observable.FromEventPattern(h => Save.Click += h, h => Save.Click -= h);
+            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(Save));
             var start = Observable.FromEventPattern(h => button3.Click += h, h => button3.Click -= h);
             start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(button3));
             var debug = Observable.FromEventPattern(h => button4.Click += h, h => button4.Click -= h);
@@ -49,7 +49,7 @@ namespace IDE
                 if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
                    MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    this.LoadFile(button1);
+                    this.LoadFile(Open);
                 }
             }
         }
@@ -116,6 +116,7 @@ namespace IDE
                 button3.Visible = true;
                 richTextBox1.Enabled = true;
                 count = 0;
+                NumerateDataGrid(data);
             }
         }
         private void Start(object sender)
@@ -138,7 +139,8 @@ namespace IDE
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;    
+                errorBox.Text = e.Message;
+                NumerateDataGrid(data);
             }
         }
         private void CreateDataGrid(Compilator.Compiler compiler, DataGridView data)
@@ -173,7 +175,7 @@ namespace IDE
                 if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
                    MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    this.LoadFile(button1);
+                    this.LoadFile(Open);
                 }
             }
             try
