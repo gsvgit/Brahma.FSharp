@@ -46,5 +46,3 @@ type MyParser() =
                 yield compileArr(lex s)
         }
         Array.ofSeq result
-
-    

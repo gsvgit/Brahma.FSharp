@@ -24,6 +24,7 @@ namespace IDE
         {
 
             InitializeComponent();
+            data.RowCount = 100;
             NumerateDataGrid(data);
             var open = Observable.FromEventPattern(h => Open.Click += h, h =>  Open.Click -= h);
             open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(Open));
@@ -61,6 +62,9 @@ namespace IDE
             DisposeDataGrid(data);
             count = 0;
             NumerateDataGrid(data);
+            CodeText.Select(0, CodeText.Text.Length);
+            CodeText.SelectionColor = System.Drawing.Color.Black;
+            CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
         }
         private void Debug(object sender)
         {
@@ -71,6 +75,7 @@ namespace IDE
                 {
                     if (count == 0)
                         DisposeDataGrid(data);
+                    Highlight();
                     StopDebagging.Visible = true;
                     Starting.Visible = false;
                     CodeText.Enabled = false;
@@ -90,7 +95,8 @@ namespace IDE
                 else
                 {
 
-                    StopDebagging.Visible = false; 
+                    StopDebagging.Visible = false;
+                    Highlight();
                     try
                     {
                         comp.Compile(CodeText.Text);
@@ -111,6 +117,10 @@ namespace IDE
             }
             catch (Exception e)
             {
+
+                CodeText.Select(0, CodeText.Text.Length);
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
                 ErrorBox.Text = e.Message;
                 DisposeDataGrid(data);
                 StopDebagging.Visible = false;
@@ -206,6 +216,30 @@ namespace IDE
                 System.IO.StreamWriter sw = new System.IO.StreamWriter(filePath);
                 sw.Write(CodeText.Text);
                 sw.Close();
+            }
+        }
+        private void Highlight()
+        {
+            if (count < CodeText.Lines.Length - 1)
+            {
+                CodeText.Select(0, CodeText.GetFirstCharIndexFromLine(count));
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
+
+                int firstCharPosition = CodeText.GetFirstCharIndexFromLine(count);
+                int ln = CodeText.Lines[count].Length;
+
+                CodeText.Select(firstCharPosition, ln);
+                CodeText.Select();
+
+                CodeText.SelectionColor = System.Drawing.Color.White;
+                CodeText.SelectionBackColor = System.Drawing.Color.YellowGreen;
+            }
+            else
+            {
+                CodeText.Select(0, CodeText.Text.Length);
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
             }
         }
 
