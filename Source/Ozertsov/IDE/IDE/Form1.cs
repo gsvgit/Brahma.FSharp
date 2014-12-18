@@ -103,7 +103,6 @@ namespace IDE
                     }
                     catch (Exception e)
                     {
-                        //Compilator.CompileException ex = new Compilator.CompileException();
                         throw e;
                     } 
                     comp.Step(count);

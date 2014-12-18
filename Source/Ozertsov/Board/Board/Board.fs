@@ -38,20 +38,15 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             if matrix.Length < intfromy
             then raise (System.ArgumentException("can't create cell " + intfromx.ToString() + " " + intfromy.ToString() ))
             if matrix.[intfromy].ContainsKey intfromx = false
-//            then
-//                let inttox = (int) tox
-//                let inttoy = (int) toy
-//                if matrix.Length < inttoy
-//                then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " " + inttoy.ToString() ))
-//                if matrix.[inttoy].ContainsKey inttox = false
-//                //then
-//                //  matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
-//                //else
-//                then addCellOnUserRequest inttox inttoy
-//                matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
-//            else
             then
                 addCellOnUserRequest intfromx intfromy
+            let inttox = (int) tox
+            let inttoy = (int) toy
+            if matrix.Length < inttoy
+            then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " " + inttoy.ToString() ))
+            if matrix.[inttoy].ContainsKey inttox = false
+            then addCellOnUserRequest inttox inttoy
+            matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
             let inttox = (int) tox
             let inttoy = (int) toy
             if matrix.Length < inttoy
@@ -152,8 +147,6 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
     member this.ValueInCell row col =
         let currentCol = matrix.[col]
         if currentCol.ContainsKey row = false
-//        then currentCol.[row].Value
-//        else
         then
             addCellOnUserRequest row col
         currentCol.[row].Value
