@@ -7,6 +7,7 @@ open MyParser.MyParser
 open System.Linq
 exception CompileException
 exception RuntimeException
+exception ProcessorException
 
 
 type Compiler() =
@@ -54,6 +55,8 @@ type Compiler() =
         try
         processor.executeProgram program
         with
+        | :? Processor.IndexOutOfBounds -> raise ProcessorException
+        | :? Processor.ParallelException -> raise ProcessorException
         | :? System.Exception -> raise RuntimeException
         program <- null
 
