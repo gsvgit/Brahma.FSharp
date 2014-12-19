@@ -55,8 +55,8 @@ type ProcessorController() =
     member this.StartDebugging inputCode =
         error <- ""        
         try
-            build inputCode
             processor.Clear
+            build inputCode
             debugState <- true
         with
         | ParserError (pos, msg) -> 
@@ -64,7 +64,7 @@ type ProcessorController() =
             this.StopDebugging ()
         | :? System.Exception as ex -> 
             error <- "---BUILD FAILED--- Syntax error: " + ex.Message
-            this.StopDebugging ()        
+            this.StopDebugging ()
     
     member this.StopDebugging () = 
         debugState <- false
@@ -90,4 +90,4 @@ type ProcessorController() =
                     
     member this.AllValues = processor.AllValues
     member this.NumOfRows = processor.NumberOfRows
-    member this.NumOfCols = processor.NumberOfCols
+    member this.NumOfCols = processor.NumberOfCols    

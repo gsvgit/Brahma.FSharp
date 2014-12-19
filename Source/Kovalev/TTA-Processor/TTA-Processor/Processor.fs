@@ -28,8 +28,8 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
 
     let addCellOnUserRequest key col = 
         grid.[col].Add (key, Cell(functions.[col]))
-        if key > gridHeight
-        then gridHeight <- key
+        if key >= gridHeight
+        then gridHeight <- key + 1
 
     let interpretASM command =
         match command with
@@ -131,10 +131,11 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
 
     member this.NumberOfCols = grid.Length
 
-    member this.NumberOfCells =
-        Array.sumBy (fun (x: Dictionary<int, Cell<'a>>) -> x.Count) grid
+    member this.NumberOfCells = Array.sumBy (fun (x: Dictionary<int, Cell<'a>>) -> x.Count) grid
 
-    member this.Clear = for col in grid do col.Clear()
+    member this.Clear = 
+        for col in grid do col.Clear()
+        gridHeight <- 0
 
     member this.Run (program: Program<'a>) =
         try
