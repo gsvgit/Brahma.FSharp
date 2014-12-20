@@ -100,7 +100,7 @@ and _fslex_token  _fslex_state lexbuf =
           )
   | 8 -> ( 
 # 23 "MyParser.fsl"
-                      failwithf "unexpected input: %s" <| string lexeme 
+                      raise(System.ArgumentException("not konown lexeme")) <| string lexeme 
 # 104 "MyParserLexer.fs"
           )
   | _ -> failwith "token"

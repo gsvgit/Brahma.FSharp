@@ -36,78 +36,89 @@ namespace IDE
         {
             this.components = new System.ComponentModel.Container();
             this.parametrExceptionBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.CodeText = new System.Windows.Forms.RichTextBox();
+            this.Open = new System.Windows.Forms.Button();
+            this.Save = new System.Windows.Forms.Button();
+            this.Starting = new System.Windows.Forms.Button();
+            this.Debagging = new System.Windows.Forms.Button();
+            this.StopDebagging = new System.Windows.Forms.Button();
             this.data = new System.Windows.Forms.DataGridView();
             this.plus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.minus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.division = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.multiplication = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.errorBox = new System.Windows.Forms.RichTextBox();
+            this.ErrorBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.data)).BeginInit();
             this.SuspendLayout();
             // 
-            // richTextBox1
+            // CodeText
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(12, 43);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(887, 508);
-            this.richTextBox1.TabIndex = 2;
-            this.richTextBox1.Text = "";
+            this.CodeText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CodeText.Location = new System.Drawing.Point(12, 43);
+            this.CodeText.Name = "CodeText";
+            this.CodeText.Size = new System.Drawing.Size(887, 508);
+            this.CodeText.TabIndex = 2;
+            this.CodeText.Text = "";
             // 
-            // button1
+            // Open
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Open";
-            this.button1.UseVisualStyleBackColor = true;
+            this.Open.Location = new System.Drawing.Point(12, 12);
+            this.Open.Name = "Open";
+            this.Open.Size = new System.Drawing.Size(75, 23);
+            this.Open.TabIndex = 3;
+            this.Open.Text = "Open";
+            this.Open.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // Save
             // 
-            this.button2.Location = new System.Drawing.Point(93, 12);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Save";
-            this.button2.UseVisualStyleBackColor = true;
+            this.Save.Location = new System.Drawing.Point(93, 12);
+            this.Save.Name = "Save";
+            this.Save.Size = new System.Drawing.Size(75, 23);
+            this.Save.TabIndex = 4;
+            this.Save.Text = "Save";
+            this.Save.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // Starting
             // 
-            this.button3.Location = new System.Drawing.Point(174, 12);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 5;
-            this.button3.Text = "Start";
-            this.button3.UseVisualStyleBackColor = true;
+            this.Starting.Location = new System.Drawing.Point(174, 12);
+            this.Starting.Name = "Starting";
+            this.Starting.Size = new System.Drawing.Size(75, 23);
+            this.Starting.TabIndex = 5;
+            this.Starting.Text = "Start";
+            this.Starting.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // Debagging
             // 
-            this.button4.Location = new System.Drawing.Point(255, 12);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 6;
-            this.button4.Text = "Debug";
-            this.button4.UseVisualStyleBackColor = true;
+            this.Debagging.Location = new System.Drawing.Point(255, 12);
+            this.Debagging.Name = "Debagging";
+            this.Debagging.Size = new System.Drawing.Size(75, 23);
+            this.Debagging.TabIndex = 6;
+            this.Debagging.Text = "Debug";
+            this.Debagging.UseVisualStyleBackColor = true;
             // 
-            // button5
+            // StopDebagging
             // 
-            this.button5.Location = new System.Drawing.Point(336, 12);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 7;
-            this.button5.Text = "Stop";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Visible = false;
+            this.StopDebagging.Location = new System.Drawing.Point(336, 12);
+            this.StopDebagging.Name = "StopDebagging";
+            this.StopDebagging.Size = new System.Drawing.Size(75, 23);
+            this.StopDebagging.TabIndex = 7;
+            this.StopDebagging.Text = "Stop";
+            this.StopDebagging.UseVisualStyleBackColor = true;
+            this.StopDebagging.Visible = false;
             // 
             // data
             // 
+            this.data.AllowUserToAddRows = false;
+            this.data.AllowUserToDeleteRows = false;
+            this.data.AllowUserToResizeColumns = false;
+            this.data.AllowUserToResizeRows = false;
+            this.data.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.data.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.data.BackgroundColor = System.Drawing.SystemColors.Info;
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
             this.minus,
@@ -118,7 +129,6 @@ namespace IDE
             this.data.ReadOnly = true;
             this.data.Size = new System.Drawing.Size(464, 679);
             this.data.TabIndex = 8;
-            this.data.RowCount = 420;
             // 
             // plus
             // 
@@ -140,28 +150,29 @@ namespace IDE
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
             // 
-            // errorBox
+            // ErrorBox
             // 
-            this.errorBox.Location = new System.Drawing.Point(12, 557);
-            this.errorBox.Name = "errorBox";
-            this.errorBox.Size = new System.Drawing.Size(887, 165);
-            this.errorBox.TabIndex = 9;
-            this.errorBox.Text = "";
+            this.ErrorBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ErrorBox.Location = new System.Drawing.Point(12, 557);
+            this.ErrorBox.Name = "ErrorBox";
+            this.ErrorBox.Size = new System.Drawing.Size(887, 165);
+            this.ErrorBox.TabIndex = 9;
+            this.ErrorBox.Text = "";
             // 
             // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1381, 734);
-            this.Controls.Add(this.errorBox);
+            this.Controls.Add(this.ErrorBox);
             this.Controls.Add(this.data);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.richTextBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Controls.Add(this.StopDebagging);
+            this.Controls.Add(this.Debagging);
+            this.Controls.Add(this.Starting);
+            this.Controls.Add(this.Save);
+            this.Controls.Add(this.Open);
+            this.Controls.Add(this.CodeText);
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
             ((System.ComponentModel.ISupportInitialize)(this.parametrExceptionBindingSource)).EndInit();
@@ -173,12 +184,12 @@ namespace IDE
         #endregion
 
         private System.Windows.Forms.BindingSource parametrExceptionBindingSource;
-        private RichTextBox richTextBox1;
-        private Button button1;
-        private Button button2;
-        private Button button3;
-        private Button button4;
-        private Button button5;
+        private RichTextBox CodeText;
+        private Button Open;
+        private Button Save;
+        private Button Starting;
+        private Button Debagging;
+        private Button StopDebagging;
         private DataGridView data;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
@@ -188,7 +199,7 @@ namespace IDE
         private DataGridViewTextBoxColumn minus;
         private DataGridViewTextBoxColumn division;
         private DataGridViewTextBoxColumn multiplication;
-        private RichTextBox errorBox;
+        private RichTextBox ErrorBox;
     }
 }
 

@@ -24,63 +24,69 @@ namespace IDE
         {
 
             InitializeComponent();
-
-            var open = Observable.FromEventPattern(h => button1.Click += h, h =>  button1.Click -= h);
-            open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(button1));
-            var load = Observable.FromEventPattern(h => button2.Click += h, h => button2.Click -= h);
-            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(button2));
-            var start = Observable.FromEventPattern(h => button3.Click += h, h => button3.Click -= h);
-            start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(button3));
-            var debug = Observable.FromEventPattern(h => button4.Click += h, h => button4.Click -= h);
-            debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(button4));
-            var stop = Observable.FromEventPattern(h => button5.Click += h, h => button5.Click -= h);
-            stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(button5));
+            data.RowCount = 100;
+            NumerateDataGrid(data);
+            var open = Observable.FromEventPattern(h => Open.Click += h, h =>  Open.Click -= h);
+            open.ObserveOn(SynchronizationContext.Current).Subscribe(x => OpenFile(Open));
+            var load = Observable.FromEventPattern(h => Save.Click += h, h => Save.Click -= h);
+            load.ObserveOn(SynchronizationContext.Current).Subscribe(x => LoadFile(Save));
+            var start = Observable.FromEventPattern(h => Starting.Click += h, h => Starting.Click -= h);
+            start.ObserveOn(SynchronizationContext.Current).Subscribe(x => Start(Starting));
+            var debug = Observable.FromEventPattern(h => Debagging.Click += h, h => Debagging.Click -= h);
+            debug.ObserveOn(SynchronizationContext.Current).Subscribe(x => Debug(Debagging));
+            var stop = Observable.FromEventPattern(h => StopDebagging.Click += h, h => StopDebagging.Click -= h);
+            stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(StopDebagging));
             var close = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
-            close.Subscribe(x => Closing());
+            close.Subscribe(x => CloseTable());
         }
         public string CreateCode
         {
-            get { return richTextBox1.Text; }
+            get { return CodeText.Text; }
         }
-        private void Closing()
+        private void CloseTable()
         {
-            if (richTextBox1.Text != "")
+            if (CodeText.Text != "")
             {
                 if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
                    MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    this.LoadFile(button1);
+                    this.LoadFile(Open);
                 }
             }
         }
         private void Stop(object sender)
         {
-            button5.Visible = false;
-            button3.Visible = true;
-            richTextBox1.Enabled = true;
+            StopDebagging.Visible = false;
+            Starting.Visible = true;
+            CodeText.Enabled = true;
             DisposeDataGrid(data);
             count = 0;
+            NumerateDataGrid(data);
+            CodeText.Select(0, CodeText.Text.Length);
+            CodeText.SelectionColor = System.Drawing.Color.Black;
+            CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
         }
         private void Debug(object sender)
         {
-            errorBox.Text = "";
+            ErrorBox.Text = "";
             try
             {
-                if (count < richTextBox1.Lines.Length - 1)
+                if (count < CodeText.Lines.Length - 1)
                 {
                     if (count == 0)
                         DisposeDataGrid(data);
-                    button5.Visible = true;
-                    button3.Visible = false;
-                    richTextBox1.Enabled = false;
+                    Highlight();
+                    StopDebagging.Visible = true;
+                    Starting.Visible = false;
+                    CodeText.Enabled = false;
                     try
                     {
-                        comp.Compile(richTextBox1.Text);
+                        comp.Compile(CodeText.Text);
                     }
                     catch (Exception e)
                     {
-                        Compilator.CompileException ex = new Compilator.CompileException();
-                        throw ex;
+                        //Compilator.CompileException ex = new Compilator.CompileException();
+                        throw e;
                     }
                     comp.Step(count);
                     count++;
@@ -89,50 +95,53 @@ namespace IDE
                 else
                 {
 
-                    button5.Visible = false; 
+                    StopDebagging.Visible = false;
+                    Highlight();
                     try
                     {
-                        comp.Compile(richTextBox1.Text);
+                        comp.Compile(CodeText.Text);
                     }
                     catch (Exception e)
                     {
-                        Compilator.CompileException ex = new Compilator.CompileException();
-                        throw ex;
+                        throw e;
                     } 
                     comp.Step(count);
                     this.CreateDataGrid(comp, data);
                     count = 0;
                     comp.Stop();
-                    button3.Visible = true;
+                    Starting.Visible = true;
 
-                    richTextBox1.Enabled = true;
+                    CodeText.Enabled = true;
                 }
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;
+
+                CodeText.Select(0, CodeText.Text.Length);
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
+                ErrorBox.Text = e.Message;
                 DisposeDataGrid(data);
-                button5.Visible = false;
-                button3.Visible = true;
-                richTextBox1.Enabled = true;
+                StopDebagging.Visible = false;
+                Starting.Visible = true;
+                CodeText.Enabled = true;
                 count = 0;
+                NumerateDataGrid(data);
             }
         }
-
         private void Start(object sender)
         {
-            errorBox.Text = "";
+            ErrorBox.Text = "";
             DisposeDataGrid(data);
             try
             {
                 try
                 {
-                    comp.Compile(richTextBox1.Text);
+                    comp.Compile(CodeText.Text);
                 }
                 catch (Exception e)
                 {
-                    Compilator.CompileException ex = new Compilator.CompileException();
-                    throw ex;
+                    throw e;
                 }    
                 comp.Run();
                 this.CreateDataGrid(comp, data);
@@ -140,10 +149,10 @@ namespace IDE
             }
             catch (Exception e)
             {
-                errorBox.Text = e.Message;    
+                ErrorBox.Text = e.Message;
+                NumerateDataGrid(data);
             }
         }
-
         private void CreateDataGrid(Compilator.Compiler compiler, DataGridView data)
         {
             if (data.RowCount < compiler.NumRows()) { data.RowCount = compiler.NumRows(); }
@@ -154,6 +163,15 @@ namespace IDE
                     data[i, kvp.Key].Value = kvp.Value;
                 }
             }
+            NumerateDataGrid(data);
+        }
+        private void NumerateDataGrid(DataGridView data)
+        {
+            for (int i = 0; i < data.Rows.Count; i++)
+            {
+                data.Rows[i].HeaderCell.Value
+                    = i.ToString();
+            }
         }
         private void DisposeDataGrid(DataGridView data)
         {
@@ -162,32 +180,65 @@ namespace IDE
         }
         private void OpenFile(object sender)
         {
+            if (CodeText.Text != "")
+            {
+                if (MessageBox.Show("Do you want to save changes to your code?", "SavingChanges",
+                   MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    this.LoadFile(Open);
+                }
+            }
             try
             {
                 string filePath = "";
-                OpenFileDialog Fd = new OpenFileDialog();
+                OpenFileDialog Fd = new OpenFileDialog(); 
+                Fd.Filter = "txt files (*.txt)|*.txt";
                 if (Fd.ShowDialog() == DialogResult.OK)
                 {
                     filePath = Fd.FileName;
                 }
                 string str = System.IO.File.ReadAllText(@filePath);
-                richTextBox1.Text = str;
+                CodeText.Text = str;
             }
             catch (Exception) { };
         }
         private void LoadFile(object sender)
         {
             string filePath = "";
-            string str = richTextBox1.Text;
+            string str = CodeText.Text;
 
             SaveFileDialog Sd = new SaveFileDialog();
-            Sd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            Sd.Filter = "txt files (*.txt)|*.txt";
             if (Sd.ShowDialog() == DialogResult.OK)
             {
                 filePath = Sd.FileName;
                 System.IO.StreamWriter sw = new System.IO.StreamWriter(filePath);
-                sw.Write(richTextBox1.Text);
+                sw.Write(CodeText.Text);
                 sw.Close();
+            }
+        }
+        private void Highlight()
+        {
+            if (count < CodeText.Lines.Length - 1)
+            {
+                CodeText.Select(0, CodeText.GetFirstCharIndexFromLine(count));
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
+
+                int firstCharPosition = CodeText.GetFirstCharIndexFromLine(count);
+                int ln = CodeText.Lines[count].Length;
+
+                CodeText.Select(firstCharPosition, ln);
+                CodeText.Select();
+
+                CodeText.SelectionColor = System.Drawing.Color.White;
+                CodeText.SelectionBackColor = System.Drawing.Color.YellowGreen;
+            }
+            else
+            {
+                CodeText.Select(0, CodeText.Text.Length);
+                CodeText.SelectionColor = System.Drawing.Color.Black;
+                CodeText.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
             }
         }
 
