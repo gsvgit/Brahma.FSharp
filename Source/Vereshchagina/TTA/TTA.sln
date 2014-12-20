@@ -11,16 +11,16 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test", "Test\Test.fsproj", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "Parser\Parser.fsproj", "{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{14C6D402-27C7-43DB-AA4F-5FEB9E847A0D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Controller", "Controller\Controller.fsproj", "{025A7EF3-C80E-4E90-A91D-AD10B64E186F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDE", "IDE\IDE.csproj", "{A27C71AC-4310-41DC-9FE4-0615A2E02784}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3F453965-2C46-4886-9689-CCC84942F9AD}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Controller", "Controller\Controller.fsproj", "{025A7EF3-C80E-4E90-A91D-AD10B64E186F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDE", "IDE\IDE.csproj", "{A27C71AC-4310-41DC-9FE4-0615A2E02784}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
