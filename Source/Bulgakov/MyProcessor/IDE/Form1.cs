@@ -35,6 +35,8 @@ namespace IDE
             stop.ObserveOn(SynchronizationContext.Current).Subscribe(x => Stop(stopButton));
             var formClosing = Observable.FromEventPattern<FormClosingEventHandler, FormClosingEventArgs>(h => FormClosing += h, h => FormClosing -= h);
             formClosing.Subscribe(x => closing(x.EventArgs));
+            var renum = Observable.FromEventPattern<DataGridViewRowsAddedEventHandler, DataGridViewRowsAddedEventArgs>(h => data.RowsAdded += h, h => data.RowsAdded -= h);
+            renum.ObserveOn(SynchronizationContext.Current).Subscribe(x => NumerateDataGrid(x.EventArgs));
         }
         
         private Compiler.Compiler comp = new Compiler.Compiler();
@@ -85,6 +87,11 @@ namespace IDE
         }
         private void Highlight()
         {
+            //Clear previous
+            richTextBox1.Select(0, richTextBox1.GetFirstCharIndexFromLine(count));
+            richTextBox1.SelectionColor = System.Drawing.Color.Black;
+            richTextBox1.SelectionBackColor = System.Drawing.Color.WhiteSmoke;
+
             //Char position
             int firstCharPosition = richTextBox1.GetFirstCharIndexFromLine(count);
             int ln = richTextBox1.Lines[count].Length;
@@ -122,6 +129,10 @@ namespace IDE
                 comp.Compile(richTextBox1.Text);
                 comp.Run();
                 this.CreateDataGrid(comp, data);
+            }
+            catch (Compiler.ProcessorException e)
+            {
+                createErrorBox();
             }
             catch (Compiler.CompileException e)
             {
@@ -170,18 +181,34 @@ namespace IDE
         {
             try
             {
-                string filePath = "";
-                OpenFileDialog Fd = new OpenFileDialog();
-                if (Fd.ShowDialog() == DialogResult.OK)
+                var dr = MessageBox.Show("Save program before open?", "Alert", MessageBoxButtons.YesNoCancel);
+                if (dr == DialogResult.Yes)
                 {
-                    filePath = Fd.FileName;
+                    if (SaveFile(saveButton))
+                    {
+                        open();
+                    }
                 }
-                string str = System.IO.File.ReadAllText(@filePath);
-                richTextBox1.Text = str;
+                if (dr == DialogResult.No)
+                {
+                    open();                   
+                }
             }
             catch (Exception) { };
         }
-        private void SaveFile(object sender)
+        private void open()
+        {
+            string filePath = "";
+            OpenFileDialog Fd = new OpenFileDialog();
+            Fd.Filter = "txt files (*.txt)|*.txt";
+            if (Fd.ShowDialog() == DialogResult.OK)
+            {
+                filePath = Fd.FileName;
+                string str = System.IO.File.ReadAllText(@filePath);
+                richTextBox1.Text = str;
+            }
+        }
+        private bool SaveFile(object sender)
         {
             string filePath = "";
             string str = richTextBox1.Text;
@@ -194,13 +221,14 @@ namespace IDE
                 System.IO.StreamWriter sw = new System.IO.StreamWriter(filePath);
                 sw.Write(richTextBox1.Text);
                 sw.Close();
+                return true;
             }
+            return false;
         }
         private void closing(FormClosingEventArgs e)
         {
             e.Cancel = saveOnClose(); ;
         }
-
         private bool saveOnClose()
         {
             var dr = MessageBox.Show("Save program before exit?", "Alert", MessageBoxButtons.YesNoCancel);
@@ -214,6 +242,14 @@ namespace IDE
                 return false;
             }
             return true;
+        }
+        private void NumerateDataGrid(DataGridViewRowsAddedEventArgs e)
+        {
+            for (int i = 0; i < data.Rows.Count; i++)
+            {
+                data.Rows[i].HeaderCell.Value = String.Format("{0}", data.Rows[i].Index + 1);
+            }
+            data.AutoResizeRowHeadersWidth(0, DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders);
         }
     }
 }

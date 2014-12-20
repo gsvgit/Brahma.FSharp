@@ -56,6 +56,9 @@ namespace IDE
             // 
             // richTextBox1
             // 
+            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.Location = new System.Drawing.Point(0, 35);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(2);
             this.richTextBox1.Name = "richTextBox1";
@@ -116,6 +119,12 @@ namespace IDE
             // 
             // data
             // 
+            this.data.AllowUserToAddRows = false;
+            this.data.AllowUserToDeleteRows = false;
+            this.data.AllowUserToResizeColumns = false;
+            this.data.AllowUserToResizeRows = false;
+            this.data.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.data.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.plus,
             this.subtraction,
@@ -132,6 +141,7 @@ namespace IDE
             // 
             this.plus.Name = "plus";
             this.plus.ReadOnly = true;
+            this.plus.Width = 101;
             // 
             // subtraction
             // 
@@ -142,6 +152,7 @@ namespace IDE
             // 
             this.multiplication.Name = "multiplication";
             this.multiplication.ReadOnly = true;
+            this.multiplication.Width = 101;
             // 
             // division
             // 
@@ -150,6 +161,8 @@ namespace IDE
             // 
             // errorsListBox
             // 
+            this.errorsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.errorsListBox.FormattingEnabled = true;
             this.errorsListBox.Location = new System.Drawing.Point(9, 396);
             this.errorsListBox.Name = "errorsListBox";
@@ -181,7 +194,6 @@ namespace IDE
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.openButton);
             this.Controls.Add(this.richTextBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainScreen";
             this.Text = "TTA IDE";
