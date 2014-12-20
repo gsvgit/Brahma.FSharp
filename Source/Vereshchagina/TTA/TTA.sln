@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{14C6D4
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Controller", "Controller\Controller.fsproj", "{025A7EF3-C80E-4E90-A91D-AD10B64E186F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDE", "IDE\IDE.csproj", "{A27C71AC-4310-41DC-9FE4-0615A2E02784}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +44,14 @@ Global
 		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EE6E821-4F8D-40E0-AD6D-8456F28DADBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{025A7EF3-C80E-4E90-A91D-AD10B64E186F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{025A7EF3-C80E-4E90-A91D-AD10B64E186F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{025A7EF3-C80E-4E90-A91D-AD10B64E186F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{025A7EF3-C80E-4E90-A91D-AD10B64E186F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A27C71AC-4310-41DC-9FE4-0615A2E02784}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A27C71AC-4310-41DC-9FE4-0615A2E02784}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A27C71AC-4310-41DC-9FE4-0615A2E02784}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A27C71AC-4310-41DC-9FE4-0615A2E02784}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

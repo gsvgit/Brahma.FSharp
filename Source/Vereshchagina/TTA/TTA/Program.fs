@@ -30,7 +30,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
  
     let interpretASM command =
         match command with
-        | Set ((fst, snd), arg) -> ((int fst, int snd), arg)            
+        | Set ((rowTo, colTo), arg) -> ((int rowTo, int colTo), arg)            
      
         | Mov ((rowTo, colTo), (rowFrom, colFrom)) ->
             let rowTo, colTo, rowFrom, colFrom = int rowTo, int colTo, int rowFrom, int colFrom
@@ -60,22 +60,22 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                    
         for i in 0..line.Length - 1 do
             match line.[i] with
-            | Set ((fst, snd), arg)
-            | Mvc ((fst, snd), arg) ->
-                if int snd > functions.Length - 1
-                then raise (CellOutOfRange (int fst, int snd))
+            | Set ((row, col), arg)
+            | Mvc ((row, col), arg) ->
+                if int col > functions.Length - 1
+                then raise (CellOutOfRange (int row, int col))
                
-                if cellsForWrite.Add (int fst, int snd) = false
-                then raise (DoubleWriteIntoCell (int fst, int snd))
+                if cellsForWrite.Add (int row, int col) = false
+                then raise (DoubleWriteIntoCell (int row, int col))
            
-            | Mov ((fstTo, sndTo), (fstFrom, sndFrom)) ->
+            | Mov ((rowTo, sndTo), (rowFrom, sndFrom)) ->
                 if int sndTo > functions.Length - 1
-                then raise (CellOutOfRange (int fstTo, int sndTo))
+                then raise (CellOutOfRange (int rowTo, int sndTo))
                 elif int sndFrom > functions.Length - 1
-                then raise (CellOutOfRange (int fstFrom, int sndFrom))
+                then raise (CellOutOfRange (int rowFrom, int sndFrom))
                
-                if cellsForWrite.Add (int fstTo, int sndTo) = false
-                then raise ((DoubleWriteIntoCell (int fstTo, int sndTo)))
+                if cellsForWrite.Add (int rowTo, int sndTo) = false
+                then raise ((DoubleWriteIntoCell (int rowTo, int sndTo)))
            
             | Eps -> ()
                
