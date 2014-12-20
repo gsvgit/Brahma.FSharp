@@ -51,22 +51,22 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\TTAforexperiments\Brahma.FSharp\Source\ASM\ASM.fsproj">
+    <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
       <Name>ASM</Name>
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\TTAforexperiments\Brahma.FSharp\Source\Finashenkov\Board\Board\Board.fsproj">
+    <ProjectReference Include="..\..\Board\Board\Board.fsproj">
       <Name>Board</Name>
       <Project>{d2848c96-2435-4750-a9e6-ced399a98864}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\TTAforexperiments\Brahma.FSharp\Source\Finashenkov\Cell\Cell\Cell.fsproj">
+    <ProjectReference Include="..\..\Cell\Cell\Cell.fsproj">
       <Name>Cell</Name>
       <Project>{85f21643-7a73-493b-9503-8a795f07bcc1}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\TTAforexperiments\Brahma.FSharp\Source\Finashenkov\Parser\Parser\Parser.fsproj">
+    <ProjectReference Include="..\..\Parser\Parser\Parser.fsproj">
       <Name>Parser</Name>
       <Project>{a577b346-cd53-4578-9076-d9552a432d62}</Project>
       <Private>True</Private>
