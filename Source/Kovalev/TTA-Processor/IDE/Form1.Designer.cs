@@ -118,25 +118,27 @@
             // startToolStripMenuItem
             // 
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
-            this.startToolStripMenuItem.Text = "Start Without Debugging";
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(257, 22);
+            this.startToolStripMenuItem.Text = "Start Without Debugging    Ctrl+F5";
             // 
             // startDebuggingToolStripMenuItem
             // 
             this.startDebuggingToolStripMenuItem.Name = "startDebuggingToolStripMenuItem";
-            this.startDebuggingToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
-            this.startDebuggingToolStripMenuItem.Text = "Start Debugging";
+            this.startDebuggingToolStripMenuItem.Size = new System.Drawing.Size(257, 22);
+            this.startDebuggingToolStripMenuItem.Text = "Start Debugging                    F5";
             // 
             // nextStepToolStripMenuItem
             // 
+            this.nextStepToolStripMenuItem.Enabled = false;
             this.nextStepToolStripMenuItem.Name = "nextStepToolStripMenuItem";
-            this.nextStepToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
-            this.nextStepToolStripMenuItem.Text = "Next Step";
+            this.nextStepToolStripMenuItem.Size = new System.Drawing.Size(257, 22);
+            this.nextStepToolStripMenuItem.Text = "Next Step                                F10";
             // 
             // stopToolStripMenuItem
             // 
+            this.stopToolStripMenuItem.Enabled = false;
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(257, 22);
             this.stopToolStripMenuItem.Text = "Stop Debugging";
             // 
             // hELPToolStripMenuItem1
@@ -165,6 +167,7 @@
             // 
             // dataGridView
             // 
+            this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Location = new System.Drawing.Point(594, 28);
             this.dataGridView.Name = "dataGridView";
@@ -193,6 +196,7 @@
             this.Controls.Add(this.output);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "My Little IDE";
