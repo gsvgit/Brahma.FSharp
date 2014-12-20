@@ -1,0 +1,13 @@
+
+rules:
+   0: stmt = yard_many_1 
+   1: yard_start_rule = stmt 
+   2: yard_many_1 = 
+   3: yard_many_1 = operation SEMI yard_many_1 
+   4: operation = SET NUMBER NUMBER NUMBER 
+   5: operation = MVC NUMBER NUMBER NUMBER 
+   6: operation = MOV NUMBER NUMBER NUMBER NUMBER 
+   7: operation = EPS 
+Source without filename: parserRange
+Source without filename: error
+<null>

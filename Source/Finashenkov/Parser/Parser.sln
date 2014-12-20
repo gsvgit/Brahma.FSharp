@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "Parser\Parser.fsproj", "{A577B346-CD53-4578-9076-D9552A432D62}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASM", "..\..\ASM\ASM.fsproj", "{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A577B346-CD53-4578-9076-D9552A432D62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A577B346-CD53-4578-9076-D9552A432D62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A577B346-CD53-4578-9076-D9552A432D62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A577B346-CD53-4578-9076-D9552A432D62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
