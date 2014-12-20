@@ -59,10 +59,10 @@
     <None Include="App.config" />
     <None Include="MyParser.yrd" />
     <None Include="MyParser.fsl" />
-    <None Include="packages.config" />
     <Compile Include="MyParser.yrd.fs" />
     <Compile Include="MyParserLexer.fs" />
     <Compile Include="MyParser.fs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AST.Common">
