@@ -15,6 +15,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Compiler", "..\Compiler\Com
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "..\Parser\Parser\Parser.fsproj", "{A577B346-CD53-4578-9076-D9552A432D62}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C8250413-7690-4C49-BBF2-5D9BFFCEEC51}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -46,6 +46,6 @@ type MyParser() =
 
 let func =
     let parser = new MyParser()
-    let p = parser.Parse("Eps; Set 0 0 1; \n Eps;")
-    p
+    let pars = parser.Parse("Eps; Set 0 0 1; \n Eps;")
+    pars
 printfn "%A" func

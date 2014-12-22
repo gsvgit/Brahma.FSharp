@@ -66,15 +66,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AST.Common">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\AST.Common.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\AST.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FsYacc">
-      <HintPath>..\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
+      <HintPath>..\..\IDE\packages\YC.Tools.0.0.6.10\lib\net45\FsYacc.exe</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Generators.Common">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\Generators.Common.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\Generators.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -90,27 +90,27 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="YC.Common">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Common.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YC.Constraints">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Constraints.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Constraints.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YC.Conversions">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Conversions.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.Conversions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YC.RNGLRAbstractParser">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRAbstractParser.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRAbstractParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YC.RNGLRCommon">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRCommon.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="YC.RNGLRParser">
-      <HintPath>..\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRParser.dll</HintPath>
+      <HintPath>..\..\IDE\packages\YC.FsYARD.0.2.8.10-dev\lib\net40\YC.RNGLRParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
