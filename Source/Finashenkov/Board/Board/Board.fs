@@ -73,7 +73,6 @@ type Processor<'a> (operations : array<'a -> 'a -> 'a>) =
         if Errors.Count > 0
         then raise(SomeException)
         else ()
-
     member this.ValueInCell row col =
         if not(grid.[col].ContainsKey row)
         then addCell row col
@@ -81,7 +80,7 @@ type Processor<'a> (operations : array<'a -> 'a -> 'a>) =
 
     member this.ExecuteLine line =
         Array.Parallel.iter interpret line
-
+    
     member this.ExecuteProgram(arr: Program<'a>) =
         try
             this.Check arr
@@ -110,7 +109,6 @@ type Processor<'a> (operations : array<'a -> 'a -> 'a>) =
 
     member this.Dispose = 
         grid <- Array.init operations.Length (fun i -> Dictionary<int, Cell<'a>>())
-
 
 
 

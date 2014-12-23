@@ -47,14 +47,14 @@ type ExceptionsTests() =
     [<Test>]
     member this.``OutOfBounds``() =
         let processor = new Processor<int>([|(fun x y -> x + y); (fun x y-> x * x);|])
-        let ex = Assert.Throws<OutOfBounds>(fun() -> processor.ExecuteProgram [| [|Mvc((0<ln>, 2<col>), 1)|] |] |> ignore)
-        Assert.AreEqual(OutOfBounds (0,2), ex)
+        let ex = Assert.Throws<SomeException>(fun() -> processor.ExecuteProgram [| [|Mvc((0<ln>, 2<col>), 1)|] |] |> ignore)
+        Assert.AreEqual(SomeException, ex)
 
     [<Test>]
     member this.``ParallelException``() =
         let processor = new Processor<int>([|(fun x y -> x + y); (fun x y-> x * x);|])
-        let ex = Assert.Throws<ParallelException>(fun() -> processor.ExecuteProgram [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 1)|] |] |> ignore)
-        Assert.AreEqual(ParallelException (0,0), ex)   
+        let ex = Assert.Throws<SomeException>(fun() -> processor.ExecuteProgram [| [|Set((0<ln>, 0<col>), 1); Mvc((0<ln>, 0<col>), 1)|] |] |> ignore)
+        Assert.AreEqual(SomeException, ex)   
 
 [<TestFixture>]
 type ExecutionTests() =    
