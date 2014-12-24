@@ -47,17 +47,17 @@ type Matrix<'a>(functions: ('a -> 'a -> 'a) array) =
             if matrix.[inttoy].ContainsKey inttox = false
             then addCellOnUserRequest inttox inttoy
             matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
-            let inttox = (int) tox
-            let inttoy = (int) toy
-            if matrix.Length < inttoy
-            then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " " + inttoy.ToString() ))
-            if matrix.[inttoy].ContainsKey inttox = false
+//            let inttox = (int) tox
+//            let inttoy = (int) toy
+//            if matrix.Length < inttoy
+//            then raise (System.ArgumentException("can't create cell " + inttox.ToString() + " " + inttoy.ToString() ))
+//            if matrix.[inttoy].ContainsKey inttox = false
+////            then
+////                matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
+////            else
 //            then
-//                matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
-//            else
-            then
-                addCellOnUserRequest inttox inttoy
-            matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
+//                addCellOnUserRequest inttox inttoy
+//            matrix.[inttoy].[inttox].RunOp (matrix.[intfromy].[intfromx].Value)
         | Mvc ((x, y), arg) -> 
             // todo correction exceptions
             let intx = (int) x
