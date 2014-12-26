@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Processor", "TTA\Processor.fsproj", "{D36B7A2A-87B4-4097-A487-6B037472ADEB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASM", "..\..\ASM\ASM.fsproj", "{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Parser", "Parser\Parser.fsproj", "{8DE718C2-B76F-4337-87E5-DB364D5075B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D36B7A2A-87B4-4097-A487-6B037472ADEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D36B7A2A-87B4-4097-A487-6B037472ADEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D36B7A2A-87B4-4097-A487-6B037472ADEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D36B7A2A-87B4-4097-A487-6B037472ADEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B53EB0D3-8C05-4362-8CBB-AF40D33C8F20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DE718C2-B76F-4337-87E5-DB364D5075B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DE718C2-B76F-4337-87E5-DB364D5075B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DE718C2-B76F-4337-87E5-DB364D5075B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DE718C2-B76F-4337-87E5-DB364D5075B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
