@@ -140,7 +140,7 @@ and letFunUp expr =
                     let newAfterExpr = Expr.Let(v, iE, bF)
                     Expr.Let(vF, iEF, letFunUp newAfterExpr)
                 | Patterns.Let(vF, iEF, bF) ->
-                    let fUp = letFunUp retFunUp
+                    let fUp = retFunUp
                     match fUp with
                     | Patterns.Let (var2, inExpr2, afterExpr2) when isLetFun fUp ->
                         let newAfterExpr = Expr.Let(v, iE, afterExpr2)
