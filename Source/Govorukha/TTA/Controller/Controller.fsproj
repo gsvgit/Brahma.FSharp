@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>d36b7a2a-87b4-4097-a487-6b037472adeb</ProjectGuid>
+    <ProjectGuid>fbb0c598-8094-4bba-9d69-51cf050c185f</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>TTA</RootNamespace>
-    <AssemblyName>TTA</AssemblyName>
+    <RootNamespace>Controller</RootNamespace>
+    <AssemblyName>Controller</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>Processor</Name>
+    <Name>Controller</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,9 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\TTA.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\Controller.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,9 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\TTA.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\Controller.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -45,13 +41,23 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="Controller.fs" />
+    <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
       <Name>ASM</Name>
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Parser\Parser.fsproj">
+      <Name>Parser</Name>
+      <Project>{8de718c2-b76f-4337-87e5-db364d5075b9}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TTA\Processor.fsproj">
+      <Name>Processor</Name>
+      <Project>{d36b7a2a-87b4-4097-a487-6b037472adeb}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -9,7 +9,7 @@ open TTA.ASM
 exception ParserError of int * string
 type line = list<Asm<int>> * string
 
-let compile (inputString: string) =     
+let parse (inputString: string) =     
         
     let lexbuf = Microsoft.FSharp.Text.Lexing.LexBuffer<_>.FromString inputString
     let allTokens = 
@@ -35,5 +35,5 @@ let compile (inputString: string) =
 
     let (program: Program<int>) = Array.init numOfCol (fun i -> Array.init tr.Length (fun j -> if i > (fst tr.[j]).Length - 1 
                                                                                                then Eps 
-                                                                                               else (fst tr.[j]).[i])) 
+                                                                                               else (fst tr.[j]).[i]))
     program
