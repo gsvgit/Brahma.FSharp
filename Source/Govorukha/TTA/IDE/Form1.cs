@@ -256,5 +256,10 @@ namespace IDE
                 if (result == DialogResult.Yes) saveButtonPressed();
             }
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Дополнительная информация в файле Документация.pdf");
+        }
     }
 }
