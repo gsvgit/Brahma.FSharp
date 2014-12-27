@@ -101,28 +101,28 @@
             // startToolStripMenuItem
             // 
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.startToolStripMenuItem.Text = "Start                Ctrl+ F5";
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.startToolStripMenuItem.Text = "Start                F9";
             // 
             // startDebugToolStripMenuItem
             // 
             this.startDebugToolStripMenuItem.Name = "startDebugToolStripMenuItem";
-            this.startDebugToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.startDebugToolStripMenuItem.Text = "Debug            F5";
+            this.startDebugToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.startDebugToolStripMenuItem.Text = "Debag            Cntrl+F9";
             // 
             // nextStepToolStripMenuItem
             // 
             this.nextStepToolStripMenuItem.Enabled = false;
             this.nextStepToolStripMenuItem.Name = "nextStepToolStripMenuItem";
-            this.nextStepToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.nextStepToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.nextStepToolStripMenuItem.Text = "Next step       F10";
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Enabled = false;
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.stopToolStripMenuItem.Text = "Stop debug   Shift+F5";
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.stopToolStripMenuItem.Text = "Stop debug   Cntrl+F10";
             // 
             // helpToolStripMenuItem
             // 
@@ -135,7 +135,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 

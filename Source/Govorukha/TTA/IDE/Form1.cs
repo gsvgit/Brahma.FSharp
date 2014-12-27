@@ -70,10 +70,10 @@ namespace IDE
 
             var keyPressed = Observable.FromEventPattern<KeyEventHandler, KeyEventArgs>(h => this.KeyDown += h, h => this.KeyDown -= h);
 
-            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5).Subscribe(e => startDebug());
-            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && p.EventArgs.Modifiers == Keys.Control).Subscribe(e => startWithoutDebug());
+            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F9 && p.EventArgs.Modifiers == Keys.Control).Subscribe(e => startDebug());
+            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F9).Subscribe(e => startWithoutDebug());
             keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F10).Subscribe(e => nextStep());
-            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F5 && p.EventArgs.Modifiers == Keys.Shift).Subscribe(e => stopDebug());
+            keyPressed.Where(p => p.EventArgs.KeyCode == Keys.F10 && p.EventArgs.Modifiers == Keys.Control).Subscribe(e => stopDebug());
         }
 
         private void openButtonPressed()
