@@ -87,16 +87,16 @@ namespace IDE
         {
             e.Cancel = SaveOnClose(); ;
         }
-        private void CreateDataGrid(Compiler.Compiler compiler, DataGridView dataGridView1)
+        private void CreateDataGrid(Compiler.Compiler compiler, DataGridView dataGridView)
         {
-            dataGridView1.RowCount = compiler.CountRows();
+            dataGridView.RowCount = compiler.CountRows();
             for (int i = 0; i < compiler.CountCols(); i++)
             {
                 Dictionary<int, string> cells = compiler.GetStringGrid(i);
                 foreach (KeyValuePair<int, string> kvp in cells)
-                {
-                    dataGridView1[i, kvp.Key].Value = kvp.Value;
-                }
+                    {
+                        dataGridView[i, kvp.Key].Value = kvp.Value;
+                    }
             }
         }
         private void NumerateDataGrid(DataGridViewRowsAddedEventArgs e)
@@ -178,12 +178,14 @@ namespace IDE
         private void NextStep(object sender)
         {
             if (count < textBox.Lines.Length)
-            {
+            {                
                 Highlight();
                 textBox.Show();
                 comp.Step(count);
                 count++;
+                dataGridView.Rows.Clear();
                 this.CreateDataGrid(comp, dataGridView);
+                
             }
             else
             {

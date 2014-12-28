@@ -130,7 +130,7 @@ namespace IDE
             this.stopButton.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.stopButton.BackColor = System.Drawing.SystemColors.Control;
             this.stopButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.stopButton.Location = new System.Drawing.Point(622, 1);
+            this.stopButton.Location = new System.Drawing.Point(448, 0);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(75, 23);
             this.stopButton.TabIndex = 3;
@@ -160,13 +160,13 @@ namespace IDE
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.saveToolStripMenuItem.Text = "Save";
             // 
             // errorBox
@@ -184,7 +184,7 @@ namespace IDE
             this.stepButton.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.stepButton.BackColor = System.Drawing.SystemColors.Control;
             this.stepButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.stepButton.Location = new System.Drawing.Point(541, 1);
+            this.stepButton.Location = new System.Drawing.Point(367, 0);
             this.stepButton.Name = "stepButton";
             this.stepButton.Size = new System.Drawing.Size(75, 23);
             this.stepButton.TabIndex = 3;
