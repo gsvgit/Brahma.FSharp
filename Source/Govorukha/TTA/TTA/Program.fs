@@ -97,17 +97,17 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                 gHeight <- 0
                 
     member this.Run (program: Program<'a>) =
-                if program.Length = 0
-                then ()   
-                let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
-                if maxLength = 0
-                then ()
-                else
-                    try
-                        for i in 0..maxLength - 1 do
-                                let line = Array.map (fun (x: array<Asm<'a>>) -> if i >= x.Length then Eps else x.[i]) program
-                                checkLine line
-                                executeLine line
-                    with
-                    | DoubleWriteIntoCell (msg) -> reraise()
-                    | :? System.ArgumentException -> reraise()
+                if  not (program.Length = 0)
+                then   
+                    let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
+                    if maxLength = 0
+                    then ()
+                    else
+                        try
+                            for i in 0..maxLength - 1 do
+                                    let line = Array.map (fun (x: array<Asm<'a>>) -> if i >= x.Length then Eps else x.[i]) program
+                                    checkLine line
+                                    executeLine line
+                        with
+                        | DoubleWriteIntoCell (msg) -> reraise()
+                        | :? System.ArgumentException -> reraise()
