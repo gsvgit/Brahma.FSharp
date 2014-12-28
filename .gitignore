@@ -32,5 +32,5 @@ Source/Bulgakov/MyProcessor/packages/*
 
 _ReSharper.*
 packages
-.nuget
+
 !Source/Bulgakov/MyProcessor/MyProcessor.v12.suo
