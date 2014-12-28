@@ -259,7 +259,9 @@ namespace IDE
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Дополнительная информация в файле Документация.pdf");
+            /*MessageBox.Show("Дополнительная информация в файле Документация.pdf");*/
+            System.Diagnostics.Process.Start(@"Документация.pdf");
+
         }
     }
 }
