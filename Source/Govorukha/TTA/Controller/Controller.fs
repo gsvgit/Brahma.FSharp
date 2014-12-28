@@ -4,7 +4,7 @@ open TTA.Processor
 open TTA.Parser
 open TTA.ASM
 
-type Controller() = 
+type Controller () = 
     
     let processor = new Processor<int> [|(fun x y -> x + y); (fun x y -> x - y); (fun x y -> x * y); (fun x y -> x / y)|]
     let mutable sourceCode = ""
