@@ -12,17 +12,15 @@ type Controller() =
     let mutable (program: Program<int>) = [| [||] |]
     let mutable debugState = false
     let mutable debugLineIndex = 0
-    
     let build inputCode =
         try
-            if inputCode = sourceCode
-            then ()
-            else
+            if not (inputCode = sourceCode)
+            then 
                 program <- parse inputCode
                 sourceCode <- inputCode
         with
         | ParserError (pos, msg) -> reraise()
-        | :? System.Exception -> reraise() 
+        | :? System.ArgumentException -> reraise() 
 
     let getLineOfProgram (program: Program<int>) index =
         let (line: Program<int>) = Array.init program.Length (fun i -> Array.init 1 (fun j -> program.[i].[index]))
@@ -33,12 +31,11 @@ type Controller() =
         try build inputCode
         with
         | ParserError (pos, msg) -> error <- "Syntax error: " + pos.ToString() + " " + msg
-        | :? System.Exception as ex -> error <- "Syntax error: " + ex.Message
+        | :? System.ArgumentException as ex -> error <- "Syntax error: " + ex.Message
 
     member this.Run inputCode = 
-        if inputCode = ""
-        then ()
-        else
+        if not (inputCode = "")
+        then 
             error <- ""
             try
                 build inputCode
@@ -47,7 +44,7 @@ type Controller() =
             with
             | ParserError (pos, msg) -> error <- "Syntax error: " + pos.ToString() + " " + msg
             | DoubleWriteIntoCell (msg) -> error <- msg
-            | :? System.Exception as ex -> error <- ex.Message
+            | :? System.ArgumentException as ex -> error <- "Syntax error: " + ex.Message
 
     member this.DebugState = debugState
     member this.DebugLineIndex = debugLineIndex
@@ -60,11 +57,11 @@ type Controller() =
             debugState <- true
         with
         | ParserError (pos, msg) -> 
-                        error <- "Syntax error: " + pos.ToString() + " " + msg
-                        this.StopDebugging ()
-        | :? System.Exception as ex -> 
-                        error <- "Syntax error:" + ex.Message
-                        this.StopDebugging ()
+            error <- "Syntax error: " + pos.ToString() + " " + msg
+            this.StopDebugging ()
+        | :? System.ArgumentException as ex -> 
+            error <- "Syntax error: " + ex.Message
+            this.StopDebugging ()
     
     member this.StopDebugging () = 
         debugState <- false
