@@ -95,6 +95,7 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Full.fs" />
+    <Compile Include="PerformanceCYK.fs" />
     <Compile Include="Translator.fs" />
     <None Include="app.config" />
   </ItemGroup>
