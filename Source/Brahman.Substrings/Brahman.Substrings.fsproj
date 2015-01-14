@@ -100,7 +100,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="OpenCL.Net">
-      <HintPath>..\..\..\Source\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -108,66 +108,65 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\AgentsSystem\Agents\Brahma.Agents.fsproj">
+    <ProjectReference Include="..\AgentsSystem\Agents\Brahma.Agents.fsproj">
       <Name>Brahma.Agents</Name>
       <Project>{dfd428f8-3698-4ed4-9d08-09d4ead512d6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.AST\Brahma.FSharp.OpenCL.AST.fsproj">
       <Name>Brahma.FSharp.OpenCL.AST</Name>
       <Project>{e0388e66-e36c-4eca-adcc-bfd115820c25}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Core\Brahma.FSharp.OpenCL.Core.fsproj">
       <Name>Brahma.FSharp.OpenCL.Core</Name>
       <Project>{cbbc6d5c-5051-4d66-b616-a59a52a1a3f5}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Extensions\Brahma.FSharp.OpenCL.Extensions.fsproj">
       <Name>Brahma.FSharp.OpenCL.Extensions</Name>
       <Project>{4903d3e4-f6dd-49b8-998b-470277120271}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Printer\Brahma.FSharp.OpenCL.Printer.fsproj">
       <Name>Brahma.FSharp.OpenCL.Printer</Name>
       <Project>{f43cab12-684e-4f92-938b-4e98b8284daa}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.Tests\Brahma.FSharp.OpenCL.Tests.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Tests\Brahma.FSharp.OpenCL.Tests.fsproj">
       <Name>Brahma.FSharp.OpenCL.Tests</Name>
       <Project>{73882d44-0194-400a-bce4-f29d66417de0}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
+    <ProjectReference Include="..\Brahma.FSharp.OpenCL.Translator\Brahma.FSharp.OpenCL.Translator.fsproj">
       <Name>Brahma.FSharp.OpenCL.Translator</Name>
       <Project>{bbb08eb4-a2ae-430b-a29c-3b3446f69a6d}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma.OpenCL\Brahma.OpenCL.csproj">
+    <ProjectReference Include="..\Brahma.OpenCL\Brahma.OpenCL.csproj">
       <Name>Brahma.OpenCL</Name>
       <Project>{1f52ecb5-6cd2-4d76-a4b7-a23131c9d195}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Brahma\Brahma.csproj">
+    <ProjectReference Include="..\Brahma\Brahma.csproj">
       <Name>Brahma</Name>
       <Project>{0e731438-dd9e-4444-950d-ef2de31d3e97}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\Samples\Brahma.Samples\Brahma.Helpers.csproj">
+    <ProjectReference Include="..\Samples\Brahma.Samples\Brahma.Helpers.csproj">
       <Name>Brahma.Helpers</Name>
       <Project>{c46de069-f581-4afe-be34-387c5d46ddef}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\..\..\Source\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\..\..\Source\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\Source\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\Source\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
   </Target>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
