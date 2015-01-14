@@ -17,3 +17,4 @@ Source/Fractals/FractalsGPU/packages/*
 RXExample/packages/*
 Source/agents_new/Agents/packages/*
 *.vspx
+**/packages/*
