@@ -65,7 +65,10 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
             | Eps -> ()
 
     let executeLine (line: array<Asm<'a>>) =
-        let res = Array.Parallel.map intASM (Array.filter (fun x -> match x with | Eps -> false | _ -> true) line)
+        let res =
+            Array.filter (function | Eps -> false | _ -> true) line
+            |> Array.Parallel.map intASM 
+                
         for i in res do
             if grid.ContainsKey (fst i)
             then grid.[fst i].Value <- snd i
@@ -97,7 +100,7 @@ type Processor<'a> (functions: array<'a -> 'a -> 'a>) =
                 gHeight <- 0
                 
     member this.Run (program: Program<'a>) =
-                if  not (program.Length = 0)
+                if  program.Length <> 0
                 then   
                     let maxLength = Array.maxBy (fun (x: array<Asm<'a>>) -> x.Length) program |> Array.length
                     if maxLength = 0
