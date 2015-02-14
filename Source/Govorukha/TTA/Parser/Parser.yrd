@@ -1,0 +1,29 @@
+﻿{
+open TTA.ASM
+}
+
+tokens {
+    _ of string
+}
+
+options {
+    translate = true
+    module = "Parser.Parser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+module Main
+
+[<Start>]
+program: (line SEMI)+
+
+line: (expr)*
+
+expr:
+	SET LBRACE c=coord COMMA n=NUMBER RBRACE {Set (c, int n)}
+	| MVC LBRACE c=coord COMMA n=NUMBER RBRACE {Mvc (c, int n)}
+	| MOV LBRACE fc=coord COMMA sc=coord RBRACE {Mov (fc, sc)}
+	| EPS {Eps}
+
+coord: LBRACE fst=NUMBER COMMA snd=NUMBER RBRACE {(int fst) * 1<ln>, (int snd) * 1<col>}

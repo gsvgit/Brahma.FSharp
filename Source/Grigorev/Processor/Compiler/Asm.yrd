@@ -1,0 +1,29 @@
+﻿{
+open TTA.ASM
+}
+
+tokens {
+    _ of string
+}
+
+options {
+    translate = true
+    module = "Parser"
+    infEpsPath = epsilons
+    pos = uint64
+}
+
+module Main
+
+[<Start>]
+program: stmt*
+
+stmt: eps | set | mvc | mov
+
+eps: EPS { Eps }
+
+set: SET i=NUMBER j=NUMBER v=NUMBER { Set (((int i)*1<ln>, (int j)*1<col>), int v) }
+
+mvc: MVC i=NUMBER j=NUMBER v=NUMBER { Mvc (((int i)*1<ln>, (int j)*1<col>), int v) }
+
+mov: MOV i=NUMBER j=NUMBER x=NUMBER y=NUMBER { Mov (((int i)*1<ln>, (int j)*1<col>), ((int x)*1<ln>, (int y)*1<col>)) }

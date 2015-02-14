@@ -57,17 +57,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Brahma.FSharp\Source\App\App.fsproj">
+    <ProjectReference Include="..\..\..\App\App.fsproj">
       <Name>App</Name>
       <Project>{f7043289-3ae8-4dee-8315-fde38c97793e}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Brahma.FSharp\Source\ASM\ASM.fsproj">
+    <ProjectReference Include="..\..\..\ASM\ASM.fsproj">
       <Name>ASM</Name>
       <Project>{b53eb0d3-8c05-4362-8cbb-af40d33c8f20}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Brahma.FSharp\Source\Elements\Arch.fsproj">
+    <ProjectReference Include="..\..\..\Elements\Arch.fsproj">
       <Name>Arch</Name>
       <Project>{3c5d1a4f-f93d-4bde-86e5-bdebd0156ff1}</Project>
       <Private>True</Private>
