@@ -5,4 +5,4 @@ open HelpTypes
 
 type VSFGraph() =
     
-    let graph = new AdjacencyGraph<Node, TaggedEdge<Node, EdgeType>>
+    let graph = new AdjacencyGraph<Node, TaggedEdge<Node, EdgeType>>()    
