@@ -3,6 +3,6 @@
 open QuickGraph
 open HelpTypes
 
-type VSFGraph() =
+type VSFGraph<'T>() =
     
-    let graph = new AdjacencyGraph<Node, TaggedEdge<Node, EdgeType>>()    
+    let graph = new AdjacencyGraph<Node<'T>, TaggedEdge<Node<'T>, EdgeType>>()
