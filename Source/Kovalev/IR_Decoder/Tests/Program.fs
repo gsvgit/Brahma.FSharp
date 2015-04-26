@@ -22,6 +22,23 @@ type TestBlocks () =
         Assert.AreEqual (2, !actual)
     
     [<Test>]
+    member this.``arithmeticExpression`` () =
+        //(2 + 3) * (2 - 7)
+
+        let channel2 = Observable.Return 2
+        let channel3 = Observable.Return 3        
+        let channel7 = Observable.Return 7
+
+        let addition = new Block<int, int, int> (channel2, channel3, fun (x, y) -> x + y)
+        let subtraction = new Block<int, int, int> (channel2, channel7, fun (x, y) -> x - y)
+        let multiplication = new Block<int, int, int> (addition.Output, subtraction.Output, fun (x, y) -> x * y)
+
+        let actual = ref 0
+        multiplication.Output.Subscribe (fun x -> actual := x) |> ignore
+
+        Assert.AreEqual (-25, !actual)
+    
+    [<Test>]
     member this.``workWithPredicate`` () =
         let first = Observable.Return 1
         let second = Observable.Return 2
