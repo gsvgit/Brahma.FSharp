@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IR_Decoder", "IR_Decoder.fsproj", "{ABA26459-C780-4ED7-8E14-B12A5815A52B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5BF397C9-56F9-40F4-BA46-423592E0C3A9}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -12,7 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5BF397
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "..\Tests\Tests.fsproj", "{6D238EFC-D955-4AAD-BEB1-1603E3B38A09}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IR_Decoder", "IR_Decoder\IR_Decoder.fsproj", "{ABA26459-C780-4ED7-8E14-B12A5815A52B}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "Tests\Tests.fsproj", "{6D238EFC-D955-4AAD-BEB1-1603E3B38A09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
