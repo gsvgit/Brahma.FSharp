@@ -6,8 +6,9 @@ open FSharp.Control.Reactive
 open Builders
 open NUnit.Framework
 open IR
-
-
+open HelpTypes
+open QuickGraph
+(*
 [<TestFixture>]
 type TestBlocks () =
     [<Test>]
@@ -60,4 +61,38 @@ type TestBlocks () =
         let actual = ref 0
         add.Output.Subscribe(fun x -> match x with Types.Int a -> actual := a | _ -> failwith "") |> ignore
         
-        Assert.AreEqual (84, !actual)        
+        Assert.AreEqual (84, !actual) *)
+
+let graph = new AdjacencyGraph<Node, Edge<Node>> ()
+
+let i = Int (ref 616)
+let a = Int (ref 10)
+let c = Int (ref 0)
+
+let portDiv1 = Int (ref 0)
+let portDiv2 = Int (ref 0)
+let portInc = Int (ref 0)
+let portPredicate = Int (ref 0)
+let portNextIter1 = Int (ref 0)
+let portNextIter2 = Int (ref 0)
+let portNextIter3 = Int (ref 0)
+let portMult1 = Int (ref 0)
+let portMult2 = Bool (ref false)
+let portMult3 = Int (ref 0)
+
+let div = Div (Division (portDiv1, portDiv2))
+let inc = Inc (Increment (portInc))
+let pred = Pred (Predicate (portPredicate, fun x -> if x > 0 then true else false))
+let mult = Gate (Multiplexer (portMult1, portMult2, portMult3))
+
+graph.AddVerticesAndEdgeRange ([
+                                 Edge<Node> (i, portDiv1); Edge<Node> (i, div);
+                                 Edge<Node> (a, portDiv2); Edge<Node> (a, portNextIter2); Edge<Node> (a, div); Edge<Node> (a, NestedGraph (graph));
+                                 Edge<Node> (c, portMult1); Edge<Node> (c, portInc); Edge<Node> (c, mult); Edge<Node> (c, inc) 
+                                 Edge<Node> (div, portPredicate); Edge<Node> (div, portNextIter1); Edge<Node> (div, pred); //Edge<Node> (div, next)
+                                 Edge<Node> (inc, portNextIter3); //Edge<Node> (inc, next)
+                                 Edge<Node> (pred, portMult2); Edge<Node> (pred, mult);
+                                 Edge<Node> (portNextIter1, i); Edge<Node> (portNextIter2, a); Edge<Node> (portNextIter3, c);
+                              ]) |> ignore
+
+printfn "end"

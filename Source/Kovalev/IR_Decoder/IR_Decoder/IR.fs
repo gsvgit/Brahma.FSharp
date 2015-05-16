@@ -7,7 +7,9 @@ open FSharp.Control.Reactive
 open FSharp.Control.Reactive.Builders
 open System.Reactive.Linq
 
-type Types =
+      
+            
+(*type Types =
     | Int of int
     | Bool of bool
 
@@ -24,7 +26,7 @@ type Block<'I1, 'I2, 'I3, 'O> (input1: IObservable<'I1>, input2: IObservable<'I2
 
 
 type Block(inputs: list<IObservable<Types>>, op: Types -> Types -> Types) =    
-    member val Output = Observable.zipSeqMap (fun list -> op list.[1] list.[0]) inputs
+    member val Output = Observable.zipSeqMap (fun list -> op list.[1] list.[0]) inputs*)
  
          
 
