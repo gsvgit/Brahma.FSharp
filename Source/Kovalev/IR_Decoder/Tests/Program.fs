@@ -69,30 +69,32 @@ let i = Int (ref 616)
 let a = Int (ref 10)
 let c = Int (ref 0)
 
-let portDiv1 = Int (ref 0)
-let portDiv2 = Int (ref 0)
-let portInc = Int (ref 0)
-let portPredicate = Int (ref 0)
-let portNextIter1 = Int (ref 0)
-let portNextIter2 = Int (ref 0)
-let portNextIter3 = Int (ref 0)
-let portMult1 = Int (ref 0)
+let portDiv1 = Int (ref 1)
+let portDiv2 = Int (ref 2)
+let portInc = Int (ref 3)
+let portPredicate = Int (ref 4)
+let portNextIter1 = Int (ref 5)
+let portNextIter2 = Int (ref 6)
+let portNextIter3 = Int (ref 7)
+let portMult1 = Int (ref 8)
 let portMult2 = Bool (ref false)
-let portMult3 = Int (ref 0)
+let portMult3 = Int (ref 9)
 
 let div = Div (Division (portDiv1, portDiv2))
 let inc = Inc (Increment (portInc))
 let pred = Pred (Predicate (portPredicate, fun x -> if x > 0 then true else false))
 let mult = Gate (Multiplexer (portMult1, portMult2, portMult3))
+let nextIter = NestedGraph (graph)
 
 graph.AddVerticesAndEdgeRange ([
                                  Edge<Node> (i, portDiv1); Edge<Node> (i, div);
-                                 Edge<Node> (a, portDiv2); Edge<Node> (a, portNextIter2); Edge<Node> (a, div); Edge<Node> (a, NestedGraph (graph));
+                                 Edge<Node> (a, portDiv2); Edge<Node> (a, portNextIter2); Edge<Node> (a, div); Edge<Node> (a, nextIter);
                                  Edge<Node> (c, portMult1); Edge<Node> (c, portInc); Edge<Node> (c, mult); Edge<Node> (c, inc) 
-                                 Edge<Node> (div, portPredicate); Edge<Node> (div, portNextIter1); Edge<Node> (div, pred); //Edge<Node> (div, next)
-                                 Edge<Node> (inc, portNextIter3); //Edge<Node> (inc, next)
+                                 Edge<Node> (div, portPredicate); Edge<Node> (div, portNextIter1); Edge<Node> (div, pred); Edge<Node> (div, nextIter)
+                                 Edge<Node> (inc, portNextIter3); Edge<Node> (inc, nextIter)
                                  Edge<Node> (pred, portMult2); Edge<Node> (pred, mult);
+                                 Edge<Node> (nextIter, portMult3);
                                  Edge<Node> (portNextIter1, i); Edge<Node> (portNextIter2, a); Edge<Node> (portNextIter3, c);
                               ]) |> ignore
 
-printfn "end"
+printfn "%A" graph.VertexCount
