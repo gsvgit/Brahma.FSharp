@@ -12,6 +12,7 @@ open System.Collections
     //| Array of Queue<array<int>>
 
 type Node =
+    | IntVar of IntV
     | Int of int ref
     | Bool of bool ref
     | Pred of Predicate
@@ -20,7 +21,9 @@ type Node =
     | Gate of Multiplexer
     | NextIter of NestedGraph//AdjacencyGraph<Node, Edge<Node>>     
 
-         
+and IntV (var: Node) =
+    member this.Out = match var with | Int v -> !v | _ -> failwith "incorrect port"
+    
 and Predicate (var: Node, op: int -> bool) =
     member this.Ports = match var with | Int v -> [!v] | _ -> failwith "incorrect port"
     member this.Out = match var with | Int v -> op !v | _ -> failwith "incorrect port"

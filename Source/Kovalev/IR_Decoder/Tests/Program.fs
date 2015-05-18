@@ -15,10 +15,9 @@ open QuickGraph
 
 let graph = new AdjacencyGraph<Node, Edge<Node>> ()
 
-let i = Int (ref 616)
-let a = Int (ref 10)
-let c = Int (ref 0)
-
+let portI = Int (ref 616)
+let portA = Int (ref 10)
+let portC = Int (ref 0)
 let portDiv1 = Int (ref -1)
 let portDiv2 = Int (ref -2)
 let portInc = Int (ref -3)
@@ -29,6 +28,10 @@ let portNextIter3 = Int (ref -7)
 let portMult1 = Int (ref -8)
 let portMult2 = Bool (ref false)
 let portMult3 = Int (ref -9)
+
+let i = IntVar (IntV (portI))
+let a = IntVar (IntV (portA))
+let c = IntVar (IntV (portC))
 
 let div = Div (Division (portDiv1, portDiv2))
 let inc = Inc (Increment (portInc))
@@ -48,6 +51,10 @@ graph.AddVerticesAndEdgeRange ([
                                  Edge<Node> (portNextIter2, a); 
                                  Edge<Node> (portNextIter3, c);
                               ]) |> ignore
+
+let edges = new Dictionary<Node, IEnumerable<Edge<Node>>> ()
+for v in graph.Vertices do
+    edges.Add (v, graph.OutEdges (v))
 
 let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<Node>) = 
 
@@ -88,15 +95,19 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
             kostyl.[i] <- true
             front.Enqueue (node)
     
-    Thread.Sleep (2000)                   //это чтобы дочерний поток не успевал дойти до nextIter (не знаю, работает ли это)
-    ct.ThrowIfCancellationRequested()     //убийство (оно находится только в этой точке, потому что ... (строка выше))
+    Thread.Sleep (3000)
+    if ct.IsCancellationRequested
+    then
+        printfn "cancel"                      //это чтобы дочерний поток не успевал дойти до nextIter (не знаю, работает ли это)
+        ct.ThrowIfCancellationRequested()     //убийство (оно находится только в этой точке, потому что ... (строка выше))
                        
     while front.Count <> 0 do            //обход
         let current = front.Dequeue ()
+        let y = edges
         match current with
-        | Int ref -> for v in graph.OutEdges (current) do    
+        | IntVar var -> for v in edges.[current] do //edges.[current] do    
                          match v.Target with
-                         | Int ref2 -> ref2 := !ref
+                         | Int ref2 -> ref2 := var.Out
                          | Div x as y -> tryEnqueue 3 y
                          | Inc x as y -> tryEnqueue 4 y
                          | NextIter x as y -> tryEnqueue 7 y
@@ -107,7 +118,7 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
                        then front.Enqueue (current)                      //Изначально там лежат отрицательные числа
                        else                                              //Только что осознал, что это не сработает, потому что мы передаем
                            let divOut = block.Out                        //тот же самый граф во вторую итерацию, и там уже не отрицательные
-                           for v in graph.OutEdges (current) do          //числа. Но сейчас даже не в этом проблема
+                           for v in edges.[current] do                   //числа. Но сейчас даже не в этом проблема
                                match v.Target with
                                    | Int ref -> ref := divOut
                                    | Pred p as y -> tryEnqueue 5 y
@@ -118,7 +129,7 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
                        then front.Enqueue (current)
                        else
                            let incOut = block.Out
-                           for v in graph.OutEdges (current) do
+                           for v in edges.[current] do
                                match v.Target with
                                | Int ref -> ref := incOut
                                | NextIter g as y -> tryEnqueue 7 y
@@ -128,37 +139,38 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
                         then front.Enqueue (current)
                         else
                             let predOut = block.Out
-                            for v in graph.OutEdges (current) do
+                            for v in edges.[current] do
                                match v.Target with
                                | Bool ref -> ref := predOut
                                | Gate g as y -> tryEnqueue 6 y
                                | _ -> failwith "not in this graph"
 
-         | NextIter gr -> if List.exists (fun x -> x < 0) gr.Ports
-                          then front.Enqueue (current)
-                          else 
-                              match i, a, c with                    //передаем значения из портов nextIter в блоки переменных
-                              | Int ref1, Int ref2, Int ref3 -> 
-                                  let ports = gr.Ports
-                                  ref1 := ports.[0]
-                                  ref2 := ports.[1]
-                                  ref3 := ports.[2]
-                              | _ -> failwith "no"
-                              task.Start ()                 //запускаем следующую итерацию
-
-         | Gate block -> if List.exists (fun x -> x < 0) block.Ports || task.Status <> TaskStatus.Running
+        | NextIter gr -> if List.exists (fun x -> x < 0) gr.Ports
                          then front.Enqueue (current)
-                         else
-                             if block.Predicate         //если true, ждем task и записываем ее результат в out
-                             then out <- task.Result   
-                             else                       //иначе убиваем task и выполняем операцию внутри мультиплексора,
-                                tokenSource.Cancel ()   //которая еще раз смотрит на предикат и пропускает значение из порта f
-                                out <- block.Out        //записываем в out
-                                                                          
-         | _ -> failwith "jkhkjhjh"                
+                         else 
+                             match portI, portA, portC with                    //передаем значения из портов nextIter в блоки переменных
+                             | Int ref1, Int ref2, Int ref3 -> 
+                                 let ports = gr.Ports
+                                 ref1 := ports.[0]
+                                 ref2 := ports.[1]
+                                 ref3 := ports.[2]
+                             | _ -> failwith "no"
+                             task.Start ()                 //запускаем следующую итерацию
+
+        | Gate block -> if List.exists (fun x -> x < 0) block.Ports || task.Status <> TaskStatus.Running
+                        then front.Enqueue (current)
+                        else
+                            if block.Predicate         //если true, ждем task и записываем ее результат в out
+                            then out <- task.Result   
+                            else                       //иначе убиваем task и выполняем операцию внутри мультиплексора,
+                               tokenSource.Cancel ()   //которая еще раз смотрит на предикат и пропускает значение из порта f
+                               out <- block.Out        //записываем в out
+                                                                         
+        | _ -> failwith "jkhkjhjh"
     out                                                        
 
 printfn "%A" graph.VertexCount
+
 
 
 Console.WriteLine (decode graph ([a; i; c]))
