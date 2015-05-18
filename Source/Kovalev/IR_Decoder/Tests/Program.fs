@@ -50,24 +50,36 @@ graph.AddVerticesAndEdgeRange ([
                               ]) |> ignore
 
 let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<Node>) = 
-    // a i c div inc pred mult nextIter
-    // 0 1 2  3   4    5    6     7
+
+    (*
+        Обход в ширину. Начинается с набора стартовых вершин. Вершины добавляются в очередь. 
+        Хотел использовать просто set, чтобы решить проблему с повторным включением вершины, но Node не реализует IComparable.
+        IEquatable он тоже не реализует, поэтому не получится использовать метод contains для проверки или что-нибудь подобное 
+        у коллекций.
+        Так что (не)хитрый kostyl - массив флагов, "лежит ли уже данная вершина в очереди". Таблица соответсвия флагов вершинам: 
+
+        a i c div inc pred mult nextIter
+        0 1 2  3   4    5    6     7
+    *)
 
     let kostyl = Array.create 8 false    //because Node doesn't implement IComparable or IEquatable
-    kostyl.[0] <- true
+    kostyl.[0] <- true                   //a, i, c - стартовые
     kostyl.[1] <- true
     kostyl.[2] <- true
 
-    let front = new Queue<Node> ()
+    let front = new Queue<Node> ()       //та самая очередь
     for n in startVertices do
         front.Enqueue (n)
     
-    let tokenSource2 = new CancellationTokenSource();
-    let ct = tokenSource2.Token;
+    let tokenSource = new CancellationTokenSource();           //всякие штуки для отмены task, не знаю, как оно работает на самом деле
+    let ct = tokenSource.Token;                                //делал как в примере на msdn
 
-    let task = new Task<int> ((fun () -> decode graph startVertices), tokenSource2.Token)
+    let task = new Task<int> ((fun () -> decode graph startVertices), tokenSource.Token) //создаем предварительно task, чтобы потом
+                                                                                         //в разных узлах запускать\требовать результат
 
-    let mutable out = -100
+    let mutable out = -100        //просто чтобы возвращать значение из decode
+
+    printfn "*"
 
     let tryEnqueue i node =
         if kostyl.[i]
@@ -76,13 +88,13 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
             kostyl.[i] <- true
             front.Enqueue (node)
     
-    Thread.Sleep (2000)
-    ct.ThrowIfCancellationRequested()
+    Thread.Sleep (2000)                   //это чтобы дочерний поток не успевал дойти до nextIter (не знаю, работает ли это)
+    ct.ThrowIfCancellationRequested()     //убийство (оно находится только в этой точке, потому что ... (строка выше))
                        
-    while front.Count <> 0 do
+    while front.Count <> 0 do            //обход
         let current = front.Dequeue ()
         match current with
-        | Int ref -> for v in graph.OutEdges (current) do
+        | Int ref -> for v in graph.OutEdges (current) do    
                          match v.Target with
                          | Int ref2 -> ref2 := !ref
                          | Div x as y -> tryEnqueue 3 y
@@ -91,11 +103,11 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
                          | Gate x as y -> tryEnqueue 6 y
                          | _ -> failwith "not in this graph"
         
-        | Div block -> if List.exists (fun x -> x < 0) block.Ports 
-                       then front.Enqueue (current) 
-                       else 
-                           let divOut = block.Out
-                           for v in graph.OutEdges (current) do
+        | Div block -> if List.exists (fun x -> x < 0) block.Ports       //<--- проверка на то, что во все порты уже пришли значения
+                       then front.Enqueue (current)                      //Изначально там лежат отрицательные числа
+                       else                                              //Только что осознал, что это не сработает, потому что мы передаем
+                           let divOut = block.Out                        //тот же самый граф во вторую итерацию, и там уже не отрицательные
+                           for v in graph.OutEdges (current) do          //числа. Но сейчас даже не в этом проблема
                                match v.Target with
                                    | Int ref -> ref := divOut
                                    | Pred p as y -> tryEnqueue 5 y
@@ -125,23 +137,23 @@ let rec decode (graph: AdjacencyGraph<Node, Edge<Node>>) (startVertices: list<No
          | NextIter gr -> if List.exists (fun x -> x < 0) gr.Ports
                           then front.Enqueue (current)
                           else 
-                              match i, a, c with
+                              match i, a, c with                    //передаем значения из портов nextIter в блоки переменных
                               | Int ref1, Int ref2, Int ref3 -> 
                                   let ports = gr.Ports
                                   ref1 := ports.[0]
                                   ref2 := ports.[1]
                                   ref3 := ports.[2]
                               | _ -> failwith "no"
-                              task.Start ()
+                              task.Start ()                 //запускаем следующую итерацию
 
          | Gate block -> if List.exists (fun x -> x < 0) block.Ports || task.Status <> TaskStatus.Running
                          then front.Enqueue (current)
                          else
-                             if block.Predicate 
-                             then out <- task.Result
-                             else 
-                                tokenSource2.Cancel ()
-                                out <- block.Out
+                             if block.Predicate         //если true, ждем task и записываем ее результат в out
+                             then out <- task.Result   
+                             else                       //иначе убиваем task и выполняем операцию внутри мультиплексора,
+                                tokenSource.Cancel ()   //которая еще раз смотрит на предикат и пропускает значение из порта f
+                                out <- block.Out        //записываем в out
                                                                           
          | _ -> failwith "jkhkjhjh"                
     out                                                        
