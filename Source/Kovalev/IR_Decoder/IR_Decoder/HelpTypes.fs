@@ -2,6 +2,7 @@
 
 open QuickGraph
 open System.Collections.Generic 
+open System.Collections
 
 //type EdgeType = Value | State | Predicate
 
@@ -17,28 +18,38 @@ type Node =
     | Inc of Increment
     | Div of Division
     | Gate of Multiplexer
-    | NestedGraph of AdjacencyGraph<Node, Edge<Node>>     
+    | NextIter of NestedGraph//AdjacencyGraph<Node, Edge<Node>>     
+
+         
+and Predicate (var: Node, op: int -> bool) =
+    member this.Ports = match var with | Int v -> [!v] | _ -> failwith "incorrect port"
+    member this.Out = match var with | Int v -> op !v | _ -> failwith "incorrect port"
+
+and Increment (var: Node) =
+    member this.Ports = match var with | Int v -> [!v] | _ -> failwith "incorrect port"
+    member this.Out = match var with | Int v -> !v + 1 | _ -> failwith "incorrect port"
+
+and Multiplexer (f: Node, p: Node, t: Node) =
+    member this.Ports = match f, p, t with | Int f, Bool p, Int t -> [!f]         //p t
+                                           | _ -> failwith "incorrect port"
+    member this.Out = match f, p, t with | Int f, Bool p, Int t -> if !p then !t else !f
+                                         | _ -> failwith "incorrect port"
+    member this.Predicate = match p with | Bool v -> !v | _ -> failwith "incorrect port"
+
+and Division (fst: Node, snd: Node) =
+    member this.Ports = match fst, snd with | Int f, Int s -> [!f; !s] | _ -> failwith "incorrect port"
+    member this.Out = match fst, snd with | Int f, Int s -> !f / !s | _ -> failwith "incorrect port"                   
+        
+and NestedGraph (g: AdjacencyGraph<Node, Edge<Node>>, port1: Node, port2: Node, port3: Node) =
+    member this.Graph = g
+    member this.Ports = match port1, port2, port3 with | Int f, Int s, Int t -> [!f; !s; !t] | _ -> failwith "incorrect port"
 
 //and Int() =
 //    [<DefaultValue>] val mutable Var : int
 
 //and BoolVar() =
 //    [<DefaultValue>] val mutable Var : bool
-         
-and Predicate (var: Node, op: int -> bool) =
-    member this.Out = match var with | Int v -> op !v | _ -> failwith "incorrect port"
 
-and Increment (var: Node) =
-    member this.Out = match var with | Int v -> !v + 1 | _ -> failwith "incorrect port"
-
-and Multiplexer (f: Node, p: Node, t: Node) =
-    member this.Out = match f, p, t with | Int f, Bool p, Int t -> if !p then !t else !f
-                                         | _ -> failwith "incorrect port"
-
-and Division (fst: Node, snd: Node) =
-    member this.Out = match fst, snd with | Int f, Int s -> !f / !s | _ -> failwith "incorrect port"                   
-        
-            
 (*type Node<'T> =
     | Predicate of 'T
     | Op of 'T
