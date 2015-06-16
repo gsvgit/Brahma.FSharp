@@ -9,6 +9,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ASM", "ASM\ASM.fsproj", "{B
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Example", "Example\Example.fsproj", "{B735E185-6125-4637-8C8C-465318786E51}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1FA97B98-169A-4603-BC8A-A2055B85D5A2}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
