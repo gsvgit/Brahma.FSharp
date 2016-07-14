@@ -1,7 +1,0 @@
-A-Za-z0-9 aaaaaaaaaaaaaaaazaaaaaaaaaa 1000000000 999992345 test1.txt
-A-Za-z0-9 abcabbcbccbabbcabbbcacacbac 10000000000 9999912345 test2.txt
-A-Za-z0-9 afgart 1000000 12345 test3.txt
-A-Za-z0-9 AafDs434s 1000000 12345 test4.txt
-A-Za-z0-9 1 1000000 12345 test5.txt
-A-Za-z0-9 asdfasdfasfeaahfgasFGAFGASFADFASdfasfasdfadsfasdf6475r3298578978das6as987f67das8569fg328fg78q2f32q8af789328fgw 1000000 12345 test6.txt
-A-Za-z0-9 1234567890qwedfghjkmsdtyoicjk 1000000 12345 test7.txt
