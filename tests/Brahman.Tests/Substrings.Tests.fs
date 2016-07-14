@@ -62,11 +62,11 @@ type ``Brahman Substrings tests`` () =
         Assert.AreEqual(x - res.ChunkSize + 32, res.Data.[0].Offset)
         Assert.AreEqual(res.Data.[0].PatternId,0)
 
-[<EntryPoint>]
-let f x =
-    let t = new ``Brahman Substrings tests``()
-    //t.``RabinKarp simple test 2``()
-    //t.``RabinKarp simple test 2``()
-    //t.``RabinKarp two patterns 2.``()
-    t.``RabinKarp two chanks 1``()
-    1
+//[<EntryPoint>]
+//let f x =
+//    let t = new ``Brahman Substrings tests``()
+//    //t.``RabinKarp simple test 2``()
+//    //t.``RabinKarp simple test 2``()
+//    //t.``RabinKarp two patterns 2.``()
+//    t.``RabinKarp two chanks 1``()
+//    1

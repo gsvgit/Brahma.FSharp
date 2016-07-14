@@ -6,12 +6,17 @@ NUGET
       FSharpx.Text.StructuredFormat (1.8.41)
       OpenCL.Net (2.2.9)
     FSharp.Core (4.0.0.1) - redirects: force
+    FSharp.Quotations.Evaluator (1.0.7)
+    FSharpx.Collections (1.15.1)
+      FSharp.Core
     FSharpx.Core (1.8.41)
     FSharpx.Text.StructuredFormat (1.8.41)
       FSharpx.Core (1.8.41)
     NuGet.CommandLine (3.4.3)
     NUnit (2.6.3)
     OpenCL.Net (2.2.9)
+    YC.PrettyPrinter (0.0.5)
+      FSharp.Core
 
 GROUP Build
 NUGET

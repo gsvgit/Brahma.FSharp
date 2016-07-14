@@ -382,7 +382,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         | Some expr -> 
             let r,tContext = translateFieldGet expr fldInfo.Name targetContext
             r :> Node<_>,tContext
-        | None -> failwithf "FieldGet for empty host is not suported. Field: " fldInfo.Name
+        | None -> failwithf "FieldGet for empty host is not suported. Field: %A" fldInfo.Name
     | Patterns.FieldSet (exprOpt,fldInfo,expr) ->
         match exprOpt with
         | Some e -> 
@@ -422,8 +422,7 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         (res :> Node<_>), tContext
     | Patterns.PropertySet(exprOpt,propInfo,exprs,expr) -> 
         let res,tContext = transletaPropSet exprOpt propInfo exprs expr targetContext
-        res :> Node<_>,tContext
-    | Patterns.Quote expr -> "Quote is not suported:" + string expr|> failwith
+        res :> Node<_>,tContext    
     | Patterns.Sequential(expr1,expr2) -> 
         let res,tContext = translateSeq expr1 expr2 targetContext
         res :> Node<_>,tContext

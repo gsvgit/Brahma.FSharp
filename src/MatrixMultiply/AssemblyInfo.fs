@@ -1,7 +1,7 @@
 ﻿namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("Brahman.Substrings")>]
+[<assembly: AssemblyTitleAttribute("MatrixMultiply")>]
 [<assembly: AssemblyProductAttribute("Brahma.FSharp")>]
 [<assembly: AssemblyDescriptionAttribute("F# quotation to OpenCL translator.")>]
 [<assembly: AssemblyVersionAttribute("1.0")>]

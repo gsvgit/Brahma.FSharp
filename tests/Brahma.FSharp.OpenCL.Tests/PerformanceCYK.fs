@@ -281,5 +281,6 @@ let answer() =
     let sw = System.Diagnostics.Stopwatch()
     sw.Start()
     transform command
+    |> ignore
     sw.Stop()
     printfn "Time elapsed: %A" <| sw.Elapsed

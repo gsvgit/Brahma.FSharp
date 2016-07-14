@@ -29,7 +29,7 @@ type TestStruct =
 [<TestFixture>]
 type Translator() =
     
-    let basePath = "../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
+    let basePath = "../../../Brahma.FSharp.OpenCL/Translator/Expected/"
 
     let deviceType = DeviceType.Gpu
     let platformName = "NVIDIA*"
@@ -652,14 +652,14 @@ type Translator() =
 
 
 
-[<EntryPoint>]
-let f _ =
-    //(new Translator()).``Nested functions``()
-    //(new Translator()).``Simple seq of struct.``()
-    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
-    //(new Brahma.FSharp.OpenCL.Full.Translator()).
-        //``Binding in WHILE.``()
-        //``Template Let Transformation Test 18``()
-        //EigenCFA()
-    PerformanceCYK.answer()
-    0
+//[<EntryPoint>]
+//let f _ =
+//    //(new Translator()).``Nested functions``()
+//    //(new Translator()).``Simple seq of struct.``()
+//    //(new Brahma.FSharp.OpenCL.Full.Translator()).``Simple seq of struct.``()
+//    //(new Brahma.FSharp.OpenCL.Full.Translator()).
+//        //``Binding in WHILE.``()
+//        //``Template Let Transformation Test 18``()
+//        //EigenCFA()
+//    PerformanceCYK.answer()
+//    0

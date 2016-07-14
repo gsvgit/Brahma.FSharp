@@ -300,6 +300,7 @@ type Translator() =
         run _1d float32Arr        
         check float32Arr [|0.0f;1.0f;4.0f;9.0f|]
 
+    [<Ignore>]
     [<Test>]
     member this.``Math sin``() = 
         let command = 

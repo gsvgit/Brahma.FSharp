@@ -3,11 +3,13 @@ source https://nuget.org/api/v2
 nuget Argu
 nuget Brahma.FSharp 0.3.5.0
 nuget FSharp.Core redirects: force
+nuget FSharp.Quotations.Evaluator
+nuget FSharpx.Collections
 nuget FSharpx.Core 1.8.41
-nuget FSharpx.Text.StructuredFormat 1.8.41
 nuget NuGet.CommandLine
 nuget NUnit 2.6.3
 nuget OpenCL.Net 2.2.9.0
+nuget YC.PrettyPrinter
 
 group Build
   source https://nuget.org/api/v2

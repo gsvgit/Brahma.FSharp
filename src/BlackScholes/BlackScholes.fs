@@ -21,7 +21,7 @@ open Brahma.OpenCL
 open Brahma.FSharp.OpenCL.Core
 open Microsoft.FSharp.Quotations
 open Brahma.FSharp.OpenCL.Extensions
-open FSharpx.Linq.QuotationEvaluation
+open FSharp.Quotations.Evaluator
 
 let main () =
     let Eps = 0.001f
@@ -39,7 +39,7 @@ let main () =
     let A5 = 1.330274429f
 
     let cumulativeNormalDistribution = 
-        let k = <@fun x -> 1.0f / (1.0f + 0.2316419f * (abs x)) @>
+        let k = <@ fun x -> 1.0f / (1.0f + 0.2316419f * (abs x)) @>
         let cnd = 
             <@ fun x ->          
                     1.0f - 1.0f / sqrt(2.0f * float32 System.Math.PI)
@@ -56,7 +56,7 @@ let main () =
                   / (volatility * sqrt timeToExpirationYears)
         @>
 
-    let D1 = d1.Compile()()
+    let D1 = d1.Compile()
 
     let d2 =
         <@
@@ -64,7 +64,7 @@ let main () =
                 d1 - volatility * sqrt timeToExpirationYears
         @>
 
-    let D2 = d2.Compile()()
+    let D2 = d2.Compile()
 
     let blackScholesCallOption =
         <@
@@ -73,7 +73,7 @@ let main () =
                 strikePrice * exp(-(riskFreeInterestRate) * timeToExpirationYears) * (%cumulativeNormalDistribution) d2
         @>
 
-    let BlackScholesCallOption = blackScholesCallOption.Compile()()
+    let BlackScholesCallOption = blackScholesCallOption.Compile()
 
     let blackScholesPutOption = 
         <@
@@ -81,7 +81,7 @@ let main () =
                 strikePrice * exp(-riskFreeInterestRate * timeToExpirationYears) * (%cumulativeNormalDistribution)(-d2) - stockPrice * (%cumulativeNormalDistribution)(-d1)        
         @>
 
-    let BlackScholesPutOption = blackScholesPutOption.Compile()()
+    let BlackScholesPutOption = blackScholesPutOption.Compile()
     
     let Main() =
         let platformName = "nvidia*"

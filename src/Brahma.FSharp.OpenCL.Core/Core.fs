@@ -17,7 +17,7 @@ module Brahma.FSharp.OpenCL.Core
 
 open Brahma.OpenCL
 open Microsoft.FSharp.Quotations
-open FSharpx.Linq.QuotationEvaluation
+open FSharp.Quotations.Evaluator
 open Brahma.FSharp.OpenCL
 open OpenCL.Net
 open System
@@ -84,7 +84,7 @@ type ComputeProvider with
                             run := kernel.Run(!rng, !args)
                         @@>
                     arr
-            let res = <@ %%(go qExpr []):'TRange ->'a @>.Compile()()
+            let res = <@ %%(go qExpr []):'TRange ->'a @>.Compile()
             
             res
                     
