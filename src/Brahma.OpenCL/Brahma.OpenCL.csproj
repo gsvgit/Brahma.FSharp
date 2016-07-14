@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Buffer.cs" />
-    <Compile Include="CLException.cs" />
+    <Compile Include="ClException.cs" />
     <Compile Include="CommandQueue.cs" />
     <Compile Include="ComputeProvider.cs" />
     <Compile Include="Kernel.cs" />
