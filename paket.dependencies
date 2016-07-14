@@ -1,7 +1,6 @@
 source https://nuget.org/api/v2
 
 nuget Argu
-nuget Brahma.FSharp 0.3.5.0
 nuget FSharp.Core redirects: force
 nuget FSharp.Quotations.Evaluator
 nuget FSharpx.Collections

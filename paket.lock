@@ -1,17 +1,10 @@
 NUGET
   remote: https://www.nuget.org/api/v2
     Argu (3.1)
-    Brahma.FSharp (0.3.5)
-      FSharpx.Core (1.8.41)
-      FSharpx.Text.StructuredFormat (1.8.41)
-      OpenCL.Net (2.2.9)
     FSharp.Core (4.0.0.1) - redirects: force
     FSharp.Quotations.Evaluator (1.0.7)
     FSharpx.Collections (1.15.1)
       FSharp.Core
-    FSharpx.Core (1.8.41)
-    FSharpx.Text.StructuredFormat (1.8.41)
-      FSharpx.Core (1.8.41)
     NuGet.CommandLine (3.4.3)
     NUnit (2.6.3)
     OpenCL.Net (2.2.9)
