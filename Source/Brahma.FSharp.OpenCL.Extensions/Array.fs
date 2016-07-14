@@ -22,10 +22,12 @@ open Brahma.OpenCL
 
 type ``[]``<'t> with
     member this.ToGpu(provider:ComputeProvider) =
-        new Brahma.OpenCL.Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,this.Length,this)
+        new Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>), true, 0, this.Length,this)
     member this.ToGpu(provider:ComputeProvider, hostArray:array<'t>) =
-        new Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,(min hostArray.Length this.Length),hostArray)
+        new Commands.WriteBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>), true, 0, (min hostArray.Length this.Length), hostArray)
     member this.ToHost(provider:ComputeProvider) =       
-        new Commands.ReadBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,this.Length,this)
+        new Commands.ReadBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>), true, 0, this.Length, this)
     member this.ToHost(provider:ComputeProvider, hostArray:array<'t>) =
-        new Commands.ReadBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>),true,0,(min hostArray.Length this.Length),hostArray)
+        new Commands.ReadBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>), true, 0, (min hostArray.Length this.Length), hostArray)
+    member this.ToHost(provider:ComputeProvider, hostArray:array<'t>, length) =
+        new Commands.ReadBuffer<'t>(provider.AutoconfiguredBuffers.[this], Marshal.SizeOf(typeof<'t>), true, 0, length, hostArray)

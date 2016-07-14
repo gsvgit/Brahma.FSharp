@@ -29,7 +29,7 @@ type TestStruct =
 [<TestFixture>]
 type Translator() =
     
-    let basePath = "../../../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
+    let basePath = "../../Tests/Brahma.FSharp.OpenCL/Translator/Expected/"
 
     let deviceType = DeviceType.Gpu
     let platformName = "NVIDIA*"

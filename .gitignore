@@ -17,3 +17,7 @@ Source/Fractals/FractalsGPU/packages/*
 
 _ReSharper.*
 packages
+RXExample/packages/*
+Source/agents_new/Agents/packages/*
+*.vspx
+**/packages/*
