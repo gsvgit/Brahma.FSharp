@@ -46,15 +46,13 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
     let rows = 200
     let columns = 200
     let localWorkSize = 2
-    //let iterations = 1
+    let iterations = 10
     let deviceType = DeviceType.Default
 
     let provider =
         try  ComputeProvider.Create(platformName, deviceType)
         with 
         | ex -> failwith ex.Message
-
-    //printfn "Using %A" provider
 
     let mutable commandQueue = new CommandQueue(provider, provider.Devices |> Seq.head)
 
@@ -73,48 +71,47 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
                 c.[ty * columns + tx] <- buf
         @>
 
-    //printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
+    printfn "Multiplying two %Ax%A matrices %A times using .NET..." rows columns iterations
     let cNormal = Array.zeroCreate (rows * columns)
-    //for i in 0 .. iterations - 1 do
-       // Timer<string>.Global.Start()
-    Multiply aValues rows columns bValues rows columns cNormal
-        //Timer<string>.Global.Lap(".NET")
+    for i in 0 .. iterations - 1 do
+        Timer<string>.Global.Start()
+        Multiply aValues rows columns bValues rows columns cNormal
+        Timer<string>.Global.Lap(".NET")
 
-    //printfn "done."
+    printfn "done."
 
-    //printfn "Multiplying two %Ax%A matrices %A times using OpenCL and selected platform/device..." rows columns iterations
+    printfn "Multiplying two %Ax%A matrices %A times using OpenCL and selected platform/device : %A ..." rows columns iterations provider
 
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
     kernelPrepare d aValues bValues cParallel
-         
-    let _ = commandQueue.Add(kernelRun()).Finish()            
+    
+    for i in 0 .. iterations - 1 do
+        Timer<string>.Global.Start()
+        let _ = commandQueue.Add(kernelRun()).Finish()            
+        Timer<string>.Global.Lap("OpenCL")
         
     let _ = commandQueue.Add(cParallel.ToHost provider).Finish()
     
-    //printfn "Verifying results..."
-    //let mutable isSuccess = true
-    //for i in 0 .. rows * columns - 1 do
-      //  if isSuccess && System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.00001f
-        //then
-          //  isSuccess <- false
-            //printfn "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))
-        
-            //printf "%A   " cParallel.[i]
+    printfn "Verifying results..."
+    let mutable isSuccess = true
+    for i in 0 .. rows * columns - 1 do
+        if isSuccess && System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.01f
+        then
+            isSuccess <- false
+            printfn "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))            
             
-    //rintfn "done."
+    printfn "done."
 
-    //Timer<string>.Global.Average(".NET") |> printfn "Avg. time, F#: %A"
-    //Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
+    Timer<string>.Global.Average(".NET") |> printfn "Avg. time, F#: %A"
+    Timer<string>.Global.Average("OpenCL") |> printfn "Avg. time, OpenCL: %A"
 
     commandQueue.Dispose()
     provider.Dispose()
     provider.CloseAllBuffers()
+            
 
-    //ignore (System.Console.Read())
-    cParallel
 
-//Main "NVIDIA*" [|1.0f; 0.0f; 0.0f; 1.0f|] [|1.0f; 1.0f; 1.0f; 1.0f|] 
-//Main "AMD*"
+//Main "AMD*" (MakeMatrix 200 200) (MakeMatrix 200 200) |> ignore
 
-Main "*" (MakeMatrix 200 200) (MakeMatrix 200 200) |> ignore
+Main "NVIDIA*" (MakeMatrix 200 200) (MakeMatrix 200 200) |> ignore
