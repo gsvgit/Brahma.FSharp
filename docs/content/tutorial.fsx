@@ -8,6 +8,7 @@
 
  * [Data transfer operations](reference/brahma-fsharp-opencl-extensions.html)
  * [Supported kernel operations](reference/global-opencl.html).
+ * Supported functions from System.Math and Microsoft.FSharp.Core.Operators: abs, acos, asin, atan, cos, cosh, exp, floor, log, log10, pow, sin, sinh, sqrt, tan, tanh
 
 
 ## Basic constructions.

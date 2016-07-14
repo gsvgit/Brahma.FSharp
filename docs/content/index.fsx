@@ -131,7 +131,12 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
 Main "NVIDIA*" (MakeMatrix 200 200) (MakeMatrix 200 200) |> ignore
 
 (**
-Some more info
+
+###Note
+
+Sometimes calculations could be interrupted buy GPU driver (OS) timeout (TDR). 
+For hot fix you can set TdrLevel registry key (KeyPath : HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers) value to 0. 
+If this key is not exists, then you should crete it. For more details look at ["TDR Registry Keys (Windows Drivers)"][tdr].
 
 Samples & documentation
 -----------------------
@@ -159,4 +164,5 @@ redistribution for both commercial and non-commercial purposes. For more informa
   [issues]: https://github.com/YaccConstructor/Brahma.FSharp/issues
   [readme]: https://github.com/YaccConstructor/Brahma.FSharp/blob/master/README.md
   [license]: https://github.com/YaccConstructor/Brahma.FSharp/blob/master/LICENSE.txt
+  [tdr]: https://msdn.microsoft.com/en-us/library/windows/hardware/ff569918(v=vs.85).aspx
 *)
