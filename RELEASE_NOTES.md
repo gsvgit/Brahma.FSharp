@@ -1,3 +1,3 @@
-### 1.0 - Unreleased
-* More awesome stuff coming
-* Added SourceLink for Source Indexing PDB
+### 1.0.0
+* FSharp.Core form NuGet
+* .NET 4.5 

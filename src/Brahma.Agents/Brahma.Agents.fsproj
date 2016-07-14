@@ -8,7 +8,7 @@
     <ProjectGuid>dfd428f8-3698-4ed4-9d08-09d4ead512d6</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Agents</RootNamespace>
-    <AssemblyName>Agents</AssemblyName>
+    <AssemblyName>Brahma.Agents</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>Brahma.Agents</Name>
     <TargetFrameworkProfile />
@@ -30,7 +30,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\Agents.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Brahma.Agents.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
