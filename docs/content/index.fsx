@@ -94,7 +94,9 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
 
     printfn "done."
 
-    printfn "Multiplying two %Ax%A matrices %A times using OpenCL and selected platform/device : %A ..." rows columns iterations provider
+    printfn 
+        "Multiplying two %Ax%A matrices %A times using OpenCL and selected platform/device : %A ..." 
+        rows columns iterations provider
 
     let kernel, kernelPrepare, kernelRun = provider.Compile command
     let d =(new _2D(rows, columns, localWorkSize, localWorkSize))
@@ -113,7 +115,9 @@ let Main platformName (m1: array<_>) (m2: array<_>) =
         if isSuccess && System.Math.Abs(float32 (cParallel.[i] - cNormal.[i])) > 0.01f
         then
             isSuccess <- false
-            printfn "Expected: %A Actual: %A Error = %A" cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))            
+            printfn 
+                "Expected: %A Actual: %A Error = %A" 
+                cNormal.[i] cParallel.[i] (System.Math.Abs(cParallel.[i] - cNormal.[i]))            
             
     printfn "done."
 
