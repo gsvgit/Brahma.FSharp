@@ -305,15 +305,15 @@ type Translator() =
     member this.``Math sin``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<float32>) ->
+                fun (range:_1D) (buf:array<float>) ->
                     let i = range.GlobalID0
-                    buf.[i] <- float32(System.Math.Sin (float buf.[i]))
+                    buf.[i] <- System.Math.Sin (float buf.[i])
             @>
         
         let run,check = checkResult command
-        let inA = [|0.0f;1.0f;2.0f;3.0f|]
+        let inA = [|0.0;1.0;2.0;3.0|]
         run _1d inA
-        check inA [|0.0f; 0.841471f; 0.9092974f; 0.14112f|]        
+        check inA (inA |> Array.map System.Math.Sin)  //[|0.0; 0.841471; 0.9092974; 0.14112|]        
 
     [<Test>]
     member this.``Int as arg``() = 
