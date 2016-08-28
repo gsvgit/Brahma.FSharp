@@ -1,5 +1,6 @@
 [![Issue Stats](http://issuestats.com/github/YaccConstructor/Brahma.FSharp/badge/issue)](http://issuestats.com/github/YaccConstructor/Brahma.FSharp)
 [![Issue Stats](http://issuestats.com/github/YaccConstructor/Brahma.FSharp/badge/pr)](http://issuestats.com/github/YaccConstructor/Brahma.FSharp)
+![Repository Size](https://reposs.herokuapp.com/?path=YaccConstructor/Brahma.FSharp)
 
 # Brahma.FSharp [![NuGet Status](http://img.shields.io/nuget/v/Brahma.FSharp.svg?style=flat)](https://www.nuget.org/packages/Brahma.FSharp/)
 
