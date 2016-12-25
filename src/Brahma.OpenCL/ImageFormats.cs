@@ -641,4 +641,28 @@ namespace Brahma.OpenCL
             }
         }
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ReadOnly: IImageModifier
+    {
+        public bool Modifier
+        {
+            get
+            {
+                return true;
+            }
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WriteOnly : IImageModifier
+    {
+        public bool Modifier
+        {
+            get
+            {
+                return false;
+            }
+        }
+    }
 }

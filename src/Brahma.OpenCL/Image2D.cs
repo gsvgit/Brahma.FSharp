@@ -12,6 +12,7 @@ namespace Brahma.OpenCL
         private readonly int _width;
         private readonly int _height;
         private readonly int _rowPitch = -1;
+        private bool _modifier = true;
 
         public Image2D(ComputeProvider provider, Operations operations, bool hostAccessible, int width, int height, int rowPitch = -1) // Create, no data
         {
@@ -27,6 +28,10 @@ namespace Brahma.OpenCL
             _width = width;
             _height = height;
             _rowPitch = rowPitch;
+            if ((MemFlags)operations == MemFlags.ReadOnly)
+                _modifier = true;
+            else
+                _modifier = false;
         }
 
         public Image2D(ComputeProvider provider, Operations operations, Memory memory, int width, int height, T[] data, int rowPitch = -1) // Create and copy/use data from host
@@ -43,6 +48,10 @@ namespace Brahma.OpenCL
             _width = width;
             _height = height;
             _rowPitch = rowPitch;
+            if ((MemFlags)operations == MemFlags.ReadOnly)
+                _modifier = true;
+            else
+                _modifier = false;
         }
 
         public int Width
@@ -66,6 +75,19 @@ namespace Brahma.OpenCL
             get
             {
                 return _rowPitch;
+            }
+        }
+
+        public bool Modifier
+        {
+            get
+            {
+                return _modifier;
+            }
+
+            set
+            {
+                _modifier = !_modifier;
             }
         }
     }

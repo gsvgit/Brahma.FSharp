@@ -32,4 +32,12 @@ namespace Brahma
             get;
         }
     }
+
+    public interface IImageModifier
+    {
+        bool Modifier
+        {
+            get;
+        }
+    }
 }
