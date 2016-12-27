@@ -67,6 +67,8 @@
     <Compile Include="ClException.cs" />
     <Compile Include="CommandQueue.cs" />
     <Compile Include="ComputeProvider.cs" />
+    <Compile Include="Image2D.cs" />
+    <Compile Include="ImageFormats.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="NDRange.cs" />
     <Compile Include="NDRangeDimension.cs" />

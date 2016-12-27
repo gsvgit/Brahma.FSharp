@@ -650,6 +650,14 @@ type Translator() =
             @>
         checkCode command "Template Test 16.gen" "Template Test 16.cl"
 
+     [<Test>]
+     member this.``Checking of Image2D``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (img:Image2D<ARGB<Float>>) (a:array<_>) ->
+                    a.[0] <- 1
+            @> 
+        checkCode command "Checking of Image2D.gen" "Checking of Image2D.cl"
 
 
 //[<EntryPoint>]

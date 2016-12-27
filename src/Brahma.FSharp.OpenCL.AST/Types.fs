@@ -48,6 +48,12 @@ type ArrayType<'lang>(baseType:Type<'lang>, size:int) =
     //override this.SpaceModifier = match spaceModeifier with Some x -> x | None -> Private
     member this.BaseType = baseType
 
+type Image2DType<'lang>(modifier:bool) =
+    inherit Type<'lang>()
+    override this.Size = 32
+    override this.Children = []
+    member this.Modifier = modifier
+
 [<Struct>]
 type StructField<'lang> =
     val FName: string

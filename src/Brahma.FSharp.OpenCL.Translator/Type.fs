@@ -37,6 +37,8 @@ let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,
             context.Flags.enableFP64 <- true
             PrimitiveType<Lang>(Double) :> Type<Lang>        
         | "unit" -> PrimitiveType<Lang>(Void) :> Type<Lang>
+        | "read_only image2D" -> Image2DType(true) :> Type<Lang>
+        | "write_only image2D" -> Image2DType(false) :> Type<Lang>
         | t when t.EndsWith "[]" ->
             let baseT = t.Substring(0,t.Length-2)
             if isKernelArg 

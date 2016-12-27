@@ -39,6 +39,10 @@ let rec Print<'lang> (_type:Type<'lang>) =
     | :? PrimitiveType<'lang> as pt -> printPrimitiveType pt
     | :? RefType<'lang> as rt ->  Print rt.BaseType ^^ wordL "*"
     | :? ArrayType<'lang> as art -> Print art.BaseType
+    | :? Image2DType<'lang> as imgt -> 
+            match imgt.Modifier with
+            | true -> wordL "read_only image2D"
+            | false -> wordL "write_only image2D"
     | :? StructType<'lang> as s -> wordL s.Declaration.Value.Name
     | t -> failwithf "Printer. Unsupported type: %A" t
 
