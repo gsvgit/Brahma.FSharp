@@ -33,4 +33,4 @@ let Print (ast:AST<'lang>) =
         |> aboveListL
     let result = StructuredFormat.Display.layout_to_string {StructuredFormat.FormatOptions.Default with PrintWidth=100} layout
     //printfn "%A" result
-    result
+    Brahma.FSharp.OpenCL.Translator.Type.tupleDecl + result

@@ -25,6 +25,7 @@ using System.Runtime.InteropServices;
 
 namespace Brahma.OpenCL.Commands
 {
+
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
         where TRange: struct, INDRangeDimension
     {
@@ -32,7 +33,43 @@ namespace Brahma.OpenCL.Commands
         private object curArgVal;
         private System.IntPtr curArgSize;
         private ICLKernel kernel;
+        private int _structMemSize = 0;
 
+       /* struct tuple
+        {
+            int x;
+            int y;
+            public tuple(int x1, int y1)
+            {
+                x = x1;
+                y = y1;
+            }
+        }
+
+        private void tupleToMem (object data)
+        {
+            var tp = (Tuple<int, int>)data;
+            var tp2 = new tuple(tp.Item1, tp.Item2);
+            if (kernel.Provider.AutoconfiguredBuffers.ContainsKey(tp2))
+            {
+                curArgVal = kernel.Provider.AutoconfiguredBuffers[tp2];
+            }
+            else
+            {
+
+                ErrorCode error;
+                var operations = Operations.ReadWrite;
+                var memory = Memory.Device;
+                curArgSize = (IntPtr)Marshal.SizeOf(tp2);
+                var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
+                    curArgSize, tp2, out error);
+                curArgVal = mem;
+                //mem.Pin();
+                kernel.Provider.AutoconfiguredBuffers.Add(tp2, (Mem)mem);
+                if (error != ErrorCode.Success)
+                    throw new CLException(error);
+            }
+        }*/
         private void ArrayToMem(object data, System.Type t)
         {
             curArgSize = _intPtrSize;
@@ -67,7 +104,8 @@ namespace Brahma.OpenCL.Commands
                 curArgSize = ((IMem)arg).Size;
                 curArgVal = ((IMem)arg).Data;
             }
-            else if (arg.GetType().ToString().EndsWith("[]")) ArrayToMem(arg, arg.GetType().GetElementType());            
+            else if (arg.GetType().ToString().EndsWith("[]")) ArrayToMem(arg, arg.GetType().GetElementType());
+            //else if (arg.GetType().ToString().Contains("uple")) tupleToMem(arg);
             else
             {
                 curArgSize = (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);
@@ -79,13 +117,14 @@ namespace Brahma.OpenCL.Commands
         public override void SetupArgument(object sender, int index, object arg)
         {
             kernel = Kernel as ICLKernel;
-            ToIMem(arg);            
-            ErrorCode error = 
+            ToIMem(arg);
+            ErrorCode error =
                     Cl.SetKernelArg(kernel.ClKernel, (uint)index
                     , curArgSize
                     , curArgVal);
             if (error != ErrorCode.Success)
                 throw new CLException(error);
+            
         }
         
         protected RunBase(IKernel kernel, TRange range)
