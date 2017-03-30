@@ -25,6 +25,13 @@ using System.Runtime.InteropServices;
 
 namespace Brahma.OpenCL.Commands
 {
+    static class CompareTuple
+    {
+        public static bool Compare<T1, T2>(this Tuple<T1, T2> value, T1 v1, T2 v2)
+        {
+            return value.Item1.Equals(v1) && value.Item2.Equals(v2);
+        }
+    }
 
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
         where TRange: struct, INDRangeDimension
@@ -34,42 +41,38 @@ namespace Brahma.OpenCL.Commands
         private System.IntPtr curArgSize;
         private ICLKernel kernel;
         private int _structMemSize = 0;
+        private System.Reflection.PropertyInfo[] _props;
 
-       /* struct tuple
+        struct t2<T1, T2>
         {
-            int x;
-            int y;
-            public tuple(int x1, int y1)
+            T1 fst;
+            T2 snd;
+            public t2(T1 x, T2 y)
             {
-                x = x1;
-                y = y1;
+                fst = x;
+                snd = y;
             }
         }
 
         private void tupleToMem (object data)
         {
-            var tp = (Tuple<int, int>)data;
-            var tp2 = new tuple(tp.Item1, tp.Item2);
-            if (kernel.Provider.AutoconfiguredBuffers.ContainsKey(tp2))
-            {
-                curArgVal = kernel.Provider.AutoconfiguredBuffers[tp2];
-            }
-            else
-            {
+             _props = data.GetType().GetProperties();
 
-                ErrorCode error;
-                var operations = Operations.ReadWrite;
-                var memory = Memory.Device;
-                curArgSize = (IntPtr)Marshal.SizeOf(tp2);
-                var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
-                    curArgSize, tp2, out error);
-                curArgVal = mem;
-                //mem.Pin();
-                kernel.Provider.AutoconfiguredBuffers.Add(tp2, (Mem)mem);
-                if (error != ErrorCode.Success)
-                    throw new CLException(error);
+            if (_props.Length == 2) 
+            {
+                var a = data.GetType().GetProperties()[0].PropertyType;
+                var b = data.GetType().GetProperties()[1].PropertyType;
+                var tupleArgs = data.ToString().Substring(1, data.ToString().Length - 2).Split(',');
+                var ab = new Tuple<string, string>(a.Name,b.Name);
+
+                if (ab.Compare("Int32", "Int32")) 
+                {
+                    var tupleStruct = new t2<int, int>(Convert.ToInt32(tupleArgs[0]), Convert.ToInt32(tupleArgs[1]));
+                    ToIMem(tupleStruct);
+                }
             }
-        }*/
+            
+        }
         private void ArrayToMem(object data, System.Type t)
         {
             curArgSize = _intPtrSize;
@@ -105,7 +108,7 @@ namespace Brahma.OpenCL.Commands
                 curArgVal = ((IMem)arg).Data;
             }
             else if (arg.GetType().ToString().EndsWith("[]")) ArrayToMem(arg, arg.GetType().GetElementType());
-            //else if (arg.GetType().ToString().Contains("uple")) tupleToMem(arg);
+            else if (arg.GetType().ToString().Contains("System.Tuple")) tupleToMem(arg);
             else
             {
                 curArgSize = (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);

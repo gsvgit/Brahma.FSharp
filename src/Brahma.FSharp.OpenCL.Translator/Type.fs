@@ -20,10 +20,37 @@ open System.Reflection
 open Microsoft.FSharp.Collections
 open Microsoft.FSharp.Quotations
 
+let printElementType (_type: string) =
+    let pType = 
+        match _type.ToLowerInvariant() with
+        | "int"| "int32" -> PrimitiveType<Lang>(Int) 
+        | "int16" -> PrimitiveType<Lang>(Short)
+        | "uint16" -> PrimitiveType<Lang>(UShort)
+        | "uint32" -> PrimitiveType<Lang>(UInt) 
+        | "float32" | "single"-> PrimitiveType<Lang>(Float) 
+        | "byte" -> PrimitiveType<Lang>(UChar) 
+        | "int64" -> PrimitiveType<Lang>(Long)
+        | "uint64" -> PrimitiveType<Lang>(ULong) 
+        | "boolean" -> PrimitiveType<Lang>(Int) 
+        | "float" | "double" -> PrimitiveType<Lang>(Double)  
+            //context.Flags.enableFP64 <- true     
+        | x -> "Unsuported tuple type: " + x |> failwith
+    match pType.Type with
+    //| Char -> "char"
+    | UChar -> "uchar"
+    | Short -> "short"
+    | UShort -> "ushort"
+    | Int -> "int"
+    | UInt -> "uint"
+    | Float -> "float"
+    | Long -> "long"
+    | ULong -> "ulong"
+    | Double -> "double"
+    | x -> "Unsuported tuple type: " + x.ToString() |> failwith
 
 let mutable tupleDecl = ""
 let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) : Type<Lang> =
-    let rec go (str:string) =
+    let rec go (str:string)=
         let mutable low = str.ToLowerInvariant()
         //let mutable tupleDecl = ""
         match low with
@@ -48,7 +75,7 @@ let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,
             then RefType<_>(go baseT) :> Type<Lang>
             else ArrayType<_>(go baseT, size |> Option.get) :> Type<Lang>
         | s when s.StartsWith "fsharpref" ->
-            go (_type.GetGenericArguments().[0].Name)
+            go (_type.GetGenericArguments().[0].Name) 
         | f when f.StartsWith "fsharpfunc" ->
 //            go (_type.GetGenericArguments().[1].Name)
             Translate (_type.GetGenericArguments().[1]) isKernelArg size context
@@ -60,7 +87,7 @@ let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,
              let el2 = new StructField<'lang> ("snd", go baseT2)
              let a = new Struct<Lang>("tuple", [el1; el2])
              let decl = Some a
-             tupleDecl <- "typedef struct tuple {int x; int y;} tuple;"
+             tupleDecl <- "typedef struct tuple {" + printElementType baseT1 + " fst; " + printElementType baseT2 + " snd;} tuple;"
              TupleType<_>(StructType(decl)) :> Type<Lang>
 
         | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)
