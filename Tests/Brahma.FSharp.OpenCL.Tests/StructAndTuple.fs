@@ -34,6 +34,7 @@ type c =
     val x: int 
     val y: int
     new (x1, y1) = {x = x1; y = y1} 
+    new (x1) = {x = x1; y = 0}
 
 [<Struct>]
 type d =
@@ -69,7 +70,7 @@ type Translator() =
         kernelPrepareF,check
     
     [<Test>]
-    member this.``truct int int``() = 
+    member this.``struct int int``() = 
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (s:a)  -> 
@@ -80,6 +81,19 @@ type Translator() =
         let run1,check1 = checkResult command
         run1 _1d intInArr s      
         check1 intInArr [|1;1;2;3|]
+   
+    [<Test>]
+    member this.``Struct int byte``() = 
+        let command = 
+            <@ 
+                fun(range:_1D) (buf:array<int>) (s:b) -> 
+                    buf.[0] <- s.x
+            
+            @>
+        let s = new b(1, 86uy)
+        let run,check = checkResult command
+        run _1d intInArr s        
+        check intInArr [|1;1;2;3|]
 
     [<Test>]
     member this.``newstruct``() = 
@@ -124,30 +138,19 @@ type Translator() =
         check intInArr [|2;1;2;3|]
 
     [<Test>]
-    member this.``Struct not mutable``() = 
+    member this.``Struct with 2 constructors``() = 
         let command = 
             <@ 
                 fun(range:_1D) (buf:array<int>) (s:c) -> 
                     buf.[0] <- s.x + s.y
+                    let s2 = new c(6)
+                    buf.[1] <- s2.x
             
             @>
         let s = new c(2, 3)
         let run,check = checkResult command
         run _1d intInArr s        
-        check intInArr [|5;1;2;3|]
-
-    [<Test>]
-    member this.``Struct int byte``() = 
-        let command = 
-            <@ 
-                fun(range:_1D) (buf:array<int>) (s:b) -> 
-                    buf.[0] <- s.x
-            
-            @>
-        let s = new b(1, 86uy)
-        let run,check = checkResult command
-        run _1d intInArr s        
-        check intInArr [|1;1;2;3|]
+        check intInArr [|5;6;2;3|]
 
     [<Test>]
     member this.``Struct with arr``() = //doesn't work
@@ -163,7 +166,7 @@ type Translator() =
         check intInArr [|1;1;2;3|]
 
     [<Test>]
-    member this.``tuple``() = //doesn't work
+    member this.``some useless tuples``() = 
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (s:int*int) -> 
@@ -172,3 +175,5 @@ type Translator() =
         let run,check = checkResult command
         run _1d intInArr (1,2)     
         check intInArr [|1;1;2;3|]
+
+
