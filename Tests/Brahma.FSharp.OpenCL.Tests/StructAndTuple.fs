@@ -19,11 +19,9 @@ open Brahma.FSharp.OpenCL.Extensions
 
 [<Struct>]
 type a = 
-    struct
         val mutable x: int 
         val mutable y: int     
         new (x1, y1) = {x = x1; y = y1}
-    end
 
 [<Struct>]
 type b = 
@@ -97,6 +95,20 @@ type Translator() =
         check intInArr [|1;1;2;3|]
 
     [<Test>]
+    member this.``change field``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>)  -> 
+                let mutable s = new a(1, 2)
+                s.x <- 6
+                buf.[0] <- s.x
+            @>
+
+        let run,check = checkResult command
+        run _1d intInArr      
+        check intInArr [|6;1;2;3|]
+
+    [<Test>]
     member this.``arr of structs``() = 
         let command = 
             <@ 
@@ -151,7 +163,7 @@ type Translator() =
         check intInArr [|1;1;2;3|]
 
     [<Test>]
-    member this.``tuple``() = 
+    member this.``tuple``() = //doesn't work
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (s:int*int) -> 
