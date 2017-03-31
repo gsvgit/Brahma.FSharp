@@ -144,6 +144,8 @@ type Translator() =
                 fun(range:_1D) (buf:array<int>) (s:c) -> 
                     buf.[0] <- s.x + s.y
                     let s2 = new c(6)
+                    let s3 = new c(s2.y + 6)
+                   // let z = (new c(6)).x + 4
                     buf.[1] <- s2.x
             
             @>
@@ -166,14 +168,15 @@ type Translator() =
         check intInArr [|1;1;2;3|]
 
     [<Test>]
-    member this.``some useless tuples``() = 
+    member this.``some tuples``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) (s:int*int) -> 
+                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2: int64*byte)  (k3: float32*int) -> 
                     buf.[0] <- 1
             @>
+        let s = new c(2)
         let run,check = checkResult command
-        run _1d intInArr (1,2)     
+        run _1d intInArr (1,2) (4294967297L, 4uy) (float32(0),9)
         check intInArr [|1;1;2;3|]
 
 

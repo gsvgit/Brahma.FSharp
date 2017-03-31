@@ -31,7 +31,7 @@ let printElementType (_type: string) =
         | "byte" -> PrimitiveType<Lang>(UChar) 
         | "int64" -> PrimitiveType<Lang>(Long)
         | "uint64" -> PrimitiveType<Lang>(ULong) 
-        | "boolean" -> PrimitiveType<Lang>(Int) 
+       // | "boolean" -> PrimitiveType<Lang>(Int)
         | "float" | "double" -> PrimitiveType<Lang>(Double)  
             //context.Flags.enableFP64 <- true     
         | x -> "Unsuported tuple type: " + x |> failwith
@@ -48,6 +48,7 @@ let printElementType (_type: string) =
     | Double -> "double"
     | x -> "Unsuported tuple type: " + x.ToString() |> failwith
 
+let mutable tupleNumber = 0
 let mutable tupleDecl = ""
 let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,_>) : Type<Lang> =
     let rec go (str:string)=
@@ -87,8 +88,9 @@ let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,
              let el2 = new StructField<'lang> ("snd", go baseT2)
              let a = new Struct<Lang>("tuple", [el1; el2])
              let decl = Some a
-             tupleDecl <- "typedef struct tuple {" + printElementType baseT1 + " fst; " + printElementType baseT2 + " snd;} tuple;"
-             TupleType<_>(StructType(decl)) :> Type<Lang>
+             tupleNumber <- tupleNumber + 1
+             tupleDecl <- tupleDecl + " typedef struct tuple"+ tupleNumber.ToString() + " {" + printElementType baseT1 + " fst; " + printElementType baseT2 + " snd;} tuple"+ tupleNumber.ToString() + ";"
+             TupleType<_>(StructType(decl), tupleNumber) :> Type<Lang>
 
         | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)
             -> 

@@ -54,24 +54,24 @@ namespace Brahma.OpenCL.Commands
             }
         }
 
-        private void tupleToMem (object data)
+        private void tupleToMem(object data)
         {
-             _props = data.GetType().GetProperties();
+            _props = data.GetType().GetProperties();
 
-            if (_props.Length == 2) 
+            if (_props.Length == 2)
             {
                 var a = data.GetType().GetProperties()[0].PropertyType;
                 var b = data.GetType().GetProperties()[1].PropertyType;
                 var tupleArgs = data.ToString().Substring(1, data.ToString().Length - 2).Split(',');
-                var ab = new Tuple<string, string>(a.Name,b.Name);
 
-                if (ab.Compare("Int32", "Int32")) 
-                {
-                    var tupleStruct = new t2<int, int>(Convert.ToInt32(tupleArgs[0]), Convert.ToInt32(tupleArgs[1]));
-                    ToIMem(tupleStruct);
-                }
+                Type d1 = typeof(t2<,>);
+                Type[] typeArgs = { typeof(TRange), a, b };
+                Type makeme = d1.MakeGenericType(typeArgs);
+                var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], a), Convert.ChangeType(tupleArgs[1], b) });
+
+                ToIMem(tupleStruct);
             }
-            
+
         }
         private void ArrayToMem(object data, System.Type t)
         {
