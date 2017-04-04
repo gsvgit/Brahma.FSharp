@@ -101,7 +101,7 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
     | "touint64"               -> new Cast<_>( args.[0],new PrimitiveType<_>(PTypes<_>.ULong)):> Statement<_>,tContext
     | "acos" | "asin" | "atan"
     | "cos" | "cosh" | "exp"
-    | "floor" | "log" | "log10"
+    | "floor" | "log" | "log10" 
     | "pow" | "sin" | "sinh" | "sqrt"
     | "tan" | "tanh" as fName ->
         if mInfo.DeclaringType.AssemblyQualifiedName.StartsWith("System.Math")
@@ -136,6 +136,8 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
             | :? Const<Lang> as c -> int c.Val
             | other -> failwithf "Calling Array.zeroCreate with a non-const argument: %A" other
         new ZeroArray<_>(length) :> Statement<_>, tContext
+    | "fst" -> new FieldGet<_>(args.[0],"fst") :> Statement<_>,tContext 
+    | "snd" -> new FieldGet<_>(args.[0],"snd") :> Statement<_>,tContext  
     | c -> failwithf "Unsupporte call: %s" c
 
 and private itemHelper exprs hostVar tContext =
@@ -415,7 +417,16 @@ and Translate expr (targetContext:TargetContext<_,_>) =
             res :> Node<_>,targetContext
         else "NewObject is not suported:" + string expr|> failwith
     | Patterns.NewRecord(sType,exprs) -> "NewRecord is not suported:" + string expr|> failwith
-    | Patterns.NewTuple(exprs) -> "NewTuple is not suported:" + string expr|> failwith
+    | Patterns.NewTuple(exprs) ->
+        let baseT1 = exprs.[0].Type
+        let baseT2 = exprs.[1].Type
+        let el1 = new StructField<'lang> ("fst", Type.Translate baseT1 false None targetContext)
+        let el2 = new StructField<'lang> ("snd", Type.Translate baseT2 false None targetContext)
+        let structInfo = new Struct<Lang>("tuple", [el1; el2])   
+        let cArgs = exprs |> List.map (fun x -> TranslateAsExpr x targetContext) 
+        let res = new NewStruct<_>(structInfo,cArgs |> List.unzip |> fst)
+        res :> Node<_>,targetContext    
+       // "NewTuple is not suported:" + string expr|> failwith
     | Patterns.NewUnionCase(unionCaseinfo,exprs) -> "NewUnionCase is not suported:" + string expr|> failwith
     | Patterns.PropertyGet(exprOpt,propInfo,exprs) -> 
         let res, tContext = transletaPropGet exprOpt propInfo exprs targetContext

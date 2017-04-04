@@ -24,7 +24,7 @@ type FSQuotationToOpenCLTranslator() =
    
     let CollectStructs e =
         let escapeNames = [|"_1D";"_2D";"_3D"|]
-        let structs = new System.Collections.Generic.Dictionary<System.Type, _> () 
+        let structs = new System.Collections.Generic.Dictionary<System.Type, _> ()
         let  add (t:System.Type) =
             if ((t.IsValueType && not t.IsPrimitive && not t.IsEnum)) && not (structs.ContainsKey t) 
                && not (Array.exists ((=)t.Name) escapeNames )
@@ -102,7 +102,8 @@ type FSQuotationToOpenCLTranslator() =
                 varsList.[i] |> List.filter (fun (v:Var) -> bdts |> List.exists((=) (v.Type.FullName.ToLowerInvariant())) |> not)
                 |> List.map 
                     (fun v -> 
-                        let t = Type.Translate v.Type true None (contextList.[i])
+                       
+                        let t = Type.Translate v.Type true None (contextList.[i]) 
                         new FunFormalArg<_>(t :? RefType<_> , v.Name, t))
             let nameFun:Var = ((newAST.[i]).FunVar)
             let mutable retFunType = new PrimitiveType<_>(Void) :> Type<_>
@@ -147,6 +148,7 @@ type FSQuotationToOpenCLTranslator() =
                         c.UserDefinedTypes.AddRange context.UserDefinedTypes
                         c.UserDefinedTypesOpenCLDeclaration.Clear()
                         for x in context.UserDefinedTypesOpenCLDeclaration do c.UserDefinedTypesOpenCLDeclaration.Add (x.Key,x.Value)
+
                         c.Flags.enableFP64 <- context.Flags.enableFP64
                         c.Namer.LetIn()
                         c.TranslatorOptions.AddRange translatorOptions
