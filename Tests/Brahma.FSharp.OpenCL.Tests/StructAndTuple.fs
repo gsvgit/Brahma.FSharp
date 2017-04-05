@@ -171,21 +171,23 @@ type Translator() =
     member this.``some tuples``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2: int64*byte)  (k3: float32*int) -> 
+                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2: int64*byte)  (k3: float32*int) (k4: int*byte*byte*int) -> 
                     let x = fst k1
                     buf.[0] <- x
+                    buf.[1] <- int(fst k3)
             @>
         let s = new c(2)
         let run,check = checkResult command
-        run _1d intInArr (10,2) (4294967297L, 4uy) (float32(0),9)
-        check intInArr [|10;1;2;3|]
+        run _1d intInArr (10, 2) (4294967297L, 4uy) (float32(0), 9) (1, 3uy, 2uy, 4)
+        check intInArr [|10;0;2;3|]
+
 
     [<Test>]
-    member this.``fst,snd and new tuple``() = 
+    member this.``fst, snd and new tuple``() = 
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (k:int*int)  -> 
-                    let k2 = (3,8)
+                    let k2 = (3, 8)
                     let x = fst k
                     let y = snd k
                     buf.[0] <- x
@@ -194,6 +196,6 @@ type Translator() =
             @>
         let s = new c(2)
         let run,check = checkResult command
-        run _1d intInArr (10,20) 
+        run _1d intInArr (10, 20) 
         check intInArr [|10;20;11;3|]
 

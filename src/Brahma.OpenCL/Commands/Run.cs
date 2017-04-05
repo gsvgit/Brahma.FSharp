@@ -34,7 +34,7 @@ namespace Brahma.OpenCL.Commands
     }
 
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
-        where TRange: struct, INDRangeDimension
+        where TRange : struct, INDRangeDimension
     {
         private static readonly IntPtr _intPtrSize = (IntPtr)Marshal.SizeOf(typeof(IntPtr));
         private object curArgVal;
@@ -53,25 +53,41 @@ namespace Brahma.OpenCL.Commands
                 snd = y;
             }
         }
-
+        struct t3<T1, T2, T3>
+        {
+            T1 fst;
+            T2 snd;
+            T3 thd;
+            public t3(T1 x, T2 y, T3 z)
+            {
+                fst = x;
+                snd = y;
+                thd = z;
+            }
+        }
         private void tupleToMem(object data)
         {
             _props = data.GetType().GetProperties();
-
+            var _types = new System.Type[_props.Length];
+            for (int i = 0; i < _props.Length; i++) { _types[i] = _props[i].PropertyType; }
+            var tupleArgs = data.ToString().Substring(1, data.ToString().Length - 2).Split(',');
             if (_props.Length == 2)
             {
-                var a = data.GetType().GetProperties()[0].PropertyType;
-                var b = data.GetType().GetProperties()[1].PropertyType;
-                var tupleArgs = data.ToString().Substring(1, data.ToString().Length - 2).Split(',');
-
                 Type d1 = typeof(t2<,>);
-                Type[] typeArgs = { typeof(TRange), a, b };
+                Type[] typeArgs = { typeof(TRange), _types[0], _types[1] };
                 Type makeme = d1.MakeGenericType(typeArgs);
-                var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], a), Convert.ChangeType(tupleArgs[1], b) });
-
+                var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]) });
                 ToIMem(tupleStruct);
             }
 
+            if (_props.Length == 3)
+            {
+                Type d1 = typeof(t3<,,>);
+                Type[] typeArgs = { typeof(TRange), _types[0], _types[1], _types[2] };
+                Type makeme = d1.MakeGenericType(typeArgs);
+                var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]), Convert.ChangeType(tupleArgs[1], _types[2]) });
+                ToIMem(tupleStruct);
+            }
         }
         private void ArrayToMem(object data, System.Type t)
         {
@@ -93,7 +109,7 @@ namespace Brahma.OpenCL.Commands
                 kernel.Provider.AutoconfiguredBuffers.Add(data, (Mem)mem);
                 if (error != ErrorCode.Success)
                     throw new CLException(error);
-            }                        
+            }
         }
 
         private void ToIMem(object arg)
@@ -127,9 +143,9 @@ namespace Brahma.OpenCL.Commands
                     , curArgVal);
             if (error != ErrorCode.Success)
                 throw new CLException(error);
-            
+
         }
-        
+
         protected RunBase(IKernel kernel, TRange range)
             : base(kernel, range)
         {
@@ -160,8 +176,8 @@ namespace Brahma.OpenCL.Commands
         }
     }
 
-    public sealed class Run<TRange>: RunBase<TRange>, ICommand<TRange>
-        where TRange: struct, INDRangeDimension
+    public sealed class Run<TRange> : RunBase<TRange>, ICommand<TRange>
+        where TRange : struct, INDRangeDimension
     {
         protected override IEnumerable<object> Arguments
         {
@@ -170,11 +186,11 @@ namespace Brahma.OpenCL.Commands
                 return args;
             }
         }
-        
+
         public Run(IKernel kernel, TRange range)
             : base(kernel, range)
         {
-                
+
         }
 
         public object[] args
