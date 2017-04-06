@@ -31,7 +31,7 @@ let printElementType (_type: string) =
         | "byte" -> PrimitiveType<Lang>(UChar) 
         | "int64" -> PrimitiveType<Lang>(Long)
         | "uint64" -> PrimitiveType<Lang>(ULong) 
-       // | "boolean" -> PrimitiveType<Lang>(Int)
+        | "boolean" -> PrimitiveType<Lang>(Int)
         | "float" | "double" -> PrimitiveType<Lang>(Double)  
             //context.Flags.enableFP64 <- true     
         | x -> "Unsuported tuple type: " + x |> failwith
@@ -81,15 +81,19 @@ let rec Translate (_type:System.Type) isKernelArg size (context:TargetContext<_,
 //            go (_type.GetGenericArguments().[1].Name)
             Translate (_type.GetGenericArguments().[1]) isKernelArg size context
         | tp when tp.Contains ("tuple") ->
-             let types = _type.UnderlyingSystemType.ToString().Substring(15, _type.UnderlyingSystemType.ToString().Length - 16).Split(',')
+             let types =
+                if _type.Name.EndsWith("[]") then  _type.UnderlyingSystemType.ToString().Substring(15, _type.UnderlyingSystemType.ToString().Length - 18).Split(',')
+                else _type.UnderlyingSystemType.ToString().Substring(15, _type.UnderlyingSystemType.ToString().Length - 16).Split(',')
              let baseT1 = types.[0].Substring(7)
              let baseT2 = types.[1].Substring(7)
              let el1 = new StructField<'lang> ("fst", go baseT1)
              let el2 = new StructField<'lang> ("snd", go baseT2)
              let a = new Struct<Lang>("tuple", [el1; el2])
              let decl = Some a
-             tupleNumber <- tupleNumber + 1
-             tupleDecl <- tupleDecl + " typedef struct tuple"+ tupleNumber.ToString() + " {" + printElementType baseT1 + " fst; " + printElementType baseT2 + " snd;} tuple"+ tupleNumber.ToString() + ";"
+             if not (tupleDecl.Contains(printElementType baseT1 + " fst; " + printElementType baseT2)) then
+                tupleNumber <- tupleNumber + 1
+                context.UserDefinedTypesOpenCLDeclaration.Add("tuple"+ tupleNumber.ToString(), a)
+                tupleDecl <- tupleDecl + " typedef struct tuple"+ tupleNumber.ToString() + " {" + printElementType baseT1 + " fst; " + printElementType baseT2 + " snd;} tuple"+ tupleNumber.ToString() + ";"
              TupleType<_>(StructType(decl), tupleNumber) :> Type<Lang>
 
         | x when context.UserDefinedTypes.Exists(fun t -> t.Name.ToLowerInvariant() = x)

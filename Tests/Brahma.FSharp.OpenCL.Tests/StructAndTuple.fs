@@ -42,6 +42,12 @@ type d =
     val y: int[]
     new (x1, y1) = {x = x1; y = y1}
 
+[<Struct>]
+type e =
+    val x: int 
+    val y: bool
+    new (x1, y1) = {x = x1; y = y1}
+
 [<TestFixture>]
 type Translator() =
     let defaultInArrayLength = 4
@@ -70,30 +76,32 @@ type Translator() =
         kernelPrepareF,check
     
     [<Test>]
-    member this.``struct int int``() = 
+    member this.``some structs``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) (s:a)  -> 
+                fun (range:_1D) (buf:array<int>) (s1:a) (s2:b)  -> 
+                    buf.[0] <- s1.x
+                    buf.[1] <- s2.x
+            @>
+
+        let s1 = new a(1, 1)
+        let s2 = new b(2, 86uy)
+        let run1,check1 = checkResult command
+        run1 _1d intInArr s1 s2      
+        check1 intInArr [|1;2;2;3|]
+
+    [<Test>]
+    member this.``struct int bool``() = //doesn't work
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) (s:e)  -> 
                     buf.[0] <- s.x
             @>
 
-        let s = new a(1, 1)
+        let s = new e(1, true)
         let run1,check1 = checkResult command
         run1 _1d intInArr s      
         check1 intInArr [|1;1;2;3|]
-   
-    [<Test>]
-    member this.``Struct int byte``() = 
-        let command = 
-            <@ 
-                fun(range:_1D) (buf:array<int>) (s:b) -> 
-                    buf.[0] <- s.x
-            
-            @>
-        let s = new b(1, 86uy)
-        let run,check = checkResult command
-        run _1d intInArr s        
-        check intInArr [|1;1;2;3|]
 
     [<Test>]
     member this.``newstruct``() = 
@@ -145,13 +153,25 @@ type Translator() =
                     buf.[0] <- s.x + s.y
                     let s2 = new c(6)
                     let s3 = new c(s2.y + 6)
-                   // let z = (new c(6)).x + 4
                     buf.[1] <- s2.x
             
             @>
         let s = new c(2, 3)
         let run,check = checkResult command
         run _1d intInArr s        
+        check intInArr [|5;6;2;3|]
+
+    [<Test>]
+    member this.``constructor``() = //doesn't work
+        let command = 
+            <@ 
+                fun(range:_1D) (buf:array<int>)  -> 
+                    let z = (new c(6)).x + 4
+                    buf.[1] <- z
+            
+            @>
+        let run,check = checkResult command
+        run _1d intInArr         
         check intInArr [|5;6;2;3|]
 
     [<Test>]
@@ -171,14 +191,13 @@ type Translator() =
     member this.``some tuples``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2: int64*byte)  (k3: float32*int) (k4: int*byte*byte*int) -> 
+                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2: int64*byte)  (k3: float32*int) -> 
                     let x = fst k1
                     buf.[0] <- x
                     buf.[1] <- int(fst k3)
             @>
-        let s = new c(2)
         let run,check = checkResult command
-        run _1d intInArr (10, 2) (4294967297L, 4uy) (float32(0), 9) (1, 3uy, 2uy, 4)
+        run _1d intInArr (10, 2) (4294967297L, 4uy) (float32(0), 9) 
         check intInArr [|10;0;2;3|]
 
 
@@ -199,3 +218,17 @@ type Translator() =
         run _1d intInArr (10, 20) 
         check intInArr [|10;20;11;3|]
 
+    [<Test>]
+    member this.``arr of tuples``() = //only for int 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2:int*int) (arr:array<int*int>)  -> 
+                    let k3 = (5, 6)
+                    arr.[0] <- k1
+                    arr.[1] <- k2
+                    arr.[2] <- k3
+                    buf.[0] <- fst (arr.[0]) + snd (arr.[2])
+            @>
+        let run,check = checkResult command
+        run _1d intInArr (1,2) (3,4) [|(0,0);(0,0);(0,0)|]
+        check intInArr [|7;1;2;3|]

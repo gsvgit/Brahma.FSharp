@@ -65,7 +65,7 @@ namespace Brahma.OpenCL.Commands
                 thd = z;
             }
         }
-        private void tupleToMem(object data)
+        private object tupleToMem(object data)
         {
             _props = data.GetType().GetProperties();
             var _types = new System.Type[_props.Length];
@@ -77,7 +77,7 @@ namespace Brahma.OpenCL.Commands
                 Type[] typeArgs = { typeof(TRange), _types[0], _types[1] };
                 Type makeme = d1.MakeGenericType(typeArgs);
                 var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]) });
-                ToIMem(tupleStruct);
+                return tupleStruct;
             }
 
             if (_props.Length == 3)
@@ -86,8 +86,9 @@ namespace Brahma.OpenCL.Commands
                 Type[] typeArgs = { typeof(TRange), _types[0], _types[1], _types[2] };
                 Type makeme = d1.MakeGenericType(typeArgs);
                 var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]), Convert.ChangeType(tupleArgs[1], _types[2]) });
-                ToIMem(tupleStruct);
+                return tupleStruct;
             }
+            else return null;
         }
         private void ArrayToMem(object data, System.Type t)
         {
@@ -101,7 +102,15 @@ namespace Brahma.OpenCL.Commands
                 ErrorCode error;
                 var operations = Operations.ReadWrite;
                 var memory = Memory.Device;
-                var _elementSize = Marshal.SizeOf(t);
+                var _elementSize = 0;
+                if (t.Name.Contains("Tuple")) //not done
+                {
+                    var data2 = new t2<int,int>[((Array)data).Length];
+                    for (int i = 0; i < ((Array)data).Length; i++) { data2.SetValue(tupleToMem(((Array)data).GetValue(i)), i); }
+                    data = data2;
+                    _elementSize = Marshal.SizeOf(data2.GetValue(0));
+                }
+                else _elementSize = Marshal.SizeOf(t);
                 var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
                     (IntPtr)(_elementSize * ((Array)data).Length), data, out error);
                 curArgVal = mem;
@@ -124,7 +133,7 @@ namespace Brahma.OpenCL.Commands
                 curArgVal = ((IMem)arg).Data;
             }
             else if (arg.GetType().ToString().EndsWith("[]")) ArrayToMem(arg, arg.GetType().GetElementType());
-            else if (arg.GetType().ToString().Contains("System.Tuple")) tupleToMem(arg);
+            else if (arg.GetType().ToString().Contains("System.Tuple")) ToIMem(tupleToMem(arg));
             else
             {
                 curArgSize = (System.IntPtr)System.Runtime.InteropServices.Marshal.SizeOf(arg);
