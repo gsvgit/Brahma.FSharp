@@ -219,16 +219,29 @@ type Translator() =
         check intInArr [|10;20;11;3|]
 
     [<Test>]
-    member this.``arr of tuples``() = //only for int 
+    member this.``arr of tuples``() = 
         let command = 
             <@ 
-                fun (range:_1D) (buf:array<int>) (k1:int*int) (k2:int*int) (arr:array<int*int>)  -> 
-                    let k3 = (5, 6)
+                fun (range:_1D) (buf:array<int>) (k1:int*int) (arr:array<int*int>)  -> 
+                    let k2 = (5, 6)
                     arr.[0] <- k1
                     arr.[1] <- k2
-                    arr.[2] <- k3
-                    buf.[0] <- fst (arr.[0]) + snd (arr.[2])
+                    buf.[0] <- fst (arr.[0]) + snd (arr.[1]) + snd (arr.[2])
             @>
         let run,check = checkResult command
-        run _1d intInArr (1,2) (3,4) [|(0,0);(0,0);(0,0)|]
-        check intInArr [|7;1;2;3|]
+        run _1d intInArr (1,2) [|(1,2);(3,4);(5,6)|]
+        check intInArr [|13;1;2;3|]
+
+   (* [<Test>]
+    member this.``triple``() = 
+        let command = 
+            <@ 
+                fun (range:_1D) (buf:array<int>) (k:int*int*int)  -> 
+                    buf.[0] <- TupleFunctions.Triple.first k
+                   // buf.[1] <- TupleFunctions.Triple.second k
+                   // buf.[2] <- TupleFunctions.Triple.third k
+
+            @>
+        let run,check = checkResult command
+        run _1d intInArr (1,2,3)
+        check intInArr [|1;2;3;3|]*)

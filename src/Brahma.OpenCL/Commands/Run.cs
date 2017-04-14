@@ -43,7 +43,7 @@ namespace Brahma.OpenCL.Commands
         private int _structMemSize = 0;
         private System.Reflection.PropertyInfo[] _props;
 
-        struct t2<T1, T2>
+        public struct t2<T1, T2>
         {
             T1 fst;
             T2 snd;
@@ -77,7 +77,7 @@ namespace Brahma.OpenCL.Commands
                 Type[] typeArgs = { typeof(TRange), _types[0], _types[1] };
                 Type makeme = d1.MakeGenericType(typeArgs);
                 var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]) });
-                return tupleStruct;
+                return (tupleStruct);
             }
 
             if (_props.Length == 3)
@@ -86,7 +86,7 @@ namespace Brahma.OpenCL.Commands
                 Type[] typeArgs = { typeof(TRange), _types[0], _types[1], _types[2] };
                 Type makeme = d1.MakeGenericType(typeArgs);
                 var tupleStruct = Activator.CreateInstance(makeme, new object[] { Convert.ChangeType(tupleArgs[0], _types[0]), Convert.ChangeType(tupleArgs[1], _types[1]), Convert.ChangeType(tupleArgs[1], _types[2]) });
-                return tupleStruct;
+                return (tupleStruct);
             }
             else return null;
         }
@@ -103,17 +103,42 @@ namespace Brahma.OpenCL.Commands
                 var operations = Operations.ReadWrite;
                 var memory = Memory.Device;
                 var _elementSize = 0;
-                if (t.Name.Contains("Tuple")) //not done
+                if (t.Name.Contains("Tuple")) 
                 {
-                    var data2 = new t2<int,int>[((Array)data).Length];
-                    for (int i = 0; i < ((Array)data).Length; i++) { data2.SetValue(tupleToMem(((Array)data).GetValue(i)), i); }
-                    data = data2;
-                    _elementSize = Marshal.SizeOf(data2.GetValue(0));
+                    var arr = ((Array)data);
+                    var types = arr.GetValue(0).GetType().GetProperties();
+                    if (types.Length == 2)
+                    {
+                        var a1 = types[0].PropertyType;
+                        var a2 = types[1].PropertyType;
+                        Type d1 = typeof(t2<,>);
+                        Type[] typeArgs = { typeof(TRange), a1, a2 };
+                        Type makeme = d1.MakeGenericType(typeArgs);
+                        var data2 = Array.CreateInstance(makeme, arr.Length);
+                        for (int i = 0; i < ((Array)data).Length; i++) { data2.SetValue(tupleToMem(((Array)data).GetValue(i)), i); }
+                        data = data2;
+                        _elementSize = Marshal.SizeOf(data2.GetValue(0));
+                    }
+                    if (types.Length == 3)
+                    {
+                        var a1 = types[0].PropertyType;
+                        var a2 = types[1].PropertyType;
+                        var a3 = types[1].PropertyType;
+                        Type d1 = typeof(t3<,,>);
+                        Type[] typeArgs = { typeof(TRange), a1, a2, a3 };
+                        Type makeme = d1.MakeGenericType(typeArgs);
+                        var data2 = Array.CreateInstance(makeme, arr.Length);
+                        for (int i = 0; i < ((Array)data).Length; i++) { data2.SetValue(tupleToMem(((Array)data).GetValue(i)), i); }
+                        data = data2;
+                        _elementSize = Marshal.SizeOf(data2.GetValue(0));
+                    }
                 }
+            
+
                 else _elementSize = Marshal.SizeOf(t);
-                var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
-                    (IntPtr)(_elementSize * ((Array)data).Length), data, out error);
-                curArgVal = mem;
+                    var mem = Cl.CreateBuffer(kernel.Provider.Context, (MemFlags)operations | (memory == Memory.Host ? MemFlags.UseHostPtr : (MemFlags)memory | MemFlags.CopyHostPtr),
+                        (IntPtr)(_elementSize * ((Array)data).Length), data, out error);
+                    curArgVal = mem;
                 //mem.Pin();
                 kernel.Provider.AutoconfiguredBuffers.Add(data, (Mem)mem);
                 if (error != ErrorCode.Success)
