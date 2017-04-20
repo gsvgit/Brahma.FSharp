@@ -232,16 +232,16 @@ type Translator() =
         run _1d intInArr (1,2) [|(1,2);(3,4);(5,6)|]
         check intInArr [|13;1;2;3|]
 
-   (* [<Test>]
-    member this.``triple``() = 
+    [<Test>]
+    member this.``triple``() = //doesn't work
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (k:int*int*int)  -> 
-                    buf.[0] <- TupleFunctions.Triple.first k
-                   // buf.[1] <- TupleFunctions.Triple.second k
-                   // buf.[2] <- TupleFunctions.Triple.third k
+                    buf.[0] <- Tuple.Triple.first k
+                    buf.[1] <- Tuple.Triple.second k
+                    buf.[2] <- Tuple.Triple.third k
 
             @>
         let run,check = checkResult command
         run _1d intInArr (1,2,3)
-        check intInArr [|1;2;3;3|]*)
+        check intInArr [|1;2;3;3|]

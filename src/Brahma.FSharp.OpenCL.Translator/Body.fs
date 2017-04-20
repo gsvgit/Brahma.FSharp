@@ -137,7 +137,10 @@ and private translateCall exprOpt (mInfo:System.Reflection.MethodInfo) _args tar
             | other -> failwithf "Calling Array.zeroCreate with a non-const argument: %A" other
         new ZeroArray<_>(length) :> Statement<_>, tContext
     | "fst" -> new FieldGet<_>(args.[0], "fst") :> Statement<_>, tContext 
-    | "snd" -> new FieldGet<_>(args.[0], "snd") :> Statement<_>, tContext  
+    | "snd" -> new FieldGet<_>(args.[0], "snd") :> Statement<_>, tContext
+    | "first" -> new FieldGet<_>(args.[0], "fst") :> Statement<_>, tContext
+    | "second" -> new FieldGet<_>(args.[0], "snd") :> Statement<_>, tContext
+    | "third" -> new FieldGet<_>(args.[0], "thd") :> Statement<_>, tContext
     | c -> failwithf "Unsupporte call: %s" c
 
 and private itemHelper exprs hostVar tContext =
@@ -418,14 +421,27 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         else "NewObject is not suported:" + string expr|> failwith
     | Patterns.NewRecord(sType,exprs) -> "NewRecord is not suported:" + string expr|> failwith
     | Patterns.NewTuple(exprs) ->
-        let baseT1 = exprs.[0].Type
-        let baseT2 = exprs.[1].Type
-        let el1 = new StructField<'lang>("fst", Type.Translate baseT1 false None targetContext)
-        let el2 = new StructField<'lang>("snd", Type.Translate baseT2 false None targetContext)
-        let structInfo = new Struct<Lang>("tuple", [el1; el2])   
-        let cArgs = exprs |> List.map (fun x -> TranslateAsExpr x targetContext) 
-        let res = new NewStruct<_>(structInfo,cArgs |> List.unzip |> fst)
-        res :> Node<_>, targetContext    
+        if exprs.Length = 2 then
+            let baseT1 = exprs.[0].Type
+            let baseT2 = exprs.[1].Type
+            let el1 = new StructField<'lang>("fst", Type.Translate baseT1 false None targetContext)
+            let el2 = new StructField<'lang>("snd", Type.Translate baseT2 false None targetContext)
+            let structInfo = new Struct<Lang>("tuple", [el1; el2])      
+            let cArgs = exprs |> List.map (fun x -> TranslateAsExpr x targetContext) 
+            let res = new NewStruct<_>(structInfo,cArgs |> List.unzip |> fst)
+            res :> Node<_>, targetContext 
+        else if exprs.Length = 3 then
+            let baseT1 = exprs.[0].Type
+            let baseT2 = exprs.[1].Type
+            let baseT3 = exprs.[1].Type
+            let el1 = new StructField<'lang>("fst", Type.Translate baseT1 false None targetContext)
+            let el2 = new StructField<'lang>("snd", Type.Translate baseT2 false None targetContext)
+            let el3 = new StructField<'lang>("thd", Type.Translate baseT3 false None targetContext)
+            let structInfo = new Struct<Lang>("tuple", [el1; el2; el3])      
+            let cArgs = exprs |> List.map (fun x -> TranslateAsExpr x targetContext) 
+            let res = new NewStruct<_>(structInfo,cArgs |> List.unzip |> fst)
+            res :> Node<_>, targetContext 
+        else "Tuple with " + string exprs.Length + " items is not supported"|> failwith    
     | Patterns.NewUnionCase(unionCaseinfo,exprs) -> "NewUnionCase is not suported:" + string expr|> failwith
     | Patterns.PropertyGet(exprOpt,propInfo,exprs) -> 
         let res, tContext = transletaPropGet exprOpt propInfo exprs targetContext
@@ -438,7 +454,18 @@ and Translate expr (targetContext:TargetContext<_,_>) =
         res :> Node<_>,tContext
     | Patterns.TryFinally(tryExpr,finallyExpr) -> "TryFinally is not suported:" + string expr|> failwith
     | Patterns.TryWith(expr1,var1,expr2,var2,expr3) -> "TryWith is not suported:" + string expr|> failwith 
-    | Patterns.TupleGet(expr,i) -> "TupleGet is not suported:" + string expr|> failwith
+    | Patterns.TupleGet(expr,i) ->  
+        match i with
+        | 0 ->            
+            let r,tContext =  translateFieldGet expr "fst" targetContext
+            r :> Node<_>,tContext
+        | 1 ->            
+            let r,tContext = translateFieldGet expr "snd" targetContext
+            r :> Node<_>,tContext
+        | 2 ->            
+            let r,tContext = translateFieldGet expr "thd" targetContext
+            r :> Node<_>,tContext
+        | _ -> "TupleGet is not suported:" + string expr|> failwith
     | Patterns.TypeTest(expr,sType) -> "TypeTest is not suported:" + string expr|> failwith
     | Patterns.UnionCaseTest(expr,unionCaseInfo) -> "UnionCaseTest is not suported:" + string expr|> failwith
     | Patterns.Value(_obj,sType) -> translateValue _obj sType  targetContext :> Node<_> , targetContext 

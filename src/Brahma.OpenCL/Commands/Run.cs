@@ -25,14 +25,6 @@ using System.Runtime.InteropServices;
 
 namespace Brahma.OpenCL.Commands
 {
-    static class CompareTuple
-    {
-        public static bool Compare<T1, T2>(this Tuple<T1, T2> value, T1 v1, T2 v2)
-        {
-            return value.Item1.Equals(v1) && value.Item2.Equals(v2);
-        }
-    }
-
     public abstract class RunBase<TRange> : Brahma.Commands.Run<TRange>
         where TRange : struct, INDRangeDimension
     {
