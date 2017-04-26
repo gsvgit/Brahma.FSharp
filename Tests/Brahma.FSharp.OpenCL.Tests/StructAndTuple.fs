@@ -237,10 +237,9 @@ type Translator() =
         let command = 
             <@ 
                 fun (range:_1D) (buf:array<int>) (k:int*int*int)  -> 
-                    buf.[0] <- Tuple.Triple.first k
-                    buf.[1] <- Tuple.Triple.second k
-                    buf.[2] <- Tuple.Triple.third k
-
+                    buf.[0] <- first k
+                    buf.[1] <- second k
+                    buf.[2] <- third k
             @>
         let run,check = checkResult command
         run _1d intInArr (1,2,3)
